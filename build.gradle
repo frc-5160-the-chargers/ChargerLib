@@ -2,10 +2,10 @@ plugins {
     id("java")
     id("edu.wpi.first.GradleRIO") version "2022.4.1"
     id("org.jetbrains.kotlin.jvm") version "1.6.20"
+    id("maven-publish")
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
@@ -16,7 +16,7 @@ kotlin {
 dependencies {
     api(wpi.java.deps.wpilib())
     api(wpi.java.vendor.java())
-    api("com.batterystaple:KMeasure:1.0.0-SNAPSHOT")
+    api("io.github.battery-staple:KMeasure:1.0.1")
 
     testImplementation('junit:junit:4.13.2')
 }
