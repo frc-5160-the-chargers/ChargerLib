@@ -7,7 +7,7 @@ import frc.robot.hardware.interfaces.MotorConfigurable
 import frc.robot.hardware.interfaces.MotorConfiguration
 import frc.robot.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.robot.hardware.motorcontrol.SparkConfiguration
-import frc.robot.hardware.motorcontrol.TalonSRXConfiguration
+import frc.robot.hardware.motorcontrol.ctre.TalonSRXConfiguration
 
 /**
  * A convenience function to create a [BasicDifferentialDrivetrain]
