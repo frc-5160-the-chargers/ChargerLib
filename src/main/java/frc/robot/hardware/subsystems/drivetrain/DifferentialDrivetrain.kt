@@ -1,5 +1,7 @@
 package frc.robot.hardware.subsystems.drivetrain
 
+import edu.wpi.first.wpilibj2.command.Subsystem
+
 /**
  * An interface used to control differential drivetrains.
  * A differential drivetrain is one based on two sides that move independently.
@@ -11,7 +13,7 @@ package frc.robot.hardware.subsystems.drivetrain
  * See [here](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html) for more on differential drivetrains, and particularly
  * [here](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html#drive-modes) for an explanation of the various drive modes.
  */
-public interface DifferentialDrivetrain {
+public interface DifferentialDrivetrain : Subsystem {
     /**
      * Drives using "tank controls", a system by which each side of the drivetrain is controlled independently.
      * @param leftPower the power of the left side of the drivetrain (from [-1..1]).
@@ -24,7 +26,7 @@ public interface DifferentialDrivetrain {
      * @param power the power with which to drive forward (from [-1..1]).
      * @param rotation the power with which to rotate (proportional to the angular velocity, or how quickly the heading changes). (Must be from [-1..1]).
      */
-    public fun arcadeDrive(power: Double, rotation: Double)
+    public fun arcadeDrive(power: Double, rotation: Double = 0.0)
 
     /**
      * Drives the robot at a certain power forward and with a certain amount of steering.

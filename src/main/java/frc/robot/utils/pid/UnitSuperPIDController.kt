@@ -2,8 +2,6 @@ package frc.robot.utils.pid
 
 import com.batterystaple.kmeasure.Dimension
 import com.batterystaple.kmeasure.DimensionedQuantity
-import com.batterystaple.kmeasure.ScalarDimension
-import com.batterystaple.kmeasure.value
 import edu.wpi.first.math.controller.PIDController
 
 //TODO: Document properly
