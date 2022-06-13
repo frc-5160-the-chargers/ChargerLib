@@ -1,9 +1,8 @@
-package frc.robot.hardware.interfaces.adaptors
+package frc.robot.hardware.sensors.encoders
 
 import com.batterystaple.kmeasure.*
 import com.ctre.phoenix.motorcontrol.IMotorController
 import com.revrobotics.RelativeEncoder
-import frc.robot.hardware.interfaces.Encoder
 import edu.wpi.first.wpilibj.Encoder as WpilibEncoder
 
 // This file contains a variety of adapters allowing various
@@ -14,7 +13,8 @@ import edu.wpi.first.wpilibj.Encoder as WpilibEncoder
 /**
  * An adapter from the WPILib Encoder class to the ChargerLib Encoder interface.
  */
-public class WPILibEncoderAdapter(private val wpiLibEncoder: WpilibEncoder, private val anglePerPulse: Angle) : Encoder {
+public class WPILibEncoderAdapter(private val wpiLibEncoder: WpilibEncoder, private val anglePerPulse: Angle) :
+    Encoder {
     public constructor(
         wpiLibEncoder: WpilibEncoder,
         pulsesPerRotation: Int /* Can't use Double here or both constructors will have the same JVM signature*/
@@ -40,7 +40,8 @@ public class RevEncoderAdapter(private val revEncoder: RelativeEncoder) : Encode
 /**
  * An adapter from the CTRE Encoder class to the ChargerLib Encoder interface.
  */
-public class CTREMotorControllerEncoderAdapter(private val ctreMotorController: IMotorController, private val pidIndex: Int, private val anglePerPulse: Angle) : Encoder {
+public class CTREMotorControllerEncoderAdapter(private val ctreMotorController: IMotorController, private val pidIndex: Int, private val anglePerPulse: Angle) :
+    Encoder {
     public constructor(
         ctreMotorController: IMotorController,
         pidIndex: Int,

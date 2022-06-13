@@ -1,8 +1,13 @@
 package frc.robot.hardware.subsystems.drivetrain
 
 import com.batterystaple.kmeasure.*
-import frc.robot.hardware.interfaces.MotorConfiguration
-import frc.robot.hardware.motorcontrol.*
+import frc.robot.hardware.motorcontrol.EncoderMotorControllerGroup
+import frc.robot.hardware.motorcontrol.MotorConfiguration
+import frc.robot.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
+import frc.robot.hardware.motorcontrol.ctre.TalonFXConfiguration
+import frc.robot.hardware.motorcontrol.rev.SparkMaxConfiguration
+import frc.robot.hardware.sensors.HeadingProvider
+import frc.robot.hardware.sensors.encoders.AverageEncoder
 
 @PublishedApi
 internal const val DEFAULT_GEAR_RATIO: Double = 1.0
@@ -15,9 +20,11 @@ public inline fun sparkMaxDrivetrain(
     leftMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
     rightMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
     invertMotors: Boolean = false, gearRatio: Double = DEFAULT_GEAR_RATIO,
-    wheelDiameter: Length, configure: SparkMaxConfiguration.() -> Unit = {}
+    wheelDiameter: Length,
+    width: Distance,
+    configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, SparkMaxConfiguration().apply(configure))
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, SparkMaxConfiguration().apply(configure))
 
 /**
  * A convenience function to create a [EncoderDifferentialDrivetrain]
@@ -26,49 +33,91 @@ public inline fun sparkMaxDrivetrain(
 public inline fun talonFXDrivetrain(
     leftMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
     rightMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
-    invertMotors: Boolean = false, gearRatio: Double = DEFAULT_GEAR_RATIO,
+    invertMotors: Boolean = false,
+    gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
-    configure: TalonFXConfiguration.() -> Unit): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, TalonFXConfiguration().apply(configure))
+    width: Distance,
+    configure: TalonFXConfiguration.() -> Unit = {}
+): EncoderDifferentialDrivetrain =
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, TalonFXConfiguration().apply(configure))
 
 /**
  * A convenience function to create an [EncoderDifferentialDrivetrain]
  * allowing its motors to all be configured.
  */
-public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(leftMotors: EncoderMotorControllerGroup<C>, rightMotors: EncoderMotorControllerGroup<C>, invertMotors: Boolean = false, gearRatio: Double, wheelDiameter: Length, configuration: C): EncoderDifferentialDrivetrain =
+public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(leftMotors: EncoderMotorControllerGroup<C>, rightMotors: EncoderMotorControllerGroup<C>, invertMotors: Boolean = false, gearRatio: Double, wheelDiameter: Length, width: Distance, configuration: C): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
         leftMotors = leftMotors.apply { configure(configuration) },
         rightMotors = rightMotors.apply { configure(configuration) },
         invertMotors = invertMotors,
         gearRatio = gearRatio,
-        wheelDiameter = wheelDiameter
+        wheelDiameter = wheelDiameter,
+        width = width
     )
 
 /**
  * An implementation of a [DifferentialDrivetrain] for use with
- * motors with encoders, allowing access to current velocity and
- * total distance driven.
+ * motors with encoders, allowing access to current velocity,
+ * total distance driven, and heading.
  *
  * @see DifferentialDrivetrain
  */
 public open class EncoderDifferentialDrivetrain(
-    leftMotors: NonConfigurableEncoderMotorControllerGroup,
-    rightMotors: NonConfigurableEncoderMotorControllerGroup,
+    private val leftMotors: NonConfigurableEncoderMotorControllerGroup,
+    private val rightMotors: NonConfigurableEncoderMotorControllerGroup,
     invertMotors: Boolean = false,
     protected val gearRatio: Double = DEFAULT_GEAR_RATIO,
-    protected val wheelDiameter: Length
-) : BasicDifferentialDrivetrain(leftMotors, rightMotors, invertMotors) {
+    protected val wheelDiameter: Length,
+    protected val width: Distance
+) : BasicDifferentialDrivetrain(leftMotors, rightMotors, invertMotors), HeadingProvider {
     private val overallEncoder = AverageEncoder(leftMotors, rightMotors)
 
+    private val wheelRadius = wheelDiameter / 2
+    private val wheelTravelPerMotorRadian = gearRatio * wheelRadius
+
+    /**
+     * The total linear distance traveled from the zero point of the encoders.
+     *
+     * This value by itself is not particularly meaningful as it may be fairly large,
+     * positive or negative, based on previous rotations of the motors, including
+     * from previous times the robot has been enabled.
+     *
+     * Thus, it's more common to use this property to determine *change* in position.
+     * If the initial value of this property is stored, the distance traveled since
+     * that initial point can easily be determined by subtracting the initial position
+     * from the current position.
+     */
     public val distanceTraveled: Distance
         get() =
             overallEncoder.angularPosition *
-                    gearRatio *
-                    wheelDiameter / 2
+                    wheelTravelPerMotorRadian
 
+    /**
+     * The current linear velocity of the robot.
+     */
     public val velocity: Velocity
         get() =
             overallEncoder.angularVelocity *
-                    gearRatio *
-                    wheelDiameter / 2
+                    wheelTravelPerMotorRadian
+
+    /**
+     * The current heading (the direction the robot is facing).
+     *
+     * This value is calculated using the encoders, not a gyroscope or accelerometer,
+     * so note that it may become inaccurate if the wheels slip. If available, consider
+     * using a [frc.robot.hardware.sensors.NavX] or similar device to calculate heading instead.
+     *
+     * This value by itself is not particularly meaningful as it may be fairly large,
+     * positive or negative, based on previous rotations of the motors, including
+     * from previous times the robot has been enabled.
+     *
+     * Thus, it's more common to use this property to determine *change* in heading.
+     * If the initial value of this property is stored, the amount of rotation since
+     * that initial point can easily be determined by subtracting the initial heading
+     * from the current heading.
+     *
+     * @see HeadingProvider
+     */
+    public override val heading: Angle
+        get() = wheelTravelPerMotorRadian * (rightMotors.encoder.angularPosition - leftMotors.encoder.angularPosition) / width
 }

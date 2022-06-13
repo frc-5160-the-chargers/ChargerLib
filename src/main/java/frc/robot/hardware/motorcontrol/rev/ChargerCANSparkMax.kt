@@ -1,4 +1,4 @@
-package frc.robot.hardware.motorcontrol
+package frc.robot.hardware.motorcontrol.rev
 
 import com.batterystaple.kmeasure.Time
 import com.batterystaple.kmeasure.inUnit
@@ -9,11 +9,11 @@ import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMax.SoftLimitDirection
 import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
-import frc.robot.hardware.interfaces.Encoder
-import frc.robot.hardware.interfaces.EncoderMotorController
-import frc.robot.hardware.interfaces.MotorConfigurable
-import frc.robot.hardware.interfaces.MotorConfiguration
-import frc.robot.hardware.interfaces.adaptors.RevEncoderAdapter
+import frc.robot.hardware.motorcontrol.EncoderMotorController
+import frc.robot.hardware.motorcontrol.MotorConfigurable
+import frc.robot.hardware.motorcontrol.MotorConfiguration
+import frc.robot.hardware.sensors.encoders.Encoder
+import frc.robot.hardware.sensors.encoders.RevEncoderAdapter
 import kotlin.math.roundToInt
 
 /**
@@ -41,7 +41,10 @@ public inline fun brushedSparkMax(canBusId: Int, configure: SparkMaxConfiguratio
  * @see com.revrobotics.CANSparkMax
  * @see SparkMaxConfiguration
  */
-public open class ChargerCANSparkMax(deviceId: Int, type: MotorType) : CANSparkMax(deviceId, type), EncoderMotorController, MotorConfigurable<SparkMaxConfiguration> {
+public open class ChargerCANSparkMax(
+    deviceId: Int,
+    type: MotorType
+) : CANSparkMax(deviceId, type), EncoderMotorController, MotorConfigurable<SparkMaxConfiguration> {
     override val encoder: Encoder = RevEncoderAdapter(super.getEncoder())
 
     override fun configure(configuration: SparkMaxConfiguration) {

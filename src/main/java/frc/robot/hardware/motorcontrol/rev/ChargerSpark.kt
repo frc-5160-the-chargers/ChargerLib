@@ -1,8 +1,8 @@
-package frc.robot.hardware.motorcontrol
+package frc.robot.hardware.motorcontrol.rev
 
 import edu.wpi.first.wpilibj.motorcontrol.Spark
-import frc.robot.hardware.interfaces.MotorConfigurable
-import frc.robot.hardware.interfaces.MotorConfiguration
+import frc.robot.hardware.motorcontrol.MotorConfigurable
+import frc.robot.hardware.motorcontrol.MotorConfiguration
 
 /**
  * Represents a Spark motor controller.

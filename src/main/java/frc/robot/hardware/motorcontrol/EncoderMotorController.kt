@@ -1,6 +1,7 @@
-package frc.robot.hardware.interfaces
+package frc.robot.hardware.motorcontrol
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
+import frc.robot.hardware.sensors.encoders.Encoder
 
 /**
  * Represents a motor controller that supports an encoder.

@@ -1,4 +1,4 @@
-package frc.robot.hardware.interfaces
+package frc.robot.hardware.sensors.encoders
 
 import com.batterystaple.kmeasure.Angle
 import com.batterystaple.kmeasure.AngularVelocity

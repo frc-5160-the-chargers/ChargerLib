@@ -6,11 +6,11 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.SensorTerm
 import com.ctre.phoenix.motorcontrol.StatusFrame
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
-import frc.robot.hardware.interfaces.Encoder
-import frc.robot.hardware.interfaces.EncoderMotorController
-import frc.robot.hardware.interfaces.MotorConfigurable
-import frc.robot.hardware.interfaces.adaptors.CTREMotorControllerEncoderAdapter
+import frc.robot.hardware.motorcontrol.EncoderMotorController
+import frc.robot.hardware.motorcontrol.MotorConfigurable
 import frc.robot.hardware.motorcontrol.ctre.CTREMotorControllerConfiguration.*
+import frc.robot.hardware.sensors.encoders.CTREMotorControllerEncoderAdapter
+import frc.robot.hardware.sensors.encoders.Encoder
 
 private const val TALON_SRX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
 
@@ -23,7 +23,10 @@ private const val TALON_SRX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://do
  * @see com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
  * @see TalonSRXConfiguration
  */
-public open class ChargerTalonSRX(deviceNumber: Int, protected val encoderTicksPerRotation: Int) : WPI_TalonSRX(deviceNumber), EncoderMotorController, MotorConfigurable<TalonSRXConfiguration> {
+public open class ChargerTalonSRX(
+    deviceNumber: Int,
+    protected val encoderTicksPerRotation: Int
+) : WPI_TalonSRX(deviceNumber), EncoderMotorController, MotorConfigurable<TalonSRXConfiguration> {
     final override val encoder: Encoder
         get() = CTREMotorControllerEncoderAdapter(
             ctreMotorController = this,

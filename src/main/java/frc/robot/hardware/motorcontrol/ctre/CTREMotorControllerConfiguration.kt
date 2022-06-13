@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.*
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.sensors.CANCoder
-import frc.robot.hardware.interfaces.MotorConfiguration
+import frc.robot.hardware.motorcontrol.MotorConfiguration
 import frc.robot.utils.pid.PIDConstants
 import kotlin.math.roundToInt
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced as CTREMotorController

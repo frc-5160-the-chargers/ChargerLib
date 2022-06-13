@@ -3,11 +3,11 @@ package frc.robot.hardware.subsystems.drivetrain
 import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.hardware.interfaces.MotorConfigurable
-import frc.robot.hardware.interfaces.MotorConfiguration
 import frc.robot.hardware.motorcontrol.EncoderMotorControllerGroup
-import frc.robot.hardware.motorcontrol.SparkConfiguration
+import frc.robot.hardware.motorcontrol.MotorConfigurable
+import frc.robot.hardware.motorcontrol.MotorConfiguration
 import frc.robot.hardware.motorcontrol.ctre.TalonSRXConfiguration
+import frc.robot.hardware.motorcontrol.rev.SparkConfiguration
 
 /**
  * A convenience function to create a [BasicDifferentialDrivetrain]

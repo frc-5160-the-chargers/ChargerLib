@@ -1,4 +1,4 @@
-package frc.robot.hardware.interfaces
+package frc.robot.hardware.motorcontrol
 
 /**
  * A marker interface for classes that store configuration

@@ -1,10 +1,9 @@
-package frc.robot.hardware.motorcontrol
+package frc.robot.hardware.sensors.encoders
 
 import com.batterystaple.kmeasure.Angle
 import com.batterystaple.kmeasure.AngularVelocity
 import com.batterystaple.kmeasure.average
-import frc.robot.hardware.interfaces.Encoder
-import frc.robot.hardware.interfaces.EncoderMotorController
+import frc.robot.hardware.motorcontrol.EncoderMotorController
 
 /**
  * An abstraction of multiple encoders into one.
@@ -13,10 +12,12 @@ import frc.robot.hardware.interfaces.EncoderMotorController
  * of the positions and velocities of its composite encoders.
  */
 public class AverageEncoder(private vararg val encoders: Encoder) : Encoder {
-    public constructor(vararg motorControllers: EncoderMotorController) : this(*motorControllers.map(EncoderMotorController::encoder).toTypedArray())
+    public constructor(vararg motorControllers: EncoderMotorController) :
+            this(*motorControllers.map(EncoderMotorController::encoder).toTypedArray())
 
     override val angularPosition: Angle
         get() = encoders.map(Encoder::angularPosition).average()
+
     override val angularVelocity: AngularVelocity
         get() = encoders.map(Encoder::angularVelocity).average()
 }

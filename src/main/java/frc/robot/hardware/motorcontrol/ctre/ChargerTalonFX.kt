@@ -5,11 +5,11 @@ import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX
 import com.ctre.phoenix.sensors.AbsoluteSensorRange
 import com.ctre.phoenix.sensors.SensorInitializationStrategy
-import frc.robot.hardware.interfaces.Encoder
-import frc.robot.hardware.interfaces.EncoderMotorController
-import frc.robot.hardware.interfaces.MotorConfigurable
-import frc.robot.hardware.interfaces.adaptors.CTREMotorControllerEncoderAdapter
+import frc.robot.hardware.motorcontrol.EncoderMotorController
+import frc.robot.hardware.motorcontrol.MotorConfigurable
 import frc.robot.hardware.motorcontrol.ctre.CTREMotorControllerConfiguration.*
+import frc.robot.hardware.sensors.encoders.CTREMotorControllerEncoderAdapter
+import frc.robot.hardware.sensors.encoders.Encoder
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration as CTRETalonFXConfiguration
 
 private const val TALON_FX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution

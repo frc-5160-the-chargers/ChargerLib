@@ -2,16 +2,17 @@ package frc.robot.hardware.motorcontrol
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup
-import frc.robot.hardware.interfaces.Encoder
-import frc.robot.hardware.interfaces.EncoderMotorController
-import frc.robot.hardware.interfaces.MotorConfigurable
-import frc.robot.hardware.interfaces.MotorConfiguration
+import frc.robot.hardware.sensors.encoders.AverageEncoder
+import frc.robot.hardware.sensors.encoders.Encoder
 
 /**
  * A [MotorControllerGroup] that aggregates the encoders
  * of its [MotorController]s in addition to their speeds.
  */
-public open class NonConfigurableEncoderMotorControllerGroup(protected vararg val motorControllers: MotorController, override val encoder: Encoder) : MotorControllerGroup(motorControllers), EncoderMotorController {
+public open class NonConfigurableEncoderMotorControllerGroup(
+    protected vararg val motorControllers: MotorController,
+    override val encoder: Encoder
+) : MotorControllerGroup(motorControllers), EncoderMotorController {
     public constructor(vararg encoderMotorControllers: EncoderMotorController) : this(*encoderMotorControllers, encoder = AverageEncoder(*encoderMotorControllers))
 
     // getInverted()/setInverted() in the WPILib MotorControllerGroup class
