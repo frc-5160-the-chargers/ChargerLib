@@ -1,6 +1,7 @@
 package frc.chargers.hardware.subsystems.drivetrain
 
 import edu.wpi.first.wpilibj2.command.Subsystem
+import frc.chargers.wpilibextensions.kinematics.ChassisPowers
 
 /**
  * An interface used to control differential drivetrains.
@@ -42,4 +43,12 @@ public interface DifferentialDrivetrain : Subsystem {
      * Stops the robot.
      */
     public fun stop()
+}
+
+public fun DifferentialDrivetrain.arcadeDrive(chassisPowers: ChassisPowers) {
+    arcadeDrive(power = chassisPowers.xPower, rotation = chassisPowers.rotationPower)
+}
+
+public fun DifferentialDrivetrain.curvatureDrive(chassisPowers: ChassisPowers) {
+    curvatureDrive(power = chassisPowers.xPower, steering = chassisPowers.rotationPower)
 }
