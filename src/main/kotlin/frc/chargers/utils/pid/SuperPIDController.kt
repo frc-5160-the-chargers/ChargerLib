@@ -15,16 +15,18 @@ import edu.wpi.first.math.controller.PIDController
  * See [here](https://www.controleng.com/articles/feed-forwards-augment-pid-control/) for an explanation of feedforward.
  */
 public class SuperPIDController(
-    pidConstants: PIDConstants,
-    private val getInput: () -> Double,
-    public val outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
-    target: Double,
-    public var feedForward: FeedForward = FeedForward { _, _ -> 0.0 }
+        pidConstants: PIDConstants,
+        private val getInput: () -> Double,
+        public val outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
+        public val integralRange: ClosedRange<Double> = outputRange,
+        target: Double,
+        public var feedForward: FeedForward = FeedForward { _, _ -> 0.0 }
 ) {
     private val pidController = PIDController(0.0, 0.0, 0.0)
         .apply {
             constants = pidConstants
             setpoint = target
+            setIntegratorRange(integralRange.start, integralRange.endInclusive)
         }
 
     /**
@@ -50,8 +52,10 @@ public class SuperPIDController(
     public var target: Double
         get() = pidController.setpoint
         set(target) {
-            pidController.reset()
-            pidController.setpoint = target
+            if (target != pidController.setpoint) {
+                pidController.reset()
+                pidController.setpoint = target
+            }
         }
 
     /**
@@ -62,8 +66,10 @@ public class SuperPIDController(
     public var constants: PIDConstants
         get() = pidController.constants
         set(pidConstants) {
-            pidController.reset()
-            pidController.constants = pidConstants
+            if (pidConstants != pidController.constants) {
+                pidController.reset()
+                pidController.constants = pidConstants
+            }
         }
 
     /**
