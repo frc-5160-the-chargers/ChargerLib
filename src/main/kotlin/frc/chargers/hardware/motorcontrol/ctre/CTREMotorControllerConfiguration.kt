@@ -1,6 +1,7 @@
 package frc.chargers.hardware.motorcontrol.ctre
 
-import com.batterystaple.kmeasure.*
+import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.*
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.sensors.CANCoder
@@ -155,7 +156,7 @@ internal fun CTREMotorController.configure(configuration: CTREMotorControllerCon
         cruiseVelocity?.let { configMotionCruiseVelocity(cruiseVelocity.inUnit(encoderStep / 100.milli.seconds),
             TIMEOUT_MILLIS
         ) }
-        acceleration?.let { configMotionAcceleration(acceleration.inUnit(encoderStep / 100.milli.seconds / Seconds),
+        acceleration?.let { configMotionAcceleration(acceleration.inUnit(encoderStep / 100.milli.seconds / seconds),
             TIMEOUT_MILLIS
         ) }
         sCurveStrength?.let { configMotionSCurveStrength(sCurveStrength, TIMEOUT_MILLIS) }

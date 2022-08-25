@@ -1,8 +1,8 @@
 package frc.chargers.utils.pid
 
-import com.batterystaple.kmeasure.Dimension
-import com.batterystaple.kmeasure.DimensionedQuantity
+import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.quantities.Quantity
 
-public fun interface UnitFeedForward<I : Dimension, O : Dimension> {
-    public fun calculate(target: DimensionedQuantity<I>, error: DimensionedQuantity<I>): DimensionedQuantity<O>
+public fun interface UnitFeedForward<I : AnyDimension, O : AnyDimension> {
+    public fun calculate(target: Quantity<I>, error: Quantity<I>): Quantity<O>
 }

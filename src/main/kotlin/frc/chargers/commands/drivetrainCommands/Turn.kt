@@ -1,6 +1,8 @@
 package frc.chargers.commands.drivetrainCommands
 
-import com.batterystaple.kmeasure.*
+import com.batterystaple.kmeasure.dimensions.AngleDimension
+import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.degrees
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CodeBlockContext
 import frc.chargers.commands.CommandBuilder
@@ -82,11 +84,11 @@ public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleD
 
 
 context(CodeBlockContext, CommandBuilder)
-@Suppress("unused", "DeprecatedCallableAddReplaceWith", "UNUSED_PARAMETER")
+@Suppress("unused", "DeprecatedCallableAddReplaceWith", "UNUSED_PARAMETER", "UnusedReceiverParameter")
 @Deprecated("Can't create a command inside a CodeBlock", level = DeprecationLevel.ERROR)
 public fun DifferentialDrivetrain.turn(angle: Angle, rotationPower: Double): Command = error("Cannot call this from inside a CodeBlock - make sure you're inside a CommandBuilder")
 
 context(CodeBlockContext, CommandBuilder)
-@Suppress("unused", "DeprecatedCallableAddReplaceWith", "UNUSED_PARAMETER")
+@Suppress("unused", "DeprecatedCallableAddReplaceWith", "UNUSED_PARAMETER", "UnusedReceiverParameter")
 @Deprecated("Can't create a command inside a CodeBlock", level = DeprecationLevel.ERROR)
 public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension>, pidConstants: PIDConstants): Command = error("Cannot call this from inside a CodeBlock - make sure you're inside a CommandBuilder")

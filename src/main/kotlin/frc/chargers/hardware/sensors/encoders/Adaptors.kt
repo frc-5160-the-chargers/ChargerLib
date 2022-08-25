@@ -1,6 +1,7 @@
 package frc.chargers.hardware.sensors.encoders
 
-import com.batterystaple.kmeasure.*
+import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.*
 import com.ctre.phoenix.motorcontrol.IMotorController
 import com.revrobotics.RelativeEncoder
 import edu.wpi.first.wpilibj.Encoder as WpilibEncoder

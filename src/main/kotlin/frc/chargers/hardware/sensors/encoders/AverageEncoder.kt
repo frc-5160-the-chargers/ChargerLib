@@ -1,8 +1,8 @@
 package frc.chargers.hardware.sensors.encoders
 
-import com.batterystaple.kmeasure.Angle
-import com.batterystaple.kmeasure.AngularVelocity
-import com.batterystaple.kmeasure.average
+import com.batterystaple.kmeasure.interop.average
+import com.batterystaple.kmeasure.quantities.Angle
+import com.batterystaple.kmeasure.quantities.AngularVelocity
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 
 /**

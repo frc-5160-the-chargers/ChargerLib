@@ -1,6 +1,7 @@
 package frc.chargers.hardware.motorcontrol.ctre
 
-import com.batterystaple.kmeasure.*
+import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.*
 import com.ctre.phoenix.motorcontrol.ControlFrame
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import com.ctre.phoenix.motorcontrol.SensorTerm
@@ -36,7 +37,7 @@ public open class ChargerTalonSRX(
 
     final override fun configure(configuration: TalonSRXConfiguration) {
         configuration.inverted?.let(::setInverted)
-        configuration.expiration?.let { expiration = it.inUnit(Seconds) }
+        configuration.expiration?.let { expiration = it.inUnit(seconds) }
         configuration.inverted?.let(::setSafetyEnabled)
 
         configure(configuration, encoderStep = (1.0 / TALON_SRX_ENCODER_UNITS_PER_ROTATION).ofUnit(Rotations))

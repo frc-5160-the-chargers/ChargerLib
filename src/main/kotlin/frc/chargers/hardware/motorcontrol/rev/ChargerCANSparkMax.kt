@@ -1,9 +1,9 @@
 package frc.chargers.hardware.motorcontrol.rev
 
-import com.batterystaple.kmeasure.Time
-import com.batterystaple.kmeasure.inUnit
-import com.batterystaple.kmeasure.milli
-import com.batterystaple.kmeasure.seconds
+import com.batterystaple.kmeasure.quantities.Time
+import com.batterystaple.kmeasure.quantities.inUnit
+import com.batterystaple.kmeasure.units.milli
+import com.batterystaple.kmeasure.units.seconds
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMax.SoftLimitDirection

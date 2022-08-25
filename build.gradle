@@ -1,7 +1,7 @@
 plugins {
     id("java")
     id("edu.wpi.first.GradleRIO") version "2022.4.1"
-    id("org.jetbrains.kotlin.jvm") version "1.7.0"
+    id("org.jetbrains.kotlin.jvm") version "1.7.20-Beta"
     id("maven-publish")
     id("org.jetbrains.dokka") version "1.6.21"
 }
@@ -27,15 +27,31 @@ kotlin {
 dependencies {
     api(wpi.java.deps.wpilib())
     api(wpi.java.vendor.java())
-    api("io.github.battery-staple:KMeasure:1.0.2")
+    api('io.github.battery-staple:KMeasure:1.1.0')
 
     testImplementation('junit:junit:4.13.2')
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.batterystaple'
+            artifactId = 'ChargerLib'
+            version = "1.0.0-SNAPSHOT"
+            from components.kotlin
+        }
+    }
 }
 
 dokkaHtml {
     dokkaSourceSets {
         configureEach {
             skipDeprecated.set(true)
+
+            perPackageOption {
+                matchingRegex.set("kotlin.internal")
+                suppress.set(true)
+            }
         }
     }
 }

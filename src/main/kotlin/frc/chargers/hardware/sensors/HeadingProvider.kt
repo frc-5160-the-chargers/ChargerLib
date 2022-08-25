@@ -1,6 +1,6 @@
 package frc.chargers.hardware.sensors
 
-import com.batterystaple.kmeasure.Angle
+import com.batterystaple.kmeasure.quantities.Angle
 
 /**
  * An interface representing a device capable of calculating the heading of a robot (the direction it is facing).

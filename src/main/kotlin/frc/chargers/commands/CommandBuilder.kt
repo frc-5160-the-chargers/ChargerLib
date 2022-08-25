@@ -1,6 +1,7 @@
 package frc.chargers.commands
 
-import com.batterystaple.kmeasure.*
+import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.*
 import kotlin.properties.ReadOnlyProperty
@@ -123,7 +124,7 @@ public class CommandBuilder {
      */
     public fun runFor(timeInterval: Time, command: Command): ParallelRaceGroup {
         return command
-            .withTimeout(timeInterval.inUnit(Seconds))
+            .withTimeout(timeInterval.inUnit(seconds))
             .also(commands::add)
     }
 
@@ -140,11 +141,11 @@ public class CommandBuilder {
     /**
      * Adds a command to be run continuously.
      *
-     * @param the Subsystems this command requires
+     * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public fun runForever(vararg requirements: Subsystem, block: CodeBlockContext.() -> Unit): RunCommand =
-            RunCommand(*requirements) { CodeBlockContext.block() }
+    public fun runForever(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): RunCommand =
+            RunCommand(*requirements) { CodeBlockContext.execute() }
                 .also(commands::add)
 
     /**
@@ -217,9 +218,9 @@ public class CommandBuilder {
  */
 @CommandBuilderMarker
 public interface TimeContext {
-    public val time: Time get() = Timer.getFPGATimestamp().ofUnit(Seconds)
-    public val approximateTimeSinceMatchStart: Time get() = Timer.getMatchTime().ofUnit(Seconds)
-    public fun delay(time: Time) { Timer.delay(time.inUnit(Seconds)) }
+    public val time: Time get() = Timer.getFPGATimestamp().ofUnit(seconds)
+    public val approximateTimeSinceMatchStart: Time get() = Timer.getMatchTime().ofUnit(seconds)
+    public fun delay(time: Time) { Timer.delay(time.inUnit(seconds)) }
 
     public companion object : TimeContext
 }

@@ -1,6 +1,6 @@
 package frc.chargers.hardware.subsystems.drivetrain
 
-import com.batterystaple.kmeasure.*
+import com.batterystaple.kmeasure.quantities.*
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
@@ -45,7 +45,14 @@ public inline fun talonFXDrivetrain(
  * A convenience function to create an [EncoderDifferentialDrivetrain]
  * allowing its motors to all be configured.
  */
-public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(leftMotors: EncoderMotorControllerGroup<C>, rightMotors: EncoderMotorControllerGroup<C>, invertMotors: Boolean = false, gearRatio: Double, wheelDiameter: Length, width: Distance, configuration: C): EncoderDifferentialDrivetrain =
+public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
+    leftMotors: EncoderMotorControllerGroup<C>,
+    rightMotors: EncoderMotorControllerGroup<C>,
+    invertMotors: Boolean = false, gearRatio: Double,
+    wheelDiameter: Length,
+    width: Distance,
+    configuration: C
+): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
         leftMotors = leftMotors.apply { configure(configuration) },
         rightMotors = rightMotors.apply { configure(configuration) },
@@ -119,5 +126,6 @@ public open class EncoderDifferentialDrivetrain(
      * @see HeadingProvider
      */
     public override val heading: Angle
-        get() = wheelTravelPerMotorRadian * (rightMotors.encoder.angularPosition - leftMotors.encoder.angularPosition) / width
+        get() = wheelTravelPerMotorRadian *
+                (rightMotors.encoder.angularPosition - leftMotors.encoder.angularPosition) / width
 }

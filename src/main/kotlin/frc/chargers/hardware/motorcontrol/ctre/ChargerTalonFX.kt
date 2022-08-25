@@ -1,6 +1,7 @@
 package frc.chargers.hardware.motorcontrol.ctre
 
-import com.batterystaple.kmeasure.*
+import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.*
 import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX
 import com.ctre.phoenix.sensors.AbsoluteSensorRange
@@ -46,7 +47,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : WP
         configuration.neutralMode?.let(::setNeutralMode)
         configuration.inverted?.let(::setInverted)
         configuration.invertSensorPhase?.let(::setSensorPhase)
-        configuration.expiration?.let { this.expiration = it.inUnit(Seconds) }
+        configuration.expiration?.let { this.expiration = it.inUnit(seconds) }
         configuration.safetyEnabled?.let(::setSafetyEnabled)
 
         configure(configuration, encoderStep = (1.0 / TALON_FX_ENCODER_UNITS_PER_ROTATION).ofUnit(Rotations))
