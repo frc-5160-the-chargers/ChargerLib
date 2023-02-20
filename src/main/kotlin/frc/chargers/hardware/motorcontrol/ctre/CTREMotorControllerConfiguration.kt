@@ -6,7 +6,7 @@ import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.sensors.CANCoder
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
-import frc.chargers.utils.pid.PIDConstants
+import frc.chargers.controls.pid.PIDConstants
 import kotlin.math.roundToInt
 import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced as CTREMotorController
 

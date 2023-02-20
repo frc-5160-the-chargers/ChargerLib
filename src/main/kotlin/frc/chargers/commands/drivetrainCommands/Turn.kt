@@ -7,11 +7,11 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CodeBlockContext
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.constants.TurnPIDConstants
-import frc.chargers.hardware.sensors.HeadingProvider
+import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.utils.Precision
-import frc.chargers.utils.pid.PIDConstants
-import frc.chargers.utils.pid.UnitSuperPIDController
+import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.controls.pid.UnitSuperPIDController
 import kotlin.internal.LowPriorityInOverloadResolution
 
 /**

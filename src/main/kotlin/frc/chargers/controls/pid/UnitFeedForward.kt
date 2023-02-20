@@ -1,4 +1,4 @@
-package frc.chargers.utils.pid
+package frc.chargers.controls.pid
 
 import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity

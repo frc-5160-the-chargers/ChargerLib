@@ -39,7 +39,7 @@ public inline fun talonSRXDrivetrain(
  */
 public fun <C : MotorConfiguration, M> BasicDifferentialDrivetrain(
     leftMotors: M,
-    rightMotors: M,
+    rightMotors: M,     
     invertMotors: Boolean = false,
     configuration: C
 ): BasicDifferentialDrivetrain where M : MotorControllerGroup, M : MotorConfigurable<C> =
@@ -89,7 +89,7 @@ public open class BasicDifferentialDrivetrain(
         )
     }
 
-    override fun curvatureDrive(power: Double, steering: Double) {
+    public override fun curvatureDrive(power: Double, steering: Double) {
         differentialDrive.curvatureDrive(
             power * powerScale,
             steering * rotationScale,

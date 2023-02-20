@@ -1,4 +1,4 @@
-package frc.chargers.utils.pid
+package frc.chargers.controls.pid
 
 import edu.wpi.first.math.controller.PIDController
 

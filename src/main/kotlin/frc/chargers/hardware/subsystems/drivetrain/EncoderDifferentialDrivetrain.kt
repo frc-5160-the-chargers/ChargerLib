@@ -6,7 +6,7 @@ import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
-import frc.chargers.hardware.sensors.HeadingProvider
+import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.encoders.AverageEncoder
 
 @PublishedApi

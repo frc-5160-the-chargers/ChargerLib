@@ -14,8 +14,7 @@ import edu.wpi.first.wpilibj.Encoder as WpilibEncoder
 /**
  * An adapter from the WPILib Encoder class to the ChargerLib Encoder interface.
  */
-public class WPILibEncoderAdapter(private val wpiLibEncoder: WpilibEncoder, private val anglePerPulse: Angle) :
-    Encoder {
+public class WPILibEncoderAdapter(private val wpiLibEncoder: WpilibEncoder, private val anglePerPulse: Angle) : Encoder {
     public constructor(
         wpiLibEncoder: WpilibEncoder,
         pulsesPerRotation: Int /* Can't use Double here or both constructors will have the same JVM signature*/
@@ -26,14 +25,16 @@ public class WPILibEncoderAdapter(private val wpiLibEncoder: WpilibEncoder, priv
     override val angularVelocity: AngularVelocity
         get() = wpiLibEncoder.rate * anglePerPulse / 1.seconds
 
+    public val encoder: WpilibEncoder get() = wpiLibEncoder
 }
 
 /**
  * An adapter from the REV RelativeEncoder class to the ChargerLib Encoder interface.
  */
-public class RevEncoderAdapter(private val revEncoder: RelativeEncoder) : Encoder {
+public class RevEncoderAdapter(private val revEncoder: RelativeEncoder) : Encoder, RelativeEncoder by revEncoder {
     override val angularPosition: Angle
         get() = revEncoder.position.ofUnit(Rotations)
+
     override val angularVelocity: AngularVelocity
         get() = revEncoder.velocity.ofUnit(Rotations/Minutes)
 }
@@ -41,19 +42,28 @@ public class RevEncoderAdapter(private val revEncoder: RelativeEncoder) : Encode
 /**
  * An adapter from the CTRE Encoder class to the ChargerLib Encoder interface.
  */
-public class CTREMotorControllerEncoderAdapter(private val ctreMotorController: IMotorController, private val pidIndex: Int, private val anglePerPulse: Angle) :
-    Encoder {
+public class CTREMotorControllerEncoderAdapter(
+    private val ctreMotorController: IMotorController,
+    private val pidIndex: Int,
+    private val anglePerPulse: Angle
+) : Encoder, IMotorController by ctreMotorController {
     public constructor(
         ctreMotorController: IMotorController,
         pidIndex: Int,
-        pulsesPerRotation: Int /* Can't use Double here or both constructors will have the same JVM signature*/
+        pulsesPerRotation: Int /* Can't use Double here or both constructors will have the same JVM signature */
     ) : this(ctreMotorController, pidIndex, (1/pulsesPerRotation.toDouble()).ofUnit(Rotations))
 
-    override val angularPosition: Angle
+    override var angularPosition: Angle
         get() = ctreMotorController.getSelectedSensorPosition(pidIndex) * anglePerPulse
+        set(value) {
+            ctreMotorController.setSelectedSensorPosition((value/anglePerPulse).value, pidIndex, DEFAULT_TIMEOUT_MS) // TODO: Should throw if error code?
+        }
 
     override val angularVelocity: AngularVelocity
-        get() = ctreMotorController.getSelectedSensorVelocity(pidIndex) * anglePerPulse / ctreTimeBetweenPulses
-}
+        get() = ctreMotorController.getSelectedSensorVelocity(pidIndex) * anglePerPulse / timeBetweenPulses
 
-private val ctreTimeBetweenPulses = 100.milli.seconds
+    public companion object {
+        private const val DEFAULT_TIMEOUT_MS = 500
+        private val timeBetweenPulses = 100.milli.seconds
+    }
+}

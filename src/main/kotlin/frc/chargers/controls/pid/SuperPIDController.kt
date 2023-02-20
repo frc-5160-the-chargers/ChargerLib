@@ -1,6 +1,7 @@
-package frc.chargers.utils.pid
+package frc.chargers.controls.pid
 
 import edu.wpi.first.math.controller.PIDController
+import frc.chargers.controls.Controller
 
 /**
  * Wraps WPILib's [PIDController], adding various improvements.
@@ -15,13 +16,13 @@ import edu.wpi.first.math.controller.PIDController
  * See [here](https://www.controleng.com/articles/feed-forwards-augment-pid-control/) for an explanation of feedforward.
  */
 public class SuperPIDController(
-        pidConstants: PIDConstants,
-        private val getInput: () -> Double,
-        public val outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
-        public val integralRange: ClosedRange<Double> = outputRange,
-        target: Double,
-        public var feedForward: FeedForward = FeedForward { _, _ -> 0.0 }
-) {
+    pidConstants: PIDConstants,
+    private val getInput: () -> Double,
+    public val outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
+    public val integralRange: ClosedRange<Double> = outputRange,
+    target: Double,
+    public var feedForward: FeedForward = FeedForward { _, _ -> 0.0 }
+): Controller<Double> {
     private val pidController = PIDController(0.0, 0.0, 0.0)
         .apply {
             constants = pidConstants
@@ -32,7 +33,7 @@ public class SuperPIDController(
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
-    public fun calculateOutput(): Double {
+    public override fun calculateOutput(): Double {
         val pidOutput = pidController.calculate(getInput())
         val fedForwardOutput = applyFeedforward(pidOutput)
         return ensureInOutputRange(fedForwardOutput)

@@ -1,6 +1,6 @@
 package frc.chargers.constants
 
-import frc.chargers.utils.pid.PIDConstants
+import frc.chargers.controls.pid.PIDConstants
 
 /**
  * An interface denoting an object that provides PID constants for turning.

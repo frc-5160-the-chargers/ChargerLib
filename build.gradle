@@ -32,6 +32,8 @@ dependencies {
     testImplementation('junit:junit:4.13.2')
 }
 
+def includeDesktopSupport = true
+
 publishing {
     publications {
         maven(MavenPublication) {

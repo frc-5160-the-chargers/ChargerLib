@@ -1,8 +1,9 @@
-package frc.chargers.utils.pid
+package frc.chargers.controls.pid
 
 import com.batterystaple.kmeasure.dimensions.*
 import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.math.controller.PIDController
+import frc.chargers.controls.Controller
 
 //TODO: Document properly
 /**
@@ -17,7 +18,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     public val integralRange: ClosedRange<Quantity<O>> = outputRange,
     target: Quantity<I>,
     public var feedForward: UnitFeedForward<I, O> = UnitFeedForward { _, _ -> Quantity(0.0) }
-) {
+) : Controller<Quantity<O>> {
     private val pidController = PIDController(0.0, 0.0, 0.0)
         .apply {
             constants = pidConstants
@@ -28,7 +29,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
-    public fun calculateOutput(): Quantity<O> {
+    public override fun calculateOutput(): Quantity<O> {
         val pidOutput = Quantity<O>(pidController.calculate(getInput().siValue))
         val fedForwardOutput = applyFeedforward(pidOutput)
         return ensureInOutputRange(fedForwardOutput)

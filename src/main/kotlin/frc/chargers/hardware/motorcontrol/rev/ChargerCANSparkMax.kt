@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMax.SoftLimitDirection
 import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
+import com.revrobotics.SparkMaxAlternateEncoder
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
@@ -20,17 +21,17 @@ import kotlin.math.roundToInt
  * A convenience function to create a [ChargerCANSparkMax]
  * specifically to drive a Neo motor.
  */
-public inline fun neoSparkMax(canBusId: Int, configure: SparkMaxConfiguration.() -> Unit = {}): ChargerCANSparkMax =
-    ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushless)
-        .apply { configure(SparkMaxConfiguration().apply(configure)) }
+public inline fun neoSparkMax(canBusId: Int, alternateEncoderConfiguration: AlternateEncoderConfiguration? = null, configure: SparkMaxConfiguration.() -> Unit = {}): ChargerCANSparkMax =
+    ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushless, alternateEncoderConfiguration)
+        .also { it.configure(SparkMaxConfiguration().apply(configure)) }
 
 /**
  * A convenience function to create a [ChargerCANSparkMax]
  * specifically to drive a brushed motor, such as a CIM.
  */
-public inline fun brushedSparkMax(canBusId: Int, configure: SparkMaxConfiguration.() -> Unit = {}): ChargerCANSparkMax =
-    ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushed)
-        .apply { configure(SparkMaxConfiguration().apply(configure)) }
+public inline fun brushedSparkMax(canBusId: Int, alternateEncoderConfiguration: AlternateEncoderConfiguration? = null, configure: SparkMaxConfiguration.() -> Unit = {}): ChargerCANSparkMax =
+    ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushed, alternateEncoderConfiguration)
+        .also { it.configure(SparkMaxConfiguration().apply(configure)) }
 
 /**
  * Represents a Spark Max motor controller.
@@ -43,10 +44,19 @@ public inline fun brushedSparkMax(canBusId: Int, configure: SparkMaxConfiguratio
  */
 public open class ChargerCANSparkMax(
     deviceId: Int,
-    type: MotorType
+    type: MotorType,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
 ) : CANSparkMax(deviceId, type), EncoderMotorController, MotorConfigurable<SparkMaxConfiguration> {
-    override val encoder: Encoder = RevEncoderAdapter(super.getEncoder())
-
+    override val encoder: Encoder by lazy {
+        alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
+            if (encoderType == null) {
+                RevEncoderAdapter(super.getAlternateEncoder(countsPerRev))
+            } else {
+                RevEncoderAdapter(super.getAlternateEncoder(encoderType, countsPerRev))
+            }
+        }
+            ?: RevEncoderAdapter(super.getEncoder())
+    }
     override fun configure(configuration: SparkMaxConfiguration) {
         configuration.idleMode?.let(::setIdleMode)
         configuration.inverted?.let(::setInverted)
@@ -99,5 +109,13 @@ public data class SparkMaxConfiguration(
     val softLimits: MutableMap<SoftLimitDirection, Float> = mutableMapOf(),
 ) : MotorConfiguration
 
+public data class AlternateEncoderConfiguration(val countsPerRev: Int, val encoderType: SparkMaxAlternateEncoder.Type? = null) {
+    public companion object {
+        public val SRXMagnetic1X: AlternateEncoderConfiguration = AlternateEncoderConfiguration(1024)
+        public val SRXMagnetic4X: AlternateEncoderConfiguration = AlternateEncoderConfiguration(4096)
+        public val versaPlanetary1X: AlternateEncoderConfiguration = SRXMagnetic1X
+        public val versaPlanetary4X: AlternateEncoderConfiguration = SRXMagnetic4X
+    }
+}
 public data class SmartCurrentLimit(val stallLimit: Int, val freeLimit: Int? = null, val limitRPM: Int? = null)
 public data class SecondaryCurrentLimit(val limit: Double, val chopCycles: Int? = null)
