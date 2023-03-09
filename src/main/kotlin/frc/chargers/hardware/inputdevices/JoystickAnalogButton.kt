@@ -61,7 +61,7 @@ public class JoystickAnalogButton : Button {
         this.threshold = threshold
     }
 
-    override fun get(): Boolean {
+    override fun getAsBoolean(): Boolean {
         return if (threshold < 0) {
             joystick.getRawAxis(axisNumber) < threshold //Return true if axis value is less than negative threshold
         } else {
