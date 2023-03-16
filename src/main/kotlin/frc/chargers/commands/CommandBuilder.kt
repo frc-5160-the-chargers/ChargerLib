@@ -23,7 +23,7 @@ public inline fun buildCommand(block: CommandBuilder.() -> Unit): Command =
 @DslMarker
 public annotation class CommandBuilderMarker
 
-@CommandBuilderMarkerc
+@CommandBuilderMarker
 public class CommandBuilder {
     @PublishedApi
     internal var commands: LinkedHashSet<Command> = linkedSetOf() // LinkedHashSet keeps commands in order, but also ensures they're not added multiple times
@@ -135,9 +135,14 @@ public class CommandBuilder {
      */
     public fun runFor(timeInterval: Time, command: Command): ParallelRaceGroup {
         return command
-            .withTimeout(timeInterval.inUnit(seconds))
+            .withTimeout(WaitCommand(timeInterval.seconds))
             .also(commands::add)
     }
+    
+    
+ 
+    
+    
 
     /**
      * Adds a command that will run until either the [timeInterval] expires or it completes on its own.
@@ -164,6 +169,7 @@ public class CommandBuilder {
      *
      * Useful if a delay is needed between two commands in a [SequentialCommandGroup].
      * Note that running this in parallel with other commands is unlikely to be useful.
+     * Note 2: Now changed to WPILib's WaitCommand
      */
     public fun waitFor(timeInterval: Time): ParallelRaceGroup = WaitCommand(timeInterval.seconds).also(commands::add)
 
@@ -172,11 +178,12 @@ public class CommandBuilder {
      *
      * Useful if some condition must be met before proceeding to the next command in a [SequentialCommandGroup].
      * Note that running this in parallel with other commands is unlikely to be useful.
+     * Note 2: Now changed to WPILib's WaitUntilCommand
      */
     public fun waitUntil(condition: CodeBlockContext.() -> Boolean): ParallelRaceGroup = WaitUntilCommand(condition).also(commands::add)
 
     /**
-     * Adds a command that prints a message.
+     * Adds a command that prints a message. Now changed to WPILib's printcommand
      *
      * @param message a function that generates the message to print
      */
@@ -225,6 +232,7 @@ public class CommandBuilder {
 
 /**
  * Adds various utility properties and functions to the local context.
+ * Note: TimeContext might not be nessecary due to WPILib's build in time commands, but
  */
 @CommandBuilderMarker
 public interface TimeContext {
