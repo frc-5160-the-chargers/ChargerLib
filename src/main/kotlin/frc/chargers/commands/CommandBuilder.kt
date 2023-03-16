@@ -36,6 +36,8 @@ public class CommandBuilder {
         commands.add(this)
         return this
     }
+    
+    
 
     /**
      * Adds a command that will run once and then complete.
@@ -53,10 +55,11 @@ public class CommandBuilder {
      *
      * @param condition the condition to be met
      * @param command the command to run until [condition] is met
+     * IMPORANT: must be declared using +runUntil({false},command)
      */
     public fun runUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
         command.until { CodeBlockContext.condition() }
-            .also(commands::add)
+
 
     /**
      * Adds a command that will run *until* [condition] is met.
@@ -66,7 +69,7 @@ public class CommandBuilder {
      * @param execute the code to be run until [condition] is met
      */
     public inline fun loopUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() })
+        runUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() }).also(commands::add)
 
     /**
      * Adds a command that will run *while* [condition] is true.
@@ -132,11 +135,11 @@ public class CommandBuilder {
      *
      * @param command the command to run
      * @param timeInterval the maximum allowed runtime of the command
+     * IMPORTANT: Now must be called by +runFor(5.seconds,HoldCommand)
      */
     public fun runFor(timeInterval: Time, command: Command): ParallelRaceGroup {
         return command
             .withTimeout(WaitCommand(timeInterval.seconds))
-            .also(commands::add)
     }
     
     
@@ -152,7 +155,7 @@ public class CommandBuilder {
      * @param execute the code to be run
      */
     public inline fun loopFor(timeInterval: Time, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runFor(timeInterval, RunCommand(*requirements) { CodeBlockContext.execute() })
+        runFor(timeInterval, RunCommand(*requirements) { CodeBlockContext.execute() }).also(commands::add)
 
     /**
      * Adds a command to be run continuously.
