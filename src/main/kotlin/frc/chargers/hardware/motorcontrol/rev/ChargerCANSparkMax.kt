@@ -57,6 +57,7 @@ public open class ChargerCANSparkMax(
         }
             ?: RevEncoderAdapter(super.getEncoder())
     }
+
     override fun configure(configuration: SparkMaxConfiguration) {
         configuration.idleMode?.let(::setIdleMode)
         configuration.inverted?.let(::setInverted)
