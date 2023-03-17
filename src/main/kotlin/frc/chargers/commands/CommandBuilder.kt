@@ -31,11 +31,70 @@ public class CommandBuilder {
     /**
      * Adds a single command to be run until its completion.
      * done like: +HoldCommand(arm)
+     * Note: unaryPlus is interpreted as a plus prefix in native kotlin
      */
     public operator fun Command.unaryPlus(){
         commands.add(this)
         return this
     }
+    
+    /**
+     * Returns a command that will run once, stopping if the timeInterval is reached.
+     *
+     * @param command the command to run
+     * @param timeInterval the maximum allowed runtime of the command
+     * Called with +Command.runFor(5.seconds)
+     */
+    public fun Command.runFor(timeInterval: Time): ParallelRaceGroup {
+        return command
+            .withTimeout(WaitCommand(timeInterval.seconds))
+    }
+    
+    /**
+     * Returns a command that will keep on looping, stopping if the timeInterval is reached.
+     *
+     * @param command the command to run
+     * @param timeInterval the maximum allowed runtime of the command
+     * Called with +Command.loopFor(5.seconds)
+     */
+    public fun Command.loopFor(timeInterval: Time): ParallelRaceGroup {
+        return command.repeatedly()
+            .withTimeout(WaitCommand(timeInterval.seconds))
+    }
+    
+    /**
+     * Returns a command that will run once *until* [condition] is met.
+     *
+     * @param condition the condition to be met
+     * @param command the command to run until [condition] is met
+     * Called with +Command.runUntil({boolean})
+     */
+    public fun Command.runUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
+        command.until { CodeBlockContext.condition() }
+    
+    /**
+     * Returns a command that will keep on running, stopping if the timeInterval is reached.
+     *
+     * @param command the command to run
+     * @param timeInterval the maximum allowed runtime of the command
+     * Called with +Command.loopUntil({boolean})
+     */
+    public fun Command.loopUntil(condition: CodeBlockContext.() -> Boolean) = Command.repeatedly().until{CodeBlockContext.condition()}
+    
+    /**
+     * Returns a command that will keep on running
+     *
+     * @param command the command to run
+     * @param timeInterval the maximum allowed runtime of the command
+     * Called with +Command.loopForever()
+     */
+    public fun Command.loopForever() = command.repeatedly()
+    
+    
+    
+    
+    // from here on out, all of the function command adders are here.
+    // these will use function calls(subsystems or not), convert them into commands and schedule them.
     
     
 
@@ -47,19 +106,6 @@ public class CommandBuilder {
      */
     public fun runOnce(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): InstantCommand =
         InstantCommand(*requirements) { CodeBlockContext.execute() }.also(commands::add)
-
-    
-
-    /**
-     * Adds a command that will run *until* [condition] is met.
-     *
-     * @param condition the condition to be met
-     * @param command the command to run until [condition] is met
-     * IMPORANT: must be declared using +runUntil({false},command)
-     */
-    public fun runUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
-        command.until { CodeBlockContext.condition() }
-
 
     /**
      * Adds a command that will run *until* [condition] is met.
@@ -130,17 +176,7 @@ public class CommandBuilder {
         return SequentialCommandGroup(*CommandBuilder().apply(block).commands.toTypedArray()).also(this.commands::add)
     }
 
-    /**
-     * Adds a command that will run until either the [timeInterval] expires or it completes on its own.
-     *
-     * @param command the command to run
-     * @param timeInterval the maximum allowed runtime of the command
-     * IMPORTANT: Now must be called by +runFor(5.seconds,HoldCommand)
-     */
-    public fun runFor(timeInterval: Time, command: Command): ParallelRaceGroup {
-        return command
-            .withTimeout(WaitCommand(timeInterval.seconds))
-    }
+    
     
     
  
