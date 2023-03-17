@@ -16,15 +16,15 @@ import edu.wpi.first.wpilibj2.command.PrintCommand
  * See [here](https://kotlinlang.org/docs/type-safe-builders.html#how-it-works)
  * for an explanation of DSLs and how they are built.
  */
-public inline fun buildCommand(block: CommandBuilder.() -> Unit): Command =
-    SequentialCommandGroup(*CommandBuilder().apply(block).commands.toTypedArray())
+public inline fun buildCommand(vararg defaultRequirements: Subsystem, block: CommandBuilder.() -> Unit): Command =
+    SequentialCommandGroup(*CommandBuilder(*defaultRequirements).apply(block).commands.toTypedArray())
 
 
 @DslMarker
 public annotation class CommandBuilderMarker
 
 @CommandBuilderMarker
-public class CommandBuilder {
+public class CommandBuilder(vararg defaultRequirements: Subsystem){
     @PublishedApi
     internal var commands: LinkedHashSet<Command> = linkedSetOf() // LinkedHashSet keeps commands in order, but also ensures they're not added multiple times
 
@@ -104,7 +104,7 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run
      */
-    public fun runOnce(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): InstantCommand =
+    public fun runOnce(vararg requirements: Subsystem = defaultRequirements, execute: CodeBlockContext.() -> Unit): InstantCommand =
         InstantCommand(*requirements) { CodeBlockContext.execute() }.also(commands::add)
 
     /**
@@ -114,7 +114,7 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run until [condition] is met
      */
-    public inline fun loopUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+    public inline fun loopUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem = defaultRequirements, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
         runUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() }).also(commands::add)
 
     /**
@@ -124,7 +124,7 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run
      */
-    public inline fun loopWhile(crossinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, noinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+    public inline fun loopWhile(crossinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem = defaultRequirements, noinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
         runUntil({ !condition() }, *requirements, execute=execute)
 
     /**
@@ -190,7 +190,7 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public inline fun loopFor(timeInterval: Time, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+    public inline fun loopFor(timeInterval: Time, vararg requirements: Subsystem = defaultRequirements, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
         runFor(timeInterval, RunCommand(*requirements) { CodeBlockContext.execute() }).also(commands::add)
 
     /**
@@ -199,7 +199,7 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public fun loopForever(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): RunCommand =
+    public fun loopForever(vararg requirements: Subsystem = defaultRequirements, execute: CodeBlockContext.() -> Unit): RunCommand =
             RunCommand(*requirements) { CodeBlockContext.execute() }
                 .also(commands::add)
 
