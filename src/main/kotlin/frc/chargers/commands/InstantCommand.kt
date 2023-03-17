@@ -8,3 +8,9 @@ import edu.wpi.first.wpilibj2.command.Subsystem
  */
 public fun InstantCommand(vararg subsystems: Subsystem, toRun: () -> Unit): InstantCommand =
     InstantCommand(toRun, *subsystems)
+
+/* 
+ *   An alternative way to define InstantCommands that is more in line with the buildCommand commands.
+ */
+public fun RunOnceCommand(vararg subsystems: Subsystem, toRun: () -> Unit): InstantCommand = 
+    InstantCommand(*subsystems,toRun)
