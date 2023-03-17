@@ -35,8 +35,8 @@ repositories {
 }
 ```
 
-C. Paste this inside the dependencies bracket in build.gradle, below "implementation wpi.java.vendor.java()":
-implementation "com.batterystaple:ChargerLib:1.0.0-SNAPSHOT"
+C. Paste this inside the dependencies bracket in build.gradle, below ``` implementation wpi.java.vendor.java()"```:
+```implementation "com.batterystaple:ChargerLib:1.0.0-SNAPSHOT"```
 
 D. At the end of the build.gradle file, add this:
 ```kotlin
@@ -68,7 +68,9 @@ build:
 # How to deploy chargerlib
 
 A. Download and unzip(if nessecary) chargerlib from the github page.
+
 B. In the terminal, type .\gradlew.bat publishToMavenLocal 
+
 C. You're done! Build and deploy your robot code, then run it.
 
 
