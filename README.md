@@ -75,5 +75,53 @@ C. You're done! Build and deploy your robot code, then run it.
 
 
 
+# The Basics
 
+
+### Sensor wrappers: 
+The Limelight, DriverCamManager(manages driver cams plugged into roborio), navX now have been wrapped into objects for easier use.
+
+Defined with: ```NavX()```, ```DriverCamManager(totalCameras = 3)```, ```limelight()```
+
+NavX features: split into gyroscope, accelerometer and compass. Provides heading.
+
+### Motor Wrappers
+Wraps motors such as the neo, the falcon, etc.
+Defined by using: ```neoSparkMax(canBusId = 6)``` , ```falcon(canID = 9)```
+
+
+### Built-in drivetrain
+Adds encoderdifferentialdrivetrain and basicdfferentialdrivetrain subsystems, which allow you to easily define drivetrains in the code.
+Defined like this: 
+
+```kotlin
+private val drivetrain: EncoderDifferentialDrivetrain = sparkMaxDrivetrain(
+        leftMotors = EncoderMotorControllerGroup(
+            neoSparkMax(canBusId = 6),
+            neoSparkMax(canBusId = 9),
+        ),
+        rightMotors = EncoderMotorControllerGroup(
+            neoSparkMax(canBusId = 4),
+            neoSparkMax(canBusId = 2),
+        ),
+        invertMotors = false,
+        gearRatio = 1.0/10.71,
+        wheelDiameter = 6.inches,
+        width = 27.inches
+    ) {
+        idleMode = CANSparkMax.IdleMode.kBrake
+    }
+```
+
+### New interfaces:
+Adds new frc-specific interfaces that help standardize types and make motors, etc. easier to use.
+
+For example:
+the HeadingProvider interface includes the drivetrain and the NavX, and allows you to consistently get the heading from these sources.
+the EncoderMotorController interface includes the falcon and the neosparkmax, and allows subsystems to accept any motor with an encoder.
+the encoder interface allows you to consistently get position and velocity.
+
+### ChargerController:
+Adds useful features related to the xbox controllers.
+Defined by using ```ChargerController(port = 1, etc. etc.)```
 
