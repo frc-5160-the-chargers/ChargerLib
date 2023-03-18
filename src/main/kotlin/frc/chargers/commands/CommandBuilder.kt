@@ -47,7 +47,7 @@ public class CommandBuilder(vararg defaultRequirements: Subsystem){
      */
     public fun Command.runFor(timeInterval: Time): ParallelRaceGroup {
         return command
-            .withTimeout(WaitCommand(timeInterval.seconds))
+            .withTimeout(timeInterval.seconds)
     }
     
     /**
@@ -59,7 +59,7 @@ public class CommandBuilder(vararg defaultRequirements: Subsystem){
      */
     public fun Command.loopFor(timeInterval: Time): ParallelRaceGroup {
         return command.repeatedly()
-            .withTimeout(WaitCommand(timeInterval.seconds))
+            .withTimeout(timeInterval.seconds)
     }
     
     /**
