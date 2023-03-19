@@ -35,15 +35,36 @@ public class NavX(public val ahrs: AHRS = AHRS()) : HeadingProvider {
     public val accelerometer: Accelerometer = Accelerometer()
 
     public inner class Gyroscope internal constructor(): ThreeAxisGyroscope, HeadingProvider {
+        // used to "calibrate" the values to zero
+        public val yawCalibration: Angle = 0.0.degrees
+        public val pitchCalibration: Angle = 0.0.degrees
+        public val rollCalibration: Angle = 0.0.degrees
+        public val headingCalibration: Angle = 0.0.degrees
+        
+        public fun calibrateYaw(target: Angle = 0.0.degrees){
+            yawCalibration = yaw - target
+        }
+        
+        public fun calibratePitch(target: Angle = 0.0.degrees){
+            pitchCalibration = pitch - target
+        }
+        
+        public fun calibrateRoll(target: Angle = 0.0.degrees){
+            rollCalibration = roll - target
+        }
+        
+        public fun calibrateHeading(target: Angle = 0.0.degrees){
+            headingCalibration = heading - target
+        }
+    
         public override val yaw: Angle
-            get() = ahrs.yaw.toDouble().ofUnit(Degrees)
+            get() = ahrs.yaw.toDouble().ofUnit(Degrees) - yawCalibration
         override val pitch: Angle
-            get() = ahrs.pitch.toDouble().ofUnit(Degrees)
+            get() = ahrs.pitch.toDouble().ofUnit(Degrees) - pitchCalibration
         override val roll: Angle
-            get() = ahrs.roll.toDouble().ofUnit(Degrees)
+            get() = ahrs.roll.toDouble().ofUnit(Degrees) - rollCalibration
         override val heading: Angle
-            get() = ahrs.angle.ofUnit(Degrees) // Negative sign because the navX reports clockwise as positive
-                                               // whereas we want counterclockwise to be positive
+            get() = ahrs.angle.ofUnit(Degrees) - headingCalibration
     }
 
     public inner class Compass internal constructor(): HeadingProvider {
