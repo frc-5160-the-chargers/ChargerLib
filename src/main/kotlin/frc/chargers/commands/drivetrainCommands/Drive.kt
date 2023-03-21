@@ -34,7 +34,7 @@ public fun EncoderDifferentialDrivetrain.driveStraight(time: Time, power: Double
         )
     }
 
-    runFor(time, this@driveStraight) { arcadeDrive(power, pid.calculateOutput().value) }
+    loopFor(time, this@driveStraight) { arcadeDrive(power, pid.calculateOutput().value) }
 }
 
 /**
@@ -69,7 +69,7 @@ public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, power
         )
     }
 
-    runUntil(
+    loopUntil(
         if (power > 0) {
             { (distanceTraveled - initialPosition) >= distance }
         } else {

@@ -13,8 +13,8 @@ public fun RunCommand(vararg subsystems: Subsystem, toRun: () -> Unit): RunComma
 /* 
  *   An alternative way to define RunCommands that is more in line with the buildCommand commands.
  */
-public fun RunForeverCommand(vararg subsystems: Subsystem, toRun: () -> Unit): InstantCommand = 
-    RunCommand(*subsystems,toRun)
+public fun RunForeverCommand(vararg subsystems: Subsystem, toRun: () -> Unit): Command =
+    RunCommand(toRun,*subsystems)
 
 /**
  * A utility function for setting the default [Command] of a [Subsystem] to a [RunCommand]

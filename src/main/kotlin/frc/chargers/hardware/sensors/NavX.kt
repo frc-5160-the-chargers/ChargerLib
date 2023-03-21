@@ -2,6 +2,7 @@ package frc.chargers.hardware.sensors
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.Degrees
+import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import com.kauailabs.navx.frc.AHRS
@@ -36,10 +37,10 @@ public class NavX(public val ahrs: AHRS = AHRS()) : HeadingProvider {
 
     public inner class Gyroscope internal constructor(): ThreeAxisGyroscope, HeadingProvider {
         // used to "calibrate" the values to zero
-        public val yawCalibration: Angle = 0.0.degrees
-        public val pitchCalibration: Angle = 0.0.degrees
-        public val rollCalibration: Angle = 0.0.degrees
-        public val headingCalibration: Angle = 0.0.degrees
+        public var yawCalibration: Angle = 0.0.degrees
+        public var pitchCalibration: Angle = 0.0.degrees
+        public var rollCalibration: Angle = 0.0.degrees
+        public var headingCalibration: Angle = 0.0.degrees
         
         public fun calibrateYaw(target: Angle = 0.0.degrees){
             yawCalibration = yaw - target

@@ -13,4 +13,4 @@ public fun InstantCommand(vararg subsystems: Subsystem, toRun: () -> Unit): Inst
  *   An alternative way to define InstantCommands that is more in line with the buildCommand commands.
  */
 public fun RunOnceCommand(vararg subsystems: Subsystem, toRun: () -> Unit): InstantCommand = 
-    InstantCommand(*subsystems,toRun)
+    InstantCommand(toRun,*subsystems)

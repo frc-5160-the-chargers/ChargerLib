@@ -22,7 +22,7 @@ context(CommandBuilder, HeadingProvider)
 @LowPriorityInOverloadResolution
 public fun DifferentialDrivetrain.turn(angle: Angle, rotationPower: Double): Command {
     val startHeading = heading
-    return runUntil(
+    return loopUntil(
         when {
             angle < 0.degrees -> { { heading < startHeading + angle } }
             angle > 0.degrees -> { { heading > startHeading + angle } }
@@ -66,7 +66,7 @@ public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleD
 
     when(precision) {
         Precision.AllowOvershoot -> {
-            return runUntil(
+            return loopUntil(
                 when {
                     angle < 0.degrees -> { { heading < targetHeading } }
                     angle > 0.degrees -> { { heading > targetHeading } }
@@ -77,7 +77,7 @@ public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleD
             )
         }
         is Precision.Within -> {
-            return runUntil({ pidController.error in precision.allowableError }, this, execute = runToTarget)
+            return loopUntil({ pidController.error in precision.allowableError }, this, execute = runToTarget)
         }
     }
 }
