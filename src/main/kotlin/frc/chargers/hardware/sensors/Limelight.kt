@@ -24,11 +24,13 @@ public class Limelight(public val noiseFilterThreshold: Double = 0.04,
     // gets a limelight entry.
     // simply makes the limelight entries for tx, ty and ta more consistent by filtering out "noise"
     // most reliable if used in periodic loop or used in constant loop.
-    public fun getEntry(entry:String): Double{
+    public fun getEntry(entry:String,filterValue:Boolean = (noiseFilterThreshold!=0.0)): Double{
         var value: Double = NetworkTableInstance.getDefault().getTable("limelight").getEntry(entry).getDouble(0.0)
-        if (entry == "tx" || entry == "ty" || entry == "ta"){
-            if (value- previousValues[entry]!! < noiseFilterThreshold){
-                value = previousValues[entry]!!
+        if (!filterValue){
+            return value
+        }else if (entry == "tx" || entry == "ty" || entry == "ta"){
+            if (value - previousValues[entry]!! < noiseFilterThreshold){
+                value = (value + previousValues[entry]!!)/2
             }else{
                 previousValues[entry] = value
             }
