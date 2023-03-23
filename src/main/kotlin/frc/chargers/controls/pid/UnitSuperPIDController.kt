@@ -19,7 +19,9 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     target: Quantity<I>,
     public var feedForward: UnitFeedForward<I, O> = UnitFeedForward { _, _ -> Quantity(0.0) }
 ) : Controller<Quantity<O>> {
-    private val pidController = PIDController(0.0, 0.0, 0.0)
+    // note: sets the base PID Controller to public to allow stuff such as setContinuousInput, etc. etc.
+    // - Daniel
+    public val basePID: PIDController = PIDController(0.0, 0.0, 0.0)
         .apply {
             constants = pidConstants
             setpoint = target.siValue
@@ -30,7 +32,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
     public override fun calculateOutput(): Quantity<O> {
-        val pidOutput = Quantity<O>(pidController.calculate(getInput().siValue))
+        val pidOutput = Quantity<O>(basePID.calculate(getInput().siValue))
         val fedForwardOutput = applyFeedforward(pidOutput)
         return ensureInOutputRange(fedForwardOutput)
     }
@@ -47,11 +49,11 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
      * The target is the value the PID controller is attempting to achieve.
      */
     public var target: Quantity<I>
-        get() = Quantity(pidController.setpoint)
+        get() = Quantity(basePID.setpoint)
         set(target) {
-            if (target.siValue != pidController.setpoint) {
-                pidController.reset()
-                pidController.setpoint = target.siValue
+            if (target.siValue != basePID.setpoint) {
+                basePID.reset()
+                basePID.setpoint = target.siValue
             }
         }
 
@@ -61,11 +63,11 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
      * @see PIDConstants
      */
     public var constants: PIDConstants
-        get() = pidController.constants
+        get() = basePID.constants
         set(pidConstants) {
-            if (pidConstants != pidController.constants) {
-                pidController.reset()
-                pidController.constants = pidConstants
+            if (pidConstants != basePID.constants) {
+                basePID.reset()
+                basePID.constants = pidConstants
             }
         }
 
@@ -73,5 +75,5 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
      * The error is a signed value representing how far the PID system currently is from the target value.
      */
     public val error: Quantity<I>
-        get() = Quantity(getInput().siValue - pidController.setpoint)
+        get() = Quantity(getInput().siValue - basePID.setpoint)
 }

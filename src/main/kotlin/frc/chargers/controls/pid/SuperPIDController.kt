@@ -23,7 +23,9 @@ public class SuperPIDController(
     target: Double,
     public var feedForward: FeedForward = FeedForward { _, _ -> 0.0 }
 ): Controller<Double> {
-    private val pidController = PIDController(0.0, 0.0, 0.0)
+    // note: sets the base PID Controller to public to allow stuff such as setContinuousInput, etc. etc.
+    // - Daniel
+    public val basePID: PIDController = PIDController(0.0, 0.0, 0.0)
         .apply {
             constants = pidConstants
             setpoint = target
@@ -34,7 +36,7 @@ public class SuperPIDController(
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
     public override fun calculateOutput(): Double {
-        val pidOutput = pidController.calculate(getInput())
+        val pidOutput = basePID.calculate(getInput())
         val fedForwardOutput = applyFeedforward(pidOutput)
         return ensureInOutputRange(fedForwardOutput)
     }
@@ -51,11 +53,11 @@ public class SuperPIDController(
      * The target is the value the PID controller is attempting to achieve.
      */
     public var target: Double
-        get() = pidController.setpoint
+        get() = basePID.setpoint
         set(target) {
-            if (target != pidController.setpoint) {
-                pidController.reset()
-                pidController.setpoint = target
+            if (target != basePID.setpoint) {
+                basePID.reset()
+                basePID.setpoint = target
             }
         }
 
@@ -65,11 +67,11 @@ public class SuperPIDController(
      * @see PIDConstants
      */
     public var constants: PIDConstants
-        get() = pidController.constants
+        get() = basePID.constants
         set(pidConstants) {
-            if (pidConstants != pidController.constants) {
-                pidController.reset()
-                pidController.constants = pidConstants
+            if (pidConstants != basePID.constants) {
+                basePID.reset()
+                basePID.constants = pidConstants
             }
         }
 
@@ -77,5 +79,5 @@ public class SuperPIDController(
      * The error is a signed value representing how far the PID system currently is from the target value.
      */
     public val error: Double
-        get() = getInput() - pidController.setpoint
+        get() = getInput() - basePID.setpoint
 }

@@ -94,10 +94,16 @@ public open class EncoderDifferentialDrivetrain(
      * that initial point can easily be determined by subtracting the initial position
      * from the current position.
      */
+    // Daniel's addition:
+    // zeroes-out distanceTraveled when subsystem is initiated using distanceOffset.
+    // so, at the start of the match, distanceTraveled is always zero; it will increase when the match goes on.
+    // distance offset is only calculated once when the subsystem object is initiated,
+    // whereas the distanceTraveled variable is a getter that will always update when called.
+    private val distanceOffset: Distance = overallEncoder.angularPosition * wheelTravelPerMotorRadian
     public val distanceTraveled: Distance
         get() =
-            overallEncoder.angularPosition *
-                    wheelTravelPerMotorRadian
+            (overallEncoder.angularPosition *
+                    wheelTravelPerMotorRadian) - distanceOffset
 
     /**
      * The current linear velocity of the robot.
