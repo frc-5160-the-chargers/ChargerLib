@@ -6,10 +6,18 @@
     <link href="../../images/logo-icon.svg" rel="icon" type="image/svg">
     <script>var pathToRoot = "../../";</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-const savedDarkMode = storage ? JSON.parse(storage) : false
-if(savedDarkMode === true){
-    document.getElementsByTagName("html")[0].classList.add("theme-dark")
-}</script>
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../styles/style.css" rel="Stylesheet">
 <link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
@@ -21,6 +29,7 @@ if(savedDarkMode === true){
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async="async"></script>
 <script type="text/javascript" src="../../scripts/main.js" defer="defer"></script>
 <script type="text/javascript" src="../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
 </head>
 <body>
 <div class="navigation-wrapper" id="navigation-wrapper">
@@ -33,6 +42,9 @@ if(savedDarkMode === true){
     <div>
 1.0.0-SNAPSHOT    </div>
     <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
         <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
         <div id="searchBar"></div>
     </div>
@@ -42,193 +54,197 @@ if(savedDarkMode === true){
         <div id="sideMenu"></div>
     </div>
     <div id="main">
-<div class="main-content" id="content" pageIds="ChargerLib::frc.chargers.hardware.sensors.encoders////PointingToDeclaration//769193423">
-  <div class="breadcrumbs"><a href="../../index.html">ChargerLib</a><span class="delimiter">/</span><a href="index.html">frc.chargers.hardware.sensors.encoders</a></div>
+<div class="main-content" data-page-type="package" id="content" pageIds="ChargerLib::frc.chargers.hardware.sensors.encoders////PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../index.html">ChargerLib</a><span class="delimiter">/</span><span class="current">frc.chargers.hardware.sensors.encoders</span></div>
   <div class="cover ">
-    <h1 class="cover"><span><span>Package</span></span> <span>frc.</span><wbr></wbr><span>chargers.</span><wbr></wbr><span>hardware.</span><wbr></wbr><span>sensors.</span><wbr></wbr><span>encoders</span></h1>
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
     <div class="tabs-section-body">
-      <h2 class="">Types</h2>
-      <div class="table" data-togglable="Types"><a data-name="-1582586084%2FClasslikes%2F769193423" anchor-label="AnalogPotentiometerPositionEncoder" id="-1582586084%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-analog-potentiometer-position-encoder/index.html"><span>Analog</span><wbr></wbr><span>Potentiometer</span><wbr></wbr><span>Position</span><wbr></wbr><span><span>Encoder</span></span></a></div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1582586084%2FClasslikes%2F769193423" anchor-label="AnalogPotentiometerPositionEncoder" id="-1582586084%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-analog-potentiometer-position-encoder/index.html"><span>Analog</span><wbr></wbr><span>Potentiometer</span><wbr></wbr><span>Position</span><wbr></wbr><span><span>Encoder</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1582586084%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-analog-potentiometer-position-encoder/index.html">AnalogPotentiometerPositionEncoder</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;input<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj/AnalogInput///PointingToDeclaration/">AnalogInput</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;fullRange<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;offset<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token operator"> = </span>0.degrees</span></span><span class="token punctuation">)</span> : <span data-unresolved-link="edu.wpi.first.wpilibj/AnalogPotentiometer///PointingToDeclaration/">AnalogPotentiometer</span>, <a href="-position-encoder/index.html">PositionEncoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-analog-potentiometer-position-encoder/index.html">AnalogPotentiometerPositionEncoder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">input<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj/AnalogInput///PointingToDeclaration/">AnalogInput</span><span class="token punctuation">, </span></span><span class="parameter ">fullRange<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token operator"> = </span>0.degrees</span></span><span class="token punctuation">)</span> : <span data-unresolved-link="edu.wpi.first.wpilibj/AnalogPotentiometer///PointingToDeclaration/">AnalogPotentiometer</span>, <a href="-position-encoder/index.html">PositionEncoder</a></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="673880979%2FClasslikes%2F769193423" anchor-label="AverageEncoder" id="673880979%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-average-encoder/index.html"><span>Average</span><wbr></wbr><span><span>Encoder</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-average-encoder/index.html"><span>Average</span><wbr></wbr><span><span>Encoder</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="673880979%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-average-encoder/index.html">AverageEncoder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">encoders<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a></span></span><span class="token punctuation">)</span> : <a href="-encoder/index.html">Encoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">An abstraction of multiple encoders into one.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-average-encoder/index.html">AverageEncoder</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">encoders<span class="token operator">: </span><a href="-encoder/index.html">Encoder</a></span></span><span class="token punctuation">)</span> : <a href="-encoder/index.html">Encoder</a></div><div class="brief "><p class="paragraph">An abstraction of multiple encoders into one.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="635385040%2FClasslikes%2F769193423" anchor-label="CTREMotorControllerEncoderAdapter" id="635385040%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-c-t-r-e-motor-controller-encoder-adapter/index.html"><span>CTREMotor</span><wbr></wbr><span>Controller</span><wbr></wbr><span>Encoder</span><wbr></wbr><span><span>Adapter</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-t-r-e-motor-controller-encoder-adapter/index.html"><span>CTREMotor</span><wbr></wbr><span>Controller</span><wbr></wbr><span>Encoder</span><wbr></wbr><span><span>Adapter</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="635385040%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-c-t-r-e-motor-controller-encoder-adapter/index.html">CTREMotorControllerEncoderAdapter</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;ctreMotorController<span class="token operator">: </span><span data-unresolved-link="com.ctre.phoenix.motorcontrol/IMotorController///PointingToDeclaration/">IMotorController</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;pidIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;anglePerPulse<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span> : <a href="-encoder/index.html">Encoder</a>, <span data-unresolved-link="com.ctre.phoenix.motorcontrol/IMotorController///PointingToDeclaration/">IMotorController</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">An adapter from the CTRE Encoder class to the ChargerLib Encoder interface.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-c-t-r-e-motor-controller-encoder-adapter/index.html">CTREMotorControllerEncoderAdapter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">ctreMotorController<span class="token operator">: </span><span data-unresolved-link="com.ctre.phoenix.motorcontrol/IMotorController///PointingToDeclaration/">IMotorController</span><span class="token punctuation">, </span></span><span class="parameter ">pidIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">anglePerPulse<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span> : <a href="-encoder/index.html">Encoder</a>, <span data-unresolved-link="com.ctre.phoenix.motorcontrol/IMotorController///PointingToDeclaration/">IMotorController</span></div><div class="brief "><p class="paragraph">An adapter from the CTRE Encoder class to the ChargerLib Encoder interface.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-2055795980%2FClasslikes%2F769193423" anchor-label="Encoder" id="-2055795980%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-encoder/index.html"><span><span>Encoder</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-encoder/index.html"><span><span>Encoder</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2055795980%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-encoder/index.html">Encoder</a> : <a href="-position-encoder/index.html">PositionEncoder</a>, <a href="-velocity-encoder/index.html">VelocityEncoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Represents a generic encoder.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-encoder/index.html">Encoder</a> : <a href="-position-encoder/index.html">PositionEncoder</a>, <a href="-velocity-encoder/index.html">VelocityEncoder</a></div><div class="brief "><p class="paragraph">Represents a generic encoder.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="128841021%2FClasslikes%2F769193423" anchor-label="PositionEncoder" id="128841021%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-position-encoder/index.html"><span>Position</span><wbr></wbr><span><span>Encoder</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-position-encoder/index.html"><span>Position</span><wbr></wbr><span><span>Encoder</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="128841021%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-position-encoder/index.html">PositionEncoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Represents an encoder that can measure the current angular position of a motor.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-position-encoder/index.html">PositionEncoder</a></div><div class="brief "><p class="paragraph">Represents an encoder that can measure the current angular position of a motor.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="1977008179%2FClasslikes%2F769193423" anchor-label="ResettableEncoder" id="1977008179%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-resettable-encoder/index.html"><span>Resettable</span><wbr></wbr><span><span>Encoder</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-resettable-encoder/index.html"><span>Resettable</span><wbr></wbr><span><span>Encoder</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1977008179%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-resettable-encoder/index.html">ResettableEncoder</a> : <a href="-zeroable-encoder/index.html">ZeroableEncoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">An encoder that allows resetting zero values. Particularly useful for absolute encoders or for relative encoders after homing.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-resettable-encoder/index.html">ResettableEncoder</a> : <a href="-zeroable-encoder/index.html">ZeroableEncoder</a></div><div class="brief "><p class="paragraph">An encoder that allows resetting zero values. Particularly useful for absolute encoders or for relative encoders after homing.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-379066246%2FClasslikes%2F769193423" anchor-label="RevEncoderAdapter" id="-379066246%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-rev-encoder-adapter/index.html"><span>Rev</span><wbr></wbr><span>Encoder</span><wbr></wbr><span><span>Adapter</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-rev-encoder-adapter/index.html"><span>Rev</span><wbr></wbr><span>Encoder</span><wbr></wbr><span><span>Adapter</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-379066246%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-rev-encoder-adapter/index.html">RevEncoderAdapter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">revEncoder<span class="token operator">: </span><span data-unresolved-link="com.revrobotics/RelativeEncoder///PointingToDeclaration/">RelativeEncoder</span></span></span><span class="token punctuation">)</span> : <a href="-encoder/index.html">Encoder</a>, <span data-unresolved-link="com.revrobotics/RelativeEncoder///PointingToDeclaration/">RelativeEncoder</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">An adapter from the REV RelativeEncoder class to the ChargerLib Encoder interface.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-rev-encoder-adapter/index.html">RevEncoderAdapter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">revEncoder<span class="token operator">: </span><span data-unresolved-link="com.revrobotics/RelativeEncoder///PointingToDeclaration/">RelativeEncoder</span></span></span><span class="token punctuation">)</span> : <a href="-encoder/index.html">Encoder</a>, <span data-unresolved-link="com.revrobotics/RelativeEncoder///PointingToDeclaration/">RelativeEncoder</span></div><div class="brief "><p class="paragraph">An adapter from the REV RelativeEncoder class to the ChargerLib Encoder interface.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-424294159%2FClasslikes%2F769193423" anchor-label="VelocityEncoder" id="-424294159%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-velocity-encoder/index.html"><span>Velocity</span><wbr></wbr><span><span>Encoder</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-velocity-encoder/index.html"><span>Velocity</span><wbr></wbr><span><span>Encoder</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-424294159%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-velocity-encoder/index.html">VelocityEncoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Represents an encoder that can measure the current angular velocity of a motor.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-velocity-encoder/index.html">VelocityEncoder</a></div><div class="brief "><p class="paragraph">Represents an encoder that can measure the current angular velocity of a motor.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-378927734%2FClasslikes%2F769193423" anchor-label="WPILibEncoderAdapter" id="-378927734%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-w-p-i-lib-encoder-adapter/index.html"><span>WPILib</span><wbr></wbr><span>Encoder</span><wbr></wbr><span><span>Adapter</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-w-p-i-lib-encoder-adapter/index.html"><span>WPILib</span><wbr></wbr><span>Encoder</span><wbr></wbr><span><span>Adapter</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-378927734%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-w-p-i-lib-encoder-adapter/index.html">WPILibEncoderAdapter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">wpiLibEncoder<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj/Encoder///PointingToDeclaration/">Encoder</span><span class="token punctuation">, </span></span><span class="parameter ">anglePerPulse<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span> : <a href="-encoder/index.html">Encoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">An adapter from the WPILib Encoder class to the ChargerLib Encoder interface.</p></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-w-p-i-lib-encoder-adapter/index.html">WPILibEncoderAdapter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">wpiLibEncoder<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj/Encoder///PointingToDeclaration/">Encoder</span><span class="token punctuation">, </span></span><span class="parameter ">anglePerPulse<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span> : <a href="-encoder/index.html">Encoder</a></div><div class="brief "><p class="paragraph">An adapter from the WPILib Encoder class to the ChargerLib Encoder interface.</p></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="349747222%2FClasslikes%2F769193423" anchor-label="ZeroableEncoder" id="349747222%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-zeroable-encoder/index.html"><span>Zeroable</span><wbr></wbr><span><span>Encoder</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-zeroable-encoder/index.html"><span>Zeroable</span><wbr></wbr><span><span>Encoder</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="349747222%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-zeroable-encoder/index.html">ZeroableEncoder</a> : <a href="-encoder/index.html">Encoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-zeroable-encoder/index.html">ZeroableEncoder</a> : <a href="-encoder/index.html">Encoder</a></div></div></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 <a data-name="-1010387406%2FClasslikes%2F769193423" anchor-label="ZeroableEncoderOffsetManager" id="-1010387406%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-zeroable-encoder-offset-manager/index.html"><span>Zeroable</span><wbr></wbr><span>Encoder</span><wbr></wbr><span>Offset</span><wbr></wbr><span><span>Manager</span></span></a></div>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-zeroable-encoder-offset-manager/index.html"><span>Zeroable</span><wbr></wbr><span>Encoder</span><wbr></wbr><span>Offset</span><wbr></wbr><span><span>Manager</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1010387406%2FClasslikes%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-zeroable-encoder-offset-manager/index.html">ZeroableEncoderOffsetManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zeroableEncoder<span class="token operator">: </span><a href="-zeroable-encoder/index.html">ZeroableEncoder</a></span></span><span class="token punctuation">)</span> : <a href="-resettable-encoder/index.html">ResettableEncoder</a>, <a href="-zeroable-encoder/index.html">ZeroableEncoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-zeroable-encoder-offset-manager/index.html">ZeroableEncoderOffsetManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zeroableEncoder<span class="token operator">: </span><a href="-zeroable-encoder/index.html">ZeroableEncoder</a></span></span><span class="token punctuation">)</span> : <a href="-resettable-encoder/index.html">ResettableEncoder</a>, <a href="-zeroable-encoder/index.html">ZeroableEncoder</a></div></div></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <h2 class="">Functions</h2>
-      <div class="table" data-togglable="Functions"><a data-name="654550484%2FFunctions%2F769193423" anchor-label="asChargerEncoder" id="654550484%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
-        <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="as-charger-encoder.html"><span>as</span><wbr></wbr><span>Charger</span><wbr></wbr><span><span>Encoder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="654550484%2FFunctions%2F769193423"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="com.revrobotics/RelativeEncoder///PointingToDeclaration/">RelativeEncoder</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rev-encoder-adapter/index.html">RevEncoderAdapter</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.wpilibj/Encoder///PointingToDeclaration/">Encoder</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">anglePerPulse<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-w-p-i-lib-encoder-adapter/index.html">WPILibEncoderAdapter</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.wpilibj/Encoder///PointingToDeclaration/">Encoder</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pulsesPerRotation<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-w-p-i-lib-encoder-adapter/index.html">WPILibEncoderAdapter</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="com.ctre.phoenix.motorcontrol/IMotorController///PointingToDeclaration/">IMotorController</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pidIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">anglePerPulse<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-c-t-r-e-motor-controller-encoder-adapter/index.html">CTREMotorControllerEncoderAdapter</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="com.ctre.phoenix.motorcontrol/IMotorController///PointingToDeclaration/">IMotorController</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pidIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">pulsesPerRotation<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-c-t-r-e-motor-controller-encoder-adapter/index.html">CTREMotorControllerEncoderAdapter</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="186057874%2FFunctions%2F769193423" anchor-label="asChargerEncoder" id="186057874%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="as-charger-encoder.html"><span>as</span><wbr></wbr><span>Charger</span><wbr></wbr><span><span>Encoder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="186057874%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="com.revrobotics/RelativeEncoder///PointingToDeclaration/">RelativeEncoder</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-rev-encoder-adapter/index.html">RevEncoderAdapter</a></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.wpilibj/Encoder///PointingToDeclaration/">Encoder</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">anglePerPulse<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-w-p-i-lib-encoder-adapter/index.html">WPILibEncoderAdapter</a></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.wpilibj/Encoder///PointingToDeclaration/">Encoder</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pulsesPerRotation<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-w-p-i-lib-encoder-adapter/index.html">WPILibEncoderAdapter</a></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="com.ctre.phoenix.motorcontrol/IMotorController///PointingToDeclaration/">IMotorController</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pidIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">anglePerPulse<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-c-t-r-e-motor-controller-encoder-adapter/index.html">CTREMotorControllerEncoderAdapter</a></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="com.ctre.phoenix.motorcontrol/IMotorController///PointingToDeclaration/">IMotorController</span><span class="token punctuation">.</span><a href="as-charger-encoder.html"><span class="token function">asChargerEncoder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pidIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">pulsesPerRotation<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-c-t-r-e-motor-controller-encoder-adapter/index.html">CTREMotorControllerEncoderAdapter</a></div></div></div>
+                </div>
               </div>
             </div>
           </div>
@@ -237,10 +253,11 @@ if(savedDarkMode === true){
     </div>
   </div>
 </div>
-        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
                 class="pull-right"><span>Generated by </span><a
                 href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-        </div>
+      </div>
     </div>
 </div>
 </body>
