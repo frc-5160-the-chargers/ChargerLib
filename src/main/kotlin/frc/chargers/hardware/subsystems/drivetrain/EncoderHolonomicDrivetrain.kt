@@ -4,6 +4,8 @@ package frc.chargers.hardware.subsystems.drivetrain
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.Degrees
 import com.batterystaple.kmeasure.units.degrees
+import com.batterystaple.kmeasure.units.kilo
+import com.batterystaple.kmeasure.units.*
 import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.motorcontrol.SwerveModule
@@ -83,6 +85,18 @@ public class EncoderHolonomicDrivetrain(private val topLeft: SwerveModule,
         var topLeftPower: Double = sqrt(B*B+D*D)
         var bottomLeftPower: Double = sqrt(A*A+D*D)
         var bottomRightPower: Double = sqrt(A*A+C*C)
+
+        // !! asserts that it will never be null(it can't be)
+        // the following "normalizes" the wheel speedsrfgb
+        var max: Double = listOf(topRightPower,topLeftPower,bottomLeftPower,bottomRightPower).maxOrNull()!!
+
+        if (max > 1){
+            topRightPower /= max
+            topLeftPower /= max
+            bottomRightPower /= max
+            bottomLeftPower /= max
+        }
+
 
         // note: radians doesn't work. rohen pls fix
         var topRightAngle: Angle = atan(B/C)*(180/PI).degrees

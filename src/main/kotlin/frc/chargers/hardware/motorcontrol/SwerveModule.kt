@@ -7,6 +7,8 @@ import frc.chargers.hardware.sensors.encoders.Encoder
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import com.batterystaple.kmeasure.units.degrees
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.controls.pid.FeedForward
 
@@ -22,12 +24,14 @@ public class SwerveModule(public val turnMotor: EncoderMotorController,
                           public val turnEncoder: Encoder,
                           public val turningPIDConstants: PIDConstants,
                           public val turnFeedForward: FeedForward = FeedForward{_,_ -> 0.0},
+                          private val wheelDiameter: Length,
                           public val invertTurnMotors: Boolean = false,
                           public val invertDriveMotors: Boolean = false,
                           vararg driveMotors: EncoderMotorController){
     public var multipliers: MutableList<Double> = mutableListOf()
 
     public var driveEncoder: Encoder = AverageEncoder(*driveMotors)
+
 
 
     // sets the multipliers of each motor inputted into the swerve module.
@@ -42,7 +46,7 @@ public class SwerveModule(public val turnMotor: EncoderMotorController,
     public val driveMotorList: List<EncoderMotorController> = driveMotors.toList()
 
     // note: I don't use unitSuperPID Controller cuz I don't know how to make it output a double.
-    public val turnPID: SuperPIDController= SuperPIDController(
+    public val turnPID: SuperPIDController = SuperPIDController(
         pidConstants = turningPIDConstants,
         getInput = {turnEncoder.angularPosition.inUnit(Degrees)},
         target = 0.0
@@ -51,6 +55,13 @@ public class SwerveModule(public val turnMotor: EncoderMotorController,
     init{
         turnPID.basePID.enableContinuousInput(-180.0,180.0)
     }
+
+    // gets the module state, using WPILib.
+    // inUnit converts the angles and velocities into meters per second and degrees.
+    // rotation2d is just used to format everything.
+    public var moduleState: SwerveModuleState = SwerveModuleState()
+        get() = SwerveModuleState(driveEncoder.angularVelocity.inUnit(Degrees/seconds) * wheelDiameter.inUnit(meters)/2,
+            Rotation2d.fromDegrees(turnEncoder.angularPosition.inUnit(Degrees)))
 
     // note: setDirectionalPower should be called repeatedly
     // the superPID controller is called repeatedly here
