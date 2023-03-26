@@ -40,7 +40,7 @@ public open class ChargerTalonSRX(
         configuration.expiration?.let { expiration = it.inUnit(seconds) }
         configuration.safetyEnabled?.let(::setSafetyEnabled)
 
-        configure(configuration, encoderStep = (1.0 / TALON_SRX_ENCODER_UNITS_PER_ROTATION).ofUnit(Rotations))
+        configure(configuration, encoderStep = (1.0 / TALON_SRX_ENCODER_UNITS_PER_ROTATION).ofUnit(rotations))
     }
 }
 

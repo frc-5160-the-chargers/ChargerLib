@@ -50,7 +50,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : WP
         configuration.expiration?.let { this.expiration = it.inUnit(seconds) }
         configuration.safetyEnabled?.let(::setSafetyEnabled)
 
-        configure(configuration, encoderStep = (1.0 / TALON_FX_ENCODER_UNITS_PER_ROTATION).ofUnit(Rotations))
+        configure(configuration, encoderStep = (1.0 / TALON_FX_ENCODER_UNITS_PER_ROTATION).ofUnit(rotations))
 
         configAllSettings(configuration.toCTRETalonFXConfiguration())
     }
@@ -118,7 +118,7 @@ public data class TalonFXConfiguration(
                 statorCurrentLimit?.let { ctreConfiguration.statorCurrLimit = it }
                 motorCommutation?.let { ctreConfiguration.motorCommutation = it }
                 absoluteSensorRange?.let { ctreConfiguration.absoluteSensorRange = it }
-                integratedSensorOffset?.let { ctreConfiguration.integratedSensorOffsetDegrees = it.inUnit(Degrees) }
+                integratedSensorOffset?.let { ctreConfiguration.integratedSensorOffsetDegrees = it.inUnit(degrees) }
                 sensorInitializationStrategy?.let { ctreConfiguration.initializationStrategy = sensorInitializationStrategy }
             }
 }

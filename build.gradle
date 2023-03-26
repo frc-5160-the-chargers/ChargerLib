@@ -27,7 +27,7 @@ kotlin {
 dependencies {
     api(wpi.java.deps.wpilib())
     api(wpi.java.vendor.java())
-    api('io.github.battery-staple:KMeasure:1.1.0')
+    api('io.github.battery-staple:KMeasure:1.2.0')
 
     testImplementation('junit:junit:4.13.2')
 }

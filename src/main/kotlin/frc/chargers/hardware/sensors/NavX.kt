@@ -1,7 +1,7 @@
 package frc.chargers.hardware.sensors
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.Degrees
+import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import com.kauailabs.navx.frc.AHRS
@@ -19,7 +19,7 @@ public class NavX(public val ahrs: AHRS = AHRS()) : HeadingProvider {
     }
 
     override val heading: Angle
-        get() = -ahrs.fusedHeading.toDouble().ofUnit(Degrees) // Negative sign because the navX reports clockwise as positive
+        get() = -ahrs.fusedHeading.toDouble().ofUnit(degrees) // Negative sign because the navX reports clockwise as positive
                                                               // whereas we want counterclockwise to be positive
 
     public val altitude: Distance?
@@ -36,19 +36,19 @@ public class NavX(public val ahrs: AHRS = AHRS()) : HeadingProvider {
 
     public inner class Gyroscope internal constructor(): ThreeAxisGyroscope, HeadingProvider {
         public override val yaw: Angle
-            get() = ahrs.yaw.toDouble().ofUnit(Degrees)
+            get() = ahrs.yaw.toDouble().ofUnit(degrees)
         override val pitch: Angle
-            get() = ahrs.pitch.toDouble().ofUnit(Degrees)
+            get() = ahrs.pitch.toDouble().ofUnit(degrees)
         override val roll: Angle
-            get() = ahrs.roll.toDouble().ofUnit(Degrees)
+            get() = ahrs.roll.toDouble().ofUnit(degrees)
         override val heading: Angle
-            get() = ahrs.angle.ofUnit(Degrees) // Negative sign because the navX reports clockwise as positive
+            get() = ahrs.angle.ofUnit(degrees) // Negative sign because the navX reports clockwise as positive
                                                // whereas we want counterclockwise to be positive
     }
 
     public inner class Compass internal constructor(): HeadingProvider {
         public override val heading: Angle
-            get() = -ahrs.compassHeading.toDouble().ofUnit(Degrees) // Negative sign because the navX reports clockwise as positive
+            get() = -ahrs.compassHeading.toDouble().ofUnit(degrees) // Negative sign because the navX reports clockwise as positive
                                                                     // whereas we want counterclockwise to be positive
     }
 
