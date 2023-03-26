@@ -50,7 +50,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : WP
         configuration.expiration?.let { this.expiration = it.inUnit(seconds) }
         configuration.safetyEnabled?.let(::setSafetyEnabled)
 
-        configure(configuration, encoderStep = (1.0 / TALON_FX_ENCODER_UNITS_PER_ROTATION).ofUnit(Rotations))
+        configure(configuration, encoderStep = (1.0 / TALON_FX_ENCODER_UNITS_PER_ROTATION).ofUnit(rotations))
 
         configAllSettings(configuration.toCTRETalonFXConfiguration())
     }
@@ -85,14 +85,14 @@ public data class TalonFXConfiguration(
     var absoluteSensorRange: AbsoluteSensorRange? = null,
     var integratedSensorOffset: Angle? = null,
     var sensorInitializationStrategy: SensorInitializationStrategy? = null,
-    override var openLoopRampSecondsFromNeutralToFull: Double? = null,
-    override var closedLoopRampSecondsFromNeutralToFull: Double? = null,
+    override var openLoopRampTimeFromNeutralToFull: Time? = null,
+    override var closedLoopRampTimeFromNeutralToFull: Time? = null,
     override var peakOutputForwardPercent: Double? = null,
     override var peakOutputReversePercent: Double? = null,
     override var nominalOutputForwardPercent: Double? = null,
     override var nominalOutputReversePercent: Double? = null,
     override var neutralDeadbandPercent: Double? = null,
-    override var voltageCompensationSaturationVoltage: Double? = null,
+    override var voltageCompensationSaturationVoltage: Voltage? = null,
     override var voltageMeasurementFilterSamples: Int? = null,
     override var voltageCompensationEnabled: Boolean? = null,
     override val selectedFeedbackSensors: MutableMap<PIDIndex, FeedbackDevice> = mutableMapOf(),
@@ -118,7 +118,7 @@ public data class TalonFXConfiguration(
                 statorCurrentLimit?.let { ctreConfiguration.statorCurrLimit = it }
                 motorCommutation?.let { ctreConfiguration.motorCommutation = it }
                 absoluteSensorRange?.let { ctreConfiguration.absoluteSensorRange = it }
-                integratedSensorOffset?.let { ctreConfiguration.integratedSensorOffsetDegrees = it.inUnit(Degrees) }
+                integratedSensorOffset?.let { ctreConfiguration.integratedSensorOffsetDegrees = it.inUnit(degrees) }
                 sensorInitializationStrategy?.let { ctreConfiguration.initializationStrategy = sensorInitializationStrategy }
             }
 }

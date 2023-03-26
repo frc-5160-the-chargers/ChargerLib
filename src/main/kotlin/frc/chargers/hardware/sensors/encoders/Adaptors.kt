@@ -24,7 +24,7 @@ public class WPILibEncoderAdapter(private val wpiLibEncoder: WpilibEncoder, priv
     public constructor(
         wpiLibEncoder: WpilibEncoder,
         pulsesPerRotation: Int /* Can't use Double here or both constructors will have the same JVM signature*/
-    ) : this(wpiLibEncoder, (1/pulsesPerRotation.toDouble()).ofUnit(Rotations))
+    ) : this(wpiLibEncoder, (1/pulsesPerRotation.toDouble()).ofUnit(rotations))
 
     override val angularPosition: Angle
         get() = wpiLibEncoder.get() * anglePerPulse
@@ -39,10 +39,10 @@ public class WPILibEncoderAdapter(private val wpiLibEncoder: WpilibEncoder, priv
  */
 public class RevEncoderAdapter(private val revEncoder: RevEncoder) : Encoder, RevEncoder by revEncoder {
     override val angularPosition: Angle
-        get() = revEncoder.position.ofUnit(Rotations)
+        get() = revEncoder.position.ofUnit(rotations)
 
     override val angularVelocity: AngularVelocity
-        get() = revEncoder.velocity.ofUnit(Rotations/Minutes)
+        get() = revEncoder.velocity.ofUnit(rotations/minutes)
 }
 
 /**
@@ -57,7 +57,7 @@ public class CTREMotorControllerEncoderAdapter(
         ctreMotorController: CTREEncoder,
         pidIndex: Int,
         pulsesPerRotation: Int /* Can't use Double here or both constructors will have the same JVM signature */
-    ) : this(ctreMotorController, pidIndex, (1/pulsesPerRotation.toDouble()).ofUnit(Rotations))
+    ) : this(ctreMotorController, pidIndex, (1/pulsesPerRotation.toDouble()).ofUnit(rotations))
 
     override var angularPosition: Angle
         get() = ctreMotorController.getSelectedSensorPosition(pidIndex) * anglePerPulse

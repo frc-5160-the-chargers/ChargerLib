@@ -1,7 +1,6 @@
 package frc.chargers.hardware.sensors
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.Degrees
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
@@ -20,7 +19,7 @@ public class NavX(public val ahrs: AHRS = AHRS()) : HeadingProvider {
     }
 
     override val heading: Angle
-        get() = -ahrs.fusedHeading.toDouble().ofUnit(Degrees) // Negative sign because the navX reports clockwise as positive
+        get() = -ahrs.fusedHeading.toDouble().ofUnit(degrees) // Negative sign because the navX reports clockwise as positive
                                                               // whereas we want counterclockwise to be positive
 
     public val altitude: Distance?
@@ -36,41 +35,20 @@ public class NavX(public val ahrs: AHRS = AHRS()) : HeadingProvider {
     public val accelerometer: Accelerometer = Accelerometer()
 
     public inner class Gyroscope internal constructor(): ThreeAxisGyroscope, HeadingProvider {
-        // used to "calibrate" the values to zero
-        public var yawCalibration: Angle = 0.0.degrees
-        public var pitchCalibration: Angle = 0.0.degrees
-        public var rollCalibration: Angle = 0.0.degrees
-        public var headingCalibration: Angle = 0.0.degrees
-        
-        public fun calibrateYaw(target: Angle = 0.0.degrees){
-            yawCalibration = yaw - target
-        }
-        
-        public fun calibratePitch(target: Angle = 0.0.degrees){
-            pitchCalibration = pitch - target
-        }
-        
-        public fun calibrateRoll(target: Angle = 0.0.degrees){
-            rollCalibration = roll - target
-        }
-        
-        public fun calibrateHeading(target: Angle = 0.0.degrees){
-            headingCalibration = heading - target
-        }
-    
         public override val yaw: Angle
-            get() = ahrs.yaw.toDouble().ofUnit(Degrees) - yawCalibration
+            get() = ahrs.yaw.toDouble().ofUnit(degrees)
         override val pitch: Angle
-            get() = ahrs.pitch.toDouble().ofUnit(Degrees) - pitchCalibration
+            get() = ahrs.pitch.toDouble().ofUnit(degrees)
         override val roll: Angle
-            get() = ahrs.roll.toDouble().ofUnit(Degrees) - rollCalibration
+            get() = ahrs.roll.toDouble().ofUnit(degrees)
         override val heading: Angle
-            get() = ahrs.angle.ofUnit(Degrees) - headingCalibration
+            get() = ahrs.angle.ofUnit(degrees) // Negative sign because the navX reports clockwise as positive
+                                               // whereas we want counterclockwise to be positive
     }
 
     public inner class Compass internal constructor(): HeadingProvider {
         public override val heading: Angle
-            get() = -ahrs.compassHeading.toDouble().ofUnit(Degrees) // Negative sign because the navX reports clockwise as positive
+            get() = -ahrs.compassHeading.toDouble().ofUnit(degrees) // Negative sign because the navX reports clockwise as positive
                                                                     // whereas we want counterclockwise to be positive
     }
 
