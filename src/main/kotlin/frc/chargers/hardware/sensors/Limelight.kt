@@ -14,6 +14,7 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.math.tan
+import kotlin.math.abs
 
 // a wrapper for the limelight; makes it easier to use
 public class Limelight(public val noiseFilterThreshold: Double = 0.04,
@@ -40,8 +41,8 @@ public class Limelight(public val noiseFilterThreshold: Double = 0.04,
         get(){
             var value: Double = nt.getEntry("tx").getDouble(0.0)
 
-            if (value - previousTX < noiseFilterThreshold){
-                return ((value + previousTX)/2).degrees
+            if (abs(value - previousTX) < noiseFilterThreshold){
+                return previousTX.degrees
             }else{
                 previousTX = value
                 return value.degrees
@@ -51,7 +52,7 @@ public class Limelight(public val noiseFilterThreshold: Double = 0.04,
         get(){
             var value: Double = nt.getEntry("ty").getDouble(0.0)
 
-            if (value - previousTY < noiseFilterThreshold){
+            if (abs(value - previousTY) < noiseFilterThreshold){
                 return ((value + previousTY)/2).degrees
             }else{
                 previousTY = value
@@ -62,7 +63,7 @@ public class Limelight(public val noiseFilterThreshold: Double = 0.04,
         get(){
             var value: Double = nt.getEntry("ta").getDouble(0.0)
 
-            if (value - previousTA < noiseFilterThreshold){
+            if (abs(value - previousTA) < noiseFilterThreshold){
                 return (value + previousTA)/2
             }else{
                 previousTA = value
