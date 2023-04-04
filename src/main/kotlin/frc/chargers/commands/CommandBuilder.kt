@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
+import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.PrintCommand
 
 /**
  * The entry point for the CommandBuilder DSL (Domain Specific Language).
@@ -21,17 +23,80 @@ public inline fun buildCommand(block: CommandBuilder.() -> Unit): Command =
 public annotation class CommandBuilderMarker
 
 @CommandBuilderMarker
-public class CommandBuilder {
+public class CommandBuilder{
     @PublishedApi
     internal var commands: LinkedHashSet<Command> = linkedSetOf() // LinkedHashSet keeps commands in order, but also ensures they're not added multiple times
 
     /**
      * Adds a single command to be run until its completion.
+     * done like: +HoldCommand(arm)
+     * Note: unaryPlus is interpreted as a plus prefix in native kotlin
      */
-    public fun <C : Command> runUntilFinish(command: C): C {
-        commands.add(command)
-        return command
+    public operator fun Command.unaryPlus(): Command{
+        commands.add(this)
+        return this
     }
+    
+    /**
+     * Returns a command that will run once, stopping if the timeInterval is reached.
+     *
+     * @param command the command to run
+     * @param timeInterval the maximum allowed runtime of the command
+     * Called with +Command.runFor(5.seconds)
+     */
+    public fun Command.runFor(timeInterval: Time): ParallelRaceGroup {
+        return this
+            .withTimeout(timeInterval.inUnit(seconds))
+    }
+    
+    /**
+     * Returns a command that will keep on looping, stopping if the timeInterval is reached.
+     *
+     * @param command the command to run
+     * @param timeInterval the maximum allowed runtime of the command
+     * Called with +Command.loopFor(5.seconds)
+     */
+    public fun Command.loopFor(timeInterval: Time): ParallelRaceGroup {
+        return this.repeatedly()
+            .withTimeout(timeInterval.inUnit(seconds))
+    }
+    
+    /**
+     * Returns a command that will run once *until* [condition] is met.
+     *
+     * @param condition the condition to be met
+     * @param command the command to run until [condition] is met
+     * Called with +Command.runUntil({boolean})
+     */
+    public fun Command.runUntil(condition: CodeBlockContext.() -> Boolean): ParallelRaceGroup =
+        this.until { CodeBlockContext.condition() }
+    
+    /**
+     * Returns a command that will keep on running, stopping if the timeInterval is reached.
+     *
+     * @param command the command to run
+     * @param timeInterval the maximum allowed runtime of the command
+     * Called with +Command.loopUntil({boolean})
+     */
+    public fun Command.loopUntil(condition: CodeBlockContext.() -> Boolean): ParallelRaceGroup =
+        this.repeatedly().until{CodeBlockContext.condition()}
+    
+    /**
+     * Returns a command that will keep on running
+     *
+     * @param command the command to run
+     * @param timeInterval the maximum allowed runtime of the command
+     * Called with +Command.loopForever()
+     */
+    public fun Command.loopForever(): Command = this.repeatedly()
+    
+    
+    
+    
+    // from here on out, all of the function command adders are here.
+    // these will use function calls(subsystems or not), convert them into commands and schedule them.
+    
+    
 
     /**
      * Adds a command that will run once and then complete.
@@ -43,32 +108,14 @@ public class CommandBuilder {
         InstantCommand(*requirements) { CodeBlockContext.execute() }.also(commands::add)
 
     /**
-     * Adds an InstantCommand that will run once and then complete.
-     *
-     * @see runUntilFinish
-     */
-    public fun runOnce(command: InstantCommand): InstantCommand =
-        runUntilFinish(command)
-
-    /**
-     * Adds a command that will run *until* [condition] is met.
-     *
-     * @param condition the condition to be met
-     * @param command the command to run until [condition] is met
-     */
-    public fun runUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
-        command.until { CodeBlockContext.condition() }
-            .also(commands::add)
-
-    /**
      * Adds a command that will run *until* [condition] is met.
      *
      * @param condition the condition to be met
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run until [condition] is met
      */
-    public inline fun runUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() })
+    public inline fun loopUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+        RunCommand(*requirements) { CodeBlockContext.execute() }.runUntil(condition).also(commands::add)
 
     /**
      * Adds a command that will run *while* [condition] is true.
@@ -77,8 +124,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run
      */
-    public inline fun runWhile(crossinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, noinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runUntil({ !condition() }, *requirements, execute=execute)
+    public inline fun loopWhile(crossinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, noinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+        InstantCommand(*requirements){CodeBlockContext.execute()}.runUntil({ !condition() }).also(commands::add)
 
     /**
      * Adds several commands that will run at the same time, all stopping as soon as one finishes.
@@ -91,6 +138,19 @@ public class CommandBuilder {
         val commandsSet = commands.toMutableSet() + CommandBuilder().apply(block).commands
         this.commands.removeAll(commandsSet)
         return ParallelRaceGroup(*commandsSet.toTypedArray()).also(this.commands::add)
+    }
+
+    /**
+     * Adds several commands that will run at the same time, only finishing when the first command defined(the "deadline") completes.
+     * 
+     * @param commands commands to run in parallel
+     * @param block a builder allowing more parallel commands to be defined and added
+     * @see ParallelDeadlineGroup
+     */
+    public fun runParallelUntilFirstFinishes(vararg commands: Command, block: CommandBuilder.() -> Unit): ParallelDeadlineGroup{
+        val commandsSet = commands.toMutableSet() + CommandBuilder().apply(block).commands
+        this.commands.removeAll(commandsSet)
+        return ParallelDeadlineGroup(commandsSet.toTypedArray()[0], *commandsSet.toTypedArray().copyOfRange(1,commandsSet.size)).also(this.commands::add)
     }
 
     /**
@@ -116,17 +176,12 @@ public class CommandBuilder {
         return SequentialCommandGroup(*CommandBuilder().apply(block).commands.toTypedArray()).also(this.commands::add)
     }
 
-    /**
-     * Adds a command that will run until either the [timeInterval] expires or it completes on its own.
-     *
-     * @param command the command to run
-     * @param timeInterval the maximum allowed runtime of the command
-     */
-    public fun runFor(timeInterval: Time, command: Command): ParallelRaceGroup {
-        return command
-            .withTimeout(timeInterval.inUnit(seconds))
-            .also(commands::add)
-    }
+    
+    
+    
+ 
+    
+    
 
     /**
      * Adds a command that will run until either the [timeInterval] expires or it completes on its own.
@@ -135,8 +190,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public inline fun runFor(timeInterval: Time, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runFor(timeInterval, RunCommand(*requirements) { CodeBlockContext.execute() })
+    public inline fun loopFor(timeInterval: Time, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+        RunCommand(*requirements) { CodeBlockContext.execute() }.runFor(timeInterval).also(commands::add)
 
     /**
      * Adds a command to be run continuously.
@@ -144,7 +199,7 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public fun runForever(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): RunCommand =
+    public fun loopForever(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): RunCommand =
             RunCommand(*requirements) { CodeBlockContext.execute() }
                 .also(commands::add)
 
@@ -153,24 +208,25 @@ public class CommandBuilder {
      *
      * Useful if a delay is needed between two commands in a [SequentialCommandGroup].
      * Note that running this in parallel with other commands is unlikely to be useful.
+     * Note 2: Now changed to WPILib's WaitCommand
      */
-    public fun waitFor(timeInterval: Time): ParallelRaceGroup = runFor(timeInterval) {}
+    public fun waitFor(timeInterval: Time): Command = WaitCommand(timeInterval.inUnit(seconds)).also(commands::add)
 
     /**
      * Adds a command that does nothing until a [condition] is met, then completes.
      *
      * Useful if some condition must be met before proceeding to the next command in a [SequentialCommandGroup].
      * Note that running this in parallel with other commands is unlikely to be useful.
+     * Note 2: Now changed to WPILib's WaitUntilCommand
      */
-    public fun waitUntil(condition: CodeBlockContext.() -> Boolean): ParallelRaceGroup = runUntil(condition) {}
+    public fun waitUntil(condition: CodeBlockContext.() -> Boolean): Command = loopUntil(condition){}
 
     /**
-     * Adds a command that prints a message.
+     * Adds a command that prints a message. Now changed to WPILib's printcommand
      *
      * @param message a function that generates the message to print
      */
-    public fun printToConsole(message: () -> Any?): Command =
-        InstantCommand { println(message()) }.also(commands::add)
+    public fun printToConsole(message: String): Command = PrintCommand(message).also(commands::add)
 
     /**
      * Adds a command that gets a property when it executes; this is useful for
@@ -215,6 +271,7 @@ public class CommandBuilder {
 
 /**
  * Adds various utility properties and functions to the local context.
+ * Note: TimeContext might not be nessecary due to WPILib's build in time commands, but
  */
 @CommandBuilderMarker
 public interface TimeContext {

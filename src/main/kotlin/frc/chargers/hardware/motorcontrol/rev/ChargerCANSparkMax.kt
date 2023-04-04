@@ -1,9 +1,7 @@
 package frc.chargers.hardware.motorcontrol.rev
 
-import com.batterystaple.kmeasure.quantities.Time
-import com.batterystaple.kmeasure.quantities.inUnit
-import com.batterystaple.kmeasure.units.milli
-import com.batterystaple.kmeasure.units.seconds
+import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.*
 import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMax.SoftLimitDirection
@@ -61,7 +59,7 @@ public open class ChargerCANSparkMax(
     override fun configure(configuration: SparkMaxConfiguration) {
         configuration.idleMode?.let(::setIdleMode)
         configuration.inverted?.let(::setInverted)
-        configuration.voltageCompensationNominalVoltage?.let(::enableVoltageCompensation)
+        configuration.voltageCompensationNominalVoltage?.let { enableVoltageCompensation(it.inUnit(volts)) }
         configuration.canTimeout?.let { timeout -> setCANTimeout(timeout.inUnit(milli.seconds).roundToInt()) }
         configuration.closedLoopRampRate?.let(::setClosedLoopRampRate)
         configuration.openLoopRampRate?.let(::setOpenLoopRampRate)
@@ -69,21 +67,31 @@ public open class ChargerCANSparkMax(
         for ((frame, period) in configuration.periodicFramePeriods) {
             setPeriodicFramePeriod(frame, period.inUnit(milli.seconds).roundToInt())
         }
-        configuration.smartCurrentLimit?.let { (stallLimit, freeLimit, limitRPM) ->
+        configuration.smartCurrentLimit?.let { (stallLimit, freeLimit, limitSpeed) ->
             when {
-                limitRPM != null && freeLimit != null -> setSmartCurrentLimit(stallLimit, freeLimit, limitRPM)
-                freeLimit != null -> setSmartCurrentLimit(stallLimit, freeLimit)
-                else -> setSmartCurrentLimit(stallLimit)
+                limitSpeed != null && freeLimit != null ->
+                    setSmartCurrentLimit(
+                        stallLimit.inUnit(amps).roundToInt(),
+                        freeLimit.inUnit(amps).roundToInt(),
+                        limitSpeed.inUnit(rotations/minutes).roundToInt()
+                    )
+                freeLimit != null -> setSmartCurrentLimit(
+                    stallLimit.inUnit(amps).roundToInt(),
+                    freeLimit.inUnit(amps).roundToInt()
+                )
+                else -> setSmartCurrentLimit(
+                    stallLimit.inUnit(amps).roundToInt()
+                )
             }
         }
         configuration.secondaryCurrentLimit?.let { (limit, chopCycles) ->
             when {
-                chopCycles != null -> setSecondaryCurrentLimit(limit, chopCycles)
-                else -> setSecondaryCurrentLimit(limit)
+                chopCycles != null -> setSecondaryCurrentLimit(limit.inUnit(amperes), chopCycles)
+                else -> setSecondaryCurrentLimit(limit.inUnit(amperes))
             }
         }
         for ((limitDirection, limit) in configuration.softLimits) {
-            setSoftLimit(limitDirection, limit)
+            setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
         }
         burnFlash()
     }
@@ -99,7 +107,7 @@ public open class ChargerCANSparkMax(
 public data class SparkMaxConfiguration(
     var idleMode: IdleMode? = null,
     var inverted: Boolean? = null,
-    var voltageCompensationNominalVoltage: Double? = null,
+    var voltageCompensationNominalVoltage: Voltage? = null,
     var canTimeout: Time? = null,
     var closedLoopRampRate: Double? = null,
     var openLoopRampRate: Double? = null,
@@ -107,16 +115,14 @@ public data class SparkMaxConfiguration(
     val periodicFramePeriods: MutableMap<PeriodicFrame, Time> = mutableMapOf(),
     var smartCurrentLimit: SmartCurrentLimit? = null,
     var secondaryCurrentLimit: SecondaryCurrentLimit? = null,
-    val softLimits: MutableMap<SoftLimitDirection, Float> = mutableMapOf(),
+    val softLimits: MutableMap<SoftLimitDirection, Angle> = mutableMapOf(),
 ) : MotorConfiguration
 
 public data class AlternateEncoderConfiguration(val countsPerRev: Int, val encoderType: SparkMaxAlternateEncoder.Type? = null) {
     public companion object {
         public val SRXMagnetic1X: AlternateEncoderConfiguration = AlternateEncoderConfiguration(1024)
         public val SRXMagnetic4X: AlternateEncoderConfiguration = AlternateEncoderConfiguration(4096)
-        public val versaPlanetary1X: AlternateEncoderConfiguration = SRXMagnetic1X
-        public val versaPlanetary4X: AlternateEncoderConfiguration = SRXMagnetic4X
     }
 }
-public data class SmartCurrentLimit(val stallLimit: Int, val freeLimit: Int? = null, val limitRPM: Int? = null)
-public data class SecondaryCurrentLimit(val limit: Double, val chopCycles: Int? = null)
+public data class SmartCurrentLimit(val stallLimit: Current, val freeLimit: Current? = null, val limitSpeed: AngularVelocity? = null)
+public data class SecondaryCurrentLimit(val limit: Current, val chopCycles: Int? = null)

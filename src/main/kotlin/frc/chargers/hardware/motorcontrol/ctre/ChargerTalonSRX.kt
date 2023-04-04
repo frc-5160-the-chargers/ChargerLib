@@ -40,7 +40,7 @@ public open class ChargerTalonSRX(
         configuration.expiration?.let { expiration = it.inUnit(seconds) }
         configuration.safetyEnabled?.let(::setSafetyEnabled)
 
-        configure(configuration, encoderStep = (1.0 / TALON_SRX_ENCODER_UNITS_PER_ROTATION).ofUnit(Rotations))
+        configure(configuration, encoderStep = (1.0 / TALON_SRX_ENCODER_UNITS_PER_ROTATION).ofUnit(rotations))
     }
 }
 
@@ -55,14 +55,14 @@ public data class TalonSRXConfiguration(
     override var invertSensorPhase: Boolean? = null,
     var expiration: Time? = null,
     var safetyEnabled: Boolean? = null,
-    override var openLoopRampSecondsFromNeutralToFull: Double? = null,
-    override var closedLoopRampSecondsFromNeutralToFull: Double? = null,
+    override var openLoopRampTimeFromNeutralToFull: Time? = null,
+    override var closedLoopRampTimeFromNeutralToFull: Time? = null,
     override var peakOutputForwardPercent: Double? = null,
     override var peakOutputReversePercent: Double? = null,
     override var nominalOutputForwardPercent: Double? = null,
     override var nominalOutputReversePercent: Double? = null,
     override var neutralDeadbandPercent: Double? = null,
-    override var voltageCompensationSaturationVoltage: Double? = null,
+    override var voltageCompensationSaturationVoltage: Voltage? = null,
     override var voltageMeasurementFilterSamples: Int? = null,
     override var voltageCompensationEnabled: Boolean? = null,
     override val selectedFeedbackSensors: MutableMap<PIDIndex, FeedbackDevice> = mutableMapOf(),

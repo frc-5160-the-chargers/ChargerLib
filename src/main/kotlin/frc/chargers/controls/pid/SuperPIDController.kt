@@ -1,6 +1,8 @@
 package frc.chargers.controls.pid
 
 import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.ProfiledPIDController
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import frc.chargers.controls.Controller
 
 /**
@@ -31,6 +33,11 @@ public class SuperPIDController(
             setpoint = target
             setIntegratorRange(integralRange.start, integralRange.endInclusive)
         }
+
+
+
+
+
 
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]

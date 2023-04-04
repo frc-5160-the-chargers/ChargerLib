@@ -12,14 +12,14 @@ import com.ctre.phoenix.motorcontrol.IMotorControllerEnhanced as CTREMotorContro
 
 public interface CTREMotorControllerConfiguration : MotorConfiguration {
     public var invertSensorPhase: Boolean?
-    public var openLoopRampSecondsFromNeutralToFull: Double?
-    public var closedLoopRampSecondsFromNeutralToFull: Double?
+    public var openLoopRampTimeFromNeutralToFull: Time?
+    public var closedLoopRampTimeFromNeutralToFull: Time?
     public var peakOutputForwardPercent: Double?
     public var peakOutputReversePercent: Double?
     public var nominalOutputForwardPercent: Double?
     public var nominalOutputReversePercent: Double?
     public var neutralDeadbandPercent: Double?
-    public var voltageCompensationSaturationVoltage: Double?
+    public var voltageCompensationSaturationVoltage: Voltage?
     public var voltageMeasurementFilterSamples: Int?
     public var voltageCompensationEnabled: Boolean?
     public val selectedFeedbackSensors: MutableMap<PIDIndex, FeedbackDevice>
@@ -71,19 +71,19 @@ public var CTREMotorControllerConfiguration.selectedFeedbackSensor: FeedbackDevi
     set(value) { value?.let { selectedFeedbackSensors[0] = it } ?: selectedFeedbackSensors.remove(0) }
 
 internal fun CTREMotorController.configure(configuration: CTREMotorControllerConfiguration, encoderStep: Angle) {
-    configuration.openLoopRampSecondsFromNeutralToFull?.let { configOpenloopRamp(it, TIMEOUT_MILLIS) }
-    configuration.closedLoopRampSecondsFromNeutralToFull?.let { configClosedloopRamp(it, TIMEOUT_MILLIS) }
+    configuration.openLoopRampTimeFromNeutralToFull?.let { configOpenloopRamp(it.inUnit(seconds), TIMEOUT_MILLIS) }
+    configuration.closedLoopRampTimeFromNeutralToFull?.let { configClosedloopRamp(it.inUnit(seconds), TIMEOUT_MILLIS) }
     configuration.peakOutputForwardPercent?.let { configPeakOutputForward(it, TIMEOUT_MILLIS) }
     configuration.peakOutputReversePercent?.let { configPeakOutputReverse(it, TIMEOUT_MILLIS) }
     configuration.nominalOutputForwardPercent?.let { configNominalOutputForward(it, TIMEOUT_MILLIS) }
     configuration.nominalOutputReversePercent?.let { configNominalOutputReverse(it, TIMEOUT_MILLIS) }
     configuration.neutralDeadbandPercent?.let { configNeutralDeadband(it, TIMEOUT_MILLIS) }
-    configuration.voltageCompensationSaturationVoltage?.let { configVoltageCompSaturation(it,
-        TIMEOUT_MILLIS
-    ) }
-    configuration.voltageMeasurementFilterSamples?.let { configVoltageMeasurementFilter(it,
-        TIMEOUT_MILLIS
-    ) }
+    configuration.voltageCompensationSaturationVoltage?.let {
+        configVoltageCompSaturation(it.inUnit(volts), TIMEOUT_MILLIS)
+    }
+    configuration.voltageMeasurementFilterSamples?.let {
+        configVoltageMeasurementFilter(it, TIMEOUT_MILLIS)
+    }
     configuration.voltageCompensationEnabled?.let(::enableVoltageCompensation)
     configuration.selectedFeedbackSensors.forEach { (pidIndex, feedbackDevice) ->
         configSelectedFeedbackSensor(feedbackDevice, pidIndex, TIMEOUT_MILLIS)
