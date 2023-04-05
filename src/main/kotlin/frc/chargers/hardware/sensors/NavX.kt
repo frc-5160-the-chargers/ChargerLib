@@ -5,6 +5,7 @@ import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import com.kauailabs.navx.frc.AHRS
+import edu.wpi.first.math.geometry.Rotation2d
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.utils.math.units.g
@@ -57,7 +58,7 @@ public class NavX(public val ahrs: AHRS = AHRS()) : HeadingProvider {
             headingCalibration = heading - target
         }
 
-        public override val yaw: Angle
+        override val yaw: Angle
             get() = ahrs.yaw.toDouble().ofUnit(degrees) - yawCalibration
         override val pitch: Angle
             get() = ahrs.pitch.toDouble().ofUnit(degrees) - pitchCalibration
@@ -65,6 +66,9 @@ public class NavX(public val ahrs: AHRS = AHRS()) : HeadingProvider {
             get() = ahrs.roll.toDouble().ofUnit(degrees) - rollCalibration
         override val heading: Angle
             get() = ahrs.angle.ofUnit(degrees) - headingCalibration
+
+        override val rotation2d: Rotation2d
+            get() = ahrs.rotation2d
     }
 
     public inner class Compass internal constructor(): HeadingProvider {

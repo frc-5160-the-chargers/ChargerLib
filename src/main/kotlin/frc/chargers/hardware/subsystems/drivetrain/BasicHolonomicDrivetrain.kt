@@ -2,17 +2,25 @@ package frc.chargers.hardware.subsystems.drivetrain
 
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.Degrees
 import com.batterystaple.kmeasure.units.degrees
-import com.batterystaple.kmeasure.units.kilo
 import com.batterystaple.kmeasure.units.*
 import com.batterystaple.kmeasure.units.meters
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry
+import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.motorcontrol.SwerveModule
+import frc.chargers.hardware.sensors.Limelight
 import frc.chargers.hardware.sensors.NavX
 import frc.chargers.hardware.sensors.encoders.AverageEncoder
 import frc.chargers.hardware.sensors.encoders.Encoder
-import kotlin.math.*
+import kotlin.math.sin
+import kotlin.math.cos
+import kotlin.math.sqrt
+import kotlin.math.PI
 
 
 /*
@@ -24,15 +32,20 @@ Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name
 // They're in the same package and thus no import
 // note: trackwidth is horizontal and wheelBase is vertical
 // second note: DEFAULT_GEAR_RATIO is defined in encoderdifferentialdrivetrain.
-public class EncoderHolonomicDrivetrain(private val topLeft: SwerveModule,
-                                        private val topRight: SwerveModule,
-                                        private val bottomLeft: SwerveModule,
-                                        private val bottomRight: SwerveModule,
-                                        protected val gyro: NavX? = null,
-                                        protected val gearRatio: Double = DEFAULT_GEAR_RATIO,
-                                        protected val wheelDiameter: Length,
-                                        protected val trackWidth: Distance,
-                                        protected val wheelBase: Distance): SubsystemBase(){
+public open class BasicHolonomicDrivetrain(
+    private val topLeft: SwerveModule,
+    private val topRight: SwerveModule,
+    private val bottomLeft: SwerveModule,
+    private val bottomRight: SwerveModule,
+    private val gyro: NavX,
+    private val gearRatio: Double = DEFAULT_GEAR_RATIO,
+    private val wheelDiameter: Length,
+    private val trackWidth: Distance,
+    private val wheelBase: Distance
+): SubsystemBase(), HolonomicDrivetrain{
+    // do drivetrain.fieldRelativeDrive = false to turn this option off.
+    public var fieldRelativeDrive: Boolean = true
+
 
 
     public val overallEncoder: Encoder = AverageEncoder(
@@ -43,10 +56,11 @@ public class EncoderHolonomicDrivetrain(private val topLeft: SwerveModule,
 
 
     // all borrowed from EncoderDifferentialDriveTrain. see more information there.
-    // note: an encoderHolonomicDriveTrain CANNOT provide heading. it relies on the navX reading in order to be field-centric
+    // note: an EncoderHolonomicDriveTrain CANNOT provide heading, and thus is NOT a headingProvider.
+    // it relies on the navX reading in order to be field-centric
     private val diagonal: Distance = sqrt((wheelBase.inUnit(meters) * wheelBase.inUnit(meters) + trackWidth.inUnit(meters) * trackWidth.inUnit(meters))).meters
 
-    private val wheelRadius = wheelDiameter / 2
+    public val wheelRadius: Distance = wheelDiameter / 2
     private val wheelTravelPerMotorRadian = gearRatio * wheelRadius
 
     private val distanceOffset: Distance = overallEncoder.angularPosition * wheelTravelPerMotorRadian
@@ -59,21 +73,20 @@ public class EncoderHolonomicDrivetrain(private val topLeft: SwerveModule,
             overallEncoder.angularVelocity *
                     wheelTravelPerMotorRadian
 
-    private var driveFunctionCalled: Boolean = false
+    public var driveFunctionCalled: Boolean = false
+
 
     // counter-intuitively, xPower is straight, and yPower is side-to-side.
-    public fun swerveDrive(xPower: Double, yPower: Double, rotationPower: Double){
+    override fun swerveDrive(xPower: Double, yPower: Double, rotationPower: Double){
         // a gyro input into the swerveDrive allows it to remain field-centric; optional
 
 
-        val forwardPower: Double = if(gyro == null){xPower}else{
-            xPower*cos(gyro!!.gyroscope.heading.inUnit(Degrees)) + yPower * sin(gyro!!.gyroscope.heading.inUnit(Degrees))
+        val forwardPower: Double = if(!fieldRelativeDrive){xPower}else{
+            xPower*cos(gyro.gyroscope.heading.inUnit(degrees)) + yPower * sin(gyro.gyroscope.heading.inUnit(degrees))
         }
-        val sidePower: Double = if(gyro == null){yPower}else{
-            -xPower * sin(gyro!!.gyroscope.heading.inUnit(Degrees)) + yPower * cos(gyro!!.gyroscope.heading.inUnit(Degrees))
+        val sidePower: Double = if(!fieldRelativeDrive){yPower}else{
+            -xPower * sin(gyro.gyroscope.heading.inUnit(degrees)) + yPower * cos(gyro.gyroscope.heading.inUnit(degrees))
         }
-
-
 
 
         var A: Double = sidePower - rotationPower * (wheelBase.inUnit(meters)/diagonal.inUnit(meters))
@@ -86,11 +99,12 @@ public class EncoderHolonomicDrivetrain(private val topLeft: SwerveModule,
         var bottomLeftPower: Double = sqrt(A*A+D*D)
         var bottomRightPower: Double = sqrt(A*A+C*C)
 
-        // !! asserts that it will never be null(it can't be)
-        // the following "normalizes" the wheel speedsrfgb
-        var max: Double = listOf(topRightPower,topLeftPower,bottomLeftPower,bottomRightPower).maxOrNull()!!
 
-        if (max > 1){
+        // the following "normalizes" the wheel
+        var max: Double? = listOf(topRightPower,topLeftPower,bottomLeftPower,bottomRightPower).maxOrNull()
+
+
+        if (max != null && max > 1.0){
             topRightPower /= max
             topLeftPower /= max
             bottomRightPower /= max
@@ -98,11 +112,11 @@ public class EncoderHolonomicDrivetrain(private val topLeft: SwerveModule,
         }
 
 
-        // note: radians doesn't work. rohen pls fix
-        var topRightAngle: Angle = atan(B/C)*(180/PI).degrees
-        var topLeftAngle: Angle = atan(B/D)*(180/PI).degrees
-        var bottomRightAngle: Angle = atan(A/D)*(180/PI).degrees
-        var bottomLeftAngle: Angle = atan(A/C)*(180/PI).degrees
+
+        var topRightAngle: Angle = atan(B/C)
+        var topLeftAngle: Angle = atan(B/D)
+        var bottomRightAngle: Angle = atan(A/D)
+        var bottomLeftAngle: Angle = atan(A/C)
 
 
         topLeft.setDirectionalPower(topLeftAngle,topLeftPower)
@@ -112,6 +126,27 @@ public class EncoderHolonomicDrivetrain(private val topLeft: SwerveModule,
 
         driveFunctionCalled = true
 
+    }
+
+    override fun directionalDrive(xPower: Double, angle: Angle){
+        topLeft.setDirectionalPower(angle,xPower)
+        topRight.setDirectionalPower(angle,xPower)
+        bottomLeft.setDirectionalPower(angle,xPower)
+        bottomRight.setDirectionalPower(angle,xPower)
+    }
+
+    override fun stop(){
+        topLeft.halt()
+        topRight.halt()
+        bottomLeft.halt()
+        bottomRight.halt()
+    }
+
+    override fun rotateInPlace(power: Double) {
+        topLeft.setDirectionalPower(45.degrees,power)
+        topRight.setDirectionalPower(-(45.degrees),power)
+        bottomLeft.setDirectionalPower(45.degrees,power)
+        bottomRight.setDirectionalPower(-(45.degrees),power)
     }
 
 
@@ -128,7 +163,7 @@ public class EncoderHolonomicDrivetrain(private val topLeft: SwerveModule,
             bottomRight.turnPID.calculateOutput()
         }
 
-    }
+}
 
 
 

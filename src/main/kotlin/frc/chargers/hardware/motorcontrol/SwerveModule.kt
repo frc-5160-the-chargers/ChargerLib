@@ -8,6 +8,7 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import com.batterystaple.kmeasure.units.degrees
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.controls.pid.FeedForward
@@ -25,30 +26,23 @@ public class SwerveModule(public val turnMotor: EncoderMotorController,
                           public val turningPIDConstants: PIDConstants,
                           public val turnFeedForward: FeedForward = FeedForward{_,_ -> 0.0},
                           private val wheelDiameter: Length,
-                          public val invertTurnMotors: Boolean = false,
-                          public val invertDriveMotors: Boolean = false,
-                          vararg driveMotors: EncoderMotorController){
-    public var multipliers: MutableList<Double> = mutableListOf()
+                          public val driveMotor: EncoderMotorController,
+                          public val turnMotorMultiplier: Double = 1.0,
+                          public val driveMotorMultiplier: Double = 1.0){
 
-    public var driveEncoder: Encoder = AverageEncoder(*driveMotors)
-
+    public var driveEncoder: Encoder = driveMotor.encoder
 
 
-    // sets the multipliers of each motor inputted into the swerve module.
-    public fun setMultipliers(vararg inputedMultipliers: Double){
-        multipliers.clear()
-        multipliers.addAll(inputedMultipliers.toList())
-    }
 
 
 
     public var drivePower: Double = 0.0
-    public val driveMotorList: List<EncoderMotorController> = driveMotors.toList()
+
 
     // note: I don't use unitSuperPID Controller cuz I don't know how to make it output a double.
     public val turnPID: SuperPIDController = SuperPIDController(
         pidConstants = turningPIDConstants,
-        getInput = {turnEncoder.angularPosition.inUnit(Degrees)},
+        getInput = {turnEncoder.angularPosition.inUnit(degrees)},
         target = 0.0
     )
 
@@ -59,28 +53,36 @@ public class SwerveModule(public val turnMotor: EncoderMotorController,
     // gets the module state, using WPILib.
     // inUnit converts the angles and velocities into meters per second and degrees.
     // rotation2d is just used to format everything.
-    public var moduleState: SwerveModuleState = SwerveModuleState()
-        get() = SwerveModuleState(driveEncoder.angularVelocity.inUnit(Degrees/seconds) * wheelDiameter.inUnit(meters)/2,
-            Rotation2d.fromDegrees(turnEncoder.angularPosition.inUnit(Degrees)))
+    public val moduleState: SwerveModuleState
+        get() = SwerveModuleState(driveEncoder.angularVelocity.inUnit(degrees/seconds) * wheelDiameter.inUnit(meters)/2,
+            Rotation2d.fromDegrees(turnEncoder.angularPosition.inUnit(degrees)))
+
+
+
+
 
     // note: setDirectionalPower should be called repeatedly
     // the superPID controller is called repeatedly here
     public fun setDirectionalPower(targetAngle: Angle,power: Double){
         var frontAngle: Angle = turnEncoder.angularPosition
         var backAngle: Angle = frontAngle + 180.degrees
-        if (abs((backAngle-targetAngle).inUnit(Degrees)) > abs((frontAngle-targetAngle).inUnit(Degrees)) ){
-            turnPID.target = (targetAngle-backAngle).inUnit(Degrees)
-            drivePower = -power
+        if (abs((backAngle-targetAngle).inUnit(degrees)) > abs((frontAngle-targetAngle).inUnit(degrees)) ){
+            turnPID.target = (targetAngle-backAngle).inUnit(degrees)
+            drivePower = -power*driveMotorMultiplier
         }else{
-            turnPID.target = (targetAngle-frontAngle).inUnit(Degrees)
-            drivePower = power
+            turnPID.target = (targetAngle-frontAngle).inUnit(degrees)
+            drivePower = power*driveMotorMultiplier
         }
 
         if (frontAngle != targetAngle || backAngle != targetAngle){
             turnMotor.set(turnPID.calculateOutput())
         }else{
             var counter = 0
-            driveMotorList.forEach{i -> i.set(drivePower*multipliers[counter]);counter++}
+            driveMotor.set(drivePower)
         }
+    }
+
+    public fun halt(){
+        driveMotor.set(0.0)
     }
 }
