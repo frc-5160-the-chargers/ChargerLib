@@ -28,6 +28,10 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             setIntegratorRange(integralRange.start.siValue, integralRange.endInclusive.siValue)
         }
 
+    public fun enableContinuousInput(bottomValue: Double, topValue: Double){
+        basePID.enableContinuousInput(bottomValue,topValue)
+    }
+
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */

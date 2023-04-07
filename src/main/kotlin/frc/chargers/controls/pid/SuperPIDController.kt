@@ -34,6 +34,10 @@ public class SuperPIDController(
             setIntegratorRange(integralRange.start, integralRange.endInclusive)
         }
 
+    public fun enableContinuousInput(bottomValue: Double, topValue: Double){
+        basePID.enableContinuousInput(bottomValue,topValue)
+    }
+
 
 
 

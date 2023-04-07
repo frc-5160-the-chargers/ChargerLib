@@ -22,6 +22,12 @@ public class Limelight(public val name: String = "limelight",
                        public val lensHeight: Distance? = null,
                        public val mountAngle: Angle? = null){
 
+    // a convenience variable that allows you to determine if a specific limelight is in use or not.
+    // good for asynchronous operation.
+    // at the beginning of your usage, set limelight.inUse = true.
+    // then, your other programs can call limelight.inUse in order to determine whether to switch pipelines, etc.
+    public val inUse: Boolean = false
+
     private var nt: NetworkTable = NetworkTableInstance.getDefault().getTable(name)
 
     // designed to inter-operate with the limelightLib "library"(literally just copy-pasted code)
