@@ -45,6 +45,10 @@ public open class ChargerCANSparkMax(
     type: MotorType,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
 ) : CANSparkMax(deviceId, type), EncoderMotorController, MotorConfigurable<SparkMaxConfiguration> {
+
+    public fun setVoltage(outputVolts: Voltage) {
+        super<CANSparkMax>.setVoltage(outputVolts.inUnit(volts))
+    }
     override val encoder: Encoder by lazy {
         alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
             if (encoderType == null) {

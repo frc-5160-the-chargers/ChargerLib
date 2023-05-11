@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.motorcontrol.SwerveModule
 import frc.chargers.hardware.sensors.NavX
+import frc.chargers.hardware.sensors.cameras.VisionCamera3d
 import frc.chargers.hardware.sensors.encoders.AverageEncoder
 import frc.chargers.hardware.sensors.encoders.Encoder
 import kotlin.math.sin
@@ -22,10 +23,19 @@ import kotlin.math.cos
 import kotlin.math.sqrt
 
 
-/*
-An implementation of Swerve drive, with encoders, to be used in future robot code.
-Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
-* */
+
+// public fun sparkMaxDrivetrain: EncoderHolonomicDrivetrain
+// accepts configuration for drive and turn motors
+// public fun talonFXDrivetrain: EncoderHolonomicDrivetrain
+// accepts configuration for drive and turn motors
+// public fun MultiMotorDrivetrain<turnMotor: EncoderMotorController,driveMotor: EncoderMotorController>
+
+
+public open class EncoderHolonomicDrivetrain(
+    private val visionCameras: List<VisionCamera3d>
+)
+
+
 
 // note: default gear ratio defined in EncoderDifferentialDriveTrain.
 // They're in the same package and thus no import
@@ -37,7 +47,7 @@ Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name
  * This also provides basic odometry(in the form of SwerveDrivePoseEstimator); however, it's less reliable than
  * [VisionHolonomicDrivetrain], which should always be used if a vision sensor(limelight or photon camera）is available.
  */
-public open class BasicHolonomicDrivetrain(
+public open class TesttestTest(
     private val topLeft: SwerveModule,
     private val topRight: SwerveModule,
     private val bottomLeft: SwerveModule,

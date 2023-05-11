@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX
 import com.ctre.phoenix.sensors.AbsoluteSensorRange
 import com.ctre.phoenix.sensors.SensorInitializationStrategy
+import com.revrobotics.CANSparkMax
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.ctre.CTREMotorControllerConfiguration.*
@@ -42,6 +43,10 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : WP
             pidIndex = 0, // Default
             pulsesPerRotation = TALON_FX_ENCODER_UNITS_PER_ROTATION
         )
+
+    public fun setVoltage(outputVolts: Voltage) {
+        super<WPI_TalonFX>.setVoltage(outputVolts.inUnit(volts))
+    }
 
     override fun configure(configuration: TalonFXConfiguration) {
         configuration.neutralMode?.let(::setNeutralMode)

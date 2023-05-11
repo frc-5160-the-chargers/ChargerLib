@@ -3,8 +3,14 @@ package frc.chargers.controls.pid
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
+import frc.chargers.commands.RunCommand
 import frc.chargers.controls.Controller
+import frc.chargers.hardware.motorcontrol.ctre.falcon
 
+/**
+ * to-do: Add SuperVoltageController, UnitSuperVoltageController
+ * add motion profiling
+ */
 /**
  * Wraps WPILib's [PIDController], adding various improvements.
  *
@@ -17,17 +23,26 @@ import frc.chargers.controls.Controller
  *
  * See [here](https://www.controleng.com/articles/feed-forwards-augment-pid-control/) for an explanation of feedforward.
  */
+
+
 public class SuperPIDController(
     pidConstants: PIDConstants,
-    private val getInput: () -> Double,
+    public var getInput: () -> Double,
     public val outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
     public val integralRange: ClosedRange<Double> = outputRange,
     target: Double,
-    public var feedForward: FeedForward = FeedForward { _, _ -> 0.0 }
+    public val outputExtender: OutputExtension = OutputExtension{_,_ -> 0.0},
+    updatePeriodically: Boolean = false
 ): Controller<Double> {
-    // note: sets the base PID Controller to public to allow stuff such as setContinuousInput, etc. etc.
-    // - Daniel
-    public val basePID: PIDController = PIDController(0.0, 0.0, 0.0)
+
+    init{
+        if(updatePeriodically){
+            RunCommand{calculateOutput()}.schedule()
+        }
+
+    }
+
+    private val basePID: PIDController = PIDController(0.0, 0.0, 0.0)
         .apply {
             constants = pidConstants
             setpoint = target
@@ -38,27 +53,33 @@ public class SuperPIDController(
         basePID.enableContinuousInput(bottomValue,topValue)
     }
 
+    public fun disableContinuousInput(){
+        basePID.disableContinuousInput()
+    }
+
+    public fun modifyInputGetter(newInputGetter: () -> Double){
+        getInput = newInputGetter
+    }
+
 
 
 
 
 
     /**
-     * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
+     * Calculates the next calculated output value.
+     * If updatePeriodically is set to false,
+     * Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
+     * otherwise, nothing else needs to be done.
      */
     public override fun calculateOutput(): Double {
-        val pidOutput = basePID.calculate(getInput())
-        val fedForwardOutput = applyFeedforward(pidOutput)
-        return ensureInOutputRange(fedForwardOutput)
+        val output = basePID.calculate(getInput()) + outputExtender.calculate(target,error)
+        return ensureInOutputRange(output)
     }
 
-    private fun applyFeedforward(pidOutput: Double): Double {
-        return pidOutput + feedForward.calculate(target, error)
-    }
 
-    private fun ensureInOutputRange(output: Double): Double {
-        return output.coerceIn(outputRange)
-    }
+    private fun ensureInOutputRange(output: Double): Double =  output.coerceIn(outputRange)
+
 
     /**
      * The target is the value the PID controller is attempting to achieve.
@@ -92,3 +113,4 @@ public class SuperPIDController(
     public val error: Double
         get() = getInput() - basePID.setpoint
 }
+

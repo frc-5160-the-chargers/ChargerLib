@@ -2,6 +2,7 @@ package frc.chargers.commands
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
+import com.kauailabs.navx.frc.AHRS
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.*
 import kotlin.properties.ReadOnlyProperty
@@ -15,8 +16,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand
  * See [here](https://kotlinlang.org/docs/type-safe-builders.html#how-it-works)
  * for an explanation of DSLs and how they are built.
  */
-public inline fun buildCommand(block: CommandBuilder.() -> Unit): Command =
-    SequentialCommandGroup(*CommandBuilder().apply(block).commands.toTypedArray())
+
 
 
 @DslMarker

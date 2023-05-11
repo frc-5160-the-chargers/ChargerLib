@@ -3,7 +3,7 @@
 // copied from https://github.com/LimelightVision/limelightlib-wpijava/blob/main/LimelightHelpers.java
 // use is for parsing json from limelight object.
 // note: I have deleted some unnessecary stuff.
-package frc.chargers.javaUtils;
+package frc.chargers.javaLibraries;
 //LimelightHelpers v1.2.1 (March 1, 2023)
 
 

@@ -3,6 +3,7 @@ package frc.chargers.controls.pid
 import com.batterystaple.kmeasure.dimensions.*
 import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.math.controller.PIDController
+import frc.chargers.commands.RunCommand
 import frc.chargers.controls.Controller
 
 //TODO: Document properly
@@ -11,14 +12,21 @@ import frc.chargers.controls.Controller
  *
  * @see SuperPIDController for an explanation of other added features.
  */
-public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
+public open class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     pidConstants: PIDConstants,
-    private val getInput: () -> Quantity<I>,
+    private var getInput: () -> Quantity<I>,
     public val outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
     public val integralRange: ClosedRange<Quantity<O>> = outputRange,
     target: Quantity<I>,
-    public var feedForward: UnitFeedForward<I, O> = UnitFeedForward { _, _ -> Quantity(0.0) }
+    public var outputExtender: UnitOutputExtension<I, O> = UnitOutputExtension { _, _ -> Quantity(0.0) },
+    updatePeriodically: Boolean = false
 ) : Controller<Quantity<O>> {
+
+    init{
+        if(updatePeriodically){
+            RunCommand{calculateOutput()}.schedule()
+        }
+    }
     // note: sets the base PID Controller to public to allow stuff such as setContinuousInput, etc. etc.
     // - Daniel
     public val basePID: PIDController = PIDController(0.0, 0.0, 0.0)
@@ -32,18 +40,22 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
         basePID.enableContinuousInput(bottomValue,topValue)
     }
 
+    public fun disableContinuousInput(){
+        basePID.disableContinuousInput()
+    }
+    public fun modifyInputGetter(newInputGetter: () -> Quantity<I>){
+        getInput = newInputGetter
+    }
+
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
     public override fun calculateOutput(): Quantity<O> {
-        val pidOutput = Quantity<O>(basePID.calculate(getInput().siValue))
-        val fedForwardOutput = applyFeedforward(pidOutput)
-        return ensureInOutputRange(fedForwardOutput)
+        val output = Quantity<O>(basePID.calculate(getInput().siValue)) + outputExtender.calculate(target,error)
+        return ensureInOutputRange(output)
     }
 
-    private fun applyFeedforward(pidOutput: Quantity<O>): Quantity<O> {
-        return pidOutput + feedForward.calculate(target, error)
-    }
+
 
     private fun ensureInOutputRange(output: Quantity<O>): Quantity<O> {
         return output.coerceIn(outputRange)
@@ -81,3 +93,4 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     public val error: Quantity<I>
         get() = Quantity(getInput().siValue - basePID.setpoint)
 }
+
