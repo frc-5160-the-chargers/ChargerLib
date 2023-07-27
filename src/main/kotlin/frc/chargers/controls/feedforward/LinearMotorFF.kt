@@ -1,6 +1,6 @@
 package frc.chargers.controls.feedforward
 
-import com.batterystaple.kmeasure.dimensions.DistanceDimension
+
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
