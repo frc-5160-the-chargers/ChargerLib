@@ -45,7 +45,11 @@ public class WPILibEncoderAdapter(private val wpiLibEncoder: WpilibEncoder, priv
 /**
  * An adapter from the REV RelativeEncoder class to the ChargerLib Encoder interface.
  */
-public class RevEncoderAdapter(private val revEncoder: RevEncoder) : Encoder, RevEncoder by revEncoder {
+public class RevEncoderAdapter(private val revEncoder: RevEncoder) : ResettableEncoder, RevEncoder by revEncoder {
+
+    override fun setZero(newZero: Angle){
+        position = newZero.inUnit(rotations)
+    }
     override val angularPosition: Angle
         get() = revEncoder.position.ofUnit(rotations)
 
@@ -53,6 +57,7 @@ public class RevEncoderAdapter(private val revEncoder: RevEncoder) : Encoder, Re
         get() = revEncoder.velocity.ofUnit(rotations/minutes)
 
 }
+
 
 
 
