@@ -2,18 +2,18 @@ package frc.chargers.hardware.motorcontrol.ctre
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
-import com.ctre.phoenix.motorcontrol.*
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX
-import com.ctre.phoenix.sensors.AbsoluteSensorRange
-import com.ctre.phoenix.sensors.SensorInitializationStrategy
+import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.signals.*
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.ctre.CTREMotorControllerConfiguration.*
-import frc.chargers.hardware.sensors.encoders.CTREMotorControllerEncoderAdapter
-import frc.chargers.hardware.sensors.encoders.Encoder
-import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration as CTRETalonFXConfiguration
+import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.sensors.encoders.TalonFXEncoderAdapter
+import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
+import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
-private const val TALON_FX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
+
+
+// private const val TALON_FX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
 
 public fun falcon(canId: Int, canBus: String? = null, configure: TalonFXConfiguration.() -> Unit = {}): ChargerTalonFX =
     when {
@@ -29,96 +29,236 @@ public fun falcon(canId: Int, canBus: String? = null, configure: TalonFXConfigur
  * but has additional features to mesh better with the rest
  * of this library.
  *
- * @see com.ctre.phoenix.motorcontrol.can.WPI_TalonFX
+ * @see com.ctre.phoenix6.hardware.TalonFX
  * @see TalonFXConfiguration
  */
-public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : WPI_TalonFX(deviceNumber, canBus),
+public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : TalonFX(deviceNumber, canBus),
     EncoderMotorController, MotorConfigurable<TalonFXConfiguration> {
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
                                      // and does not pass around the reference to this class.
-    final override val encoder: Encoder =
-        CTREMotorControllerEncoderAdapter(
-            ctreMotorController = this,
-            pidIndex = 0, // Default
-            pulsesPerRotation = TALON_FX_ENCODER_UNITS_PER_ROTATION
-        )
+    final override val encoder: TimestampedEncoder =
+        TalonFXEncoderAdapter(this)
 
-    override fun configure(configuration: TalonFXConfiguration) {
-        configuration.neutralMode?.let(::setNeutralMode)
-        configuration.inverted?.let(::setInverted)
-        configuration.invertSensorPhase?.let(::setSensorPhase)
-        configuration.expiration?.let { this.expiration = it.inUnit(seconds) }
-        configuration.safetyEnabled?.let(::setSafetyEnabled)
-
-        configure(configuration, encoderStep = (1.0 / TALON_FX_ENCODER_UNITS_PER_ROTATION).ofUnit(rotations))
-
-        configAllSettings(configuration.toCTRETalonFXConfiguration())
+    override fun configure(configuration: TalonFXConfiguration){
+        configurator.apply(configuration.toCTRETalonFXConfiguration())
     }
 
-    final override fun getSelectedSensorPosition(pidIdx: Int): Double =
-        super.getSelectedSensorPosition(pidIdx)
-
-    final override fun getSelectedSensorVelocity(pidIdx: Int): Double =
-        super.getSelectedSensorVelocity(pidIdx)
 }
 
-public typealias PIDIndex = Int
-public typealias SlotIndex = Int
-public typealias CustomParameterIndex = Int
-public typealias CustomParameterValue = Int
+
+
+
 
 /**
  * A data class representing all possible configuration parameters
  * of a ChargerTalonFX.
  *
+ * Identical to CTRE's TalonFXConfiguration for Phoenix v6, except for a couple of changes:
+ *
+ * 1. All configs with an "Enable" counterpart now use kotlin's nullable types.
+ *    For example, instead of having to set [StatorCurrentLimitEnable] to false,
+ *    you just set [statorCurrentLimit] to null instead.
+ *
+ * 2. Configurations are no longer grouped into sub-configurations,
+ *    as it isn't really necessary anymore with lambda-based configuration.
+ *
+ * 3. PID / Motion magic configuration is removed, and replaced with FeedbackMotorController functionality
+ *
  * @see ChargerTalonFX
  */
+
+// Note to self: CustomParamConfigs might be able to be used by chargerlib, no idea how
 public data class TalonFXConfiguration(
-    var neutralMode: NeutralMode? = null,
-    var inverted: Boolean? = null,
-    override var invertSensorPhase: Boolean? = null,
-    var expiration: Time? = null,
-    var safetyEnabled: Boolean? = null,
-    var supplyCurrentLimit: SupplyCurrentLimitConfiguration? = null,
-    var statorCurrentLimit: StatorCurrentLimitConfiguration? = null,
-    var motorCommutation: MotorCommutation? = null,
-    var absoluteSensorRange: AbsoluteSensorRange? = null,
-    var integratedSensorOffset: Angle? = null,
-    var sensorInitializationStrategy: SensorInitializationStrategy? = null,
-    override var openLoopRampTimeFromNeutralToFull: Time? = null,
-    override var closedLoopRampTimeFromNeutralToFull: Time? = null,
-    override var peakOutputForwardPercent: Double? = null,
-    override var peakOutputReversePercent: Double? = null,
-    override var nominalOutputForwardPercent: Double? = null,
-    override var nominalOutputReversePercent: Double? = null,
-    override var neutralDeadbandPercent: Double? = null,
-    override var voltageCompensationSaturationVoltage: Voltage? = null,
-    override var voltageMeasurementFilterSamples: Int? = null,
-    override var voltageCompensationEnabled: Boolean? = null,
-    override val selectedFeedbackSensors: MutableMap<PIDIndex, FeedbackDevice> = mutableMapOf(),
-    override val selectedFeedbackCoefficients: MutableMap<PIDIndex, Double> = mutableMapOf(),
-    override var remoteFeedbackFilter: RemoteFeedbackFilterDevice? = null,
-    override val sensorTermFeedbackDevices: MutableMap<SensorTerm, FeedbackDevice> = mutableMapOf(),
-    override val controlFramePeriods: MutableMap<ControlFrame, Time> = mutableMapOf(),
-    override val statusFramePeriods: MutableMap<StatusFrame, Time> = mutableMapOf(),
-    override var forwardLimitSwitchSource: LimitSwitchConfig? = null,
-    override var reverseLimitSwitchSource: LimitSwitchConfig? = null,
-    override var forwardSoftLimitThreshold: Angle? = null,
-    override var reverseSoftLimitThreshold: Angle? = null,
-    override var forwardSoftLimitEnable: Boolean? = null,
-    override var reverseSoftLimitEnable: Boolean? = null,
-    override val pidConfiguration: PIDConfiguration = PIDConfiguration(),
-    override val motionMagicConfiguration: MotionMagicConfiguration = MotionMagicConfiguration(),
-    override val customParameters: MutableMap<CustomParameterIndex, CustomParameterValue> = mutableMapOf()
-) : CTREMotorControllerConfiguration {
-    public fun toCTRETalonFXConfiguration(): CTRETalonFXConfiguration =
-        CTRETalonFXConfiguration()
-            .also { ctreConfiguration ->
-                supplyCurrentLimit?.let { ctreConfiguration.supplyCurrLimit = it }
-                statorCurrentLimit?.let { ctreConfiguration.statorCurrLimit = it }
-                motorCommutation?.let { ctreConfiguration.motorCommutation = it }
-                absoluteSensorRange?.let { ctreConfiguration.absoluteSensorRange = it }
-                integratedSensorOffset?.let { ctreConfiguration.integratedSensorOffsetDegrees = it.inUnit(degrees) }
-                sensorInitializationStrategy?.let { ctreConfiguration.initializationStrategy = sensorInitializationStrategy }
+    // audio configs
+    var beepOnBoot: Boolean = true,
+
+    // closed loop general configs
+    var closedLoopContinuousWrap: Boolean = false,
+
+    // Closed Loop Ramps Configs
+    var dutyCycleClosedLoopRampPeriod: Time = Time(0.0),
+    var torqueClosedLoopRampPeriod: Time = Time(0.0),
+    var voltageClosedLoopRampPeriod: Time = Time(0.0),
+
+    // Open loop ramp configs
+    var dutyCycleOpenLoopRampPeriod: Time = Time(0.0),
+    var torqueOpenLoopRampPeriod: Time = Time(0.0),
+    var voltageOpenLoopRampPeriod: Time = Time(0.0),
+
+    // Current Limit Configs
+    var statorCurrentLimit: Current? = null,
+    var supplyCurrentLimit: Current? = null,
+    var supplyCurrentThreshold: Current = Current(0.0),
+    var supplyTimeThreshold: Time = Time(0.0),
+
+    // feedback configs
+    var feedbackRemoteSensorID: Int = 0,
+    var feedbackRotorOffset: Angle = Angle(0.0),
+    var feedbackSensorSource: FeedbackSensorSourceValue = FeedbackSensorSourceValue.RotorSensor,
+    var rotorToSensorRatio: Double = 1.0,
+    var sensorToMechanismRatio: Double = 1.0,
+
+    // Hardware Limit Switch Configs
+    var forwardLimitEnable: Boolean = false,
+    var forwardLimitAutosetPositionValue: Angle? = null,
+    var forwardLimitRemoteSensorID: Int = 0,
+    var forwardLimitSource: ForwardLimitSourceValue = ForwardLimitSourceValue.LimitSwitchPin,
+    var forwardLimitType: ForwardLimitTypeValue = ForwardLimitTypeValue.NormallyOpen,
+
+    var reverseLimitEnable: Boolean = false,
+    var reverseLimitAutosetPositionValue: Angle? = null,
+    var reverseLimitRemoteSensorID: Int = 0,
+    var reverseLimitSource: ReverseLimitSourceValue = ReverseLimitSourceValue.LimitSwitchPin,
+    var reverseLimitType: ReverseLimitTypeValue = ReverseLimitTypeValue.NormallyOpen,
+
+    // Motor Output Configs
+
+    var neutralMode: NeutralModeValue = NeutralModeValue.Brake,
+    var inverted: Boolean = false,
+    var dutyCycleNeutralDeadband: Double = 0.0,
+    var peakForwardDutyCycle: Double = 1.0,
+    var peakReverseDutyCycle: Double = -1.0,
+
+    // Software Limit Switch Configs
+
+    var forwardSoftLimitThreshold: Angle? = null,
+    var reverseSoftLimitThreshold: Angle? = null,
+
+    // Torque Current Configs
+    var peakForwardTorqueCurrent: Current = 800.amps,
+    var peakReverseTorqueCurrent: Current = -800.amps,
+    var torqueNeutralDeadband: Current = Current(0.0),
+
+    // Voltage Configs
+
+    var peakForwardVoltage: Voltage = 12.volts,
+    var peakReverseVoltage: Voltage = -12.volts,
+    var supplyVoltageTimeConstant: Time = Time(0.0)
+
+): MotorConfiguration{
+
+    public fun toCTRETalonFXConfiguration(): CTRETalonFXConfiguration{
+        val config = CTRETalonFXConfiguration()
+        config.Audio.BeepOnBoot = beepOnBoot
+
+        config.ClosedLoopGeneral.ContinuousWrap = closedLoopContinuousWrap
+
+        config.ClosedLoopRamps.apply{
+            DutyCycleClosedLoopRampPeriod = dutyCycleClosedLoopRampPeriod.inUnit(seconds)
+            TorqueClosedLoopRampPeriod = torqueClosedLoopRampPeriod.inUnit(seconds)
+            VoltageClosedLoopRampPeriod = voltageClosedLoopRampPeriod.inUnit(seconds)
+        }
+
+        config.CurrentLimits.apply{
+
+            if(statorCurrentLimit == null){
+                StatorCurrentLimitEnable = false
+            }else{
+                StatorCurrentLimitEnable = true
+                // In this specific scenario(as well as others),
+                // the "!!"(aka assert non-null call is perfectly safe.
+                StatorCurrentLimit = statorCurrentLimit!!.inUnit(amps)
             }
+
+            if(supplyCurrentLimit == null){
+                SupplyCurrentLimitEnable = false
+            }else{
+                SupplyCurrentLimitEnable = true
+                SupplyCurrentLimit = supplyCurrentLimit!!.inUnit(amps)
+            }
+            SupplyCurrentThreshold = supplyCurrentThreshold.inUnit(amps)
+            SupplyTimeThreshold = supplyTimeThreshold.inUnit(seconds)
+        }
+
+        config.OpenLoopRamps.apply{
+            DutyCycleOpenLoopRampPeriod = dutyCycleOpenLoopRampPeriod.inUnit(seconds)
+            TorqueOpenLoopRampPeriod = torqueOpenLoopRampPeriod.inUnit(seconds)
+            VoltageOpenLoopRampPeriod = voltageOpenLoopRampPeriod.inUnit(seconds)
+        }
+
+        config.Feedback.apply{
+            FeedbackRemoteSensorID = feedbackRemoteSensorID
+            FeedbackRotorOffset = feedbackRotorOffset.inUnit(rotations)
+            FeedbackSensorSource = feedbackSensorSource
+            RotorToSensorRatio = rotorToSensorRatio
+            SensorToMechanismRatio = sensorToMechanismRatio
+        }
+
+        config.HardwareLimitSwitch.apply{
+            ForwardLimitEnable = forwardLimitEnable
+            if(forwardLimitAutosetPositionValue == null){
+                ForwardLimitAutosetPositionEnable = false
+            }else{
+                ForwardLimitAutosetPositionEnable = true
+                ForwardLimitAutosetPositionValue = forwardLimitAutosetPositionValue!!.inUnit(rotations)
+            }
+
+            ForwardLimitRemoteSensorID = forwardLimitRemoteSensorID
+            ForwardLimitSource = forwardLimitSource
+            ForwardLimitType = forwardLimitType
+
+
+            ReverseLimitEnable = reverseLimitEnable
+            if(reverseLimitAutosetPositionValue == null){
+                ReverseLimitAutosetPositionEnable = false
+            }else{
+                ReverseLimitAutosetPositionEnable = true
+                ReverseLimitAutosetPositionValue = reverseLimitAutosetPositionValue!!.inUnit(rotations)
+            }
+            ReverseLimitRemoteSensorID = reverseLimitRemoteSensorID
+            ReverseLimitSource = reverseLimitSource
+            ReverseLimitType = reverseLimitType
+        }
+
+
+        config.MotorOutput.apply{
+            Inverted = if(inverted){
+                InvertedValue.Clockwise_Positive
+            }else{
+                InvertedValue.CounterClockwise_Positive
+            }
+            NeutralMode = neutralMode
+            DutyCycleNeutralDeadband = dutyCycleNeutralDeadband
+            PeakForwardDutyCycle = peakForwardDutyCycle
+            PeakReverseDutyCycle = peakReverseDutyCycle
+        }
+
+        config.SoftwareLimitSwitch.apply{
+            if(forwardSoftLimitThreshold == null){
+                ForwardSoftLimitEnable = false
+            }else{
+                ForwardSoftLimitEnable = true
+                ForwardSoftLimitThreshold = forwardSoftLimitThreshold!!.inUnit(rotations)
+            }
+
+            if(reverseSoftLimitThreshold == null){
+                ReverseSoftLimitEnable = false
+            }else{
+                ReverseSoftLimitEnable = true
+                ReverseSoftLimitThreshold = reverseSoftLimitThreshold!!.inUnit(rotations)
+            }
+        }
+
+        config.TorqueCurrent.apply{
+            PeakForwardTorqueCurrent = peakForwardTorqueCurrent.inUnit(amps)
+            PeakReverseTorqueCurrent = peakReverseTorqueCurrent.inUnit(amps)
+            TorqueNeutralDeadband = torqueNeutralDeadband.inUnit(amps)
+        }
+        config.Voltage.apply{
+            PeakForwardVoltage = peakForwardVoltage.inUnit(volts)
+            PeakReverseVoltage = peakReverseVoltage.inUnit(volts)
+            SupplyVoltageTimeConstant = supplyVoltageTimeConstant.inUnit(seconds)
+        }
+
+        return config
+    }
 }
+
+/**
+ * Code below is TBD at the moment.
+public fun CTRETalonFXConfiguration.toChargerConfiguration(): TalonFXConfiguration{
+    val config = TalonFXConfiguration()
+
+}
+ **/
+

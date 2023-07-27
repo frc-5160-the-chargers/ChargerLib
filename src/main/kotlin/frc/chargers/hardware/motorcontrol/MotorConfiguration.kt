@@ -14,4 +14,5 @@ public interface MotorConfiguration
  */
 public interface MotorConfigurable<C : MotorConfiguration> {
     public fun configure(configuration: C)
+
 }

@@ -3,8 +3,26 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.chargers.wpilibextensions.kinematics
 
-public data class ChassisPowers(
+import com.batterystaple.kmeasure.quantities.Angle
+import com.batterystaple.kmeasure.quantities.cos
+import com.batterystaple.kmeasure.quantities.sin
+
+public class ChassisPowers(
     public var xPower: Double = 0.0,
     public var yPower: Double = 0.0,
     public var rotationPower: Double = 0.0
-)
+){
+    public fun asFieldRelative(robotAngle: Angle): ChassisPowers = fromFieldRelativePowers(xPower,yPower,rotationPower,robotAngle)
+    public companion object{
+        public fun fromFieldRelativePowers(
+            xPower: Double,
+            yPower: Double,
+            rotationPower: Double,
+            robotAngle: Angle): ChassisPowers =
+            ChassisPowers(
+                xPower * cos(robotAngle) + yPower * sin(robotAngle),
+                -xPower * sin(robotAngle) + yPower * cos(robotAngle),
+                rotationPower)
+    }
+}
+
