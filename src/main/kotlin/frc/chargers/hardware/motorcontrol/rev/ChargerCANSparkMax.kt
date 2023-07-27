@@ -12,6 +12,7 @@ import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.hardware.sensors.encoders.ResettableEncoder
 import frc.chargers.hardware.sensors.encoders.RevEncoderAdapter
 import kotlin.math.roundToInt
 
@@ -45,7 +46,7 @@ public open class ChargerCANSparkMax(
     type: MotorType,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
 ) : CANSparkMax(deviceId, type), EncoderMotorController, MotorConfigurable<SparkMaxConfiguration> {
-    override val encoder: Encoder by lazy {
+    override val encoder: ResettableEncoder by lazy {
         alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
             if (encoderType == null) {
                 RevEncoderAdapter(super.getAlternateEncoder(countsPerRev))

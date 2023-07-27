@@ -15,7 +15,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguratio
 
 // private const val TALON_FX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
 
-public fun falcon(canId: Int, canBus: String? = null, configure: TalonFXConfiguration.() -> Unit = {}): ChargerTalonFX =
+public inline fun falcon(canId: Int, canBus: String? = null, configure: TalonFXConfiguration.() -> Unit = {}): ChargerTalonFX =
     when {
         canBus != null -> ChargerTalonFX(canId, canBus)
         else -> ChargerTalonFX(canId)
