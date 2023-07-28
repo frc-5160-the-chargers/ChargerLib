@@ -55,4 +55,7 @@ public class AngularMotorFF(
         )
     }
 
+    public fun convertToLinear(gearRatio: Double, wheelDiameter: Length): LinearMotorFF =
+        convertToLinear(gearRatio*wheelDiameter)
+
 }

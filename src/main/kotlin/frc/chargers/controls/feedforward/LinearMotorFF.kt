@@ -27,16 +27,15 @@ public class LinearMotorFF(
                 getAcceleration().inUnit(distanceUnit/ timeUnit / timeUnit)
             ).ofUnit(volts) + gravity.getValue()
 
-
     public fun convertToAngular(distancePerRadian: Distance): AngularMotorFF{
-        val radiansPerMeter: Angle = distancePerRadian.inUnit(meters).ofUnit(radians)
+        val radiansPerMeter: Angle = (1 /distancePerRadian.inUnit(meters) ).ofUnit(radians)
 
         // note: siValue is used here because for kA, the units are too long for kmeasure to handle
         val standardizedKV = (kV.volts/ 1.ofUnit(distanceUnit/timeUnit)).siValue
         val standardizedKA = (kA.volts/ 1.ofUnit(distanceUnit/timeUnit/timeUnit)).siValue
 
-        val newKV = standardizedKV * radiansPerMeter.inUnit(radians)
-        val newKA = standardizedKA * radiansPerMeter.inUnit(radians)
+        val newKV = standardizedKV / radiansPerMeter.inUnit(radians)
+        val newKA = standardizedKA / radiansPerMeter.inUnit(radians)
 
         return AngularMotorFF(
             kS = kS,
@@ -48,6 +47,9 @@ public class LinearMotorFF(
             getAcceleration = {getAcceleration() * (radiansPerMeter / 1.meters)}
         )
     }
+
+    public fun convertToAngular(gearRatio: Double, wheelDiameter: Length): AngularMotorFF =
+        convertToAngular(gearRatio*wheelDiameter)
 
 
 }
