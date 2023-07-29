@@ -5,11 +5,13 @@ import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import com.batterystaple.kmeasure.units.volts
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.controller.*
+
 
 
 /**
- * An adaptor for WPILib's angular motor feedforward.
+ * A wrapper for WPILib's [SimpleMotorFeedforward], [ArmFeedforward]. and [ElevatorFeedforward],
+ * which includes unit support for angular velocity inputs(i.e. radians/second).
  *
  * Note: the voltage unit here is not necessary,
  * as the voltage unit is always volts in SysID,

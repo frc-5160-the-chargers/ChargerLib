@@ -3,7 +3,15 @@ package frc.chargers.controls.feedforward
 import com.batterystaple.kmeasure.quantities.*
 
 
-
+/**
+ * Represents Gravity constants; used to supplement the [AngularMotorFF] and [LinearMotorFF].
+ *
+ * For example, Gravity.Arm represents the amount of voltage required
+ * to keep an arm joint in a stable position.
+ *
+ * @see AngularMotorFF
+ * @see LinearMotorFF
+ */
 public sealed class Gravity private constructor(
     public val getValue: () -> Voltage = {Voltage(0.0)}
 ) {

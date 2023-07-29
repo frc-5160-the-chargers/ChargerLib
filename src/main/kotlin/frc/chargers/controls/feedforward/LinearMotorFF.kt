@@ -5,11 +5,19 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import com.batterystaple.kmeasure.units.volts
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.controller.*
 import com.batterystaple.kmeasure.quantities.div
 import com.batterystaple.kmeasure.units.meters
 
 
+/**
+ * A wrapper for WPILib's [SimpleMotorFeedforward], [ArmFeedforward]. and [ElevatorFeedforward],
+ * which includes unit support for linear velocity inputs(i.e. meters/second).
+ *
+ * Note: the voltage unit here is not necessary,
+ * as the voltage unit is always volts in SysID,
+ * which is the only place where feedforwards are measured in FRC.
+ */
 public class LinearMotorFF(
     public val kS: Voltage,
     public val kV: Double,

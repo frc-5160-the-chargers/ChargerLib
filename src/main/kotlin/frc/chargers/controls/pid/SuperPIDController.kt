@@ -1,7 +1,10 @@
 package frc.chargers.controls.pid
 
+import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.math.controller.PIDController
+import frc.chargers.commands.RunCommand
 import frc.chargers.controls.Controller
+import frc.chargers.controls.feedforward.Feedforward
 
 /**
  * Wraps WPILib's [PIDController], adding various improvements.
@@ -11,18 +14,89 @@ import frc.chargers.controls.Controller
  *
  * See [here](https://www.ni.com/en-us/innovations/white-papers/06/pid-theory-explained.html) for an explanation of PID.
  *
- * This class also adds feedforward capability, an augmentation to PID that can increase how quickly it reaches the target value.
- *
- * See [here](https://www.controleng.com/articles/feed-forwards-augment-pid-control/) for an explanation of feedforward.
+ * This class also adds feedforward([getFFOutput]), and adds the option to update the controller every loop ([selfSustain]).
  */
 public class SuperPIDController(
     pidConstants: PIDConstants,
-    private val getInput: () -> Double,
+    private val getPIDInput: () -> Double,
     public val outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
     public val integralRange: ClosedRange<Double> = outputRange,
     target: Double,
-    public var feedForward: FeedForward = FeedForward { _, _ -> 0.0 }
+    /**
+     * Determines if the [SuperPIDController] should call calculateOutput()
+     * during every loop of the command scheduler. Normal PID controllers require the user to do this.
+     */
+    private val selfSustain: Boolean = false,
+    /**
+     * A lambda that returns the feedforward output of the controller it's in.
+     * Intended to be callable as a function for other uses: I.E. controller.getFFOutput()
+     */
+    public val getFFOutput: SuperPIDController.() -> Double = {0.0}
 ): Controller<Double> {
+
+    public companion object{
+        /**
+         * Fake Constructor of [SuperPIDController]
+         * which supports the native feedforward class with an input lambda,
+         * instead of a Feedforward output lambda.
+         *
+         */
+        public operator fun invoke(
+            pidConstants: PIDConstants,
+            getInput: () -> Double,
+            outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
+            integralRange: ClosedRange<Double> = outputRange,
+            target: Double,
+            selfSustain: Boolean = false,
+            getFFInput: () -> Double,
+            feedforward: Feedforward<Double,Double>
+        ): SuperPIDController = SuperPIDController(
+            pidConstants,
+            getInput,
+            outputRange,
+            integralRange,
+            target,
+            selfSustain
+        ) { feedforward.calculate(getFFInput()) }
+
+        /**
+         * Fake Constructor of [SuperPIDController]
+         * where the input of the feedforward and the input of the PID controller are shared.
+         *
+         */
+        public operator fun invoke(
+            pidConstants: PIDConstants,
+            getInput: () -> Double,
+            outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
+            integralRange: ClosedRange<Double> = outputRange,
+            target: Double,
+            selfSustain: Boolean = false,
+            feedforward: Feedforward<Double,Double>
+        ): SuperPIDController = invoke(
+            pidConstants,
+            getInput,
+            outputRange,
+            integralRange,
+            target,
+            selfSustain,
+            getInput,
+            feedforward,
+        )
+
+    }
+
+
+
+    init{
+        if(selfSustain){
+            RunCommand{
+                calculateOutput()
+            }.schedule()
+        }
+    }
+
+
+
     private val pidController = PIDController(0.0, 0.0, 0.0)
         .apply {
             constants = pidConstants
@@ -34,14 +108,10 @@ public class SuperPIDController(
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
     public override fun calculateOutput(): Double {
-        val pidOutput = pidController.calculate(getInput())
-        val fedForwardOutput = applyFeedforward(pidOutput)
-        return ensureInOutputRange(fedForwardOutput)
+        val output = pidController.calculate(getPIDInput()) + getFFOutput()
+        return ensureInOutputRange(output)
     }
 
-    private fun applyFeedforward(pidOutput: Double): Double {
-        return pidOutput + feedForward.calculate(target, error)
-    }
 
     private fun ensureInOutputRange(output: Double): Double {
         return output.coerceIn(outputRange)
@@ -77,5 +147,5 @@ public class SuperPIDController(
      * The error is a signed value representing how far the PID system currently is from the target value.
      */
     public val error: Double
-        get() = getInput() - pidController.setpoint
+        get() = getPIDInput() - pidController.setpoint
 }
