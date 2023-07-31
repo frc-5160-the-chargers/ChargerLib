@@ -14,10 +14,12 @@ public class UnitTranslation2d(
     public val y: Distance,
 ): Interpolatable<UnitTranslation2d>{
 
-    public constructor(
-        distance: Distance,
-        angle: Angle
-    ): this(distance * Scalar(cos(angle)), distance * Scalar(sin(angle)) )
+    public companion object{
+        // a fake constructor is required here, since both Distance and Angle are stored as Double(s) during runtime
+        public operator fun invoke(distance: Distance, angle: Angle): UnitTranslation2d =
+            UnitTranslation2d(distance * Scalar(cos(angle)), distance * Scalar(sin(angle)) )
+    }
+
 
     public constructor(): this(Distance(0.0),Distance(0.0))
 

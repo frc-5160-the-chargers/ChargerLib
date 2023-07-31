@@ -69,6 +69,18 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
 
 // Note to self: CustomParamConfigs might be able to be used by chargerlib, no idea how
 public data class TalonFXConfiguration(
+    /*
+    Important note: TalonFXConfiguration actually doesn't use null-by-default properties,
+    like SparkMaxConfiguration and TalonSRXConfiguration.
+
+    This is because the way CTRE motor controllers are configured, through phoenix v6,
+    is through another TalonFXConfiguration object.
+    Since changing the values of properties within an object is negligible performance-wise,
+    nullable types can be used for the various "enable" properties within the TalonFXConfiguration instead.
+
+     */
+
+
     // audio configs
     var beepOnBoot: Boolean = true,
 

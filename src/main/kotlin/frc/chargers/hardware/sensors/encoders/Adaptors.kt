@@ -11,6 +11,8 @@ import com.ctre.phoenix6.hardware.CANcoder as CTRECANcoder
 import com.revrobotics.RelativeEncoder as RevEncoder
 import edu.wpi.first.wpilibj.Encoder as WpilibEncoder
 
+import com.ctre.phoenix.motorcontrol.IMotorController as TalonSRXEncoder
+
 // This file contains a variety of adapters allowing various
 // implementations of encoders from various different
 // libraries and vendors (WPILib, REV, CTRE, etc.) to meet
@@ -103,7 +105,7 @@ public class CTREEncoderAdapter(
 /**
  * Adapts the TalonFX motor class's builtin encoder functionality to the charger encoder interface.
  * Also used for fusedCANCoder applications
- * (details specified in TalonFXConfiguration and the CTRE Phoenix 6 docs)
+ *
  */
 public class TalonFXEncoderAdapter(
     private val motorController: TalonFX
@@ -137,4 +139,36 @@ public class TalonFXEncoderAdapter(
         }
 
 }
+
+/**
+ * An adapter from the phoenix v5 encoder class to the ChargerLib Encoder interface.
+ */
+public class TalonSRXEncoderAdaptor(
+    private val ctreMotorController: TalonSRXEncoder,
+    private val pidIndex: Int,
+    private val anglePerPulse: Angle
+) : Encoder, TalonSRXEncoder by ctreMotorController {
+    public constructor(
+        ctreMotorController: TalonSRXEncoder,
+        pidIndex: Int,
+        pulsesPerRotation: Int /* Can't use Double here or both constructors will have the same JVM signature */
+    ) : this(ctreMotorController, pidIndex, (1/pulsesPerRotation.toDouble()).ofUnit(rotations))
+
+    override var angularPosition: Angle
+        get() = ctreMotorController.getSelectedSensorPosition(pidIndex) * anglePerPulse
+        set(value) {
+            ctreMotorController.setSelectedSensorPosition((value/anglePerPulse).value, pidIndex, DEFAULT_TIMEOUT_MS) // TODO: Should throw if error code?
+        }
+
+    override val angularVelocity: AngularVelocity
+        get() = ctreMotorController.getSelectedSensorVelocity(pidIndex) * anglePerPulse / timeBetweenPulses
+
+    public companion object {
+        private const val DEFAULT_TIMEOUT_MS = 500
+        private val timeBetweenPulses = 100.milli.seconds
+    }
+}
+
+
+
 
