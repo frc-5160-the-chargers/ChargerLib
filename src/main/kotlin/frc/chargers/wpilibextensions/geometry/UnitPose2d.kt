@@ -2,10 +2,12 @@ package frc.chargers.wpilibextensions.geometry
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
-import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.geometry.Pose2d
 
+/**
+ * A wrapper for WPILib's [Pose2d], adding in Unit support.
+ */
 public class UnitPose2d(public val translation: UnitTranslation2d, public val rotation: Angle){
 
     public constructor(x: Distance, y: Distance, rotation: Angle): this(UnitTranslation2d(x,y), rotation)

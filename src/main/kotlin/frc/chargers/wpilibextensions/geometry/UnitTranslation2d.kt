@@ -6,7 +6,9 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.interpolation.Interpolatable
 
 
-
+/**
+ * A wrapper for WPILib's [Translation2d], adding in Unit support.
+ */
 public class UnitTranslation2d(
     public val x: Distance,
     public val y: Distance,
@@ -22,8 +24,6 @@ public class UnitTranslation2d(
     // simplifies calculation
     private val baseTranslation = inUnit(meters)
     public fun inUnit(unit: Distance): Translation2d = Translation2d(x.inUnit(unit),y.inUnit(unit))
-
-
 
 
 
