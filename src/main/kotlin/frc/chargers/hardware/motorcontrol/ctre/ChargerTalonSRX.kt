@@ -16,6 +16,17 @@ import kotlin.math.roundToInt
 private const val TALON_SRX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
 private const val TIMEOUT_MILLIS = 1000
 
+public inline fun redlineSRX(
+    deviceNumber: Int,
+    encoderTicksPerRotation: Int = 1024,
+    configure: TalonSRXConfiguration.() -> Unit): ChargerTalonSRX =
+    ChargerTalonSRX(
+    deviceNumber,
+    encoderTicksPerRotation
+).also{
+    it.configure(TalonSRXConfiguration().apply(configure))
+}
+
 /**
  * Represents a TalonSRX motor controller.
  * Includes everything in the CTRE TalonSRX class,

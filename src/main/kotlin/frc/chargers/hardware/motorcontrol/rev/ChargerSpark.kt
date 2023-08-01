@@ -4,6 +4,9 @@ import edu.wpi.first.wpilibj.motorcontrol.Spark
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 
+public fun redlineSpark(channel: Int, configure: SparkConfiguration.() -> Unit): ChargerSpark =
+    ChargerSpark(channel).also{it.configure(SparkConfiguration().apply(configure))}
+
 /**
  * Represents a Spark motor controller.
  * Includes everything in the WPILib Spark class,
