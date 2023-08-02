@@ -8,12 +8,18 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection
 import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
 import com.revrobotics.SparkMaxAlternateEncoder
+import com.revrobotics.SparkMaxPIDController
+import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
+import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.ResettableEncoder
 import frc.chargers.hardware.sensors.encoders.RevEncoderAdapter
+import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
+import kotlin.math.PI
 import kotlin.math.roundToInt
 
 /**
@@ -45,7 +51,9 @@ public open class ChargerCANSparkMax(
     deviceId: Int,
     type: MotorType,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
-) : CANSparkMax(deviceId, type), EncoderMotorController, MotorConfigurable<SparkMaxConfiguration> {
+) : CANSparkMax(deviceId, type), FeedbackMotorController, MotorConfigurable<SparkMaxConfiguration> {
+
+
     override val encoder: ResettableEncoder by lazy {
         alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
             if (encoderType == null) {
@@ -95,6 +103,68 @@ public open class ChargerCANSparkMax(
             setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
         }
         burnFlash()
+    }
+
+
+    /*
+    Below is the implementation of the FeedbackMotorController Interface
+     */
+
+
+
+    // equivalent to SparkMax.getPIDController() (uses property access syntax)
+    private val innerController = pidController.also{
+        it.positionPIDWrappingEnabled = true
+        // SI units are used by default here, so radians are used.
+        it.positionPIDWrappingMaxInput = PI
+        it.positionPIDWrappingMinInput = -PI
+
+    }
+    private var currentConstants = PIDConstants(0.0,0.0,0.0)
+
+    private fun updateControllerConstants(newConstants: PIDConstants){
+        if(currentConstants != newConstants){
+            innerController.constants = newConstants
+            currentConstants = newConstants
+        }
+    }
+
+    private var SparkMaxPIDController.constants: PIDConstants
+        get() = PIDConstants(getP(0), getI(0), getD(0) )
+        set(newConstants){
+            setP(newConstants.kP,0)
+            setI(newConstants.kI,0)
+            setD(newConstants.kD,0)
+        }
+    override fun setAngularVelocity(
+        velocity: AngularVelocity,
+        pidConstants: PIDConstants,
+        feedforward: AngularMotorFF
+    ) {
+        updateControllerConstants(pidConstants)
+        innerController.setReference(velocity.siValue, ControlType.kVelocity,0,feedforward.calculate(velocity).inUnit(volts))
+    }
+
+    override fun setAngularPosition(position: Angle, pidConstants: PIDConstants) {
+        updateControllerConstants(pidConstants)
+        innerController.setReference(position.siValue,ControlType.kPosition,0)
+    }
+
+    override fun setAngularPosition(
+        position: Angle,
+        pidConstants: PIDConstants,
+        feedforward: AngularMotorFF,
+        constraints: AngularTrapezoidProfile.Constraints
+    ) {
+        val trapezoidProfile = AngularTrapezoidProfile(
+            constraints,
+            AngularTrapezoidProfile.State(position,AngularVelocity(0.0)),
+            AngularTrapezoidProfile.State(encoder.angularPosition,AngularVelocity(0.0))
+        )
+        val currentState = trapezoidProfile.calculateCurrentState()
+        updateControllerConstants(pidConstants)
+        innerController.setReference(currentState.position.siValue, ControlType.kPosition,0,feedforward.calculate(currentState.velocity).inUnit(volts))
+
     }
 }
 

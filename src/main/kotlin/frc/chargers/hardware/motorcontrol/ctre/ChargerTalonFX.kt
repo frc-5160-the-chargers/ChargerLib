@@ -48,7 +48,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
     final override val encoder: TimestampedEncoder =
         TalonFXEncoderAdapter(this)
 
-    override fun configure(configuration: TalonFXConfiguration){
+    final override fun configure(configuration: TalonFXConfiguration){
         configurator.apply(configuration.toCTRETalonFXConfiguration())
     }
 
@@ -57,14 +57,13 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
     Below is the Implementation of the FeedbackMotorController interface.
      */
 
-
     private val currentMMConfigs = MotionMagicConfigs()
     private val currentSlotConfigs = Slot0Configs()
     private val velocityRequest = VelocityVoltage(0.0).also{ it.Slot = 0 }
     private val positionRequest = PositionVoltage(0.0).also{it.Slot = 0 }
     private val mmRequest = MotionMagicVoltage(0.0).also{it.Slot = 0 }
 
-    override fun setAngularVelocity(
+    final override fun setAngularVelocity(
         velocity: AngularVelocity,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF
@@ -84,7 +83,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         setControl(velocityRequest)
     }
 
-    override fun setAngularPosition(position: Angle, pidConstants: PIDConstants) {
+    final override fun setAngularPosition(position: Angle, pidConstants: PIDConstants) {
         if (currentSlotConfigs.pidConstants != pidConstants){
             currentSlotConfigs.pidConstants = pidConstants
             configurator.apply(currentSlotConfigs)
@@ -93,7 +92,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         setControl(positionRequest)
     }
 
-    override fun setAngularPosition(
+    final override fun setAngularPosition(
         position: Angle,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
@@ -357,13 +356,6 @@ public var Slot0Configs.pidConstants: PIDConstants
         kD = newConstants.kD
     }
 
-/**
- * Code below is TBD at the moment.
-public fun CTRETalonFXConfiguration.toChargerConfiguration(): TalonFXConfiguration{
-    val config = TalonFXConfiguration()
-
-}
- **/
 
 
 
