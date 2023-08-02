@@ -19,8 +19,8 @@ private const val TIMEOUT_MILLIS = 1000
 public inline fun redlineSRX(
     deviceNumber: Int,
     encoderTicksPerRotation: Int = 1024,
-    configure: TalonSRXConfiguration.() -> Unit): ChargerTalonSRX =
-    ChargerTalonSRX(
+    configure: TalonSRXConfiguration.() -> Unit
+): ChargerTalonSRX = ChargerTalonSRX(
     deviceNumber,
     encoderTicksPerRotation
 ).also{

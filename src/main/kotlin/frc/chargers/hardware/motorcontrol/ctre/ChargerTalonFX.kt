@@ -2,13 +2,21 @@ package frc.chargers.hardware.motorcontrol.ctre
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
+import com.ctre.phoenix6.configs.MotionMagicConfigs
+import com.ctre.phoenix6.configs.Slot0Configs
+import com.ctre.phoenix6.controls.MotionMagicVoltage
+import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.*
-import frc.chargers.hardware.motorcontrol.EncoderMotorController
+import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.TalonFXEncoderAdapter
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
+import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
 
@@ -33,15 +41,86 @@ public inline fun falcon(canId: Int, canBus: String? = null, configure: TalonFXC
  * @see TalonFXConfiguration
  */
 public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : TalonFX(deviceNumber, canBus),
-    EncoderMotorController, MotorConfigurable<TalonFXConfiguration> {
+    FeedbackMotorController, MotorConfigurable<TalonFXConfiguration> {
+
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
-                                     // and does not pass around the reference to this class.
+    // and does not pass around the reference to this class.
     final override val encoder: TimestampedEncoder =
         TalonFXEncoderAdapter(this)
 
     override fun configure(configuration: TalonFXConfiguration){
         configurator.apply(configuration.toCTRETalonFXConfiguration())
     }
+
+
+    /*
+    Below is the Implementation of the FeedbackMotorController interface.
+     */
+
+
+    private val currentMMConfigs = MotionMagicConfigs()
+    private val currentSlotConfigs = Slot0Configs()
+    private val velocityRequest = VelocityVoltage(0.0).also{ it.Slot = 0 }
+    private val positionRequest = PositionVoltage(0.0).also{it.Slot = 0 }
+    private val mmRequest = MotionMagicVoltage(0.0).also{it.Slot = 0 }
+
+    override fun setAngularVelocity(
+        velocity: AngularVelocity,
+        pidConstants: PIDConstants,
+        feedforward: AngularMotorFF
+    ) {
+        if (currentSlotConfigs.pidConstants != pidConstants ||
+            currentSlotConfigs.kS != feedforward.kS.inUnit(volts) ||
+            currentSlotConfigs.kV != feedforward.getKV(rotations,seconds)){
+
+            currentSlotConfigs.pidConstants = pidConstants
+            currentSlotConfigs.kS = feedforward.kS.inUnit(volts)
+            currentSlotConfigs.kV = feedforward.getKV(rotations,seconds)
+            configurator.apply(currentSlotConfigs)
+        }
+
+        velocityRequest.Velocity = velocity.inUnit(rotations/seconds)
+        velocityRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.getOutput()).inUnit(volts)
+        setControl(velocityRequest)
+    }
+
+    override fun setAngularPosition(position: Angle, pidConstants: PIDConstants) {
+        if (currentSlotConfigs.pidConstants != pidConstants){
+            currentSlotConfigs.pidConstants = pidConstants
+            configurator.apply(currentSlotConfigs)
+        }
+        positionRequest.Position = position.inUnit(rotations)
+        setControl(positionRequest)
+    }
+
+    override fun setAngularPosition(
+        position: Angle,
+        pidConstants: PIDConstants,
+        feedforward: AngularMotorFF,
+        constraints: AngularTrapezoidProfile.Constraints
+    ) {
+        if(constraints.maxVelocity != currentMMConfigs.MotionMagicCruiseVelocity.ofUnit(rotations/seconds)
+            || constraints.maxAcceleration != currentMMConfigs.MotionMagicAcceleration.ofUnit(rotations/seconds/seconds)){
+            currentMMConfigs.MotionMagicCruiseVelocity = constraints.maxVelocity.inUnit(rotations/seconds)
+            currentMMConfigs.MotionMagicAcceleration = constraints.maxAcceleration.inUnit(rotations/seconds/seconds)
+            configurator.apply(currentMMConfigs)
+        }
+
+        if (currentSlotConfigs.pidConstants != pidConstants ||
+            currentSlotConfigs.kS != feedforward.kS.inUnit(volts) ||
+            currentSlotConfigs.kV != feedforward.getKV(rotations,seconds)){
+
+            currentSlotConfigs.pidConstants = pidConstants
+            currentSlotConfigs.kS = feedforward.kS.inUnit(volts)
+            currentSlotConfigs.kV = feedforward.getKV(rotations,seconds)
+            configurator.apply(currentSlotConfigs)
+        }
+
+        mmRequest.Position = position.inUnit(rotations)
+        mmRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.getOutput()).inUnit(volts)
+        setControl(mmRequest)
+    }
+
 
 }
 
@@ -85,7 +164,10 @@ public data class TalonFXConfiguration(
     var beepOnBoot: Boolean = true,
 
     // closed loop general configs
-    var closedLoopContinuousWrap: Boolean = false,
+
+    // Note: While this value is by default false in CTRE's configuration,
+    // We want it to be true.
+    var closedLoopContinuousWrap: Boolean = true,
 
     // Closed Loop Ramps Configs
     var dutyCycleClosedLoopRampPeriod: Time = Time(0.0),
@@ -266,6 +348,15 @@ public data class TalonFXConfiguration(
     }
 }
 
+
+public var Slot0Configs.pidConstants: PIDConstants
+    get() = PIDConstants(kP,kI,kD)
+    set(newConstants){
+        kP = newConstants.kP
+        kI = newConstants.kI
+        kD = newConstants.kD
+    }
+
 /**
  * Code below is TBD at the moment.
 public fun CTRETalonFXConfiguration.toChargerConfiguration(): TalonFXConfiguration{
@@ -273,4 +364,6 @@ public fun CTRETalonFXConfiguration.toChargerConfiguration(): TalonFXConfigurati
 
 }
  **/
+
+
 

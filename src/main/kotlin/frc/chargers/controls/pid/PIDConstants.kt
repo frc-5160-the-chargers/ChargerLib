@@ -23,7 +23,20 @@ public data class PIDConstants(
      */
     @JvmField
     public var kD: Double
-)
+){
+    override fun equals(other: Any?): Boolean = if (other is PIDConstants){
+        (other.kP == this.kP && other.kI == this.kI && other.kD == this.kD)
+    }else{
+        false
+    }
+
+    override fun hashCode(): Int {
+        var result = kP.hashCode()
+        result = 31 * result + kI.hashCode()
+        result = 31 * result + kD.hashCode()
+        return result
+    }
+}
 
 /**
  * Gets the [PIDConstants] of an existing [PIDController]

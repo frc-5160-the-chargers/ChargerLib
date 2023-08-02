@@ -13,7 +13,7 @@ import com.batterystaple.kmeasure.quantities.*
  * @see LinearMotorFF
  */
 public sealed class Gravity private constructor(
-    public val getValue: () -> Voltage = {Voltage(0.0)}
+    public val getOutput: () -> Voltage = {Voltage(0.0)}
 ) {
     public object None: Gravity()
 

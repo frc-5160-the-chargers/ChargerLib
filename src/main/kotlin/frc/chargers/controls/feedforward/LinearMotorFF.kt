@@ -20,20 +20,38 @@ import com.batterystaple.kmeasure.units.meters
  */
 public class LinearMotorFF(
     public val kS: Voltage,
-    public val kV: Double,
-    public val kA: Double,
+    private val kV: Double,
+    private val kA: Double,
     public val gravity: Gravity,
     public val distanceUnit: Distance,
     public val timeUnit: Time = seconds,
     public val getAcceleration: () -> Acceleration
 ): Feedforward<Velocity,Voltage>{
 
+    public fun getKV(newDistanceUnit: Distance, newTimeUnit: Time): Double{
+        return kV.ofUnit(volts * timeUnit / distanceUnit).inUnit(volts * newTimeUnit / newDistanceUnit)
+    }
+
+    /*
+    For this function, we had to use some workarounds.
+    
+    Unfortunately, kmeasure does not support the combination of more than 3 units, so the unit that kA is supposed to be in (volts * seconds * seconds / meters)
+    would result in a compiling error.
+    
+    Instead, we treat kA here as a Voltage divided by an acceleration, so we just convert the acceleration to the proper units, then return the right value.
+     */
+    public fun getKA(newDistanceUnit: Distance, newTimeUnit: Time): Double{
+        val kANumerator = kA
+        val kADenominator = 1.ofUnit(distanceUnit/timeUnit/timeUnit).inUnit(newDistanceUnit/newTimeUnit/newTimeUnit)
+        return kANumerator/kADenominator
+    }
+
     override fun calculate(value: Velocity): Voltage =
         SimpleMotorFeedforward(kS.inUnit(volts),kV,kA)
             .calculate(
                 value.inUnit(distanceUnit/ timeUnit),
                 getAcceleration().inUnit(distanceUnit/ timeUnit / timeUnit)
-            ).ofUnit(volts) + gravity.getValue()
+            ).ofUnit(volts) + gravity.getOutput()
 
     public fun convertToAngular(distancePerRadian: Distance): AngularMotorFF{
         val radiansPerMeter: Angle = (1 /distancePerRadian.inUnit(meters) ).ofUnit(radians)

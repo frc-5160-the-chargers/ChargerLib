@@ -13,5 +13,5 @@ import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 public interface FeedbackMotorController: EncoderMotorController{
     public fun setAngularVelocity(velocity: AngularVelocity, pidConstants: PIDConstants, feedforward: AngularMotorFF)
     public fun setAngularPosition(position: Angle, pidConstants: PIDConstants)
-    public fun setAngularPosition(position: Angle, pidConstants: PIDConstants, feedforward: AngularMotorFF, trapezoidProfileConstraints: AngularTrapezoidProfile.Constraints)
+    public fun setAngularPosition(position: Angle, pidConstants: PIDConstants, feedforward: AngularMotorFF, constraints: AngularTrapezoidProfile.Constraints)
 }
