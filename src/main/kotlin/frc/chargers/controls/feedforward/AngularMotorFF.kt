@@ -29,6 +29,10 @@ public class AngularMotorFF(
     public val getAcceleration: () -> AngularAcceleration = {AngularAcceleration(0.0)}
 ): Feedforward<AngularVelocity,Voltage>{
 
+    public companion object{
+        public val None: AngularMotorFF = AngularMotorFF(0.0.volts,0.0,0.0,Gravity.None,radians)
+    }
+
     public fun getKV(newAngleUnit: Angle, newTimeUnit: Time): Double{
         return kV.ofUnit(volts * angleUnit / timeUnit).inUnit(volts * newAngleUnit / newTimeUnit)
     }

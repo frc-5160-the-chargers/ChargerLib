@@ -25,8 +25,12 @@ public class LinearMotorFF(
     public val gravity: Gravity,
     public val distanceUnit: Distance,
     public val timeUnit: Time = seconds,
-    public val getAcceleration: () -> Acceleration
+    public val getAcceleration: () -> Acceleration = {Acceleration(0.0)}
 ): Feedforward<Velocity,Voltage>{
+
+    public companion object{
+        public val None: LinearMotorFF = LinearMotorFF(0.0.volts,0.0,0.0,Gravity.None,meters)
+    }
 
     public fun getKV(newDistanceUnit: Distance, newTimeUnit: Time): Double{
         return kV.ofUnit(volts * timeUnit / distanceUnit).inUnit(volts * newTimeUnit / newDistanceUnit)
