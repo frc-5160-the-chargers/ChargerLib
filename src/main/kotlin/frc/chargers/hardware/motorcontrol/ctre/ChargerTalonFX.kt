@@ -14,6 +14,7 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.TalonFXEncoderAdapter
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
@@ -64,7 +65,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
     private val mmRequest = MotionMagicVoltage(0.0).also{it.Slot = 0 }
 
     final override fun setAngularVelocity(
-        velocity: AngularVelocity,
+        target: AngularVelocity,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF
     ) {
@@ -78,25 +79,45 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
             configurator.apply(currentSlotConfigs)
         }
 
-        velocityRequest.Velocity = velocity.inUnit(rotations/seconds)
+        velocityRequest.Velocity = target.inUnit(rotations/seconds)
         velocityRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.getOutput()).inUnit(volts)
         setControl(velocityRequest)
     }
 
-    final override fun setAngularPosition(position: Angle, pidConstants: PIDConstants) {
+    final override fun setAngularPosition(target: Angle, pidConstants: PIDConstants, absoluteEncoder: Encoder?) {
+
         if (currentSlotConfigs.pidConstants != pidConstants){
             currentSlotConfigs.pidConstants = pidConstants
             configurator.apply(currentSlotConfigs)
         }
-        positionRequest.Position = position.inUnit(rotations)
+
+        /**
+         * Onboard PID control usually does not support external Encoders,
+         * especially not ones that aren't from the motor vendor.
+         *
+         * This essentially uses a workaround to allow an external Encoder to be used.
+         *
+         * Let's assume that the integrated Encoder returns a position of 540 degrees,
+         * the [absoluteEncoder] returns a position of 180 degrees,
+         * and the target is 90 degrees.
+         *
+         * By setting the target of the PID loop to 540 - (180-90) = 450 degrees,
+         * the same effect is acheived, since the motor is spinning 90 degrees to the left in both instances.
+         */
+        if (absoluteEncoder == null){
+            positionRequest.Position = target.inUnit(rotations)
+        }else{
+            positionRequest.Position = (encoder.angularPosition - (absoluteEncoder.angularPosition - target)).inUnit(rotations)
+        }
         setControl(positionRequest)
     }
 
     final override fun setAngularPosition(
-        position: Angle,
+        target: Angle,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
-        constraints: AngularTrapezoidProfile.Constraints
+        constraints: AngularTrapezoidProfile.Constraints,
+        absoluteEncoder: Encoder?
     ) {
         if(constraints.maxVelocity != currentMMConfigs.MotionMagicCruiseVelocity.ofUnit(rotations/seconds)
             || constraints.maxAcceleration != currentMMConfigs.MotionMagicAcceleration.ofUnit(rotations/seconds/seconds)){
@@ -115,7 +136,14 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
             configurator.apply(currentSlotConfigs)
         }
 
-        mmRequest.Position = position.inUnit(rotations)
+        /**
+         * See above for an explanation.
+         */
+        if (absoluteEncoder == null){
+            mmRequest.Position = target.inUnit(rotations)
+        }else{
+            mmRequest.Position = (encoder.angularPosition - (absoluteEncoder.angularPosition - target)).inUnit(rotations)
+        }
         mmRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.getOutput()).inUnit(volts)
         setControl(mmRequest)
     }

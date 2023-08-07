@@ -11,7 +11,6 @@ import com.revrobotics.SparkMaxAlternateEncoder
 import com.revrobotics.SparkMaxPIDController
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
@@ -137,34 +136,43 @@ public open class ChargerCANSparkMax(
             setD(newConstants.kD,0)
         }
     override fun setAngularVelocity(
-        velocity: AngularVelocity,
+        target: AngularVelocity,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF
     ) {
         updateControllerConstants(pidConstants)
-        innerController.setReference(velocity.siValue, ControlType.kVelocity,0,feedforward.calculate(velocity).inUnit(volts))
+        innerController.setReference(target.siValue, ControlType.kVelocity,0,feedforward.calculate(target).inUnit(volts))
     }
 
-    override fun setAngularPosition(position: Angle, pidConstants: PIDConstants) {
+    override fun setAngularPosition(target: Angle, pidConstants: PIDConstants,absoluteEncoder: Encoder?) {
+        val actualTarget = if (absoluteEncoder != null){
+            encoder.angularPosition - (absoluteEncoder.angularPosition - target)
+        }else{
+            encoder.angularPosition
+        }
         updateControllerConstants(pidConstants)
-        innerController.setReference(position.siValue,ControlType.kPosition,0)
+        innerController.setReference(actualTarget.siValue,ControlType.kPosition,0)
     }
 
     override fun setAngularPosition(
-        position: Angle,
+        target: Angle,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
-        constraints: AngularTrapezoidProfile.Constraints
+        constraints: AngularTrapezoidProfile.Constraints,
+        absoluteEncoder: Encoder?
     ) {
         val trapezoidProfile = AngularTrapezoidProfile(
             constraints,
-            AngularTrapezoidProfile.State(position,AngularVelocity(0.0)),
+            AngularTrapezoidProfile.State(target,AngularVelocity(0.0)),
             AngularTrapezoidProfile.State(encoder.angularPosition,AngularVelocity(0.0))
         )
         val currentState = trapezoidProfile.calculateCurrentState()
         updateControllerConstants(pidConstants)
-        innerController.setReference(currentState.position.siValue, ControlType.kPosition,0,feedforward.calculate(currentState.velocity).inUnit(volts))
-
+        if (absoluteEncoder != null){
+            innerController.setReference((currentState.position + (encoder.angularPosition - absoluteEncoder.angularPosition)).siValue, ControlType.kPosition,0,feedforward.calculate(currentState.velocity).inUnit(volts))
+        }else{
+            innerController.setReference(currentState.position.siValue, ControlType.kPosition,0,feedforward.calculate(currentState.velocity).inUnit(volts))
+        }
     }
 }
 

@@ -4,6 +4,7 @@ import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.AngularVelocity
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 
 
@@ -11,7 +12,61 @@ import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
  * An encoder motor controller with builtin PID support.
  */
 public interface FeedbackMotorController: EncoderMotorController{
-    public fun setAngularVelocity(velocity: AngularVelocity, pidConstants: PIDConstants, feedforward: AngularMotorFF)
-    public fun setAngularPosition(position: Angle, pidConstants: PIDConstants)
-    public fun setAngularPosition(position: Angle, pidConstants: PIDConstants, feedforward: AngularMotorFF, constraints: AngularTrapezoidProfile.Constraints)
+    /**
+     * Unlike position control, velocity control usually does not use external absolute encoders.
+     * So, an absoluteEncoder variable here is not necessary.
+     */
+    public fun setAngularVelocity(
+        target: AngularVelocity,
+        pidConstants: PIDConstants,
+        feedforward: AngularMotorFF
+    )
+
+    /**
+     * If [absoluteEncoder] is null,
+     * then the FeedbackMotorController will default to using the built-in encoder
+     * for position measuring.
+     */
+    public fun setAngularPosition(
+        target: Angle,
+        pidConstants: PIDConstants,
+        absoluteEncoder: Encoder?
+    )
+
+    public fun setAngularPosition(
+        target: Angle,
+        pidConstants: PIDConstants
+    ): Unit = setAngularPosition(
+        target,
+        pidConstants,
+        null
+    )
+
+    /**
+     * If [absoluteEncoder] is null,
+     * then the FeedbackMotorController will default to using the built-in encoder
+     * for position measuring.
+     */
+    public fun setAngularPosition(
+        target: Angle,
+        pidConstants: PIDConstants,
+        feedforward: AngularMotorFF,
+        constraints: AngularTrapezoidProfile.Constraints,
+        absoluteEncoder: Encoder?
+    )
+
+    public fun setAngularPosition(
+        target: Angle,
+        pidConstants: PIDConstants,
+        feedforward: AngularMotorFF,
+        constraints: AngularTrapezoidProfile.Constraints
+    ): Unit = setAngularPosition(
+        target,
+        pidConstants,
+        feedforward,
+        constraints,
+        null
+    )
+
+
 }
