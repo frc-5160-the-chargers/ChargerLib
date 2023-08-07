@@ -23,6 +23,13 @@ public class LinearTrapezoidProfile(
     public val initialState: State = State(Distance(0.0),Velocity(0.0))
 ) {
 
+    public companion object{
+        public val None: LinearTrapezoidProfile = LinearTrapezoidProfile(
+            Constraints(Velocity(0.0), Acceleration(0.0)),
+            State(Distance(0.0), Velocity(0.0))
+        )
+    }
+
     /**
      * Represents the constraints of a Trapezoid Profile, with the respective [maxVelocity] and [maxAcceleration].
      *

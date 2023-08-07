@@ -25,6 +25,13 @@ public class AngularTrapezoidProfile(
     public val initialState: State = State(Angle(0.0),AngularVelocity(0.0))
 ) {
 
+    public companion object{
+        public val None: AngularTrapezoidProfile = AngularTrapezoidProfile(
+            Constraints(AngularVelocity(0.0),AngularAcceleration(0.0)),
+            State(Angle(0.0),AngularVelocity(0.0))
+        )
+    }
+
     /**
      * Represents the constraints of a Trapezoid Profile, with the respective [maxVelocity] and [maxAcceleration].
      *

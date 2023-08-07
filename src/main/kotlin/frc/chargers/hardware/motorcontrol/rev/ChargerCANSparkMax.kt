@@ -117,9 +117,9 @@ public open class ChargerCANSparkMax(
         // SI units are used by default here, so radians are used.
         it.positionPIDWrappingMaxInput = PI
         it.positionPIDWrappingMinInput = -PI
-
     }
     private var currentConstants = PIDConstants(0.0,0.0,0.0)
+    private var trapezoidProfile = AngularTrapezoidProfile.None
 
     private fun updateControllerConstants(newConstants: PIDConstants){
         if(currentConstants != newConstants){
@@ -161,11 +161,13 @@ public open class ChargerCANSparkMax(
         constraints: AngularTrapezoidProfile.Constraints,
         absoluteEncoder: Encoder?
     ) {
-        val trapezoidProfile = AngularTrapezoidProfile(
-            constraints,
-            AngularTrapezoidProfile.State(target,AngularVelocity(0.0)),
-            AngularTrapezoidProfile.State(encoder.angularPosition,AngularVelocity(0.0))
-        )
+        if (trapezoidProfile.constraints != constraints){
+            trapezoidProfile = AngularTrapezoidProfile(
+                constraints,
+                AngularTrapezoidProfile.State(target,AngularVelocity(0.0)),
+                AngularTrapezoidProfile.State(encoder.angularPosition,AngularVelocity(0.0))
+            )
+        }
         val currentState = trapezoidProfile.calculateCurrentState()
         updateControllerConstants(pidConstants)
         if (absoluteEncoder != null){
