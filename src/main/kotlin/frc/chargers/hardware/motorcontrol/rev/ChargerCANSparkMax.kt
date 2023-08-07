@@ -148,7 +148,7 @@ public open class ChargerCANSparkMax(
         val actualTarget = if (absoluteEncoder != null){
             encoder.angularPosition - (absoluteEncoder.angularPosition - target)
         }else{
-            encoder.angularPosition
+            target
         }
         updateControllerConstants(pidConstants)
         innerController.setReference(actualTarget.siValue,ControlType.kPosition,0)
