@@ -1,6 +1,5 @@
 package frc.chargers.controls.pid
 
-import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.math.controller.PIDController
 import frc.chargers.commands.RunCommand
 import frc.chargers.controls.Controller

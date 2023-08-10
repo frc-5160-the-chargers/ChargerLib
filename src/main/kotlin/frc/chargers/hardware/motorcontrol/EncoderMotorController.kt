@@ -1,13 +1,7 @@
 package frc.chargers.hardware.motorcontrol
 
 
-import com.batterystaple.kmeasure.dimensions.AngleDimension
-import com.batterystaple.kmeasure.quantities.Angle
-import com.batterystaple.kmeasure.quantities.AngularVelocity
-import com.batterystaple.kmeasure.quantities.Voltage
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
-
-import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.sensors.encoders.Encoder
 
 /**

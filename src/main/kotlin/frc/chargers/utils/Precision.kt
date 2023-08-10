@@ -1,10 +1,7 @@
 package frc.chargers.utils
 
-import com.batterystaple.kmeasure.dimensions.AngleDimension
 import com.batterystaple.kmeasure.dimensions.AnyDimension
-import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Quantity
-import frc.chargers.wpilibextensions.kinematics.StandardDeviation
 
 /**
  * Example of use of Precision:

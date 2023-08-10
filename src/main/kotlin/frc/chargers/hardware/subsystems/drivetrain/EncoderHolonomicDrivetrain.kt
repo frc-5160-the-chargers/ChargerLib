@@ -162,7 +162,7 @@ public open class EncoderHolonomicDrivetrain(
     private val wheelDiameter: Length,
     private val trackWidth: Distance,
     private val wheelBase: Distance,
-    private val startingPose: UnitPose2d = UnitPose2d(),
+    public val startingPose: UnitPose2d = UnitPose2d(),
     // do drivetrain.fieldRelativeDrive = false to turn this option off.
     public var fieldRelativeDrive: Boolean = true,
     vararg poseSuppliers: RobotPoseSupplier
@@ -207,7 +207,7 @@ public open class EncoderHolonomicDrivetrain(
 
 
 
-    public var drivetrainPoseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
+    public val drivetrainPoseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
         drivetrainKinematics,
         gyro.heading.asRotation2d(),
         arrayOf(

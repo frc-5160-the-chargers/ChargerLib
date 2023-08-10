@@ -2,7 +2,6 @@ package frc.chargers.hardware.sensors.encoders
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
-import com.ctre.phoenix6.Utils
 
 import com.ctre.phoenix6.hardware.TalonFX
 import frc.chargers.utils.Measurement
