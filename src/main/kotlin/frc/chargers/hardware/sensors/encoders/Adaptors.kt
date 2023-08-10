@@ -80,8 +80,7 @@ public class CTREEncoderAdapter(
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = absolutePosition.timestamp.isValid,
-                getCurrentTime = { Utils.getCurrentTimeSeconds().ofUnit(seconds)}
+                isValid = absolutePosition.timestamp.isValid
             )
         }
 
@@ -91,8 +90,7 @@ public class CTREEncoderAdapter(
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations/seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = absolutePosition.timestamp.isValid,
-                getCurrentTime = { Utils.getCurrentTimeSeconds().ofUnit(seconds)}
+                isValid = absolutePosition.timestamp.isValid
             )
         }
     override val angularPosition: Angle
@@ -123,8 +121,7 @@ public class TalonFXEncoderAdapter(
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = statusSignal.timestamp.isValid,
-                getCurrentTime = { Utils.getCurrentTimeSeconds().ofUnit(seconds)}
+                isValid = statusSignal.timestamp.isValid
             )
         }
     override val timestampedAngularVelocity: Measurement<AngularVelocity>
@@ -133,8 +130,7 @@ public class TalonFXEncoderAdapter(
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations/seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = statusSignal.timestamp.isValid,
-                getCurrentTime = { Utils.getCurrentTimeSeconds().ofUnit(seconds)}
+                isValid = statusSignal.timestamp.isValid
             )
         }
 

@@ -1,9 +1,8 @@
 package frc.chargers.utils
 
 import com.batterystaple.kmeasure.quantities.Time
-import com.batterystaple.kmeasure.quantities.ofUnit
-import com.batterystaple.kmeasure.units.seconds
-import edu.wpi.first.wpilibj.Timer
+import frc.chargers.wpilibextensions.Timer
+
 
 /**
  * Represents a measurement read from a generic source, such as an encoder or potentiometer.
@@ -12,9 +11,10 @@ import edu.wpi.first.wpilibj.Timer
 public data class Measurement<T>(
     public val value: T,
     public val timestamp: Time,
-    public val isValid: Boolean,
-    private val getCurrentTime: () -> Time = {Timer.getFPGATimestamp().ofUnit(seconds)}
+    public val isValid: Boolean
 ){
-    public val latency: Time
-        get() = getCurrentTime() - timestamp
+    public val latency: Time = Timer.getFPGATimestamp() - timestamp
+
+    public val currentLatency: Time
+        get() = Timer.getFPGATimestamp() - timestamp
 }

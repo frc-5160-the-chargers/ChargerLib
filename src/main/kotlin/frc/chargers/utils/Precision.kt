@@ -4,6 +4,7 @@ import com.batterystaple.kmeasure.dimensions.AngleDimension
 import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Quantity
+import frc.chargers.wpilibextensions.kinematics.StandardDeviation
 
 /**
  * Example of use of Precision:
@@ -29,6 +30,17 @@ public sealed class Precision<out D : AnyDimension> {
 
     }
 }
+
+public inline fun <D: AnyDimension> Precision<D>.processValue(
+    whenValueExists: (Precision.Within<D>) -> Unit,
+    whenAllowOvershoot: () -> Unit){
+    if (this is Precision.Within<D>){
+        whenValueExists(this)
+    }else{
+        whenAllowOvershoot()
+    }
+}
+
 
 
 
