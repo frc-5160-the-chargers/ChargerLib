@@ -243,10 +243,26 @@ public open class EncoderHolonomicDrivetrain(
             bottomRight.getModuleState(gearRatio,wheelDiameter)
         )
         set(moduleStates){
-            topLeft.setDesiredState(moduleStates[0],gearRatio,wheelDiameter)
-            topRight.setDesiredState(moduleStates[1],gearRatio,wheelDiameter)
-            bottomLeft.setDesiredState(moduleStates[2],gearRatio,wheelDiameter)
-            bottomRight.setDesiredState(moduleStates[3],gearRatio,wheelDiameter)
+
+            topLeft.setDesiredState(SwerveModuleState.optimize(
+                moduleStates[0],
+                topLeft.getModulePosition(gearRatio, wheelDiameter).angle
+            ),gearRatio,wheelDiameter)
+
+            topRight.setDesiredState(SwerveModuleState.optimize(
+                moduleStates[1],
+                topRight.getModulePosition(gearRatio, wheelDiameter).angle
+            ),gearRatio,wheelDiameter)
+
+            bottomLeft.setDesiredState(SwerveModuleState.optimize(
+                moduleStates[2],
+                bottomLeft.getModulePosition(gearRatio, wheelDiameter).angle
+            ),gearRatio,wheelDiameter)
+
+            bottomRight.setDesiredState(SwerveModuleState.optimize(
+                moduleStates[3],
+                bottomRight.getModulePosition(gearRatio, wheelDiameter).angle
+            ),gearRatio,wheelDiameter)
         }
 
     public val currentModulePositions: Array<SwerveModulePosition>
@@ -346,12 +362,7 @@ public open class EncoderHolonomicDrivetrain(
             )
         }
 
-        currentModuleStates = drivetrainKinematics.toSwerveModuleStates(speeds).apply {
-            this[0] = SwerveModuleState.optimize(this[0],topLeft.getModulePosition(gearRatio, wheelDiameter).angle)
-            this[1] = SwerveModuleState.optimize(this[1],topRight.getModulePosition(gearRatio, wheelDiameter).angle)
-            this[2] = SwerveModuleState.optimize(this[2],bottomLeft.getModulePosition(gearRatio, wheelDiameter).angle)
-            this[3] = SwerveModuleState.optimize(this[3],bottomRight.getModulePosition(gearRatio, wheelDiameter).angle)
-        }
+        currentModuleStates = drivetrainKinematics.toSwerveModuleStates(speeds)
     }
 
     /**
