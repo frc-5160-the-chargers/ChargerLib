@@ -3,10 +3,8 @@ package frc.chargers.hardware.subsystems.drivetrain
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
-import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
-import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
@@ -27,11 +25,9 @@ import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.kinematics.ChassisPowers
-import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
-import frc.chargers.wpilibextensions.kinematics.StandardDeviation
-import frc.chargers.wpilibextensions.kinematics.processValue
 import kotlin.math.sqrt
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import frc.chargers.wpilibextensions.kinematics.*
 
 /**
  * A convenience function to create a [EncoderHolonomicDrivetrain]
@@ -171,7 +167,7 @@ public open class EncoderHolonomicDrivetrain(
     private val allPoseSuppliers: MutableList<RobotPoseSupplier> = poseSuppliers.toMutableList()
 
 
-    public val overallEncoder: Encoder = AverageEncoder(
+    private val overallEncoder: Encoder = AverageEncoder(
         topLeft.distanceMeasurementEncoder,
         topRight.distanceMeasurementEncoder,
         bottomLeft.distanceMeasurementEncoder,
@@ -183,8 +179,8 @@ public open class EncoderHolonomicDrivetrain(
     // it relies on the navX reading in order to be field-centric
     private val diagonal: Distance = sqrt((wheelBase.inUnit(meters) * wheelBase.inUnit(meters) + trackWidth.inUnit(meters) * trackWidth.inUnit(meters))).meters
 
-    public val wheelRadius: Distance = wheelDiameter / 2
-    public var wheelTravelPerMotorRadian: Distance = gearRatio * wheelRadius
+    private val wheelRadius: Distance = wheelDiameter / 2
+    private val wheelTravelPerMotorRadian: Distance = gearRatio * wheelRadius
 
     private val distanceOffset: Distance = overallEncoder.angularPosition * wheelTravelPerMotorRadian
     public val distanceTraveled: Distance
@@ -323,9 +319,9 @@ public open class EncoderHolonomicDrivetrain(
      * A version of velocityDrive that uses [ChassisSpeeds] instead.
      */
     public fun velocityDrive(speeds: ChassisSpeeds): Unit = velocityDrive(
-        speeds.vxMetersPerSecond.ofUnit(meters/seconds),
-        speeds.vyMetersPerSecond.ofUnit(meters/seconds),
-        speeds.omegaRadiansPerSecond.ofUnit(radians/seconds)
+        speeds.xVelocity,
+        speeds.yVelocity,
+        speeds.rotationSpeed
     )
 
     /**
@@ -336,11 +332,11 @@ public open class EncoderHolonomicDrivetrain(
 
 
         val speeds = if(fieldRelativeDrive){
-            ChassisSpeeds.fromFieldRelativeSpeeds(
-                xVelocity.inUnit(meters/seconds),
-                yVelocity.inUnit(meters/seconds),
-                rotationVelocity.inUnit(radians/seconds),
-                gyro.heading.asRotation2d()
+            FieldRelativeChassisSpeeds(
+                xVelocity,
+                yVelocity,
+                rotationVelocity,
+                gyro.heading
             )
         }else{
             ChassisSpeeds(
@@ -349,7 +345,13 @@ public open class EncoderHolonomicDrivetrain(
                 rotationVelocity
             )
         }
-        currentModuleStates = drivetrainKinematics.toSwerveModuleStates(speeds)
+
+        currentModuleStates = drivetrainKinematics.toSwerveModuleStates(speeds).apply {
+            this[0] = SwerveModuleState.optimize(this[0],topLeft.getModulePosition(gearRatio, wheelDiameter).angle)
+            this[1] = SwerveModuleState.optimize(this[1],topRight.getModulePosition(gearRatio, wheelDiameter).angle)
+            this[2] = SwerveModuleState.optimize(this[2],bottomLeft.getModulePosition(gearRatio, wheelDiameter).angle)
+            this[3] = SwerveModuleState.optimize(this[3],bottomRight.getModulePosition(gearRatio, wheelDiameter).angle)
+        }
     }
 
     /**
