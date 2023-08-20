@@ -28,10 +28,11 @@ public class CommandBuilder {
     /**
      * Adds a single command to be run until its completion.
      */
-    public fun <C : Command> runUntilFinish(command: C): C {
-        commands.add(command)
-        return command
+    public operator fun <C : Command> C.unaryPlus(): C{
+        commands.add(this)
+        return this
     }
+
 
     /**
      * Adds a command that will run once and then complete.
@@ -42,13 +43,6 @@ public class CommandBuilder {
     public fun runOnce(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): InstantCommand =
         InstantCommand(*requirements) { CodeBlockContext.execute() }.also(commands::add)
 
-    /**
-     * Adds an InstantCommand that will run once and then complete.
-     *
-     * @see runUntilFinish
-     */
-    public fun runOnce(command: InstantCommand): InstantCommand =
-        runUntilFinish(command)
 
     /**
      * Adds a command that will run *until* [condition] is met.
@@ -56,7 +50,7 @@ public class CommandBuilder {
      * @param condition the condition to be met
      * @param command the command to run until [condition] is met
      */
-    public fun runUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
+    public fun loopUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
         command.until { CodeBlockContext.condition() }
             .also(commands::add)
 
@@ -67,8 +61,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run until [condition] is met
      */
-    public inline fun runUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() })
+    public inline fun loopUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+        loopUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() })
 
     /**
      * Adds a command that will run *while* [condition] is true.
@@ -77,8 +71,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run
      */
-    public inline fun runWhile(crossinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, noinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runUntil({ !condition() }, *requirements, execute=execute)
+    public inline fun loopWhile(crossinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, noinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+        loopUntil({ !condition() }, *requirements, execute=execute)
 
     /**
      * Adds several commands that will run at the same time, all stopping as soon as one finishes.
@@ -122,7 +116,7 @@ public class CommandBuilder {
      * @param command the command to run
      * @param timeInterval the maximum allowed runtime of the command
      */
-    public fun runFor(timeInterval: Time, command: Command): ParallelRaceGroup {
+    public fun loopFor(timeInterval: Time, command: Command): ParallelRaceGroup {
         return command
             .withTimeout(timeInterval.inUnit(seconds))
             .also(commands::add)
@@ -135,8 +129,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public inline fun runFor(timeInterval: Time, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runFor(timeInterval, RunCommand(*requirements) { CodeBlockContext.execute() })
+    public inline fun loopFor(timeInterval: Time, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+        loopFor(timeInterval, RunCommand(*requirements) { CodeBlockContext.execute() })
 
     /**
      * Adds a command to be run continuously.
@@ -144,7 +138,7 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public fun runForever(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): RunCommand =
+    public fun loopForever(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): RunCommand =
             RunCommand(*requirements) { CodeBlockContext.execute() }
                 .also(commands::add)
 
@@ -154,7 +148,7 @@ public class CommandBuilder {
      * Useful if a delay is needed between two commands in a [SequentialCommandGroup].
      * Note that running this in parallel with other commands is unlikely to be useful.
      */
-    public fun waitFor(timeInterval: Time): ParallelRaceGroup = runFor(timeInterval) {}
+    public fun waitFor(timeInterval: Time): ParallelRaceGroup = loopFor(timeInterval) {}
 
     /**
      * Adds a command that does nothing until a [condition] is met, then completes.
@@ -162,7 +156,7 @@ public class CommandBuilder {
      * Useful if some condition must be met before proceeding to the next command in a [SequentialCommandGroup].
      * Note that running this in parallel with other commands is unlikely to be useful.
      */
-    public fun waitUntil(condition: CodeBlockContext.() -> Boolean): ParallelRaceGroup = runUntil(condition) {}
+    public fun waitUntil(condition: CodeBlockContext.() -> Boolean): ParallelRaceGroup = loopUntil(condition) {}
 
     /**
      * Adds a command that prints a message.

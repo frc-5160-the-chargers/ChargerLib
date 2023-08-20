@@ -193,7 +193,7 @@ public open class EncoderHolonomicDrivetrain(
                     wheelTravelPerMotorRadian
 
 
-    private val drivetrainKinematics: SwerveDriveKinematics =
+    public val drivetrainKinematics: SwerveDriveKinematics =
         SwerveDriveKinematics(
             UnitTranslation2d(trackWidth/2,wheelBase/2).inUnit(meters),
             UnitTranslation2d(trackWidth/2,-wheelBase/2).inUnit(meters),
@@ -234,6 +234,14 @@ public open class EncoderHolonomicDrivetrain(
     public val yCoordinate: Distance
         get() = drivetrainPoseEstimator.estimatedPosition.y.meters
 
+    public fun resetPose(pose: UnitPose2d, gyroAngle: Angle = gyro.heading){
+        drivetrainPoseEstimator.resetPosition(
+            gyroAngle.asRotation2d(),
+            currentModulePositions,
+            pose.inUnit(meters)
+        )
+    }
+
 
     public var currentModuleStates: Array<SwerveModuleState>
         get() = arrayOf(
@@ -272,6 +280,8 @@ public open class EncoderHolonomicDrivetrain(
             bottomLeft.getModulePosition(gearRatio,wheelDiameter),
             bottomRight.getModulePosition(gearRatio,wheelDiameter)
         )
+
+
 
     /**
      * A variant of the swerveDrive function which usses [ChassisPowers] instead.
