@@ -1,6 +1,7 @@
 package frc.chargers.controls.pid
 
 import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.ProfiledPIDController
 
 /**
  * A data class representing the various constants needed to configure a PID controller.
@@ -25,9 +26,17 @@ public data class PIDConstants(
     public var kD: Double
 )
 
+
 /**
  * Gets the [PIDConstants] of an existing [PIDController]
  */
 public var PIDController.constants: PIDConstants
+    get() = PIDConstants(p, i, d)
+    set(newConstants) = setPID(newConstants.kP, newConstants.kI, newConstants.kD)
+
+/**
+ * Gets the [PIDConstants] of an existing [ProfiledPIDController]
+ */
+public var ProfiledPIDController.constants: PIDConstants
     get() = PIDConstants(p, i, d)
     set(newConstants) = setPID(newConstants.kP, newConstants.kI, newConstants.kD)
