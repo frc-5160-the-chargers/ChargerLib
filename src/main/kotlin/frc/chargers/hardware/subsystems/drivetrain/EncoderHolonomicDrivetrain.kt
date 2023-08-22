@@ -154,7 +154,7 @@ public class EncoderHolonomicDrivetrain(
     private val topRight: NonConfigurableHolonomicModule,
     private val bottomLeft: NonConfigurableHolonomicModule,
     private val bottomRight: NonConfigurableHolonomicModule,
-    private val gyro: HeadingProvider,
+    public val gyro: HeadingProvider,
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,
     override val wheelDiameter: Length,
     private val trackWidth: Distance,

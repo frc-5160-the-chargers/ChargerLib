@@ -10,9 +10,13 @@ import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
+import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
 import kotlin.internal.LowPriorityInOverloadResolution
 
 private const val DEFAULT_MAX_STEERING_POWER = 0.3
+
+private val DEFAULT_MAX_STEERING_VELOCITY = AngularVelocity(0.3)
 
 /**
  * Adds a command to the command builder driving the robot for
@@ -80,6 +84,76 @@ public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, power
         arcadeDrive(power, pid.calculateOutput().value)
     }
 }
+
+context(CommandBuilder, TurnPIDConstants)
+@JvmName("driveDistanceWithVelocity")
+@LowPriorityInOverloadResolution
+public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, velocity: Velocity, maxSteeringVelocity: AngularVelocity = DEFAULT_MAX_STEERING_VELOCITY): Command =
+    driveStraight(distance, velocity, turnPIDConstants, maxSteeringVelocity)
+
+context(CommandBuilder)
+@JvmName("driveDistanceWithVelocity")
+@LowPriorityInOverloadResolution
+public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, velocity: Velocity, steeringPIDConstants: PIDConstants, maxSteeringVelocity: AngularVelocity = DEFAULT_MAX_STEERING_VELOCITY): Command = runSequentially {
+    val initialPosition by getOnceDuringRun { distanceTraveled }
+    val initialHeading by getOnceDuringRun { heading }
+    val pid by getOnceDuringRun {
+        UnitSuperPIDController(
+            pidConstants = steeringPIDConstants,
+            getInput = { heading },
+            target = initialHeading,
+            outputRange = -maxSteeringVelocity..maxSteeringVelocity
+        )
+    }
+
+    loopUntil(
+        if (velocity > Velocity(0.0)) {
+            { (distanceTraveled - initialPosition) >= distance }
+        } else {
+            { (distanceTraveled - initialPosition) <= distance }
+        },
+        this@driveStraight
+    ) {
+        velocityDrive(ChassisSpeeds(velocity,Quantity(0.0),pid.calculateOutput()))
+    }
+}
+
+context(CommandBuilder, HeadingProvider)
+@JvmName("driveTimeWithVelocity")
+@LowPriorityInOverloadResolution
+public fun EncoderDifferentialDrivetrain.driveStraight(time: Time, velocity: Velocity, steeringPIDConstants: PIDConstants, maxSteeringVelocity: AngularVelocity = DEFAULT_MAX_STEERING_VELOCITY): Command = runSequentially {
+    val initialHeading by getOnceDuringRun { this@HeadingProvider.heading }
+
+    val pid by getOnceDuringRun {
+        UnitSuperPIDController(
+            pidConstants = steeringPIDConstants,
+            getInput = { this@HeadingProvider.heading },
+            target = initialHeading,
+            outputRange = -maxSteeringVelocity..maxSteeringVelocity
+        )
+    }
+
+
+    loopFor(time, this@driveStraight) { velocityDrive(ChassisSpeeds(velocity,Quantity(0.0),pid.calculateOutput())) }
+}
+
+context(CommandBuilder)
+@JvmName("swerveDriveTime")
+@LowPriorityInOverloadResolution
+public fun EncoderHolonomicDrivetrain.driveStraight(direction: Angle = gyro.heading, time: Time, power: Double): Command = loopFor(time){
+    directionalDrive(power,direction)
+}
+
+context(CommandBuilder)
+@JvmName("swerveDriveDistance")
+@LowPriorityInOverloadResolution
+public fun EncoderHolonomicDrivetrain.driveStraight(direction: Angle = gyro.heading, distance: Distance, power: Double): Command = loopWhile({distanceTraveled < distance}){
+    directionalDrive(power,direction)
+}
+
+
+
+
 
 context(CodeBlockContext, CommandBuilder)
 @Suppress("unused", "DeprecatedCallableAddReplaceWith", "UNUSED_PARAMETER", "UnusedReceiverParameter")

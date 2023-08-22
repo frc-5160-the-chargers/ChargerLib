@@ -15,8 +15,10 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.utils.PathPlannerAutoContext
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
+import kotlin.internal.LowPriorityInOverloadResolution
 
 context(CommandBuilder)
+@LowPriorityInOverloadResolution
 public fun EncoderDifferentialDrivetrain.followPath(
     trajectory: PathPlannerTrajectory,
     isFirstPath: Boolean = false,
@@ -44,6 +46,7 @@ public fun EncoderDifferentialDrivetrain.followPath(
 }
 
 context(CommandBuilder)
+@LowPriorityInOverloadResolution
 public fun EncoderDifferentialDrivetrain.followPath(
     trajectoryName: String,
     pathConstraints: LinearTrapezoidProfile.Constraints,

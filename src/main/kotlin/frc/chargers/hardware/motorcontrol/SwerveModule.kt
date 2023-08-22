@@ -11,6 +11,7 @@ import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.utils.Precision
 import frc.chargers.wpilibextensions.kinematics.SwerveModuleState
 import frc.chargers.wpilibextensions.kinematics.SwerveModulePosition
 
@@ -27,6 +28,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
     turnPIDConstants: PIDConstants,
     drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     velocityFF: AngularMotorFF = AngularMotorFF.None,
+    turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableSwerveModule(
     turnMotor,
@@ -35,6 +37,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
     turnPIDConstants,
     drivePIDConstants,
     velocityFF,
+    turnPrecision,
     useOnboardPIDIfAvailable
 ), HolonomicModule<TMC,DMC>{
 
@@ -46,6 +49,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             turnPIDConstants: PIDConstants,
             drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
             velocityFF: AngularMotorFF = AngularMotorFF.None,
+            turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
             useOnboardPIDIfAvailable: Boolean = false,
             turnMotorConfiguration: TMC? = null,
             driveMotorConfiguration: DMC? = null
@@ -65,6 +69,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             turnPIDConstants,
             drivePIDConstants,
             velocityFF,
+            turnPrecision,
             useOnboardPIDIfAvailable
         )
     }
@@ -94,6 +99,7 @@ public open class NonConfigurableSwerveModule(
     public val turnPIDConstants: PIDConstants,
     public val drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     public val velocityFF: AngularMotorFF = AngularMotorFF.None,
+    public val turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableHolonomicModule{
 
@@ -169,10 +175,31 @@ public open class NonConfigurableSwerveModule(
         if (abs(delta) > 90.0.degrees){
             val newDirection = ((direction.inUnit(degrees) + 180) % 360).ofUnit(degrees)
             driveMotor.set(-power)
-            turnMotorPositionSetter(newDirection)
+            when(turnPrecision){
+                Precision.AllowOvershoot -> turnMotorPositionSetter(newDirection)
+
+                is Precision.Within -> {
+                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-newDirection in turnPrecision.allowableError){
+                        turnMotorPositionSetter(newDirection)
+                    }else{
+                        turnMotor.set(0.0)
+                    }
+                }
+            }
+
         }else{
             driveMotor.set(power)
-            turnMotorPositionSetter(direction)
+            when(turnPrecision){
+                Precision.AllowOvershoot -> turnMotorPositionSetter(direction)
+
+                is Precision.Within -> {
+                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-direction in turnPrecision.allowableError){
+                        turnMotorPositionSetter(direction)
+                    }else{
+                        turnMotor.set(0.0)
+                    }
+                }
+            }
         }
     }
 
@@ -181,10 +208,30 @@ public open class NonConfigurableSwerveModule(
         if (abs(delta) > 90.0.degrees){
             val newDirection = ((direction.inUnit(degrees) + 180) % 360).ofUnit(degrees)
             driveMotorVelocitySetter(-angularVelocity)
-            turnMotorPositionSetter(newDirection)
+            when(turnPrecision){
+                Precision.AllowOvershoot -> turnMotorPositionSetter(newDirection)
+
+                is Precision.Within -> {
+                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-newDirection in turnPrecision.allowableError){
+                        turnMotorPositionSetter(newDirection)
+                    }else{
+                        turnMotor.set(0.0)
+                    }
+                }
+            }
         }else{
             driveMotorVelocitySetter(angularVelocity)
-            turnMotorPositionSetter(direction)
+            when(turnPrecision){
+                Precision.AllowOvershoot -> turnMotorPositionSetter(direction)
+
+                is Precision.Within -> {
+                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-direction in turnPrecision.allowableError){
+                        turnMotorPositionSetter(direction)
+                    }else{
+                        turnMotor.set(0.0)
+                    }
+                }
+            }
         }
     }
 

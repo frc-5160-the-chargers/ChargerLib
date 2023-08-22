@@ -1,5 +1,6 @@
 package frc.chargers.hardware.motorcontrol
 
+import com.batterystaple.kmeasure.dimensions.AngleDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.volts
@@ -10,6 +11,7 @@ import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.utils.Precision
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.kinematics.SwerveModulePosition
 import frc.chargers.wpilibextensions.kinematics.SwerveModuleState
@@ -28,6 +30,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
     profileConstraints: AngularTrapezoidProfile.Constraints,
     drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     velocityFF: AngularMotorFF = AngularMotorFF.None,
+    turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableProfiledSwerveModule(
     turnMotor,
@@ -38,6 +41,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
     profileConstraints,
     drivePIDConstants,
     velocityFF,
+    turnPrecision,
     useOnboardPIDIfAvailable
 ), HolonomicModule<TMC,DMC>{
 
@@ -51,6 +55,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
             profileConstraints: AngularTrapezoidProfile.Constraints,
             drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
             velocityFF: AngularMotorFF = AngularMotorFF.None,
+            turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
             useOnboardPIDIfAvailable: Boolean = false,
             turnMotorConfiguration: TMC? = null,
             driveMotorConfiguration: DMC? = null
@@ -72,6 +77,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
                 profileConstraints,
                 drivePIDConstants,
                 velocityFF,
+                turnPrecision,
                 useOnboardPIDIfAvailable
             )
     }
@@ -103,7 +109,8 @@ public open class NonConfigurableProfiledSwerveModule(
     public val profileConstraints: AngularTrapezoidProfile.Constraints,
     public val drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     public val velocityFF: AngularMotorFF = AngularMotorFF.None,
-    useOnboardPIDIfAvailable: Boolean = false
+    public val turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
+    useOnboardPIDIfAvailable: Boolean = false,
 ): NonConfigurableHolonomicModule{
 
     override val distanceMeasurementEncoder: Encoder = driveMotor.encoder
@@ -182,10 +189,30 @@ public open class NonConfigurableProfiledSwerveModule(
         if (abs(delta) > 90.0.degrees){
             val newDirection = ((direction.inUnit(degrees) + 180) % 360).ofUnit(degrees)
             driveMotor.set(-power)
-            turnMotorPositionSetter(newDirection)
+            when(turnPrecision){
+                Precision.AllowOvershoot -> turnMotorPositionSetter(newDirection)
+
+                is Precision.Within -> {
+                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-newDirection in turnPrecision.allowableError){
+                        turnMotorPositionSetter(newDirection)
+                    }else{
+                        turnMotor.set(0.0)
+                    }
+                }
+            }
         }else{
             driveMotor.set(power)
-            turnMotorPositionSetter(direction)
+            when(turnPrecision){
+                Precision.AllowOvershoot -> turnMotorPositionSetter(direction)
+
+                is Precision.Within -> {
+                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-direction in turnPrecision.allowableError){
+                        turnMotorPositionSetter(direction)
+                    }else{
+                        turnMotor.set(0.0)
+                    }
+                }
+            }
         }
     }
 
@@ -194,10 +221,30 @@ public open class NonConfigurableProfiledSwerveModule(
         if (abs(delta) > 90.0.degrees){
             val newDirection = ((direction.inUnit(degrees) + 180) % 360).ofUnit(degrees)
             driveMotorVelocitySetter(-angularVelocity)
-            turnMotorPositionSetter(newDirection)
+            when(turnPrecision){
+                Precision.AllowOvershoot -> turnMotorPositionSetter(newDirection)
+
+                is Precision.Within -> {
+                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-newDirection in turnPrecision.allowableError){
+                        turnMotorPositionSetter(newDirection)
+                    }else{
+                        turnMotor.set(0.0)
+                    }
+                }
+            }
         }else{
             driveMotorVelocitySetter(angularVelocity)
-            turnMotorPositionSetter(direction)
+            when(turnPrecision){
+                Precision.AllowOvershoot -> turnMotorPositionSetter(direction)
+
+                is Precision.Within -> {
+                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-direction in turnPrecision.allowableError){
+                        turnMotorPositionSetter(direction)
+                    }else{
+                        turnMotor.set(0.0)
+                    }
+                }
+            }
         }
     }
 
