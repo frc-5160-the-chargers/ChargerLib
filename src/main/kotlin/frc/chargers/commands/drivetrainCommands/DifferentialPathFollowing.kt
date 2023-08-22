@@ -11,7 +11,6 @@ import com.pathplanner.lib.commands.PPRamseteCommand
 import edu.wpi.first.math.controller.RamseteController
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CommandBuilder
-import frc.chargers.commands.buildCommand
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.utils.PathPlannerAutoContext
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
@@ -69,8 +68,8 @@ public inline fun EncoderDifferentialDrivetrain.runPathPlannerAuto(
     eventsBlock: PathPlannerAutoContext.() -> Unit
 ): Command{
     val eventMap: Map<String,Command> = PathPlannerAutoContext().apply(eventsBlock).eventMap
-    return buildCommand{
-        var firstTrajectory = true;
+    return runSequentially{
+        var firstTrajectory = true
         for (trajectory in trajectories){
             +FollowPathWithEvents(
                 // returns a path following command
@@ -84,7 +83,7 @@ public inline fun EncoderDifferentialDrivetrain.runPathPlannerAuto(
             )
             firstTrajectory = false
         }
-    }.also(commands::add)
+    }
 
 }
 

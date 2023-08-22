@@ -149,7 +149,7 @@ public fun <TMC: MotorConfiguration, DMC: MotorConfiguration> EncoderHolonomicDr
  * An implementation of Swerve drive, with encoders, to be used in future robot code.
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
  */
-public open class EncoderHolonomicDrivetrain(
+public class EncoderHolonomicDrivetrain(
     private val topLeft: NonConfigurableHolonomicModule,
     private val topRight: NonConfigurableHolonomicModule,
     private val bottomLeft: NonConfigurableHolonomicModule,
