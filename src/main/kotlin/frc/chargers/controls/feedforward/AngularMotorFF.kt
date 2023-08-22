@@ -6,7 +6,7 @@ import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.math.controller.*
-
+import frc.chargers.utils.WheelRatioProvider
 
 
 /**
@@ -86,5 +86,9 @@ public class AngularMotorFF(
 
     public fun convertToLinear(gearRatio: Double, wheelDiameter: Length): LinearMotorFF =
         convertToLinear(gearRatio*wheelDiameter)
+
+    context(WheelRatioProvider)
+    public fun convertToLinear(): LinearMotorFF =
+        convertToLinear(gearRatio,wheelDiameter)
 
 }

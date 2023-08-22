@@ -26,8 +26,8 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
     turnPIDConstants: PIDConstants,
     turnFF: AngularMotorFF = AngularMotorFF.None,
     profileConstraints: AngularTrapezoidProfile.Constraints,
-    drivePIDConstants: PIDConstants,
-    velocityFF: AngularMotorFF,
+    drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    velocityFF: AngularMotorFF = AngularMotorFF.None,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableProfiledSwerveModule(
     turnMotor,
@@ -49,8 +49,8 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
             turnPIDConstants: PIDConstants,
             turnFF: AngularMotorFF = AngularMotorFF.None,
             profileConstraints: AngularTrapezoidProfile.Constraints,
-            drivePIDConstants: PIDConstants,
-            velocityFF: AngularMotorFF,
+            drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+            velocityFF: AngularMotorFF = AngularMotorFF.None,
             useOnboardPIDIfAvailable: Boolean = false,
             turnMotorConfiguration: TMC? = null,
             driveMotorConfiguration: DMC? = null
@@ -101,8 +101,8 @@ public open class NonConfigurableProfiledSwerveModule(
     public val turnPIDConstants: PIDConstants,
     public val turnFF: AngularMotorFF = AngularMotorFF.None,
     public val profileConstraints: AngularTrapezoidProfile.Constraints,
-    public val drivePIDConstants: PIDConstants,
-    public val velocityFF: AngularMotorFF,
+    public val drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    public val velocityFF: AngularMotorFF = AngularMotorFF.None,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableHolonomicModule{
 

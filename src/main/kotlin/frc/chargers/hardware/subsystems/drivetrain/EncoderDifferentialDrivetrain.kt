@@ -1,13 +1,31 @@
 package frc.chargers.hardware.subsystems.drivetrain
 
 import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.meters
+import com.batterystaple.kmeasure.units.seconds
+import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
+import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
+import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.encoders.AverageEncoder
+import frc.chargers.utils.Measurement
+import frc.chargers.utils.WheelRatioProvider
+import frc.chargers.wpilibextensions.Timer
+import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargers.wpilibextensions.geometry.ofUnit
+import frc.chargers.wpilibextensions.kinematics.StandardDeviation
+import frc.chargers.wpilibextensions.kinematics.processValue
+import frc.chargers.wpilibextensions.motorcontrol.setVoltage
 
 @PublishedApi
 internal const val DEFAULT_GEAR_RATIO: Double = 1.0
@@ -22,9 +40,14 @@ public inline fun sparkMaxDrivetrain(
     invertMotors: Boolean = false, gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     width: Distance,
+    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
+    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    startingPose: UnitPose2d = UnitPose2d(),
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, SparkMaxConfiguration().apply(configure))
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF, startingPose,SparkMaxConfiguration().apply(configure))
 
 /**
  * A convenience function to create a [EncoderDifferentialDrivetrain]
@@ -37,9 +60,14 @@ public inline fun talonFXDrivetrain(
     gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     width: Distance,
+    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
+    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    startingPose: UnitPose2d = UnitPose2d(),
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, TalonFXConfiguration().apply(configure))
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF, startingPose,TalonFXConfiguration().apply(configure))
 
 /**
  * A convenience function to create an [EncoderDifferentialDrivetrain]
@@ -51,6 +79,11 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
     invertMotors: Boolean = false, gearRatio: Double,
     wheelDiameter: Length,
     width: Distance,
+    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
+    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    startingPose: UnitPose2d = UnitPose2d(),
     configuration: C
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
@@ -59,7 +92,12 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
         invertMotors = invertMotors,
         gearRatio = gearRatio,
         wheelDiameter = wheelDiameter,
-        width = width
+        width = width,
+        leftVelocityConstants = leftVelocityConstants,
+        leftMotorFF = leftMotorFF,
+        rightVelocityConstants = rightVelocityConstants,
+        rightMotorFF = rightMotorFF,
+        startingPose = startingPose
     )
 
 /**
@@ -69,14 +107,21 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
  *
  * @see DifferentialDrivetrain
  */
-public open class EncoderDifferentialDrivetrain(
+public class EncoderDifferentialDrivetrain(
     private val leftMotors: NonConfigurableEncoderMotorControllerGroup,
     private val rightMotors: NonConfigurableEncoderMotorControllerGroup,
     invertMotors: Boolean = false,
-    protected val gearRatio: Double = DEFAULT_GEAR_RATIO,
-    protected val wheelDiameter: Length,
-    protected val width: Distance
-) : BasicDifferentialDrivetrain(leftMotors, rightMotors, invertMotors), HeadingProvider {
+    override val gearRatio: Double = DEFAULT_GEAR_RATIO,
+    override val wheelDiameter: Length,
+    protected val width: Distance,
+    private val leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    private val leftMotorFF: AngularMotorFF = AngularMotorFF.None,
+    private val rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    private val rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    private val startingPose: UnitPose2d = UnitPose2d(),
+    vararg poseSuppliers: RobotPoseSupplier
+) : BasicDifferentialDrivetrain(leftMotors, rightMotors, invertMotors),
+    HeadingProvider, RobotPoseSupplier, WheelRatioProvider {
     private val overallEncoder = AverageEncoder(leftMotors, rightMotors)
 
     private val wheelRadius = wheelDiameter / 2
@@ -128,4 +173,123 @@ public open class EncoderDifferentialDrivetrain(
     public override val heading: Angle
         get() = wheelTravelPerMotorRadian *
                 (rightMotors.encoder.angularPosition - leftMotors.encoder.angularPosition) / width
+
+
+    /**
+     * The kinematics of the drivetrain.
+     *
+     * @see DifferentialDriveKinematics
+     */
+    public val kinematics: DifferentialDriveKinematics = DifferentialDriveKinematics(
+        width.inUnit(meters)
+    )
+
+    private val leftController = UnitSuperPIDController(
+        leftVelocityConstants,
+        {leftMotors.encoder.angularVelocity},
+        target = AngularVelocity(0.0),
+        selfSustain = true,
+        feedforward = leftMotorFF
+    )
+
+    private val rightController = UnitSuperPIDController(
+        rightVelocityConstants,
+        {rightMotors.encoder.angularVelocity},
+        target = AngularVelocity(0.0),
+        selfSustain = true,
+        feedforward = rightMotorFF
+    )
+
+    public fun velocityDrive(leftSpeed: Velocity, rightSpeed: Velocity){
+        leftController.target = leftSpeed / (gearRatio * wheelDiameter)
+        rightController.target = rightSpeed / (gearRatio * wheelDiameter)
+        leftMotors.setVoltage(leftController.calculateOutput())
+        rightMotors.setVoltage(rightController.calculateOutput())
+    }
+
+    public fun velocityDrive(speeds: ChassisSpeeds){
+        val wheelSpeeds = kinematics.toWheelSpeeds(speeds)
+        velocityDrive(
+            wheelSpeeds.leftMetersPerSecond.ofUnit(meters/seconds),
+            wheelSpeeds.rightMetersPerSecond.ofUnit(meters/seconds)
+        )
+    }
+
+    public val poseEstimator: DifferentialDrivePoseEstimator = DifferentialDrivePoseEstimator(
+        kinematics,
+        heading.asRotation2d(),
+        (leftMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters),
+        (rightMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters),
+        startingPose.inUnit(meters),
+    )
+
+    private val allPoseSuppliers: MutableList<RobotPoseSupplier> = poseSuppliers.toMutableList()
+
+
+    /**
+     * adds a variable amount of pose suppliers to the drivetrain.
+     * these pose suppliers will fuse their poses into the pose estimator for more accurate measurements.
+     */
+    public fun addPoseSuppliers(vararg poseSuppliers: RobotPoseSupplier){
+        allPoseSuppliers.addAll(poseSuppliers)
+    }
+
+    public fun resetPose(pose: UnitPose2d, gyroAngle: Angle){
+        poseEstimator.resetPosition(
+            gyroAngle.asRotation2d(),
+            (leftMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters),
+            (rightMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters),
+            pose.inUnit(meters)
+        )
+    }
+
+    public fun resetPose(pose: UnitPose2d){
+        poseEstimator.resetPosition(
+            heading.asRotation2d(),
+            (leftMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters),
+            (rightMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters),
+            pose.inUnit(meters)
+        )
+    }
+
+    override val robotPoseMeasurement: Measurement<UnitPose2d>
+        get() = Measurement(
+            poseEstimator.estimatedPosition.ofUnit(meters),
+            Timer.getFPGATimestamp(),
+            true
+        )
+
+    override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
+
+    override fun periodic() {
+        poseEstimator.update(
+            heading.asRotation2d(),
+            (leftMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters),
+            (rightMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters)
+        )
+
+        allPoseSuppliers.forEach{
+            val poseMeasurement = it.robotPoseMeasurement
+
+            it.poseStandardDeviation.processValue(
+                whenValueExists = { stdDev ->
+                    poseEstimator.addVisionMeasurement(
+                        poseMeasurement.value.inUnit(meters),
+                        poseMeasurement.timestamp.inUnit(seconds),
+                        stdDev.getVector()
+                    )
+                },
+                whenDefault = {
+                    poseEstimator.addVisionMeasurement(
+                        poseMeasurement.value.inUnit(meters),
+                        poseMeasurement.timestamp.inUnit(seconds)
+                    )
+                }
+            )
+        }
+    }
+
+
+
 }
+

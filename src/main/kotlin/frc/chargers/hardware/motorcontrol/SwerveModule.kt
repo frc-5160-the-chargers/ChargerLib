@@ -25,8 +25,8 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
     turnEncoder: Encoder? = null,
     driveMotor: EncoderMotorController,
     turnPIDConstants: PIDConstants,
-    drivePIDConstants: PIDConstants,
-    velocityFF: AngularMotorFF,
+    drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    velocityFF: AngularMotorFF = AngularMotorFF.None,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableSwerveModule(
     turnMotor,
@@ -44,8 +44,8 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             turnEncoder: Encoder? = null,
             driveMotor: DM,
             turnPIDConstants: PIDConstants,
-            drivePIDConstants: PIDConstants,
-            velocityFF: AngularMotorFF,
+            drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+            velocityFF: AngularMotorFF = AngularMotorFF.None,
             useOnboardPIDIfAvailable: Boolean = false,
             turnMotorConfiguration: TMC? = null,
             driveMotorConfiguration: DMC? = null
@@ -92,8 +92,8 @@ public open class NonConfigurableSwerveModule(
     public val turnEncoder: Encoder? = null,
     public val driveMotor: EncoderMotorController,
     public val turnPIDConstants: PIDConstants,
-    public val drivePIDConstants: PIDConstants,
-    public val velocityFF: AngularMotorFF,
+    public val drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    public val velocityFF: AngularMotorFF = AngularMotorFF.None,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableHolonomicModule{
 

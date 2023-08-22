@@ -13,47 +13,63 @@ import frc.chargers.commands.buildCommand
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.constants
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
+import frc.chargers.utils.PathPlannerAutoContext
+import frc.chargers.utils.asPathPlannerConstants
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import com.pathplanner.lib.auto.PIDConstants as PathPlannerPIDConstants
 
-public fun PIDConstants.asPathPlannerConstants(): PathPlannerPIDConstants =
-    PathPlannerPIDConstants(kP,kI,kD)
+/**
+ * Stores all the commands related to path following with the [EncoderHolonomicDrivetrain],
+ * using pathplannerlib.
+ */
 
 
+
+/**
+ * Makes an [EncoderHolonomicDrivetrain] follow a designated path, using [PPSwerveControllerCommand] and a [PathPlannerTrajectory].
+ */
 context(CommandBuilder)
 public fun EncoderHolonomicDrivetrain.followPath(
     trajectory: PathPlannerTrajectory,
     isFirstPath: Boolean = false,
     translationOffsetConstants: PIDConstants,
     rotationOffsetConstants: PIDConstants
-): Command{
-    return buildCommand{
-        runOnce(this@EncoderHolonomicDrivetrain){
-            if(isFirstPath){
-                this@EncoderHolonomicDrivetrain.resetPose(trajectory.initialHolonomicPose.ofUnit(meters))
-            }
+): Command = runSequentially{
+    // NOTE: this@followPath denotes the "this" of the followPath function
+    // instead of the CommandBuilder's this,
+    // which refers to the DRIVETRAIN.
+    runOnce(this@followPath){
+        if(isFirstPath){
+            this@followPath.resetPose(trajectory.initialHolonomicPose.ofUnit(meters))
         }
-
-        +PPSwerveControllerCommand(
-            trajectory,
-            {robotPose.inUnit(meters)},
-            PIDController(0.0,0.0,0.0).apply{
-                constants = translationOffsetConstants
-            },
-            PIDController(0.0,0.0,0.0).apply{
-                constants = translationOffsetConstants
-            },
-            PIDController(0.0,0.0,0.0).apply{
-                constants = rotationOffsetConstants
-            },
-            ::velocityDrive,
-            true,
-            this@EncoderHolonomicDrivetrain
-        )
     }
+
+    +PPSwerveControllerCommand(
+        trajectory,
+        {robotPose.inUnit(meters)},
+        PIDController(0.0,0.0,0.0).apply{
+            constants = translationOffsetConstants
+        },
+        PIDController(0.0,0.0,0.0).apply{
+            constants = translationOffsetConstants
+        },
+        PIDController(0.0,0.0,0.0).apply{
+            constants = rotationOffsetConstants
+        },
+        ::velocityDrive,
+        true,
+        this@followPath
+    )
 }
 
+
+/**
+ * Makes an [EncoderHolonomicDrivetrain] follow a designated path, using [PPSwerveControllerCommand].
+ *
+ * IMPORTANT: use PathPlannerServer.
+ *
+ * Utilizes a [trajectoryName] and [LinearTrapezoidProfile.Constraints] instead of a [PathPlannerTrajectory].
+ */
 context(CommandBuilder)
 public fun EncoderHolonomicDrivetrain.followPath(
     trajectoryName: String,
@@ -74,20 +90,6 @@ public fun EncoderHolonomicDrivetrain.followPath(
     rotationOffsetConstants
 )
 
-public class PathPlannerAutoContext{
-    public var eventMap: MutableMap<String,Command> = mutableMapOf()
-
-    public val javaEventMap: HashMap<String,Command>
-        get() = HashMap(eventMap)
-    public fun onEvent(eventName: String, command: Command){
-        eventMap[eventName] = command
-    }
-
-    public inline fun onEvent(
-        eventName: String,
-        context: CommandBuilder.() -> Unit
-    ): Unit = onEvent(eventName, buildCommand(context))
-}
 
 context(CommandBuilder)
 public inline fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
@@ -96,19 +98,21 @@ public inline fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     rotationOffsetConstants: PIDConstants,
     eventsBlock: PathPlannerAutoContext.() -> Unit
 ): Command{
-
+    // NOTE: this@runPathPlannerAuto denotes the "this" of the followPath function
+    // instead of the CommandBuilder's this,
+    // which refers to the DRIVETRAIN.
     val autoBuilder = SwerveAutoBuilder(
         {robotPose.inUnit(meters)},  // Pose2d supplier
         {resetPose(it.ofUnit(meters))},  // Pose2d consumer, used to reset odometry at the beginning of auto
         translationOffsetConstants.asPathPlannerConstants(),  // PID constants to correct for translation error (used to create the X and Y PID controllers)
         rotationOffsetConstants.asPathPlannerConstants(),  // PID constants to correct for rotation error (used to create the rotation controller)
-        ::velocityDrive,  // Module states consumer used to output to the drive subsystem
+        ::velocityDrive,  // chassis speeds consumer
         PathPlannerAutoContext().apply(eventsBlock).javaEventMap,
         true,  // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true,
-        this@EncoderHolonomicDrivetrain // The drive subsystem. Used to properly set the requirements of path following commands
+        this@runPathPlannerAuto // The drive subsystem. Used to properly set the requirements of path following commands
     )
 
-    return autoBuilder.fullAuto(trajectories)
+    return autoBuilder.fullAuto(trajectories).also(commands::add)
 }
 
 context(CommandBuilder)

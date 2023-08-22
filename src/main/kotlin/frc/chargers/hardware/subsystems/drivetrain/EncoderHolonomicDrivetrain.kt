@@ -27,6 +27,7 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import kotlin.math.sqrt
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.wpilibextensions.kinematics.*
 
 /**
@@ -154,15 +155,15 @@ public open class EncoderHolonomicDrivetrain(
     private val bottomLeft: NonConfigurableHolonomicModule,
     private val bottomRight: NonConfigurableHolonomicModule,
     private val gyro: HeadingProvider,
-    private val gearRatio: Double = DEFAULT_GEAR_RATIO,
-    private val wheelDiameter: Length,
+    override val gearRatio: Double = DEFAULT_GEAR_RATIO,
+    override val wheelDiameter: Length,
     private val trackWidth: Distance,
     private val wheelBase: Distance,
     public val startingPose: UnitPose2d = UnitPose2d(),
     // do drivetrain.fieldRelativeDrive = false to turn this option off.
     public var fieldRelativeDrive: Boolean = true,
     vararg poseSuppliers: RobotPoseSupplier
-): SubsystemBase(), RobotPoseSupplier{
+): SubsystemBase(), RobotPoseSupplier, WheelRatioProvider{
 
     private val allPoseSuppliers: MutableList<RobotPoseSupplier> = poseSuppliers.toMutableList()
 
@@ -193,7 +194,7 @@ public open class EncoderHolonomicDrivetrain(
                     wheelTravelPerMotorRadian
 
 
-    public val drivetrainKinematics: SwerveDriveKinematics =
+    public val kinematics: SwerveDriveKinematics =
         SwerveDriveKinematics(
             UnitTranslation2d(trackWidth/2,wheelBase/2).inUnit(meters),
             UnitTranslation2d(trackWidth/2,-wheelBase/2).inUnit(meters),
@@ -203,8 +204,8 @@ public open class EncoderHolonomicDrivetrain(
 
 
 
-    public val drivetrainPoseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
-        drivetrainKinematics,
+    public val poseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
+        kinematics,
         gyro.heading.asRotation2d(),
         arrayOf(
             topLeft.getModulePosition(gearRatio,wheelDiameter),
@@ -217,7 +218,7 @@ public open class EncoderHolonomicDrivetrain(
 
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
-            drivetrainPoseEstimator.estimatedPosition.ofUnit(meters),
+            poseEstimator.estimatedPosition.ofUnit(meters),
             Timer.getFPGATimestamp(),
             true
         )
@@ -230,13 +231,21 @@ public open class EncoderHolonomicDrivetrain(
     // note 2: these values, along with pose, are nullable.
     // They are set to null if the limelight has not detected any apriltags yet.
     public val xCoordinate: Distance
-        get() = drivetrainPoseEstimator.estimatedPosition.x.meters
+        get() = poseEstimator.estimatedPosition.x.meters
     public val yCoordinate: Distance
-        get() = drivetrainPoseEstimator.estimatedPosition.y.meters
+        get() = poseEstimator.estimatedPosition.y.meters
 
-    public fun resetPose(pose: UnitPose2d, gyroAngle: Angle = gyro.heading){
-        drivetrainPoseEstimator.resetPosition(
+    public fun resetPose(pose: UnitPose2d, gyroAngle: Angle){
+        poseEstimator.resetPosition(
             gyroAngle.asRotation2d(),
+            currentModulePositions,
+            pose.inUnit(meters)
+        )
+    }
+
+    public fun resetPose(pose: UnitPose2d){
+        poseEstimator.resetPosition(
+            gyro.heading.asRotation2d(),
             currentModulePositions,
             pose.inUnit(meters)
         )
@@ -372,7 +381,7 @@ public open class EncoderHolonomicDrivetrain(
             )
         }
 
-        currentModuleStates = drivetrainKinematics.toSwerveModuleStates(speeds)
+        currentModuleStates = kinematics.toSwerveModuleStates(speeds)
     }
 
     /**
@@ -414,7 +423,7 @@ public open class EncoderHolonomicDrivetrain(
     }
 
     override fun periodic() {
-        drivetrainPoseEstimator.update(
+        poseEstimator.update(
             gyro.heading.asRotation2d(),
             currentModulePositions
         )
@@ -424,14 +433,14 @@ public open class EncoderHolonomicDrivetrain(
 
             it.poseStandardDeviation.processValue(
                 whenValueExists = { stdDev ->
-                    drivetrainPoseEstimator.addVisionMeasurement(
+                    poseEstimator.addVisionMeasurement(
                         poseMeasurement.value.inUnit(meters),
                         poseMeasurement.timestamp.inUnit(seconds),
                         stdDev.getVector()
                     )
                 },
                 whenDefault = {
-                    drivetrainPoseEstimator.addVisionMeasurement(
+                    poseEstimator.addVisionMeasurement(
                         poseMeasurement.value.inUnit(meters),
                         poseMeasurement.timestamp.inUnit(seconds)
                     )
