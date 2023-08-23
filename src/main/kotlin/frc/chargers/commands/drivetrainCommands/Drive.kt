@@ -140,14 +140,14 @@ public fun EncoderDifferentialDrivetrain.driveStraight(time: Time, velocity: Vel
 context(CommandBuilder)
 @JvmName("swerveDriveTime")
 @LowPriorityInOverloadResolution
-public fun EncoderHolonomicDrivetrain.driveStraight(direction: Angle = gyro.heading, time: Time, power: Double): Command = loopFor(time){
+public fun EncoderHolonomicDrivetrain.driveStraight(direction: Angle = gyro.heading, time: Time, power: Double): Command = loopFor(time,this){
     directionalDrive(power,direction)
 }
 
 context(CommandBuilder)
 @JvmName("swerveDriveDistance")
 @LowPriorityInOverloadResolution
-public fun EncoderHolonomicDrivetrain.driveStraight(direction: Angle = gyro.heading, distance: Distance, power: Double): Command = loopWhile({distanceTraveled < distance}){
+public fun EncoderHolonomicDrivetrain.driveStraight(direction: Angle = gyro.heading, distance: Distance, power: Double): Command = loopWhile({distanceTraveled < distance},this){
     directionalDrive(power,direction)
 }
 

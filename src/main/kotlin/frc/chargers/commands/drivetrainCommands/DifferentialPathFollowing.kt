@@ -6,6 +6,7 @@ import com.batterystaple.kmeasure.units.seconds
 import com.pathplanner.lib.PathConstraints
 import com.pathplanner.lib.PathPlanner
 import com.pathplanner.lib.PathPlannerTrajectory
+import com.pathplanner.lib.auto.RamseteAutoBuilder
 import com.pathplanner.lib.commands.FollowPathWithEvents
 import com.pathplanner.lib.commands.PPRamseteCommand
 import edu.wpi.first.math.controller.RamseteController
@@ -70,24 +71,21 @@ public inline fun EncoderDifferentialDrivetrain.runPathPlannerAuto(
     ramseteController: RamseteController = RamseteController(),
     eventsBlock: PathPlannerAutoContext.() -> Unit
 ): Command{
-    val eventMap: Map<String,Command> = PathPlannerAutoContext().apply(eventsBlock).eventMap
-    return runSequentially{
-        var firstTrajectory = true
-        for (trajectory in trajectories){
-            +FollowPathWithEvents(
-                // returns a path following command
-                followPath(
-                    trajectory,
-                    firstTrajectory,
-                    ramseteController
-                ),
-                trajectory.markers,
-                eventMap
-            )
-            firstTrajectory = false
-        }
-    }
+    val autoBuilder = RamseteAutoBuilder(
+        {robotPose.inUnit(meters)},
+        {resetPose(it.ofUnit(meters))},
+        ramseteController,
+        kinematics,
+        {
+            leftSpeed: Double, rightSpeed: Double -> velocityDrive(
+            leftSpeed.ofUnit(meters/seconds),
+            rightSpeed.ofUnit(meters/seconds))
+        },
+        PathPlannerAutoContext().apply(eventsBlock).eventMap,
+        this@runPathPlannerAuto
+    )
 
+    return autoBuilder.fullAuto(trajectories).also(commands::add)
 }
 
 context(CommandBuilder)
