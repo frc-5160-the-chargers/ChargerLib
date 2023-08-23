@@ -18,7 +18,7 @@ public class LinearProfiledPIDController(
     public val integralRange: ClosedRange<Voltage> = outputRange,
     target: Distance,
     constraints: LinearTrapezoidProfile.Constraints,
-    private val feedforward: LinearMotorFF,
+    private val feedforward: LinearMotorFF = LinearMotorFF.None,
     /**
      * Determines if the [UnitSuperPIDController] should call calculateOutput()
      * during every loop of the command scheduler. Normal PID controllers require the user to do this.

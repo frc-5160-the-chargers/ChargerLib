@@ -18,7 +18,7 @@ public class AngularProfiledPIDController(
     public val integralRange: ClosedRange<Voltage> = outputRange,
     target: Angle,
     constraints: AngularTrapezoidProfile.Constraints,
-    private val feedforward: AngularMotorFF,
+    private val feedforward: AngularMotorFF = AngularMotorFF.None,
     /**
      * Determines if the [UnitSuperPIDController] should call calculateOutput()
      * during every loop of the command scheduler. Normal PID controllers require the user to do this.

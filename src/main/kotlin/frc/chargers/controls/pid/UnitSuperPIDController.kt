@@ -50,7 +50,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             target: Quantity<I>,
             selfSustain: Boolean = false,
             getFFInput: () -> Quantity<FI>,
-            feedforward: Feedforward<Quantity<FI>,Quantity<O>>
+            feedforward: Feedforward<Quantity<FI>,Quantity<O>> = Feedforward{Quantity(0.0)}
         ): UnitSuperPIDController<I,O> = UnitSuperPIDController(
             pidConstants,
             getInput,

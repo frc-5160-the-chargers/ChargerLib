@@ -70,7 +70,7 @@ public class SuperPIDController(
             integralRange: ClosedRange<Double> = outputRange,
             target: Double,
             selfSustain: Boolean = false,
-            feedforward: Feedforward<Double,Double>
+            feedforward: Feedforward<Double,Double> = Feedforward{0.0}
         ): SuperPIDController = invoke(
             pidConstants,
             getInput,

@@ -1,5 +1,8 @@
 package frc.chargers.utils
 
+import com.batterystaple.kmeasure.quantities.Acceleration
+import com.batterystaple.kmeasure.quantities.Velocity
+import com.pathplanner.lib.PathConstraints
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.commands.buildCommand
@@ -10,6 +13,12 @@ import frc.chargers.controls.pid.PIDConstants
  */
 public fun PIDConstants.asPathPlannerConstants(): com.pathplanner.lib.auto.PIDConstants =
     com.pathplanner.lib.auto.PIDConstants(kP, kI, kD)
+
+
+public fun PathConstraints(maxVelocity: Velocity, maxAcceleration: Acceleration): PathConstraints = PathConstraints(
+    maxVelocity.siValue,
+    maxAcceleration.siValue
+)
 
 @DslMarker
 public annotation class PathPlannerAutoContextMarker
