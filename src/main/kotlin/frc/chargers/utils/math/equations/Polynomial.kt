@@ -1,4 +1,4 @@
-package frc.chargers.utils.math
+package frc.chargers.utils.math.equations
 
 import kotlin.math.pow
 

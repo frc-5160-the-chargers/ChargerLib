@@ -12,6 +12,7 @@ import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.utils.Precision
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
 
 /**
@@ -81,6 +82,50 @@ public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleD
         }
     }
 }
+
+context(CommandBuilder,HeadingProvider)
+@JvmName("turnWithExternalHeadingProvider")
+@LowPriorityInOverloadResolution
+public fun EncoderHolonomicDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension> = Precision.AllowOvershoot, pidConstants: PIDConstants): Command{
+    val targetHeading = heading
+    val pidController = UnitSuperPIDController(
+        pidConstants = pidConstants,
+        getInput = { heading },
+        outputRange = Scalar(0.0)..Scalar(1.0),
+        target = targetHeading
+    )
+
+    val runToTarget: CodeBlockContext.() -> Unit = { rotateInPlace(pidController.calculateOutput().siValue) }
+
+    when(precision) {
+        Precision.AllowOvershoot -> {
+            return loopUntil(
+                when {
+                    angle < 0.degrees -> { { heading < targetHeading } }
+                    angle > 0.degrees -> { { heading > targetHeading } }
+                    else -> { { true } } // If target rotation is 0 degrees or NaN, immediately stop
+                },
+                this,
+                execute = runToTarget
+            )
+        }
+        is Precision.Within -> {
+            return loopUntil({ pidController.error in precision.allowableError }, this, execute = runToTarget)
+        }
+    }
+}
+
+
+context(CommandBuilder)
+@JvmName("turnWithBuiltinGyro")
+public fun EncoderHolonomicDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension> = Precision.AllowOvershoot, pidConstants: PIDConstants): Command =
+    with(gyro){
+        return turn(angle,precision,pidConstants)
+    }
+
+
+
+
 
 
 context(CodeBlockContext, CommandBuilder)

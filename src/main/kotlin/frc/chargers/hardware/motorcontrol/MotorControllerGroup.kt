@@ -6,9 +6,10 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup
 /**
  * A convenience function for creating and configuring a [MotorControllerGroup]
  */
-public fun <M : MotorController> MotorControllerGroup(motorController: M, vararg motorControllers: M, configure: (motorController: M) -> Unit): MotorControllerGroup {
-    configure(motorController)
-    motorControllers.forEach { otherMotorController -> configure(otherMotorController) }
+public fun <M,C : MotorConfiguration> MotorControllerGroup(motorController: M, vararg motorControllers: M, configuration: C): MotorControllerGroup
+    where M: MotorController, M: MotorConfigurable<C>{
+    motorController.configure(configuration)
+    motorControllers.forEach { it.configure(configuration) }
 
     return MotorControllerGroup(motorController, *motorControllers)
 }
@@ -16,8 +17,10 @@ public fun <M : MotorController> MotorControllerGroup(motorController: M, vararg
 /**
  * A convenience function for creating and configuring a [MotorControllerGroup]
  */
-public fun <M : MotorController> MotorControllerGroup(motorControllers: Array<M>, configure: (motorController: M) -> Unit): MotorControllerGroup {
-    motorControllers.forEach { motorController -> configure(motorController) }
+public fun <M, C: MotorConfiguration> MotorControllerGroup(motorControllers: Array<M>, configuration: C): MotorControllerGroup
+    where M: MotorController, M: MotorConfigurable<C>{
+    motorControllers.forEach { it.configure(configuration) }
 
     return MotorControllerGroup(motorControllers)
 }
+
