@@ -118,6 +118,7 @@ public fun EncoderHolonomicDrivetrain.turn(angle: Angle, precision: Precision<An
 
 context(CommandBuilder)
 @JvmName("turnWithBuiltinGyro")
+@LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension> = Precision.AllowOvershoot, pidConstants: PIDConstants): Command =
     with(gyro){
         return turn(angle,precision,pidConstants)

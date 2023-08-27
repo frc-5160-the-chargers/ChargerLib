@@ -1,28 +1,36 @@
 package frc.chargers.utils.math.equations
 
 import com.batterystaple.kmeasure.dimensions.AnyDimension
-import com.batterystaple.kmeasure.quantities.Quantity
+import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.*
 import kotlin.math.pow
 
 /**
  * A class representing a polynomial function, with Units support.
  *
- * Implements the (Quantity) -> (Quantity) interface, so can be called as a function.
+ * Example usage:
  *
- * Coefficients are ordered from least to most significant;
- * for example, `Polynomial(1.0, 2.0, 3.0)` represents the polynomial
- * 1 + 2x + 3x^2.
+ * val pol = UnitPolynomial([degrees] to [volts], listOf(5.0,6.1,7.2))
+ *
+ * val pol = UnitPolynomial([degrees] to [volts], 5.1,6.1,7.2)
+ *
+ * Coefficients are ordered from least to most significant.
+ *
+ * @see Polynomial
  */
-public data class UnitPolynomial<D: AnyDimension>(val coefficients: List<Double>) : (Quantity<D>) -> Quantity<D> {
-    public constructor(vararg coefficients: Double) : this(coefficients.toList())
+public data class UnitPolynomial<I: AnyDimension, O: AnyDimension>(
+    val unitsUsed: Pair<Quantity<I>, Quantity<O>> = Quantity<I>(0.0) to Quantity<O>(0.0),
+    val coefficients: List<Double>
+) : (Quantity<I>) -> Quantity<O> {
+    public constructor(unitsUsed: Pair<Quantity<I>, Quantity<O>>, vararg coefficients: Double) : this(unitsUsed, coefficients.toList())
 
-    override fun invoke(x: Quantity<D>): Quantity<D> =
-        Quantity(
-            coefficients
-            .asSequence()
-            .mapIndexed { power, coeff ->
-                coeff * x.siValue.pow(power)
-            }
-            .sum()
-        )
+    override fun invoke(x: Quantity<I>): Quantity<O> =
+        coefficients
+        .asSequence()
+        .mapIndexed { power, coeff ->
+            coeff * x.inUnit(unitsUsed.first).pow(power)
+        }
+        .sum()
+        .ofUnit(unitsUsed.second)
 }
+

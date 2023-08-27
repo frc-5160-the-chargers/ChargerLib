@@ -30,7 +30,7 @@ public fun EncoderDifferentialDrivetrain.followPath(
     // which refers to the DRIVETRAIN.
     runOnce(this@followPath){
         if(isFirstPath){
-            this@followPath.resetPose(trajectory.initialHolonomicPose.ofUnit(meters))
+            this@followPath.resetPose(trajectory.initialPose.ofUnit(meters))
         }
     }
 
