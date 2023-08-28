@@ -9,7 +9,8 @@ import edu.wpi.first.cameraserver.CameraServer
 public class DriverCameraView(
     public val totalDriverCams: Int = 1,
     public val defaultResWidth: Int,
-    public val defaultResHeight: Int){
+    public val defaultResHeight: Int
+){
     private var driverCameras = List(totalDriverCams){ i -> CameraServer.startAutomaticCapture(i)}
     private val cameraSelector: NetworkTableEntry = NetworkTableInstance.getDefault().getTable("").getEntry("CameraSelection")
 

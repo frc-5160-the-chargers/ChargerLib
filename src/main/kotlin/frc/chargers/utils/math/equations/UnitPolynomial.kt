@@ -19,7 +19,7 @@ import kotlin.math.pow
  * @see Polynomial
  */
 public data class UnitPolynomial<I: AnyDimension, O: AnyDimension>(
-    val unitsUsed: Pair<Quantity<I>, Quantity<O>> = Quantity<I>(0.0) to Quantity<O>(0.0),
+    val unitsUsed: Pair<Quantity<I>, Quantity<O>> = Quantity<I>(1.0) to Quantity<O>(1.0),
     val coefficients: List<Double>
 ) : (Quantity<I>) -> Quantity<O> {
     public constructor(unitsUsed: Pair<Quantity<I>, Quantity<O>>, vararg coefficients: Double) : this(unitsUsed, coefficients.toList())

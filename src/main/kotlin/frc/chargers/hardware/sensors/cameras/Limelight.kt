@@ -37,7 +37,6 @@ import frc.chargers.wpilibextensions.kinematics.StandardDeviation
  */
 public class Limelight(
     public val name: String = "limelight",
-    public val noiseFilterThreshold: Double = 0.04,
     public val lensHeight: Distance? = null,
     public val mountAngle: Angle? = null,
     public val defaultDriverStationIfUnavailable: DriverStation.Alliance = DriverStation.Alliance.Blue
@@ -120,57 +119,11 @@ public class Limelight(
             nt.getEntry("pipeline").setNumber(value)
         }
 
-    // alternative to use base tv.
-
-
-    private var previousTX: Double = 0.0
-    private var previousTY: Double = 0.0
-    private var previousTA: Double = 0.0
-
-    /**
-     * the following are copies of the networktables calls, wrapped as getters for ease of use.
-     * Note: tx,ty,and ta values are all filtered to reduce noise. to use their base value, use
-     * limelight.rawTX
-     */
     public val tx: Double
-        get(){
-            val value: Double = nt.getEntry("tx").getDouble(0.0)
-
-            return if (abs(value - previousTX) < noiseFilterThreshold){
-                previousTX
-            }else{
-                previousTX = value
-                value
-            }
-        }
-    public val rawTX: Double
         get() = nt.getEntry("tx").getDouble(0.0)
-
     public val ty: Double
-        get(){
-            val value: Double = nt.getEntry("ty").getDouble(0.0)
-
-            return if (abs(value - previousTY) < noiseFilterThreshold){
-                previousTY
-            }else{
-                previousTY = value
-                value
-            }
-        }
-    public val rawTY: Double
         get() = nt.getEntry("ty").getDouble(0.0)
     public val ta: Double
-        get(){
-            val value: Double = nt.getEntry("ta").getDouble(0.0)
-
-            return if (abs(value - previousTA) < noiseFilterThreshold){
-                previousTA
-            }else{
-                previousTA = value
-                value
-            }
-        }
-    public val rawTA: Double
         get() = nt.getEntry("ta").getDouble(0.0)
     public val tv: Double
         get() = nt.getEntry("tv").getDouble(0.0)

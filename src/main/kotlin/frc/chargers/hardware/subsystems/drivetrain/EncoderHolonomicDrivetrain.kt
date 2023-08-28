@@ -29,6 +29,7 @@ import kotlin.math.sqrt
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.wpilibextensions.kinematics.*
+import org.ejml.simple.SimpleMatrix
 
 /**
  * A convenience function to create a [EncoderHolonomicDrivetrain]
@@ -260,26 +261,10 @@ public class EncoderHolonomicDrivetrain(
             bottomRight.getModuleState(gearRatio,wheelDiameter)
         )
         set(moduleStates){
-
-            topLeft.setDesiredState(SwerveModuleState.optimize(
-                moduleStates[0],
-                topLeft.getModulePosition(gearRatio, wheelDiameter).angle
-            ),gearRatio,wheelDiameter)
-
-            topRight.setDesiredState(SwerveModuleState.optimize(
-                moduleStates[1],
-                topRight.getModulePosition(gearRatio, wheelDiameter).angle
-            ),gearRatio,wheelDiameter)
-
-            bottomLeft.setDesiredState(SwerveModuleState.optimize(
-                moduleStates[2],
-                bottomLeft.getModulePosition(gearRatio, wheelDiameter).angle
-            ),gearRatio,wheelDiameter)
-
-            bottomRight.setDesiredState(SwerveModuleState.optimize(
-                moduleStates[3],
-                bottomRight.getModulePosition(gearRatio, wheelDiameter).angle
-            ),gearRatio,wheelDiameter)
+            topLeft.setDesiredState(moduleStates[0],gearRatio,wheelDiameter)
+            topRight.setDesiredState(moduleStates[1],gearRatio,wheelDiameter)
+            bottomLeft.setDesiredState(moduleStates[2],gearRatio,wheelDiameter)
+            bottomRight.setDesiredState(moduleStates[3],gearRatio,wheelDiameter)
         }
 
     public val currentModulePositions: Array<SwerveModulePosition>
@@ -305,20 +290,26 @@ public class EncoderHolonomicDrivetrain(
      * The default drive function. Makes the drivetrain move, using an xPower, yPower and rotationPower.
      */
     public fun swerveDrive(xPower: Double, yPower: Double, rotationPower: Double){
-        // a gyro input into the swerveDrive allows it to remain field-centric; optional
 
-        val forwardPower: Double = if(!fieldRelativeDrive){xPower}else{
-            xPower*cos(gyro.heading) + yPower * sin(gyro.heading)
+        val powers = if(fieldRelativeDrive){
+            FieldRelativeChassisPowers(
+                xPower,
+                yPower,
+                rotationPower,
+                gyro.heading
+            )
+        }else{
+            ChassisPowers(
+                xPower,
+                yPower,
+                rotationPower
+            )
         }
-        val sidePower: Double = if(!fieldRelativeDrive){yPower}else{
-            -xPower * sin(gyro.heading) + yPower * cos(gyro.heading)
-        }
 
-
-        val A: Double = sidePower - rotationPower * (wheelBase.inUnit(meters)/diagonal.inUnit(meters))
-        val B: Double = sidePower + rotationPower * (wheelBase.inUnit(meters)/diagonal.inUnit(meters))
-        val C: Double = forwardPower - rotationPower * (trackWidth.inUnit(meters)/diagonal.inUnit(meters))
-        val D: Double = forwardPower + rotationPower * (trackWidth.inUnit(meters)/diagonal.inUnit(meters))
+        val A: Double = powers.yPower - powers.rotationPower * (wheelBase.inUnit(meters)/diagonal.inUnit(meters))
+        val B: Double = powers.yPower + powers.rotationPower * (wheelBase.inUnit(meters)/diagonal.inUnit(meters))
+        val C: Double = powers.xPower - powers.rotationPower * (trackWidth.inUnit(meters)/diagonal.inUnit(meters))
+        val D: Double = powers.xPower + powers.rotationPower * (trackWidth.inUnit(meters)/diagonal.inUnit(meters))
 
         var topRightPower: Double = sqrt(B*B + C*C)
         var topLeftPower: Double = sqrt(B*B+D*D)
@@ -340,8 +331,8 @@ public class EncoderHolonomicDrivetrain(
 
         val topRightAngle: Angle = atan(B/C)
         val topLeftAngle: Angle = atan(B/D)
-        val bottomRightAngle: Angle = atan(A/D)
-        val bottomLeftAngle: Angle = atan(A/C)
+        val bottomLeftAngle: Angle = atan(A/D)
+        val bottomRightAngle: Angle = atan(A/C)
 
 
         topLeft.setDirectionalPower(topLeftPower,topLeftAngle)

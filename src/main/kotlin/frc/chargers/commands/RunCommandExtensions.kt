@@ -16,6 +16,6 @@ public fun RunCommand(vararg subsystems: Subsystem, toRun: () -> Unit): RunComma
  *
  * @see Subsystem.setDefaultCommand
  */
-public fun Subsystem.setDefaultRunCommand(vararg requirements: Subsystem = arrayOf(this), toRun: () -> Unit) {
-    defaultCommand = RunCommand(toRun, *requirements)
+public fun <S: Subsystem> S.setDefaultRunCommand(vararg requirements: Subsystem, toRun: S.() -> Unit){
+    defaultCommand = RunCommand({toRun()}, this, *requirements)
 }

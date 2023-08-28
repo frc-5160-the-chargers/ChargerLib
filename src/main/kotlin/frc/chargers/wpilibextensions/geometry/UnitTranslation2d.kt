@@ -9,7 +9,7 @@ import edu.wpi.first.math.interpolation.Interpolatable
 /**
  * A wrapper for WPILib's [Translation2d], adding in Unit support.
  */
-public class UnitTranslation2d(
+public data class UnitTranslation2d(
     public val x: Distance,
     public val y: Distance,
 ): Interpolatable<UnitTranslation2d>{

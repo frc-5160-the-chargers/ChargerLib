@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Transform2d
 /**
  * A wrapper for WPILib's [Transform2d], adding in Unit support.
  */
-public class UnitTransform2d(
+public data class UnitTransform2d(
     public val translation: UnitTranslation2d,
     public val rotation: Angle
 ){
@@ -20,6 +20,8 @@ public class UnitTransform2d(
         (last.translation - initial.translation).rotateBy(-initial.rotation),
         last.rotation - initial.rotation
     )
+
+    public constructor(x: Distance, y: Distance, rotation: Angle): this(UnitTranslation2d(x,y),rotation)
 
     private val baseTransform = inUnit(meters)
 
@@ -39,10 +41,4 @@ public class UnitTransform2d(
         get() = baseTransform.y.meters
     public operator fun unaryMinus(): UnitTransform2d = baseTransform.inverse().ofUnit(meters)
 
-    public override operator fun equals(other: Any?): Boolean = if (other !is UnitTransform2d){
-        false
-    }else{
-        baseTransform == other.inUnit(meters)
-    }
-    override fun hashCode(): Int = baseTransform.hashCode()
 }

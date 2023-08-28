@@ -4,20 +4,26 @@ package frc.chargers.hardware.sensors.cameras
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.inUnit
+import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
+import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.geometry.Transform3d
+import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import frc.chargers.hardware.sensors.CameraPoseSupplier
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.utils.Measurement
+import frc.chargers.wpilibextensions.Timer
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.kinematics.StandardDeviation
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
@@ -25,37 +31,13 @@ import org.photonvision.PhotonUtils
 import kotlin.math.pow
 
 /**
- * A drop-in replacement for photonCamera, which implements the VisionCamera interface.
+ * A [PhotonCamera] wrapper, which implements the VisionCamera3d interface.
  */
-public class BasicPhotonCamera(
+public open class BasicPhotonCamera(
     name: String,
     public val lensHeight: Distance,
     public val mountAngle: Angle,
 ): PhotonCamera(name), VisionCamera3d {
-
-    /*
-    public val poseEstimator: PhotonPoseEstimator = PhotonPoseEstimator(fieldLayout,
-        PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP,
-        this,
-        cameraTransform)
-
-
-    init{
-        poseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY)
-    }
-    */
-
-
-
-    private inner class poseProvider: RobotPoseSupplier, CameraPoseSupplier{
-        override val cameraPoseMeasurement: Measurement<UnitPose2d>
-            get() = TODO("Not yet implemented")
-        override val poseStandardDeviation: StandardDeviation
-            get() = TODO("Not yet implemented")
-        override val robotPoseMeasurement: Measurement<UnitPose2d>
-            get() = TODO("Not yet implemented")
-
-    }
 
 
     override val hasTarget: Boolean
@@ -98,3 +80,50 @@ public class BasicPhotonCamera(
     }
 
 }
+
+/**
+ * A [PhotonCamera] which can supply the pose of the robot.
+ *
+ * @see BasicPhotonCamera
+ */
+public class OdometryPhotonCamera(
+    name: String,
+    fieldLayout: AprilTagFieldLayout,
+    xTranslation: Distance,
+    yTranslation: Distance,
+    zTranslation: Distance,
+    roll: Angle,
+    pitch: Angle,
+    yaw: Angle
+): BasicPhotonCamera(name,zTranslation,pitch), RobotPoseSupplier{
+    public val poseEstimator: PhotonPoseEstimator = PhotonPoseEstimator(fieldLayout,
+        PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP,
+        this,
+        Transform3d(
+            Translation3d(xTranslation.inUnit(meters), yTranslation.inUnit(meters),zTranslation.inUnit(meters)),
+            Rotation3d(roll.inUnit(radians), pitch.inUnit(radians), yaw.inUnit(radians))
+        )
+    )
+
+
+    init{
+        poseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY)
+    }
+
+    override val poseStandardDeviation: StandardDeviation
+        get() = StandardDeviation.Default
+    override val robotPoseMeasurement: Measurement<UnitPose2d>
+        get() {
+            val m = poseEstimator.update()
+            return Measurement(
+                m.get().estimatedPose.toPose2d().ofUnit(meters),
+                m.get().timestampSeconds.ofUnit(seconds),
+                m.isEmpty
+            )
+        }
+
+}
+
+/*
+
+    */

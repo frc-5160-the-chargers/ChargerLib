@@ -5,6 +5,7 @@ import com.batterystaple.kmeasure.quantities.*
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 
 /**
@@ -14,18 +15,25 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 /**
  * Converts WPILib's [Pose2d] into a [UnitPose2d].
  */
-public fun Pose2d.ofUnit(unit: Distance): UnitPose2d = UnitPose2d(this.x.ofUnit(unit),this.y.ofUnit(unit),this.rotation.asAngle())
+public fun Pose2d.ofUnit(unit: Distance): UnitPose2d = UnitPose2d(x.ofUnit(unit),y.ofUnit(unit),rotation.asAngle())
 
 /**
  * Converts WPILib's [Translation2d] into a [UnitTranslation2d].
  */
-public fun Translation2d.ofUnit(unit: Distance): UnitTranslation2d = UnitTranslation2d(this.norm.ofUnit(unit),this.angle.asAngle())
+public fun Translation2d.ofUnit(unit: Distance): UnitTranslation2d = UnitTranslation2d(norm.ofUnit(unit),angle.asAngle())
 
 /**
  * Converts WPILib's [Transform2d] into a [UnitTransform2d].
  */
-public fun Transform2d.ofUnit(unit: Distance): UnitTransform2d = UnitTransform2d(this.translation.ofUnit(unit),this.rotation.asAngle())
+public fun Transform2d.ofUnit(unit: Distance): UnitTransform2d = UnitTransform2d(translation.ofUnit(unit),rotation.asAngle())
 
+/*
+public fun Translation3d.ofUnit(unit: Distance): UnitTranslation3d = UnitTranslation3d(
+    x.ofUnit(unit),
+    y.ofUnit(unit),
+    z.ofUnit(unit)
+)
+ */
 
 /**
  * Converts WPILib's [TrapezoidProfile.State] into an [AngularTrapezoidProfile.State].

@@ -12,17 +12,16 @@ public class ChassisPowers(
     public var yPower: Double = 0.0,
     public var rotationPower: Double = 0.0
 ){
-    public fun asFieldRelative(robotAngle: Angle): ChassisPowers = fromFieldRelativePowers(xPower,yPower,rotationPower,robotAngle)
-    public companion object{
-        public fun fromFieldRelativePowers(
-            xPower: Double,
-            yPower: Double,
-            rotationPower: Double,
-            robotAngle: Angle): ChassisPowers =
-            ChassisPowers(
-                xPower * cos(robotAngle) + yPower * sin(robotAngle),
-                -xPower * sin(robotAngle) + yPower * cos(robotAngle),
-                rotationPower)
-    }
+    public fun asFieldRelative(robotAngle: Angle): ChassisPowers = FieldRelativeChassisPowers(xPower,yPower,rotationPower,robotAngle)
 }
+
+public fun FieldRelativeChassisPowers(
+    xPower: Double,
+    yPower: Double,
+    rotationPower: Double,
+    robotAngle: Angle): ChassisPowers =
+    ChassisPowers(
+        xPower * cos(robotAngle) + yPower * sin(robotAngle),
+        -xPower * sin(robotAngle) + yPower * cos(robotAngle),
+        rotationPower)
 

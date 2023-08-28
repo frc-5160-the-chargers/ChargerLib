@@ -8,10 +8,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 
 
-public object ChassisSpeeds{
-
-}
-
 public fun ChassisSpeeds(xVelocity: Velocity, yVelocity: Velocity, rotationSpeed: AngularVelocity): ChassisSpeeds =
     ChassisSpeeds(
         /* vxMetersPerSecond = */ xVelocity.inUnit(meters/seconds),
