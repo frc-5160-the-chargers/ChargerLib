@@ -49,7 +49,7 @@ public fun talonFXHolonomicDrivetrain(
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
     vararg poseSuppliers: RobotPoseSupplier,
-    configure: ModuleConfiguration<TalonFXConfiguration,TalonFXConfiguration>.() -> Unit
+    configure: ModuleConfiguration<TalonFXConfiguration,TalonFXConfiguration>.() -> Unit = {}
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft, topRight, bottomLeft, bottomRight, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
     *poseSuppliers,
@@ -75,7 +75,7 @@ public fun sparkMaxHolonomicDrivetrain(
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
     vararg poseSuppliers: RobotPoseSupplier,
-    configure: ModuleConfiguration<SparkMaxConfiguration,SparkMaxConfiguration>.() -> Unit,
+    configure: ModuleConfiguration<SparkMaxConfiguration,SparkMaxConfiguration>.() -> Unit = {},
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft, topRight, bottomLeft, bottomRight, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
     *poseSuppliers,
