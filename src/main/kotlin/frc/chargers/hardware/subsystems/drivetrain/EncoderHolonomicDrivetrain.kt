@@ -29,8 +29,6 @@ import kotlin.math.sqrt
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.wpilibextensions.kinematics.*
-import org.ejml.simple.SimpleMatrix
-
 /**
  * A convenience function to create a [EncoderHolonomicDrivetrain]
  * using Talon FX motor controllers.
@@ -49,8 +47,8 @@ public fun talonFXHolonomicDrivetrain(
     wheelBase: Distance,
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
-    configureTurnMotor: TalonFXConfiguration.() -> Unit,
-    configureDriveMotor: TalonFXConfiguration.() -> Unit,
+    configureTurnMotor: TalonFXConfiguration.() -> Unit = {},
+    configureDriveMotor: TalonFXConfiguration.() -> Unit = {},
     vararg poseSuppliers: RobotPoseSupplier
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft, topRight, bottomLeft, bottomRight, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
@@ -77,8 +75,8 @@ public fun sparkMaxHolonomicDrivetrain(
     wheelBase: Distance,
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
-    configureTurnMotor: SparkMaxConfiguration.() -> Unit,
-    configureDriveMotor: SparkMaxConfiguration.() -> Unit,
+    configureTurnMotor: SparkMaxConfiguration.() -> Unit = {},
+    configureDriveMotor: SparkMaxConfiguration.() -> Unit = {},
     vararg poseSuppliers: RobotPoseSupplier
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft, topRight, bottomLeft, bottomRight, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,

@@ -92,10 +92,6 @@ public class CTREEncoderAdapter(
                 isValid = absolutePosition.timestamp.isValid
             )
         }
-    override val angularPosition: Angle
-        get() = absolutePosition.value.ofUnit(rotations)
-    override val angularVelocity: AngularVelocity
-        get() = velocity.value.ofUnit(rotations/seconds)
 
 }
 
@@ -107,12 +103,6 @@ public class CTREEncoderAdapter(
 public class TalonFXEncoderAdapter(
     private val motorController: TalonFX
 ): TimestampedEncoder{
-
-    override val angularPosition: Angle
-        get() = motorController.rotorPosition.value.ofUnit(rotations)
-
-    override val angularVelocity: AngularVelocity
-        get() = motorController.rotorVelocity.value.ofUnit(rotations/seconds)
 
     override val timestampedAngularPosition: Measurement<Angle>
         get(){

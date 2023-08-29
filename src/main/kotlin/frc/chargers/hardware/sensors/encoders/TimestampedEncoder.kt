@@ -12,4 +12,10 @@ public interface TimestampedEncoder: Encoder {
     public val timestampedAngularPosition: Measurement<Angle>
 
     public val timestampedAngularVelocity: Measurement<AngularVelocity>
+
+    override val angularPosition: Angle
+        get() = timestampedAngularPosition.value
+
+    override val angularVelocity: AngularVelocity
+        get() = timestampedAngularVelocity.value
 }

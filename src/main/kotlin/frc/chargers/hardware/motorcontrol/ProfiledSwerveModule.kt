@@ -46,6 +46,31 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
 ), HolonomicModule<TMC,DMC>{
 
     public companion object{
+
+        public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
+            turnMotor: TM,
+            turnEncoder: Encoder? = null,
+            driveMotor: DM,
+            data: Data,
+            turnMotorConfiguration: TMC? = null,
+            driveMotorConfiguration: DMC? = null
+        ): ProfiledSwerveModule<TMC,DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
+        invoke(
+            turnMotor,
+            turnEncoder,
+            driveMotor,
+            data.turnPIDConstants,
+            data.turnFF,
+            data.profileConstraints,
+            data.drivePIDConstants,
+            data.velocityFF,
+            data.turnPrecision,
+            data.useOnboardPIDIfAvailable,
+            turnMotorConfiguration,
+            driveMotorConfiguration
+        )
+
+
         public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
             turnMotor: TM,
             turnEncoder: Encoder? = null,
@@ -93,6 +118,16 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
         turnMotor as MotorConfigurable<TMC>
         turnMotor.configure(configuration)
     }
+
+    public data class Data(
+        val turnPIDConstants: PIDConstants,
+        val turnFF: AngularMotorFF = AngularMotorFF.None,
+        val profileConstraints: AngularTrapezoidProfile.Constraints,
+        val drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+        val velocityFF: AngularMotorFF = AngularMotorFF.None,
+        val turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
+        val useOnboardPIDIfAvailable: Boolean = false
+    )
 
 }
 
