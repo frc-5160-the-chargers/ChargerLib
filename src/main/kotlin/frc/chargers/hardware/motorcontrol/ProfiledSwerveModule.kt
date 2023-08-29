@@ -52,8 +52,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
             turnEncoder: Encoder? = null,
             driveMotor: DM,
             data: Data,
-            turnMotorConfiguration: TMC? = null,
-            driveMotorConfiguration: DMC? = null
+            configuration: ModuleConfiguration<TMC,DMC>
         ): ProfiledSwerveModule<TMC,DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
         invoke(
             turnMotor,
@@ -66,8 +65,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
             data.velocityFF,
             data.turnPrecision,
             data.useOnboardPIDIfAvailable,
-            turnMotorConfiguration,
-            driveMotorConfiguration
+            configuration
         )
 
 
@@ -82,19 +80,18 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
             velocityFF: AngularMotorFF = AngularMotorFF.None,
             turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
             useOnboardPIDIfAvailable: Boolean = false,
-            turnMotorConfiguration: TMC? = null,
-            driveMotorConfiguration: DMC? = null
+            configuration: ModuleConfiguration<TMC,DMC>? = null
         ): ProfiledSwerveModule<TMC,DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
             ProfiledSwerveModule(
                 turnMotor.apply{
-                    if(turnMotorConfiguration != null){
-                        configure(turnMotorConfiguration)
+                    if(configuration != null){
+                        configure(configuration.turnMotorConfig)
                     }
                 },
                 turnEncoder,
                 driveMotor.apply{
-                    if(driveMotorConfiguration != null){
-                        configure(driveMotorConfiguration)
+                    if(configuration != null){
+                        configure(configuration.driveMotorConfig)
                     }
                 },
                 turnPIDConstants,
@@ -107,17 +104,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
             )
     }
 
-    override fun configureDriveMotor(configuration: DMC) {
-        @Suppress("UNCHECKED_CAST")
-        driveMotor as MotorConfigurable<DMC>
-        driveMotor.configure(configuration)
-    }
 
-    override fun configureTurnMotor(configuration: TMC) {
-        @Suppress("UNCHECKED_CAST")
-        turnMotor as MotorConfigurable<TMC>
-        turnMotor.configure(configuration)
-    }
 
     public data class Data(
         val turnPIDConstants: PIDConstants,
@@ -128,6 +115,16 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
         val turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
         val useOnboardPIDIfAvailable: Boolean = false
     )
+
+    override fun configure(configuration: ModuleConfiguration<TMC, DMC>) {
+        @Suppress("UNCHECKED_CAST")
+        driveMotor as MotorConfigurable<DMC>
+        driveMotor.configure(configuration.driveMotorConfig)
+
+        @Suppress("UNCHECKED_CAST")
+        turnMotor as MotorConfigurable<TMC>
+        turnMotor.configure(configuration.turnMotorConfig)
+    }
 
 }
 

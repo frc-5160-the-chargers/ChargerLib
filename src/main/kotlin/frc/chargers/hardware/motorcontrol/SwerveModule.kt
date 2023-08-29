@@ -48,8 +48,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             turnEncoder: Encoder? = null,
             driveMotor: DM,
             data: Data,
-            turnMotorConfiguration: TMC? = null,
-            driveMotorConfiguration: DMC? = null
+            configuration: ModuleConfiguration<TMC,DMC>
         ): SwerveModule<TMC,DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
             invoke(
                 turnMotor,
@@ -60,8 +59,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
                 data.velocityFF,
                 data.turnPrecision,
                 data.useOnboardPIDIfAvailable,
-                turnMotorConfiguration,
-                driveMotorConfiguration
+                configuration
             )
         public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
             turnMotor: TM,
@@ -72,19 +70,18 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             velocityFF: AngularMotorFF = AngularMotorFF.None,
             turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
             useOnboardPIDIfAvailable: Boolean = false,
-            turnMotorConfiguration: TMC? = null,
-            driveMotorConfiguration: DMC? = null
+            configuration: ModuleConfiguration<TMC,DMC>? = null
         ): SwerveModule<TMC,DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
             SwerveModule(
             turnMotor.apply{
-                if(turnMotorConfiguration != null){
-                    configure(turnMotorConfiguration)
+                if(configuration != null){
+                    configure(configuration.turnMotorConfig)
                 }
             },
             turnEncoder,
             driveMotor.apply{
-                if(driveMotorConfiguration != null){
-                    configure(driveMotorConfiguration)
+                if(configuration != null){
+                    configure(configuration.driveMotorConfig)
                 }
             },
             turnPIDConstants,
@@ -95,16 +92,14 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
         )
     }
 
-    override fun configureDriveMotor(configuration: DMC) {
+    override fun configure(configuration: ModuleConfiguration<TMC, DMC>) {
         @Suppress("UNCHECKED_CAST")
         driveMotor as MotorConfigurable<DMC>
-        driveMotor.configure(configuration)
-    }
+        driveMotor.configure(configuration.driveMotorConfig)
 
-    override fun configureTurnMotor(configuration: TMC) {
         @Suppress("UNCHECKED_CAST")
         turnMotor as MotorConfigurable<TMC>
-        turnMotor.configure(configuration)
+        turnMotor.configure(configuration.turnMotorConfig)
     }
 
     public data class Data(

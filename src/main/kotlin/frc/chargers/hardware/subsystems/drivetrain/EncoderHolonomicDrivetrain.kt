@@ -9,10 +9,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.hardware.motorcontrol.HolonomicModule
+import frc.chargers.hardware.motorcontrol.NonConfigurableHolonomicModule
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 
-import frc.chargers.hardware.motorcontrol.NonConfigurableHolonomicModule
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.sensors.RobotPoseSupplier
@@ -27,6 +26,8 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import kotlin.math.sqrt
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import frc.chargers.hardware.motorcontrol.HolonomicModule
+import frc.chargers.hardware.motorcontrol.ModuleConfiguration
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.wpilibextensions.kinematics.*
 /**
@@ -47,14 +48,12 @@ public fun talonFXHolonomicDrivetrain(
     wheelBase: Distance,
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
-    configureTurnMotor: TalonFXConfiguration.() -> Unit = {},
-    configureDriveMotor: TalonFXConfiguration.() -> Unit = {},
-    vararg poseSuppliers: RobotPoseSupplier
+    vararg poseSuppliers: RobotPoseSupplier,
+    configure: ModuleConfiguration<TalonFXConfiguration,TalonFXConfiguration>.() -> Unit
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft, topRight, bottomLeft, bottomRight, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
-    TalonFXConfiguration().apply(configureTurnMotor),
-    TalonFXConfiguration().apply(configureDriveMotor),
-    *poseSuppliers
+    *poseSuppliers,
+    configuration = ModuleConfiguration(TalonFXConfiguration(),TalonFXConfiguration()).apply(configure),
 )
 
 /**
@@ -75,14 +74,12 @@ public fun sparkMaxHolonomicDrivetrain(
     wheelBase: Distance,
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
-    configureTurnMotor: SparkMaxConfiguration.() -> Unit = {},
-    configureDriveMotor: SparkMaxConfiguration.() -> Unit = {},
-    vararg poseSuppliers: RobotPoseSupplier
+    vararg poseSuppliers: RobotPoseSupplier,
+    configure: ModuleConfiguration<SparkMaxConfiguration,SparkMaxConfiguration>.() -> Unit,
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft, topRight, bottomLeft, bottomRight, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
-    SparkMaxConfiguration().apply(configureTurnMotor),
-    SparkMaxConfiguration().apply(configureDriveMotor),
-    *poseSuppliers
+    *poseSuppliers,
+    configuration = ModuleConfiguration(SparkMaxConfiguration(),SparkMaxConfiguration()).apply(configure),
 )
 
 /**
@@ -90,7 +87,7 @@ public fun sparkMaxHolonomicDrivetrain(
  * allowing its motors to all be configured.
  */
 public fun <TMC: MotorConfiguration, DMC: MotorConfiguration> EncoderHolonomicDrivetrain(
-    topLeft: HolonomicModule<TMC,DMC>,
+    topLeft: HolonomicModule<TMC, DMC>,
     topRight: HolonomicModule<TMC,DMC>,
     bottomLeft: HolonomicModule<TMC,DMC>,
     bottomRight: HolonomicModule<TMC,DMC>,
@@ -101,40 +98,27 @@ public fun <TMC: MotorConfiguration, DMC: MotorConfiguration> EncoderHolonomicDr
     wheelBase: Distance,
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
-    turnMotorConfiguration: TMC? = null,
-    driveMotorConfiguration: DMC? = null,
-    vararg poseSuppliers: RobotPoseSupplier
+    vararg poseSuppliers: RobotPoseSupplier,
+    configuration: ModuleConfiguration<TMC, DMC>? = null,
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft.apply{
-        if(turnMotorConfiguration != null){
-            configureTurnMotor(turnMotorConfiguration)
-        }
-        if(driveMotorConfiguration != null){
-            configureDriveMotor(driveMotorConfiguration)
+        if(configuration != null){
+            configure(configuration)
         }
     },
     topRight.apply{
-        if(turnMotorConfiguration != null){
-            configureTurnMotor(turnMotorConfiguration)
-        }
-        if(driveMotorConfiguration != null){
-            configureDriveMotor(driveMotorConfiguration)
+        if(configuration != null){
+            configure(configuration)
         }
     },
     bottomLeft.apply{
-        if(turnMotorConfiguration != null){
-            configureTurnMotor(turnMotorConfiguration)
-        }
-        if(driveMotorConfiguration != null){
-            configureDriveMotor(driveMotorConfiguration)
+        if(configuration != null){
+            configure(configuration)
         }
     },
     bottomRight.apply{
-        if(turnMotorConfiguration != null){
-            configureTurnMotor(turnMotorConfiguration)
-        }
-        if(driveMotorConfiguration != null){
-            configureDriveMotor(driveMotorConfiguration)
+        if(configuration != null){
+            configure(configuration)
         }
     }, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive, *poseSuppliers
 )

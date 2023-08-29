@@ -12,9 +12,9 @@ package frc.chargers.utils
  * val array1D = doubleArrayOf(1.0, 2.0, 3.0)
  * val array2D =
  *     arrayOf(
- *         doubleArrayOf(1.0, 2.0, 3.0),
- *         doubleArrayOf(4.0, 5.0, 6.0),
- *         doubleArrayOf(7.0, 8.0, 9.0),
+ *         arrayOf(1.0, 2.0, 3.0),
+ *         arrayOf(4.0, 5.0, 6.0),
+ *         arrayOf(7.0, 8.0, 9.0),
  *     )
  * ```
  *
@@ -29,7 +29,22 @@ package frc.chargers.utils
  * ```
  */
 public object a {
-    public operator fun get(vararg elements: Double): DoubleArray = doubleArrayOf(*elements)
-    public operator fun get(vararg elements: Float): FloatArray = floatArrayOf(*elements)
     public inline operator fun <reified T> get(vararg elements: T): Array<T> = arrayOf(*elements)
+}
+
+/**
+ * Convenience object for creating [IntArray]s, [DoubleArray]s and [FloatArray]s.
+ * These arrays have no boxing overhead, but function the same as regular arrays.
+ *
+ * Usage:
+ *
+ * p[1.0,2.0,3.0]
+ * p[1,2,3]
+ * @see a
+ */
+public object p{
+    public operator fun get(vararg elements: Int): IntArray = intArrayOf(*elements)
+    public operator fun get(vararg elements: Double): DoubleArray = doubleArrayOf(*elements)
+
+    public operator fun get(vararg elements: Float): FloatArray = floatArrayOf(*elements)
 }

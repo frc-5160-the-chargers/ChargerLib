@@ -8,17 +8,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.wpilibextensions.geometry.asAngle
 
-/**
- * Represents a module of a holonomic drivetrain,
- * where the turn and drive motors can be configured.
- *
- * @see NonConfigurableHolonomicModule
- */
-public interface HolonomicModule<TMC: MotorConfiguration, DMC: MotorConfiguration>: NonConfigurableHolonomicModule{
-    public fun configureDriveMotor(configuration: DMC)
-    public fun configureTurnMotor(configuration: TMC)
-}
 
+public interface HolonomicModule<TMC: MotorConfiguration,DMC: MotorConfiguration>: NonConfigurableHolonomicModule, MotorConfigurable<ModuleConfiguration<TMC,DMC>>
 
 
 /**
