@@ -8,7 +8,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.wpilibextensions.geometry.asAngle
 
-
+/**
+ * Represents a [HolonomicModule] that can be configured.
+ */
 public interface HolonomicModule<TMC: MotorConfiguration,DMC: MotorConfiguration>: NonConfigurableHolonomicModule, MotorConfigurable<ModuleConfiguration<TMC,DMC>>
 
 

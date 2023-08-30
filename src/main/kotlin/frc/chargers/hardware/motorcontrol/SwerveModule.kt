@@ -12,6 +12,7 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.utils.Precision
+import frc.chargers.utils.rem
 import frc.chargers.wpilibextensions.kinematics.SwerveModuleState
 import frc.chargers.wpilibextensions.kinematics.SwerveModulePosition
 
@@ -129,20 +130,40 @@ public open class NonConfigurableSwerveModule(
 
     override val distanceMeasurementEncoder: Encoder = driveMotor.encoder
 
+    private val currentDirection: Angle
+        get() = (turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition) % 360.0
+
 
     /**
      * A base lambda for the SwerveModule class.
      */
     private val turnMotorPositionSetter: (Angle) -> Unit = if(useOnboardPIDIfAvailable && turnMotor is FeedbackMotorController){
-        // return value
         // turnMotor smart casts to FeedbackMotorController here, which means that setAngularPosition is allowed.
-        {
-            turnMotor.setAngularPosition(
-                it,
-                turnPIDConstants,
-                turnEncoder
-            )
+
+        if (turnPrecision is Precision.Within){
+            // return value
+            {
+                if(currentDirection-it !in turnPrecision.allowableError){
+                    turnMotor.setAngularPosition(
+                        it,
+                        turnPIDConstants,
+                        turnEncoder
+                    )
+                }else{
+                    turnMotor.set(0.0)
+                }
+            }
+        }else{
+            // return value
+            {
+                turnMotor.setAngularPosition(
+                    it,
+                    turnPIDConstants,
+                    turnEncoder
+                )
+            }
         }
+
     }else{
         val controller = UnitSuperPIDController<AngleDimension,VoltageDimension>(
             pidConstants = turnPIDConstants,
@@ -154,14 +175,25 @@ public open class NonConfigurableSwerveModule(
             target = Angle(0.0),
             selfSustain = true
         )
-        // Needed so that the return lambda isn't confused to be part of the superPIDController
-        val separator = Unit
 
-        // return value
-        {
-            if(controller.target != it){controller.target = it}
-            turnMotor.setVoltage(controller.calculateOutput().inUnit(volts))
+        if(turnPrecision is Precision.Within){
+            // return value
+            {
+                if(controller.target != it){controller.target = it}
+                if (currentDirection-it !in turnPrecision.allowableError){
+                    turnMotor.setVoltage(controller.calculateOutput().inUnit(volts))
+                }else{
+                    turnMotor.set(0.0)
+                }
+            }
+        }else{
+            // return value
+            {
+                if(controller.target != it){controller.target = it}
+                turnMotor.setVoltage(controller.calculateOutput().inUnit(volts))
+            }
         }
+
     }
 
     /**
@@ -195,35 +227,15 @@ public open class NonConfigurableSwerveModule(
     }
 
     override fun setDirectionalPower(power: Double, direction: Angle) {
-        val delta = direction - (turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)
-        if (abs(delta) > 90.0.degrees){
+
+        if (abs(direction - currentDirection) > 90.0.degrees){
             val newDirection = ((direction.inUnit(degrees) + 180) % 360).ofUnit(degrees)
             driveMotor.set(-power)
-            when(turnPrecision){
-                Precision.AllowOvershoot -> turnMotorPositionSetter(newDirection)
-
-                is Precision.Within -> {
-                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-newDirection in turnPrecision.allowableError){
-                        turnMotorPositionSetter(newDirection)
-                    }else{
-                        turnMotor.set(0.0)
-                    }
-                }
-            }
+            turnMotorPositionSetter(newDirection)
 
         }else{
             driveMotor.set(power)
-            when(turnPrecision){
-                Precision.AllowOvershoot -> turnMotorPositionSetter(direction)
-
-                is Precision.Within -> {
-                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-direction in turnPrecision.allowableError){
-                        turnMotorPositionSetter(direction)
-                    }else{
-                        turnMotor.set(0.0)
-                    }
-                }
-            }
+            turnMotorPositionSetter(direction)
         }
     }
 
@@ -232,30 +244,10 @@ public open class NonConfigurableSwerveModule(
         if (abs(delta) > 90.0.degrees){
             val newDirection = ((direction.inUnit(degrees) + 180) % 360).ofUnit(degrees)
             driveMotorVelocitySetter(-angularVelocity)
-            when(turnPrecision){
-                Precision.AllowOvershoot -> turnMotorPositionSetter(newDirection)
-
-                is Precision.Within -> {
-                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-newDirection in turnPrecision.allowableError){
-                        turnMotorPositionSetter(newDirection)
-                    }else{
-                        turnMotor.set(0.0)
-                    }
-                }
-            }
+            turnMotorPositionSetter(newDirection)
         }else{
             driveMotorVelocitySetter(angularVelocity)
-            when(turnPrecision){
-                Precision.AllowOvershoot -> turnMotorPositionSetter(direction)
-
-                is Precision.Within -> {
-                    if((turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)-direction in turnPrecision.allowableError){
-                        turnMotorPositionSetter(direction)
-                    }else{
-                        turnMotor.set(0.0)
-                    }
-                }
-            }
+            turnMotorPositionSetter(direction)
         }
     }
 
@@ -267,13 +259,13 @@ public open class NonConfigurableSwerveModule(
     override fun getModuleState(gearRatio: Double, wheelDiameter: Length): SwerveModuleState =
         SwerveModuleState(
             driveMotor.encoder.angularVelocity * (gearRatio * wheelDiameter),
-            turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition
+            currentDirection
         )
 
     override fun getModulePosition(gearRatio: Double, wheelDiameter: Length): SwerveModulePosition =
         SwerveModulePosition(
             driveMotor.encoder.angularPosition * (gearRatio * wheelDiameter),
-            turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition
+            currentDirection
         )
 
 }
