@@ -215,10 +215,7 @@ public open class NonConfigurableSwerveModule(
             target = AngularVelocity(0.0),
             selfSustain = true,
             feedforward = velocityFF
-        )
-        // separator is necessary to prevent the compiler
-        // from thinking the return lambda is part of the UnitSuperPIDController
-        val separator = Unit
+        );
         // return value
         {
             if(controller.target != it){controller.target = it}
@@ -228,26 +225,23 @@ public open class NonConfigurableSwerveModule(
 
     override fun setDirectionalPower(power: Double, direction: Angle) {
 
-        if (abs(direction - currentDirection) > 90.0.degrees){
-            val newDirection = ((direction.inUnit(degrees) + 180) % 360).ofUnit(degrees)
+        if (abs(direction%360 - currentDirection) > 90.0.degrees){
             driveMotor.set(-power)
-            turnMotorPositionSetter(newDirection)
+            turnMotorPositionSetter((direction + 180.degrees) % 360)
 
         }else{
             driveMotor.set(power)
-            turnMotorPositionSetter(direction)
+            turnMotorPositionSetter(direction%360)
         }
     }
 
     override fun setDirectionalVelocity(angularVelocity: AngularVelocity, direction: Angle) {
-        val delta = direction - (turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition)
-        if (abs(delta) > 90.0.degrees){
-            val newDirection = ((direction.inUnit(degrees) + 180) % 360).ofUnit(degrees)
+        if (abs(direction%360 - currentDirection) > 90.0.degrees){
             driveMotorVelocitySetter(-angularVelocity)
-            turnMotorPositionSetter(newDirection)
+            turnMotorPositionSetter((direction + 180.degrees) % 360)
         }else{
             driveMotorVelocitySetter(angularVelocity)
-            turnMotorPositionSetter(direction)
+            turnMotorPositionSetter(direction%360)
         }
     }
 
