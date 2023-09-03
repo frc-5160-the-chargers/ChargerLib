@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj.Timer
  */
 public object Timer{
     public fun getFPGATimestamp(): Time = Timer.getFPGATimestamp().ofUnit(seconds)
+
+    public val fpgaTimestamp: Time
+        get() = getFPGATimestamp()
     public fun getMatchTime(): Time = Timer.getMatchTime().ofUnit(seconds)
     public fun delay(time: Time){
         Timer.delay(time.inUnit(seconds))
