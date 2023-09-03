@@ -12,7 +12,7 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.utils.Precision
-import frc.chargers.utils.rem
+import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.kinematics.SwerveModulePosition
 import frc.chargers.wpilibextensions.kinematics.SwerveModuleState
@@ -150,7 +150,7 @@ public open class NonConfigurableProfiledSwerveModule(
 
 
     private val currentDirection: Angle
-        get() = (turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition) % 360.0
+        get() = turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition
 
     /**
      * A base lambda for the SwerveModule class.
@@ -249,22 +249,22 @@ public open class NonConfigurableProfiledSwerveModule(
     }
 
     override fun setDirectionalPower(power: Double, direction: Angle) {
-        if (abs(direction%360 - currentDirection) > 90.0.degrees){
+        if (abs(direction - currentDirection) > 90.0.degrees){
             driveMotor.set(-power)
-            turnMotorPositionSetter((direction + 180.degrees) % 360)
+            turnMotorPositionSetter((direction + 180.degrees) % 360.degrees)
         }else{
             driveMotor.set(power)
-            turnMotorPositionSetter(direction%360)
+            turnMotorPositionSetter(direction)
         }
     }
 
     override fun setDirectionalVelocity(angularVelocity: AngularVelocity, direction: Angle) {
-        if (abs(direction%360 - currentDirection) > 90.0.degrees){
+        if (abs(direction - currentDirection) > 90.0.degrees){
             driveMotorVelocitySetter(-angularVelocity)
-            turnMotorPositionSetter((direction + 180.degrees) % 360)
+            turnMotorPositionSetter((direction + 180.degrees) % 360.degrees)
         }else{
             driveMotorVelocitySetter(angularVelocity)
-            turnMotorPositionSetter(direction%360)
+            turnMotorPositionSetter(direction)
         }
     }
 
