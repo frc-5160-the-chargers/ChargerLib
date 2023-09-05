@@ -57,7 +57,7 @@ public fun talonFXHolonomicDrivetrain(
 )
 
 /**
- * A convenience function to create a [EncoderDifferentialDrivetrain]
+ * A convenience function to create a [EncoderHolonomicDrivetrain]
  * using SparkMax motor controllers.
  *
  * @see EncoderHolonomicDrivetrain
