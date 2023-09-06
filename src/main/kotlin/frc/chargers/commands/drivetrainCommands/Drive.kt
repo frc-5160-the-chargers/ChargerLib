@@ -26,20 +26,20 @@ private val DEFAULT_MAX_STEERING_VELOCITY = AngularVelocity(0.3)
 context(CommandBuilder, HeadingProvider)
 @JvmName("driveTime")
 @LowPriorityInOverloadResolution
-public fun EncoderDifferentialDrivetrain.driveStraight(time: Time, power: Double, steeringPIDConstants: PIDConstants, maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER): Command = runSequentially {
+public fun DifferentialDrivetrain.driveStraight(time: Time, power: Double, steeringPIDConstants: PIDConstants, maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER): Command = runSequentially {
     val initialHeading by getOnceDuringRun { this@HeadingProvider.heading }
 
-    val pid by getOnceDuringRun {
+    val pid =
         UnitSuperPIDController(
             pidConstants = steeringPIDConstants,
             getInput = { this@HeadingProvider.heading },
             target = initialHeading,
             outputRange = Scalar(0.0)..Scalar(maxSteeringPower)
         )
-    }
 
     loopFor(time, this@driveStraight) { arcadeDrive(power, pid.calculateOutput().value) }
 }
+
 
 /**
  * Adds a command to the command builder driving the robot
@@ -47,31 +47,31 @@ public fun EncoderDifferentialDrivetrain.driveStraight(time: Time, power: Double
  * PID to ensure a straight drive without deviation and
  * getting PID constants from the local context.
  */
-context(CommandBuilder, TurnPIDConstants)
+context(CommandBuilder, HeadingProvider, TurnPIDConstants)
 @JvmName("driveDistance")
 @LowPriorityInOverloadResolution
-public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, power: Double, maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER): Command =
+public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, power: Double, maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER): Command = with(this@HeadingProvider) {
     driveStraight(distance, power, turnPIDConstants, maxSteeringPower)
+}
 
 /**
  * Adds a command to the command builder driving the robot
  * a specified [distance] with a specified [power], using
  * PID to ensure a straight drive without deviation.
  */
-context(CommandBuilder)
+context(CommandBuilder, HeadingProvider)
 @JvmName("driveDistance")
 @LowPriorityInOverloadResolution
 public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, power: Double, steeringPIDConstants: PIDConstants, maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER): Command = runSequentially {
     val initialPosition by getOnceDuringRun { distanceTraveled }
-    val initialHeading by getOnceDuringRun { heading }
-    val pid by getOnceDuringRun {
+    val initialHeading by getOnceDuringRun { this@HeadingProvider.heading }
+    val pid =
         UnitSuperPIDController(
             pidConstants = steeringPIDConstants,
-            getInput = { heading },
+            getInput = { this@HeadingProvider.heading },
             target = initialHeading,
             outputRange = Scalar(0.0)..Scalar(maxSteeringPower)
         )
-    }
 
     loopUntil(
         if (power > 0) {
