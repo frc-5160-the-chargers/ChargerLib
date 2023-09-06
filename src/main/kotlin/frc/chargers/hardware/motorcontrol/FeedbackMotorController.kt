@@ -5,6 +5,7 @@ import com.batterystaple.kmeasure.quantities.AngularVelocity
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 
 
@@ -30,7 +31,7 @@ public interface FeedbackMotorController: EncoderMotorController{
     public fun setAngularPosition(
         target: Angle,
         pidConstants: PIDConstants,
-        absoluteEncoder: Encoder?
+        absoluteEncoder: PositionEncoder?
     )
 
     public fun setAngularPosition(
@@ -52,7 +53,7 @@ public interface FeedbackMotorController: EncoderMotorController{
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
         constraints: AngularTrapezoidProfile.Constraints,
-        absoluteEncoder: Encoder?
+        absoluteEncoder: PositionEncoder?
     )
 
     public fun setAngularPosition(

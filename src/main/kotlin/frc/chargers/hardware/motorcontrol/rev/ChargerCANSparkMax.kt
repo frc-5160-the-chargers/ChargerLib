@@ -15,6 +15,7 @@ import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.ResettableEncoder
 import frc.chargers.hardware.sensors.encoders.RevEncoderAdapter
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
@@ -144,7 +145,7 @@ public open class ChargerCANSparkMax(
         innerController.setReference(target.siValue, ControlType.kVelocity,0,feedforward.calculate(target).inUnit(volts))
     }
 
-    override fun setAngularPosition(target: Angle, pidConstants: PIDConstants,absoluteEncoder: Encoder?) {
+    override fun setAngularPosition(target: Angle, pidConstants: PIDConstants,absoluteEncoder: PositionEncoder?) {
         val actualTarget = if (absoluteEncoder != null){
             encoder.angularPosition - (absoluteEncoder.angularPosition - target)
         }else{
@@ -159,7 +160,7 @@ public open class ChargerCANSparkMax(
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
         constraints: AngularTrapezoidProfile.Constraints,
-        absoluteEncoder: Encoder?
+        absoluteEncoder: PositionEncoder?
     ) {
         if (trapezoidProfile.constraints != constraints){
             trapezoidProfile = AngularTrapezoidProfile(

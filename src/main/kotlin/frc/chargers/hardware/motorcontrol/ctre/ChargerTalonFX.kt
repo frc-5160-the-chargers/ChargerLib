@@ -15,6 +15,7 @@ import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.TalonFXEncoderAdapter
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
@@ -84,7 +85,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         setControl(velocityRequest)
     }
 
-    final override fun setAngularPosition(target: Angle, pidConstants: PIDConstants, absoluteEncoder: Encoder?) {
+    final override fun setAngularPosition(target: Angle, pidConstants: PIDConstants, absoluteEncoder: PositionEncoder?) {
 
         if (currentSlotConfigs.pidConstants != pidConstants){
             currentSlotConfigs.pidConstants = pidConstants
@@ -117,7 +118,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
         constraints: AngularTrapezoidProfile.Constraints,
-        absoluteEncoder: Encoder?
+        absoluteEncoder: PositionEncoder?
     ) {
         if(constraints.maxVelocity != currentMMConfigs.MotionMagicCruiseVelocity.ofUnit(rotations/seconds)
             || constraints.maxAcceleration != currentMMConfigs.MotionMagicAcceleration.ofUnit(rotations/seconds/seconds)){

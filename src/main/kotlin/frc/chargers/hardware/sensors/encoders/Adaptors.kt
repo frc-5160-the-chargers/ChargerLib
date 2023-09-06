@@ -70,6 +70,7 @@ public class CTREEncoderAdapter(
     canBus: String? = null
 ): CTRECANcoder(deviceID, canBus), TimestampedEncoder, ResettableEncoder{
 
+
     override fun setZero(newZero: Angle){
         setPosition(newZero.inUnit(rotations))
     }

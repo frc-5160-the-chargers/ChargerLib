@@ -2,7 +2,7 @@ package frc.chargers.hardware.motorcontrol
 
 /**
  * A marker interface for classes that store configuration
- * parameters for motors.
+ * parameters for motors/encoders.
  */
 public interface MotorConfiguration
 

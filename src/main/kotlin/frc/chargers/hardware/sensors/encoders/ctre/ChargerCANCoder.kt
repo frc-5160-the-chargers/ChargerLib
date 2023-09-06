@@ -1,5 +1,6 @@
 package frc.chargers.hardware.sensors.encoders.ctre
 
+/*
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.seconds
@@ -20,4 +21,4 @@ public class ChargerCANCoder(id: Int, canbus: String = "") : CANCoder(id, canbus
         override val angularPosition: Angle
             get() = absolutePosition.ofUnit(degrees)
     }
-}
+}*/

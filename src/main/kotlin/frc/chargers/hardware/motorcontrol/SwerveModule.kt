@@ -11,6 +11,7 @@ import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.kinematics.SwerveModuleState
@@ -119,7 +120,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
  */
 public open class NonConfigurableSwerveModule(
     public val turnMotor: EncoderMotorController,
-    public val turnEncoder: Encoder? = null,
+    public val turnEncoder: PositionEncoder? = null,
     public val driveMotor: EncoderMotorController,
     public val turnPIDConstants: PIDConstants,
     public val drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
