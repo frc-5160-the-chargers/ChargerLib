@@ -9,7 +9,7 @@ import com.ctre.phoenix.sensors.CANCoder
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
-import frc.chargers.hardware.sensors.encoders.relative.TalonSRXEncoderAdaptor
+import frc.chargers.hardware.sensors.encoders.relative.TalonSRXEncoderAdapter
 import kotlin.math.roundToInt
 
 private const val TALON_SRX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
@@ -41,8 +41,8 @@ public open class ChargerTalonSRX(
     protected val encoderTicksPerRotation: Int
 ) : WPI_TalonSRX(deviceNumber), EncoderMotorController, MotorConfigurable<TalonSRXConfiguration> {
 
-    final override val encoder: TalonSRXEncoderAdaptor
-        get() = TalonSRXEncoderAdaptor(
+    final override val encoder: TalonSRXEncoderAdapter
+        get() = TalonSRXEncoderAdapter(
             ctreMotorController = this,
             pidIndex = 0,
             pulsesPerRotation = encoderTicksPerRotation
