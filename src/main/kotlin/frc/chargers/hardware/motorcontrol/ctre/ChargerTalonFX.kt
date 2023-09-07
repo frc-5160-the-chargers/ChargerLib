@@ -16,8 +16,8 @@ import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
-import frc.chargers.hardware.sensors.encoders.TalonFXEncoderAdapter
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
+import frc.chargers.hardware.sensors.encoders.relative.TalonFXEncoderAdapter
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
@@ -47,7 +47,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
     // and does not pass around the reference to this class.
-    final override val encoder: TimestampedEncoder =
+    final override val encoder: TalonFXEncoderAdapter =
         TalonFXEncoderAdapter(this)
 
     final override fun configure(configuration: TalonFXConfiguration){

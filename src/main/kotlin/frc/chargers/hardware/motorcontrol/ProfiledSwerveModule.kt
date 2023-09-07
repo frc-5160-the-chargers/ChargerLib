@@ -11,6 +11,7 @@ import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
@@ -24,7 +25,7 @@ import frc.chargers.wpilibextensions.kinematics.SwerveModuleState
  */
 public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> private constructor(
     turnMotor: EncoderMotorController,
-    turnEncoder: Encoder? = null,
+    turnEncoder: PositionEncoder? = null,
     driveMotor: EncoderMotorController,
     turnPIDConstants: PIDConstants,
     turnFF: AngularMotorFF = AngularMotorFF.None,
@@ -50,7 +51,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
 
         public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
             turnMotor: TM,
-            turnEncoder: Encoder? = null,
+            turnEncoder: PositionEncoder? = null,
             driveMotor: DM,
             data: Data,
             configuration: ModuleConfiguration<TMC,DMC>
@@ -72,7 +73,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
 
         public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
             turnMotor: TM,
-            turnEncoder: Encoder? = null,
+            turnEncoder: PositionEncoder? = null,
             driveMotor: DM,
             turnPIDConstants: PIDConstants,
             turnFF: AngularMotorFF = AngularMotorFF.None,
@@ -135,7 +136,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
  */
 public open class NonConfigurableProfiledSwerveModule(
     public val turnMotor: EncoderMotorController,
-    public val turnEncoder: Encoder? = null,
+    public val turnEncoder: PositionEncoder? = null,
     public val driveMotor: EncoderMotorController,
     public val turnPIDConstants: PIDConstants,
     public val turnFF: AngularMotorFF = AngularMotorFF.None,

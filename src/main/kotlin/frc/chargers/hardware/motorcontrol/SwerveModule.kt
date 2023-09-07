@@ -25,7 +25,7 @@ import frc.chargers.wpilibextensions.kinematics.SwerveModulePosition
  */
 public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> private constructor(
     turnMotor: EncoderMotorController,
-    turnEncoder: Encoder? = null,
+    turnEncoder: PositionEncoder? = null,
     driveMotor: EncoderMotorController,
     turnPIDConstants: PIDConstants,
     drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
@@ -47,7 +47,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
 
         public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
             turnMotor: TM,
-            turnEncoder: Encoder? = null,
+            turnEncoder: PositionEncoder? = null,
             driveMotor: DM,
             data: Data,
             configuration: ModuleConfiguration<TMC,DMC>
@@ -65,7 +65,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             )
         public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
             turnMotor: TM,
-            turnEncoder: Encoder? = null,
+            turnEncoder: PositionEncoder? = null,
             driveMotor: DM,
             turnPIDConstants: PIDConstants,
             drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
@@ -75,22 +75,22 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             configuration: ModuleConfiguration<TMC,DMC>? = null
         ): SwerveModule<TMC,DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
             SwerveModule(
-            turnMotor.apply{
-                if(configuration != null){
-                    configure(configuration.turnMotorConfig)
-                }
-            },
-            turnEncoder,
-            driveMotor.apply{
-                if(configuration != null){
-                    configure(configuration.driveMotorConfig)
-                }
-            },
-            turnPIDConstants,
-            drivePIDConstants,
-            velocityFF,
-            turnPrecision,
-            useOnboardPIDIfAvailable
+                turnMotor.apply{
+                    if(configuration != null){
+                        configure(configuration.turnMotorConfig)
+                    }
+                },
+                turnEncoder,
+                driveMotor.apply{
+                    if(configuration != null){
+                        configure(configuration.driveMotorConfig)
+                    }
+                },
+                turnPIDConstants,
+                drivePIDConstants,
+                velocityFF,
+                turnPrecision,
+                useOnboardPIDIfAvailable
         )
     }
 

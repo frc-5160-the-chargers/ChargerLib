@@ -14,10 +14,9 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
-import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.ResettableEncoder
-import frc.chargers.hardware.sensors.encoders.RevEncoderAdapter
+import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import kotlin.math.PI
 import kotlin.math.roundToInt
@@ -54,15 +53,15 @@ public open class ChargerCANSparkMax(
 ) : CANSparkMax(deviceId, type), FeedbackMotorController, MotorConfigurable<SparkMaxConfiguration> {
 
 
-    override val encoder: ResettableEncoder by lazy {
+    override val encoder: SparkMaxEncoderAdapter by lazy {
         alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
             if (encoderType == null) {
-                RevEncoderAdapter(super.getAlternateEncoder(countsPerRev))
+                SparkMaxEncoderAdapter(super.getAlternateEncoder(countsPerRev))
             } else {
-                RevEncoderAdapter(super.getAlternateEncoder(encoderType, countsPerRev))
+                SparkMaxEncoderAdapter(super.getAlternateEncoder(encoderType, countsPerRev))
             }
         }
-            ?: RevEncoderAdapter(super.getEncoder())
+            ?: SparkMaxEncoderAdapter(super.getEncoder())
     }
 
     override fun configure(configuration: SparkMaxConfiguration) {

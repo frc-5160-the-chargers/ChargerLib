@@ -1,4 +1,4 @@
-package frc.chargers.hardware.sensors.encoders
+package frc.chargers.hardware.sensors.encoders.absolute
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.inUnit
@@ -6,8 +6,9 @@ import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.degrees
 import edu.wpi.first.wpilibj.AnalogInput
 import edu.wpi.first.wpilibj.AnalogPotentiometer
+import frc.chargers.hardware.sensors.encoders.PositionEncoder
 
-public class AnalogPotentiometerPositionEncoder(input: AnalogInput, fullRange: Angle, offset: Angle = 0.degrees) :
+public class AnalogPotentiometerEncoder(input: AnalogInput, fullRange: Angle, offset: Angle = 0.degrees) :
     AnalogPotentiometer(input, fullRange.inUnit(degrees), offset.inUnit(degrees)), PositionEncoder {
     public constructor(channel: Int, fullRange: Angle, offset: Angle = 0.degrees) : this(AnalogInput(channel), fullRange, offset)
 

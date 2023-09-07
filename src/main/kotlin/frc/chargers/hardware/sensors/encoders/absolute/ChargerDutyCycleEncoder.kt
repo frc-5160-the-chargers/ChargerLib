@@ -7,9 +7,15 @@ import com.batterystaple.kmeasure.units.rotations
 import edu.wpi.first.wpilibj.DigitalSource
 import edu.wpi.first.wpilibj.DutyCycle
 import edu.wpi.first.wpilibj.DutyCycleEncoder
+import frc.chargers.hardware.motorcontrol.MotorConfigurable
+import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 
-public class ChargerDutyCycleEncoder: DutyCycleEncoder, PositionEncoder{
+/**
+ * An Adapter of WPILib's [DutyCycleEncoder] class; consists of REV through bore encoders, CTRE mag encoders.
+ */
+public class ChargerDutyCycleEncoder: DutyCycleEncoder, PositionEncoder,
+    MotorConfigurable<DutyCycleEncoderConfiguration> {
 
     public constructor(channel: Int): super(channel)
     public constructor(source: DigitalSource): super(source)
@@ -18,5 +24,20 @@ public class ChargerDutyCycleEncoder: DutyCycleEncoder, PositionEncoder{
     override val angularPosition: Angle
         get() = get().ofUnit(rotations)
 
+    override fun configure(configuration: DutyCycleEncoderConfiguration) {
+        configuration.connectedFrequencyThreshold?.let { setConnectedFrequencyThreshold(it) }
+        configuration.dutyCycleRange?.let{
+            setDutyCycleRange(it.start,it.endInclusive)
+        }
+        configuration.positionOffset?.let{
+            positionOffset = it
+        }
+    }
 
 }
+
+public data class DutyCycleEncoderConfiguration(
+    var connectedFrequencyThreshold: Int? = null,
+    var dutyCycleRange: ClosedRange<Double>? = null,
+    var positionOffset: Double? = null
+): MotorConfiguration

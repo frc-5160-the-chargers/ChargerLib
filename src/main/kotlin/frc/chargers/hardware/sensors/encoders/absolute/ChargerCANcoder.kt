@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.rotations
 import com.batterystaple.kmeasure.units.seconds
 import com.ctre.phoenix6.configs.MagnetSensorConfigs
-import com.ctre.phoenix6.configs.CANcoderConfiguration as CTRECANCoderConfiguration
+import com.ctre.phoenix6.configs.CANcoderConfiguration as CTRECANcoderConfiguration
 import com.ctre.phoenix6.hardware.CANcoder as CTRECANcoder
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
@@ -16,20 +16,23 @@ import frc.chargers.utils.Measurement
 
 
 /**
- * A wrapper for the [CTRECANcoder] class, with integration into chargerlib.
+ * A wrapper for the CTRE's CANCoder class, with integration into chargerlib.
+ *
+ * @see CTRECANcoder
+ * @see CANcoderConfiguration
  */
-public class ChargerCANCoder(
+public class ChargerCANcoder(
     deviceID: Int,
     canBus: String? = null
-): CTRECANcoder(deviceID, canBus), TimestampedEncoder, ResettableEncoder, MotorConfigurable<CANCoderConfiguration> {
+): CTRECANcoder(deviceID, canBus), TimestampedEncoder, ResettableEncoder, MotorConfigurable<CANcoderConfiguration> {
 
     public companion object{
         public inline operator fun invoke(
             deviceID: Int,
             canBus: String? = null,
-            configure: CANCoderConfiguration.() -> Unit = {}
-        ): ChargerCANCoder = ChargerCANCoder(deviceID,canBus).also{
-            it.configure(CANCoderConfiguration().apply(configure))
+            configure: CANcoderConfiguration.() -> Unit = {}
+        ): ChargerCANcoder = ChargerCANcoder(deviceID,canBus).also{
+            it.configure(CANcoderConfiguration().apply(configure))
         }
     }
 
@@ -47,7 +50,7 @@ public class ChargerCANCoder(
             }
     }
     
-    override fun configure(configuration: CANCoderConfiguration) {
+    override fun configure(configuration: CANcoderConfiguration) {
         configurator.apply(configuration.toCTRECANCoderConfiguration())
     }
 
@@ -75,15 +78,15 @@ public class ChargerCANCoder(
         }
 }
 
-private val blankConfig = CTRECANCoderConfiguration()
+private val blankConfig = CTRECANcoderConfiguration()
 
-public data class CANCoderConfiguration(
+public data class CANcoderConfiguration(
     var futureProofConfigs: Boolean = true,
     var sensorDirection: SensorDirectionValue = blankConfig.MagnetSensor.SensorDirection,
     var absoluteSensorRange: AbsoluteSensorRangeValue = blankConfig.MagnetSensor.AbsoluteSensorRange,
     var magnetOffset: Angle = Angle(0.0),
 ): MotorConfiguration{
-    public fun toCTRECANCoderConfiguration(): CTRECANCoderConfiguration = CTRECANCoderConfiguration().apply{
+    public fun toCTRECANCoderConfiguration(): CTRECANcoderConfiguration = CTRECANcoderConfiguration().apply{
         FutureProofConfigs = futureProofConfigs
         MagnetSensor = MagnetSensorConfigs().apply{
             SensorDirection = sensorDirection
