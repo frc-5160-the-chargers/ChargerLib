@@ -1,17 +1,20 @@
-package frc.chargers.hardware.motorcontrol
+package frc.chargers.hardware.motorcontrol.swerve
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import frc.chargers.hardware.motorcontrol.MotorConfigurable
+import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.wpilibextensions.geometry.asAngle
 
 /**
  * Represents a [HolonomicModule] that can be configured.
  */
-public interface HolonomicModule<TMC: MotorConfiguration,DMC: MotorConfiguration>: NonConfigurableHolonomicModule, MotorConfigurable<ModuleConfiguration<TMC,DMC>>
+public interface HolonomicModule<TMC: MotorConfiguration,DMC: MotorConfiguration>: NonConfigurableHolonomicModule,
+    MotorConfigurable<ModuleConfiguration<TMC, DMC>>
 
 
 /**

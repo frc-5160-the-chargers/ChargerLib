@@ -1,4 +1,4 @@
-package frc.chargers.hardware.motorcontrol
+package frc.chargers.hardware.motorcontrol.swerve
 
 import com.batterystaple.kmeasure.dimensions.AngleDimension
 import com.batterystaple.kmeasure.dimensions.VoltageDimension
@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.utils.Precision
@@ -41,7 +42,7 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
     velocityFF,
     turnPrecision,
     useOnboardPIDIfAvailable
-), HolonomicModule<TMC,DMC>{
+), HolonomicModule<TMC, DMC> {
 
     public companion object{
 
@@ -50,8 +51,8 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             turnEncoder: PositionEncoder? = null,
             driveMotor: DM,
             data: Data,
-            configuration: ModuleConfiguration<TMC,DMC>
-        ): SwerveModule<TMC,DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
+            configuration: ModuleConfiguration<TMC, DMC>
+        ): SwerveModule<TMC, DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
             invoke(
                 turnMotor,
                 turnEncoder,
@@ -72,8 +73,8 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             velocityFF: AngularMotorFF = AngularMotorFF.None,
             turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
             useOnboardPIDIfAvailable: Boolean = false,
-            configuration: ModuleConfiguration<TMC,DMC>? = null
-        ): SwerveModule<TMC,DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
+            configuration: ModuleConfiguration<TMC, DMC>? = null
+        ): SwerveModule<TMC, DMC> where TM: MotorConfigurable<TMC>, TM: EncoderMotorController, DM: MotorConfigurable<DMC>, DM: EncoderMotorController =
             SwerveModule(
                 turnMotor.apply{
                     if(configuration != null){
@@ -127,7 +128,7 @@ public open class NonConfigurableSwerveModule(
     public val velocityFF: AngularMotorFF = AngularMotorFF.None,
     public val turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     useOnboardPIDIfAvailable: Boolean = false
-): NonConfigurableHolonomicModule{
+): NonConfigurableHolonomicModule {
 
     override val distanceMeasurementEncoder: Encoder = driveMotor.encoder
 

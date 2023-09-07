@@ -9,7 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.hardware.motorcontrol.NonConfigurableHolonomicModule
+import frc.chargers.hardware.motorcontrol.swerve.NonConfigurableHolonomicModule
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
@@ -26,8 +26,8 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import kotlin.math.sqrt
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import frc.chargers.hardware.motorcontrol.HolonomicModule
-import frc.chargers.hardware.motorcontrol.ModuleConfiguration
+import frc.chargers.hardware.motorcontrol.swerve.HolonomicModule
+import frc.chargers.hardware.motorcontrol.swerve.ModuleConfiguration
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.wpilibextensions.kinematics.*
 /**
@@ -49,7 +49,7 @@ public fun talonFXHolonomicDrivetrain(
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
     vararg poseSuppliers: RobotPoseSupplier,
-    configure: ModuleConfiguration<TalonFXConfiguration,TalonFXConfiguration>.() -> Unit = {}
+    configure: ModuleConfiguration<TalonFXConfiguration, TalonFXConfiguration>.() -> Unit = {}
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft, topRight, bottomLeft, bottomRight, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
     *poseSuppliers,
@@ -64,9 +64,9 @@ public fun talonFXHolonomicDrivetrain(
  */
 public fun sparkMaxHolonomicDrivetrain(
     topLeft: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
-    topRight: HolonomicModule<SparkMaxConfiguration,SparkMaxConfiguration>,
-    bottomLeft: HolonomicModule<SparkMaxConfiguration,SparkMaxConfiguration>,
-    bottomRight: HolonomicModule<SparkMaxConfiguration,SparkMaxConfiguration>,
+    topRight: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
+    bottomLeft: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
+    bottomRight: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
     gyro: HeadingProvider,
     gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
@@ -75,7 +75,7 @@ public fun sparkMaxHolonomicDrivetrain(
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
     vararg poseSuppliers: RobotPoseSupplier,
-    configure: ModuleConfiguration<SparkMaxConfiguration,SparkMaxConfiguration>.() -> Unit = {},
+    configure: ModuleConfiguration<SparkMaxConfiguration, SparkMaxConfiguration>.() -> Unit = {},
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft, topRight, bottomLeft, bottomRight, gyro, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
     *poseSuppliers,
@@ -88,9 +88,9 @@ public fun sparkMaxHolonomicDrivetrain(
  */
 public fun <TMC: MotorConfiguration, DMC: MotorConfiguration> EncoderHolonomicDrivetrain(
     topLeft: HolonomicModule<TMC, DMC>,
-    topRight: HolonomicModule<TMC,DMC>,
-    bottomLeft: HolonomicModule<TMC,DMC>,
-    bottomRight: HolonomicModule<TMC,DMC>,
+    topRight: HolonomicModule<TMC, DMC>,
+    bottomLeft: HolonomicModule<TMC, DMC>,
+    bottomRight: HolonomicModule<TMC, DMC>,
     gyro: HeadingProvider,
     gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,

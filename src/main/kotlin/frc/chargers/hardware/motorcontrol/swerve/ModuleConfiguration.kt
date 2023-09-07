@@ -1,4 +1,6 @@
-package frc.chargers.hardware.motorcontrol
+package frc.chargers.hardware.motorcontrol.swerve
+
+import frc.chargers.hardware.motorcontrol.MotorConfiguration
 
 public data class ModuleConfiguration<TMC: MotorConfiguration, DMC: MotorConfiguration>(
     var turnMotorConfig: TMC,
