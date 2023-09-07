@@ -22,7 +22,10 @@ public data class UnitPolynomial<I: AnyDimension, O: AnyDimension>(
     val unitsUsed: Pair<Quantity<I>, Quantity<O>> = Quantity<I>(1.0) to Quantity<O>(1.0),
     val coefficients: List<Double>
 ) : (Quantity<I>) -> Quantity<O> {
-    public constructor(unitsUsed: Pair<Quantity<I>, Quantity<O>>, vararg coefficients: Double) : this(unitsUsed, coefficients.toList())
+    public constructor(
+        unitsUsed: Pair<Quantity<I>, Quantity<O>> = Quantity<I>(1.0) to Quantity<O>(1.0),
+        vararg coefficients: Double
+    ) : this(unitsUsed, coefficients.toList())
 
     override fun invoke(x: Quantity<I>): Quantity<O> =
         coefficients

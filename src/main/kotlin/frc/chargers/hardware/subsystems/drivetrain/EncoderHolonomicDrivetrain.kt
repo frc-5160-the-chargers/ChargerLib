@@ -163,8 +163,13 @@ public class EncoderHolonomicDrivetrain(
     // it relies on the navX reading in order to be field-centric
     private val diagonal: Distance = sqrt((wheelBase.inUnit(meters) * wheelBase.inUnit(meters) + trackWidth.inUnit(meters) * trackWidth.inUnit(meters))).meters
 
-    private val wheelRadius: Distance = wheelDiameter / 2
-    private val wheelTravelPerMotorRadian: Distance = gearRatio * wheelRadius
+    // wheel radius is wheelDiameter / 2.
+    private val wheelTravelPerMotorRadian: Distance = gearRatio * (wheelDiameter / 2)
+
+
+    /*
+    Encoder-based functions below
+     */
 
     private val distanceOffset: Distance = overallEncoder.angularPosition * wheelTravelPerMotorRadian
     public val distanceTraveled: Distance
@@ -175,6 +180,9 @@ public class EncoderHolonomicDrivetrain(
         get() =
             overallEncoder.angularVelocity *
                     wheelTravelPerMotorRadian
+
+
+
 
 
     public val kinematics: SwerveDriveKinematics =

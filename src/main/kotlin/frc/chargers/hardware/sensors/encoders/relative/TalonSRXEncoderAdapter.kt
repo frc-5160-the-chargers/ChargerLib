@@ -10,7 +10,7 @@ import frc.chargers.hardware.sensors.encoders.Encoder
 /**
  * An adapter from the phoenix v5 encoder class to the ChargerLib Encoder interface.
  */
-public class TalonSRXEncoderAdaptor(
+public class TalonSRXEncoderAdapter(
     private val ctreMotorController: IMotorController,
     private val pidIndex: Int,
     private val anglePerPulse: Angle
