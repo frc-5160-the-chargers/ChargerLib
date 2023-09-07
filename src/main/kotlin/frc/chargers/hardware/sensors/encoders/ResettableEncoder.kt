@@ -19,6 +19,14 @@ public interface ResettableEncoder : ZeroableEncoder {
     override fun setZero() { setZero(angularPosition) }
 }
 
+/**
+ * an encoder which can both be reset and which provides timestamps.
+ *
+ * @see TimestampedEncoder
+ * @see ResettableEncoder
+ */
+public interface ResettableTimestampedEncoder: ResettableEncoder, TimestampedEncoder
+
 public class ZeroableEncoderOffsetManager(private val zeroableEncoder: ZeroableEncoder): ResettableEncoder, ZeroableEncoder by zeroableEncoder {
     public var offset: Angle = 0.degrees
     public override fun setZero() {

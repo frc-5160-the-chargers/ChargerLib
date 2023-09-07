@@ -10,7 +10,7 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
-import frc.chargers.hardware.sensors.encoders.ResettableEncoder
+import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
 import frc.chargers.utils.Measurement
 
@@ -24,7 +24,7 @@ import frc.chargers.utils.Measurement
 public class ChargerCANcoder(
     deviceID: Int,
     canBus: String? = null
-): CTRECANcoder(deviceID, canBus), TimestampedEncoder, ResettableEncoder, MotorConfigurable<CANcoderConfiguration> {
+): CTRECANcoder(deviceID, canBus), ResettableTimestampedEncoder, MotorConfigurable<CANcoderConfiguration> {
 
     public companion object{
         public inline operator fun invoke(

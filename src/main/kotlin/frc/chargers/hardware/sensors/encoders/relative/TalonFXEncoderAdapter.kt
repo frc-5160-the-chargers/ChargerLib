@@ -4,8 +4,7 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.rotations
 import com.batterystaple.kmeasure.units.seconds
 import com.ctre.phoenix6.hardware.TalonFX
-import frc.chargers.hardware.sensors.encoders.ResettableEncoder
-import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
+import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
 import frc.chargers.utils.Measurement
 
 /**
@@ -15,7 +14,7 @@ import frc.chargers.utils.Measurement
  */
 public class TalonFXEncoderAdapter(
     private val motorController: TalonFX
-): TimestampedEncoder, ResettableEncoder {
+): ResettableTimestampedEncoder {
 
     override fun setZero(newZero: Angle) {
         motorController.setRotorPosition(newZero.inUnit(rotations))
