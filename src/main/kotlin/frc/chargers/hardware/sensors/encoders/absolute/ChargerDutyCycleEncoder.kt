@@ -1,7 +1,6 @@
 package frc.chargers.hardware.sensors.encoders.absolute
 
 import com.batterystaple.kmeasure.quantities.Angle
-import com.batterystaple.kmeasure.quantities.AngularVelocity
 import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.rotations
 import edu.wpi.first.wpilibj.DigitalSource

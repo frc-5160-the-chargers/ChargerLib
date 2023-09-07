@@ -9,7 +9,6 @@ import com.ctre.phoenix.sensors.CANCoder
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
-import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonSRXEncoderAdaptor
 import kotlin.math.roundToInt
 

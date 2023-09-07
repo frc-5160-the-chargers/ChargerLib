@@ -14,9 +14,7 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
-import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
-import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonFXEncoderAdapter
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
