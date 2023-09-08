@@ -287,13 +287,13 @@ public class EncoderHolonomicDrivetrain(
                 yPower,
                 rotationPower,
                 gyro.heading
-            )
+            ).correctForDynamics()
         }else{
             ChassisPowers(
                 xPower,
                 yPower,
                 rotationPower
-            )
+            ).correctForDynamics()
         }
 
         val A: Double = powers.yPower - powers.rotationPower * (wheelBase.inUnit(meters)/diagonal.inUnit(meters))
@@ -353,13 +353,13 @@ public class EncoderHolonomicDrivetrain(
                 yVelocity,
                 rotationVelocity,
                 gyro.heading
-            )
+            ).correctForDynamics()
         }else{
             ChassisSpeeds(
                 xVelocity,
                 yVelocity,
                 rotationVelocity
-            )
+            ).correctForDynamics()
         }
 
         currentModuleStates = kinematics.toSwerveModuleStates(speeds)
