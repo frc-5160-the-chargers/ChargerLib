@@ -17,7 +17,7 @@ import frc.chargers.utils.asPathPlannerConstants
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
 
-/**
+/*
  * Stores all the commands related to path following with the [EncoderHolonomicDrivetrain],
  * using pathplannerlib.
  */

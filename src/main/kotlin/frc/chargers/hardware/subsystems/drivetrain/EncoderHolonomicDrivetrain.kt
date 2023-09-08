@@ -21,7 +21,6 @@ import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import kotlin.math.sqrt
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import frc.chargers.hardware.motorcontrol.swerve.HolonomicModule
 import frc.chargers.hardware.motorcontrol.swerve.ModuleConfiguration
