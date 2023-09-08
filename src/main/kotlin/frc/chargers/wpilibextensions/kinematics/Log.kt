@@ -7,7 +7,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-private const val kEps = 1E-9;
+private const val kEps = 1E-9
 /**
  * Credits: [5727](https://github.com/FRC5727/SwervyBoi/tree/THOR2023)
  *
