@@ -4,7 +4,6 @@
 package frc.chargers.wpilibextensions.kinematics
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
@@ -35,7 +34,7 @@ public fun FieldRelativeChassisPowers(
  *
  * Credits: [254](https://github.com/Team254/FRC-2022-Public), [5727](https://github.com/FRC5727/SwervyBoi/tree/THOR2023) repositories
  */
-public fun ChassisPowers.correctForDynamics(loopPeriod: Time = 2.milli.seconds): ChassisPowers {
+public fun ChassisPowers.correctForDynamics(loopPeriod: Time = 0.02.seconds): ChassisPowers {
     val futureRobotPose = Pose2d(
         xPower * loopPeriod.inUnit(seconds),
         yPower * loopPeriod.inUnit(seconds),
