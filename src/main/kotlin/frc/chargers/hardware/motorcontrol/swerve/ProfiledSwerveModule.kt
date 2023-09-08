@@ -16,8 +16,8 @@ import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
-import frc.chargers.wpilibextensions.kinematics.SwerveModulePosition
-import frc.chargers.wpilibextensions.kinematics.SwerveModuleState
+import frc.chargers.wpilibextensions.kinematics.swerve.SwerveModulePosition
+import frc.chargers.wpilibextensions.kinematics.swerve.SwerveModuleState
 
 /**
  * Represents a basic swerve module w/ configuration.

@@ -1,4 +1,4 @@
-package frc.chargers.wpilibextensions.kinematics
+package frc.chargers.wpilibextensions.kinematics.swerve
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance

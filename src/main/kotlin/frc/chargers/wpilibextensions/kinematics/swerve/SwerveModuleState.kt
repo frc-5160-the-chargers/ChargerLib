@@ -1,4 +1,4 @@
-package frc.chargers.wpilibextensions.kinematics
+package frc.chargers.wpilibextensions.kinematics.swerve
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters

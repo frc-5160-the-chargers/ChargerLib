@@ -55,7 +55,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
         PIDController(0.0,0.0,0.0).apply{
             constants = rotationOffsetConstants
         },
-        ::velocityDrive,
+        ::swerveDrive,
         true,
         this@followPath
     )
@@ -105,7 +105,7 @@ public inline fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
         {resetPose(it.ofUnit(meters))},  // Pose2d consumer, used to reset odometry at the beginning of auto
         translationOffsetConstants.asPathPlannerConstants(),  // PID constants to correct for translation error (used to create the X and Y PID controllers)
         rotationOffsetConstants.asPathPlannerConstants(),  // PID constants to correct for rotation error (used to create the rotation controller)
-        ::velocityDrive,  // chassis speeds consumer
+        ::swerveDrive,  // chassis speeds consumer
         PathPlannerAutoContext().apply(eventsBlock).javaEventMap,
         true,  // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true,
         this@runPathPlannerAuto // The drive subsystem. Used to properly set the requirements of path following commands

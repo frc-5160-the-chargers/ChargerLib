@@ -30,6 +30,10 @@ import frc.chargers.hardware.motorcontrol.swerve.HolonomicModule
 import frc.chargers.hardware.motorcontrol.swerve.ModuleConfiguration
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.wpilibextensions.kinematics.*
+import frc.chargers.wpilibextensions.kinematics.swerve.ModulePositions
+import frc.chargers.wpilibextensions.kinematics.swerve.ModuleSpeeds
+import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveKinematics
+
 /**
  * A convenience function to create a [EncoderHolonomicDrivetrain]
  * using Talon FX motor controllers.
@@ -157,11 +161,7 @@ public class EncoderHolonomicDrivetrain(
         bottomLeft.distanceMeasurementEncoder,
         bottomRight.distanceMeasurementEncoder)
 
-
-    // all borrowed from EncoderDifferentialDriveTrain. see more information there.
-    // note: an EncoderHolonomicDriveTrain CANNOT provide heading, and thus is NOT a headingProvider.
-    // it relies on the navX reading in order to be field-centric
-    private val diagonal: Distance = sqrt((wheelBase.inUnit(meters) * wheelBase.inUnit(meters) + trackWidth.inUnit(meters) * trackWidth.inUnit(meters))).meters
+    
 
     // wheel radius is wheelDiameter / 2.
     private val wheelTravelPerMotorRadian: Distance = gearRatio * (wheelDiameter / 2)
@@ -185,6 +185,7 @@ public class EncoderHolonomicDrivetrain(
 
 
 
+    /*
     public val kinematics: SwerveDriveKinematics =
         SwerveDriveKinematics(
             UnitTranslation2d(trackWidth/2,wheelBase/2).inUnit(meters),
@@ -192,6 +193,15 @@ public class EncoderHolonomicDrivetrain(
             UnitTranslation2d(-trackWidth/2,wheelBase/2).inUnit(meters),
             UnitTranslation2d(-trackWidth/2,-wheelBase/2).inUnit(meters)
         )
+     */
+
+
+    public val kinematics: SuperSwerveKinematics = SuperSwerveKinematics(
+        UnitTranslation2d(trackWidth/2,wheelBase/2),
+        UnitTranslation2d(trackWidth/2,-wheelBase/2),
+        UnitTranslation2d(-trackWidth/2,wheelBase/2),
+        UnitTranslation2d(-trackWidth/2,-wheelBase/2)
+    )
 
 
 
@@ -217,19 +227,10 @@ public class EncoderHolonomicDrivetrain(
     override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
 
 
-    // note: pose2d's 2 important parameters here are called x and y.
-    // thus, these 2 getters use those when getting the x coordinate and y coordinate, respectively.
-    // note 2: these values, along with pose, are nullable.
-    // They are set to null if the limelight has not detected any apriltags yet.
-    public val xCoordinate: Distance
-        get() = poseEstimator.estimatedPosition.x.meters
-    public val yCoordinate: Distance
-        get() = poseEstimator.estimatedPosition.y.meters
-
     public fun resetPose(pose: UnitPose2d, gyroAngle: Angle){
         poseEstimator.resetPosition(
             gyroAngle.asRotation2d(),
-            currentModulePositions,
+            currentModulePositions.toArray(),
             pose.inUnit(meters)
         )
     }
@@ -237,104 +238,45 @@ public class EncoderHolonomicDrivetrain(
     public fun resetPose(pose: UnitPose2d){
         poseEstimator.resetPosition(
             gyro.heading.asRotation2d(),
-            currentModulePositions,
+            currentModulePositions.toArray(),
             pose.inUnit(meters)
         )
     }
 
 
-    public var currentModuleStates: Array<SwerveModuleState>
-        get() = arrayOf(
-            topLeft.getModuleState(gearRatio,wheelDiameter),
-            topRight.getModuleState(gearRatio,wheelDiameter),
-            bottomLeft.getModuleState(gearRatio,wheelDiameter),
-            bottomRight.getModuleState(gearRatio,wheelDiameter)
+
+    public var currentModuleStates: ModuleSpeeds
+        get() = ModuleSpeeds(
+            topLeftState = topLeft.getModuleState(gearRatio,wheelDiameter),
+            topRightState = topRight.getModuleState(gearRatio,wheelDiameter),
+            bottomLeftState = bottomLeft.getModuleState(gearRatio,wheelDiameter),
+            bottomRightState = bottomRight.getModuleState(gearRatio,wheelDiameter)
         )
-        set(moduleStates){
-            topLeft.setDesiredState(moduleStates[0],gearRatio,wheelDiameter)
-            topRight.setDesiredState(moduleStates[1],gearRatio,wheelDiameter)
-            bottomLeft.setDesiredState(moduleStates[2],gearRatio,wheelDiameter)
-            bottomRight.setDesiredState(moduleStates[3],gearRatio,wheelDiameter)
+        set(ms){
+            topLeft.setDirectionalVelocity(ms.topLeftSpeed,ms.topLeftAngle,gearRatio,wheelDiameter)
+            topRight.setDirectionalVelocity(ms.topRightSpeed,ms.topRightAngle,gearRatio,wheelDiameter)
+            bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed,ms.bottomLeftAngle,gearRatio,wheelDiameter)
+            bottomRight.setDirectionalVelocity(ms.bottomRightSpeed,ms.bottomRightAngle,gearRatio,wheelDiameter)
         }
 
-    public val currentModulePositions: Array<SwerveModulePosition>
-        get() = arrayOf(
-            topLeft.getModulePosition(gearRatio,wheelDiameter),
-            topRight.getModulePosition(gearRatio,wheelDiameter),
-            bottomLeft.getModulePosition(gearRatio,wheelDiameter),
-            bottomRight.getModulePosition(gearRatio,wheelDiameter)
+
+
+    public val currentModulePositions: ModulePositions
+        get() = ModulePositions(
+            topLeftPosition = topLeft.getModulePosition(gearRatio,wheelDiameter),
+            topRightPosition = topRight.getModulePosition(gearRatio,wheelDiameter),
+            bottomLeftPosition = bottomLeft.getModulePosition(gearRatio,wheelDiameter),
+            bottomRightPosition = bottomRight.getModulePosition(gearRatio,wheelDiameter)
         )
 
 
+    
+    
 
     /**
-     * A variant of the swerveDrive function which usses [ChassisPowers] instead.
+     * A version of swerveDrive that uses [ChassisSpeeds] instead.
      */
-    public fun swerveDrive(powers: ChassisPowers): Unit = swerveDrive(
-        powers.xPower,
-        powers.yPower,
-        powers.rotationPower
-    )
-
-    /**
-     * The default drive function. Makes the drivetrain move, using an xPower, yPower and rotationPower.
-     */
-    public fun swerveDrive(xPower: Double, yPower: Double, rotationPower: Double){
-
-        val powers = if(fieldRelativeDrive){
-            FieldRelativeChassisPowers(
-                xPower,
-                yPower,
-                rotationPower,
-                gyro.heading
-            ).correctForDynamics()
-        }else{
-            ChassisPowers(
-                xPower,
-                yPower,
-                rotationPower
-            ).correctForDynamics()
-        }
-
-        val A: Double = powers.yPower - powers.rotationPower * (wheelBase.inUnit(meters)/diagonal.inUnit(meters))
-        val B: Double = powers.yPower + powers.rotationPower * (wheelBase.inUnit(meters)/diagonal.inUnit(meters))
-        val C: Double = powers.xPower - powers.rotationPower * (trackWidth.inUnit(meters)/diagonal.inUnit(meters))
-        val D: Double = powers.xPower + powers.rotationPower * (trackWidth.inUnit(meters)/diagonal.inUnit(meters))
-
-        var topRightPower: Double = sqrt(B*B + C*C)
-        var topLeftPower: Double = sqrt(B*B+D*D)
-        var bottomLeftPower: Double = sqrt(A*A+D*D)
-        var bottomRightPower: Double = sqrt(A*A+C*C)
-
-
-        // the following "normalizes" the wheel
-        val max: Double? = listOf(topRightPower,topLeftPower,bottomLeftPower,bottomRightPower).maxOrNull()
-
-
-        if (max != null && max > 1.0){
-            topRightPower /= max
-            topLeftPower /= max
-            bottomRightPower /= max
-            bottomLeftPower /= max
-        }
-
-
-        val topRightAngle: Angle = atan(B/C)
-        val topLeftAngle: Angle = atan(B/D)
-        val bottomLeftAngle: Angle = atan(A/D)
-        val bottomRightAngle: Angle = atan(A/C)
-
-
-        topLeft.setDirectionalPower(topLeftPower,topLeftAngle)
-        topRight.setDirectionalPower(topRightPower,topRightAngle)
-        bottomLeft.setDirectionalPower(bottomLeftPower,bottomLeftAngle)
-        bottomRight.setDirectionalPower(bottomRightPower,bottomRightAngle)
-    }
-
-    /**
-     * A version of velocityDrive that uses [ChassisSpeeds] instead.
-     */
-    public fun velocityDrive(speeds: ChassisSpeeds): Unit = velocityDrive(
+    public fun swerveDrive(speeds: ChassisSpeeds): Unit = swerveDrive(
         speeds.xVelocity,
         speeds.yVelocity,
         speeds.rotationSpeed
@@ -344,8 +286,7 @@ public class EncoderHolonomicDrivetrain(
      * Drives the robot using certain velocities instead of certain amounts of power(or duty cycle output).
      * Relies on PID in order to be used effectively.
      */
-    public fun velocityDrive(xVelocity: Velocity, yVelocity: Velocity, rotationVelocity: AngularVelocity){
-
+    public fun swerveDrive(xVelocity: Velocity, yVelocity: Velocity, rotationVelocity: AngularVelocity){
 
         val speeds = if(fieldRelativeDrive){
             FieldRelativeChassisSpeeds(
@@ -362,18 +303,30 @@ public class EncoderHolonomicDrivetrain(
             ).correctForDynamics()
         }
 
-        currentModuleStates = kinematics.toSwerveModuleStates(speeds)
+        currentModuleStates = kinematics.toFirstOrderModuleSpeeds(speeds)
+        // currentModuleStates = kinematics.toSecondOrderModuleSpeeds(speeds,gyro.heading)
     }
 
     /**
-    * Drives the drivetrain with a specific power at a specified angle.
+    * Drives the drivetrain with a specific speed at a specified angle.
      */
-    public fun directionalDrive(xPower: Double, angle: Angle){
-        topLeft.setDirectionalPower(xPower,angle)
-        topRight.setDirectionalPower(xPower,angle)
-        bottomLeft.setDirectionalPower(xPower,angle)
-        bottomRight.setDirectionalPower(xPower,angle)
+    public fun directionalDrive(speed: Velocity, angle: Angle){
+        topLeft.setDirectionalVelocity(speed,angle,gearRatio, wheelDiameter)
+        topRight.setDirectionalVelocity(speed,angle,gearRatio,wheelDiameter)
+        bottomLeft.setDirectionalVelocity(speed,angle,gearRatio,wheelDiameter)
+        bottomRight.setDirectionalVelocity(speed,angle,gearRatio,wheelDiameter)
     }
+
+    /**
+     * Drives the drivetrain with a specific speed at a specified angle.
+     */
+    public fun directionalDrive(power: Double, angle: Angle){
+        topLeft.setDirectionalPower(power,angle)
+        topRight.setDirectionalPower(power,angle)
+        bottomLeft.setDirectionalPower(power,angle)
+        bottomRight.setDirectionalPower(power,angle)
+    }
+
 
     /**
     * Stops the drivetrain.
@@ -386,13 +339,23 @@ public class EncoderHolonomicDrivetrain(
     }
 
     /**
+     * Stops the drivetrain in an X.
+     */
+    public fun stopInX(){
+        topLeft.setDirectionalPower(0.0,-45.degrees)
+        topRight.setDirectionalPower(0.0,45.degrees)
+        bottomLeft.setDirectionalPower(0.0,45.degrees)
+        bottomRight.setDirectionalPower(0.0,-45.degrees)
+    }
+
+    /**
     * Makes the drivetrain rotate in place, with a specific power.
      */
-    public fun rotateInPlace(power: Double) {
-        topLeft.setDirectionalPower(power,45.degrees)
-        topRight.setDirectionalPower(power, (-45).degrees)
-        bottomLeft.setDirectionalPower(power,45.degrees)
-        bottomRight.setDirectionalPower(power, (-45).degrees)
+    public fun rotateInPlace(speed: Velocity) {
+        topLeft.setDirectionalVelocity(speed,45.degrees,gearRatio, wheelDiameter)
+        topRight.setDirectionalVelocity(speed,-45.degrees,gearRatio,wheelDiameter)
+        bottomLeft.setDirectionalVelocity(speed,-45.degrees,gearRatio,wheelDiameter)
+        bottomRight.setDirectionalVelocity(speed,45.degrees,gearRatio,wheelDiameter)
     }
 
     /**
@@ -406,7 +369,7 @@ public class EncoderHolonomicDrivetrain(
     override fun periodic() {
         poseEstimator.update(
             gyro.heading.asRotation2d(),
-            currentModulePositions
+            currentModulePositions.toArray()
         )
 
         allPoseSuppliers.forEach{

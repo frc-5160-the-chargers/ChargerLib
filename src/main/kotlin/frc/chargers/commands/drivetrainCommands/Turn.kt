@@ -1,6 +1,7 @@
 package frc.chargers.commands.drivetrainCommands
 
 import com.batterystaple.kmeasure.dimensions.AngleDimension
+import com.batterystaple.kmeasure.dimensions.VelocityDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import edu.wpi.first.wpilibj2.command.Command
@@ -88,14 +89,13 @@ context(CommandBuilder,HeadingProvider)
 @LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension> = Precision.AllowOvershoot, pidConstants: PIDConstants): Command{
     val targetHeading = heading
-    val pidController = UnitSuperPIDController(
+    val pidController = UnitSuperPIDController<AngleDimension,VelocityDimension>(
         pidConstants = pidConstants,
         getInput = { heading },
-        outputRange = Scalar(0.0)..Scalar(1.0),
         target = targetHeading
     )
 
-    val runToTarget: CodeBlockContext.() -> Unit = { rotateInPlace(pidController.calculateOutput().siValue) }
+    val runToTarget: CodeBlockContext.() -> Unit = { rotateInPlace(pidController.calculateOutput()) }
 
     when(precision) {
         Precision.AllowOvershoot -> {
