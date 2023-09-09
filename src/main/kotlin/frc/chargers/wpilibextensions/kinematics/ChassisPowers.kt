@@ -29,22 +29,4 @@ public fun FieldRelativeChassisPowers(
         rotationPower)
 
 
-/**
- * A function used to correct for drift on swerve drive when simultaneously rotating and driving in a singular direction.
- *
- * Credits: [254](https://github.com/Team254/FRC-2022-Public), [5727](https://github.com/FRC5727/SwervyBoi/tree/THOR2023) repositories
- */
-public fun ChassisPowers.correctForDynamics(loopPeriod: Time = 0.02.seconds): ChassisPowers {
-    val futureRobotPose = Pose2d(
-        xPower * loopPeriod.inUnit(seconds),
-        yPower * loopPeriod.inUnit(seconds),
-        Rotation2d.fromRadians(rotationPower * loopPeriod.inUnit(seconds))
-    )
-    val twistForPose: Twist2d = log(futureRobotPose)
-    return ChassisPowers(
-        twistForPose.dx / loopPeriod.inUnit(seconds),
-        twistForPose.dy / loopPeriod.inUnit(seconds),
-        twistForPose.dtheta / loopPeriod.inUnit(seconds)
-    )
-}
 

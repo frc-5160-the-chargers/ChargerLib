@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.numbers.N1
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.Timer
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
@@ -31,10 +30,10 @@ import kotlin.math.sqrt
  * Credits: [5727 codebase](https://github.com/FRC5727/SwervyBoi/blob/THOR2023), [4481 codebase](https://github.com/FRC-4481-Team-Rembrandts/4481-Stock-Robot-2023-Public/tree/1988b5b9fb01f0fb2fd15d67197a3968efbd52d5)
  */
 public class SuperSwerveKinematics(
-    public val topLeftLocation: UnitTranslation2d,
-    public val topRightLocation: UnitTranslation2d,
-    public val bottomLeftLocation: UnitTranslation2d,
-    public val bottomRightLocation: UnitTranslation2d
+    topLeftLocation: UnitTranslation2d,
+    topRightLocation: UnitTranslation2d,
+    bottomLeftLocation: UnitTranslation2d,
+    bottomRightLocation: UnitTranslation2d
 ): SwerveDriveKinematics(
     topLeftLocation.inUnit(meters),
     topRightLocation.inUnit(meters),
@@ -119,7 +118,7 @@ public class SuperSwerveKinematics(
             val moduleY = moduleLocations[i].norm * kotlin.math.sin(moduleAngleFieldCentric.radians)
             firstOrderMatrix[0, 2] = -moduleY //-r_y
             firstOrderMatrix[1, 2] = moduleX //r_x
-            val firstOrderOutput = firstOrderMatrix.times<N1>(firstOrderInputMatrix)
+            val firstOrderOutput = firstOrderMatrix.times(firstOrderInputMatrix)
             val moduleHeading = kotlin.math.atan2(firstOrderOutput[1, 0], firstOrderOutput[0, 0])
             val moduleSpeed = sqrt(firstOrderOutput.elementPower(2).elementSum())
             secondOrderMatrix[0, 2] = -moduleX
@@ -147,7 +146,7 @@ public class SuperSwerveKinematics(
         val dt: Time = currentT - previousT
         //Get desired rotational speed in radians per second and absolute translational speed in m/s
         val vr = desiredSpeed.rotationSpeed
-        if (vr > 0.01.ofUnit(radians/seconds) || vr < -0.01.ofUnit(radians/seconds)) {
+        if (vr > 0.01.ofUnit(radians/seconds) || vr < -(0.01.ofUnit(radians/seconds)) ) {
             offT = currentT
             targetHeading = inputHeading
             return desiredSpeed

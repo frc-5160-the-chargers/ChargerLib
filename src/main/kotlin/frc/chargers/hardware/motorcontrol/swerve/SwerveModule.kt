@@ -29,8 +29,8 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
     turnEncoder: PositionEncoder? = null,
     driveMotor: EncoderMotorController,
     turnPIDConstants: PIDConstants,
-    drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    velocityFF: AngularMotorFF = AngularMotorFF.None,
+    drivePIDConstants: PIDConstants,
+    velocityFF: AngularMotorFF,
     turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableSwerveModule(
@@ -69,8 +69,8 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
             turnEncoder: PositionEncoder? = null,
             driveMotor: DM,
             turnPIDConstants: PIDConstants,
-            drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-            velocityFF: AngularMotorFF = AngularMotorFF.None,
+            drivePIDConstants: PIDConstants,
+            velocityFF: AngularMotorFF,
             turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
             useOnboardPIDIfAvailable: Boolean = false,
             configuration: ModuleConfiguration<TMC, DMC>? = null
@@ -107,8 +107,8 @@ public class SwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> priv
 
     public data class Data(
         val turnPIDConstants: PIDConstants,
-        val drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-        val velocityFF: AngularMotorFF = AngularMotorFF.None,
+        val drivePIDConstants: PIDConstants,
+        val velocityFF: AngularMotorFF,
         val turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
         val useOnboardPIDIfAvailable: Boolean = false
     )
@@ -124,8 +124,8 @@ public open class NonConfigurableSwerveModule(
     public val turnEncoder: PositionEncoder? = null,
     public val driveMotor: EncoderMotorController,
     public val turnPIDConstants: PIDConstants,
-    public val drivePIDConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    public val velocityFF: AngularMotorFF = AngularMotorFF.None,
+    public val drivePIDConstants: PIDConstants,
+    public val velocityFF: AngularMotorFF,
     public val turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     useOnboardPIDIfAvailable: Boolean = false
 ): NonConfigurableHolonomicModule {
