@@ -9,7 +9,9 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Twist2d
 
-
+/**
+ * A helper class that stores direction powers for drivetrain classes.
+ */
 public class ChassisPowers(
     public var xPower: Double = 0.0,
     public var yPower: Double = 0.0,

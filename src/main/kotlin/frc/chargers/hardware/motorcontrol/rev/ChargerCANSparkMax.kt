@@ -100,6 +100,20 @@ public open class ChargerCANSparkMax(
         for ((limitDirection, limit) in configuration.softLimits) {
             setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
         }
+        configuration.encoderAverageDepth?.let{encoder.averageDepth = it}
+        configuration.encoderInverted?.let{encoder.inverted = it}
+        configuration.encoderMeasurementPeriod?.let{encoder.measurementPeriod = (it.inUnit(seconds) * 1000).toInt()}
+        configuration.encoderPositionConversionFactor?.let{encoder.positionConversionFactor = it}
+        configuration.encoderVelocityConversionFactor?.let{encoder.velocityConversionFactor = it}
+
+        configuration.feedbackDFilter?.let{innerController.setDFilter(it,0)}
+        configuration.feedbackIZone?.let{innerController.setIZone(it,0)}
+        configuration.feedbackOutputRange?.let{innerController.setOutputRange(it.start,it.endInclusive,0)}
+        configuration.positionPIDWrappingEnabled?.let{innerController.setPositionPIDWrappingEnabled(it)}
+        configuration.positionPIDWrappingInputRange?.let{
+            innerController.setPositionPIDWrappingMinInput(it.start)
+            innerController.setPositionPIDWrappingMaxInput(it.endInclusive)
+        }
         burnFlash()
     }
 
@@ -111,12 +125,7 @@ public open class ChargerCANSparkMax(
 
 
     // equivalent to SparkMax.getPIDController() (uses property access syntax)
-    private val innerController = pidController.also{
-        it.positionPIDWrappingEnabled = true
-        // SI units are used by default here, so radians are used.
-        it.positionPIDWrappingMaxInput = PI
-        it.positionPIDWrappingMinInput = -PI
-    }
+    private val innerController = pidController
     private var currentConstants = PIDConstants(0.0,0.0,0.0)
     private var trapezoidProfile = AngularTrapezoidProfile.None
 
@@ -196,6 +205,20 @@ public data class SparkMaxConfiguration(
     var smartCurrentLimit: SmartCurrentLimit? = null,
     var secondaryCurrentLimit: SecondaryCurrentLimit? = null,
     val softLimits: MutableMap<SoftLimitDirection, Angle> = mutableMapOf(),
+
+    // encoder configs
+    var encoderAverageDepth: Int? = null,
+    var encoderInverted: Boolean? = null,
+    var encoderMeasurementPeriod: Time? = null,
+    var encoderPositionConversionFactor: Double? = null,
+    var encoderVelocityConversionFactor: Double? = null,
+
+    // sparkMaxPIDController configs
+    var feedbackDFilter: Double? = null,
+    var feedbackIZone: Double? = null,
+    var feedbackOutputRange: ClosedRange<Double>? = null,
+    var positionPIDWrappingEnabled: Boolean? = null,
+    var positionPIDWrappingInputRange: ClosedRange<Double>? = null,
 ) : MotorConfiguration
 
 public data class AlternateEncoderConfiguration(val countsPerRev: Int, val encoderType: SparkMaxAlternateEncoder.Type? = null) {

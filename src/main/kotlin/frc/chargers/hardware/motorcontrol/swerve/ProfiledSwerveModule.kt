@@ -26,7 +26,7 @@ import frc.chargers.wpilibextensions.kinematics.swerve.SwerveModuleState
  */
 public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfiguration> private constructor(
     turnMotor: EncoderMotorController,
-    turnEncoder: PositionEncoder? = null,
+    turnEncoder: PositionEncoder,
     driveMotor: EncoderMotorController,
     turnPIDConstants: PIDConstants,
     turnFF: AngularMotorFF = AngularMotorFF.None,
@@ -52,7 +52,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
 
         public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
             turnMotor: TM,
-            turnEncoder: PositionEncoder? = null,
+            turnEncoder: PositionEncoder,
             driveMotor: DM,
             data: Data,
             configuration: ModuleConfiguration<TMC, DMC>
@@ -74,7 +74,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
 
         public operator fun <TM, TMC: MotorConfiguration, DM, DMC: MotorConfiguration>invoke(
             turnMotor: TM,
-            turnEncoder: PositionEncoder? = null,
+            turnEncoder: PositionEncoder,
             driveMotor: DM,
             turnPIDConstants: PIDConstants,
             turnFF: AngularMotorFF = AngularMotorFF.None,
@@ -137,7 +137,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
  */
 public open class NonConfigurableProfiledSwerveModule(
     public val turnMotor: EncoderMotorController,
-    public val turnEncoder: PositionEncoder? = null,
+    public val turnEncoder: PositionEncoder,
     public val driveMotor: EncoderMotorController,
     public val turnPIDConstants: PIDConstants,
     public val turnFF: AngularMotorFF = AngularMotorFF.None,
@@ -151,8 +151,7 @@ public open class NonConfigurableProfiledSwerveModule(
     override val distanceMeasurementEncoder: Encoder = driveMotor.encoder
 
 
-    private val currentDirection: Angle
-        get() = turnEncoder?.angularPosition ?: turnMotor.encoder.angularPosition
+
 
     /**
      * A base lambda for the SwerveModule class.
@@ -164,7 +163,7 @@ public open class NonConfigurableProfiledSwerveModule(
         if (turnPrecision is Precision.Within){
             // return value
             {
-                if(currentDirection-it !in turnPrecision.allowableError) {
+                if(turnEncoder.angularPosition-it !in turnPrecision.allowableError) {
                     turnMotor.setAngularPosition(
                         it,
                         turnPIDConstants,
@@ -192,11 +191,7 @@ public open class NonConfigurableProfiledSwerveModule(
     }else{
         val controller = AngularProfiledPIDController(
             pidConstants = turnPIDConstants,
-            getInput = if(turnEncoder == null){
-                {turnMotor.encoder.angularPosition}
-            }else{
-                {turnEncoder.angularPosition}
-            },
+            getInput = {turnEncoder.angularPosition},
             target = Angle(0.0),
             constraints = profileConstraints,
             feedforward = turnFF,
@@ -208,7 +203,7 @@ public open class NonConfigurableProfiledSwerveModule(
             // return value
             {
                 if(controller.target != it){controller.target = it}
-                if (currentDirection-it !in turnPrecision.allowableError){
+                if (turnEncoder.angularPosition-it !in turnPrecision.allowableError){
                     turnMotor.setVoltage(controller.calculateOutput().inUnit(volts))
                 }else{
                     turnMotor.set(0.0)
@@ -251,7 +246,7 @@ public open class NonConfigurableProfiledSwerveModule(
     }
 
     override fun setDirectionalPower(power: Double, direction: Angle) {
-        if (abs(direction - currentDirection) > 90.0.degrees){
+        if (abs(direction - turnEncoder.angularPosition) > 90.0.degrees){
             driveMotor.set(-power)
             turnMotorPositionSetter((direction + 180.degrees) % 360.degrees)
         }else{
@@ -261,7 +256,7 @@ public open class NonConfigurableProfiledSwerveModule(
     }
 
     override fun setDirectionalVelocity(angularVelocity: AngularVelocity, direction: Angle) {
-        if (abs(direction - currentDirection) > 90.0.degrees){
+        if (abs(direction - turnEncoder.angularPosition) > 90.0.degrees){
             driveMotorVelocitySetter(-angularVelocity)
             turnMotorPositionSetter((direction + 180.degrees) % 360.degrees)
         }else{
@@ -278,13 +273,13 @@ public open class NonConfigurableProfiledSwerveModule(
     override fun getModuleState(gearRatio: Double, wheelDiameter: Length): SwerveModuleState =
         SwerveModuleState(
             driveMotor.encoder.angularVelocity * (gearRatio * wheelDiameter),
-            currentDirection
+            turnEncoder.angularPosition
         )
 
     override fun getModulePosition(gearRatio: Double, wheelDiameter: Length): SwerveModulePosition =
         SwerveModulePosition(
             driveMotor.encoder.angularPosition * (gearRatio * wheelDiameter),
-            currentDirection
+            turnEncoder.angularPosition
         )
 
 }

@@ -45,6 +45,7 @@ public object a {
 public object p{
     public operator fun get(vararg elements: Int): IntArray = intArrayOf(*elements)
     public operator fun get(vararg elements: Double): DoubleArray = doubleArrayOf(*elements)
-
+    public operator fun get(vararg elements: Byte): ByteArray = byteArrayOf(*elements)
     public operator fun get(vararg elements: Float): FloatArray = floatArrayOf(*elements)
+    public operator fun get(vararg elements: Char): CharArray = charArrayOf(*elements)
 }

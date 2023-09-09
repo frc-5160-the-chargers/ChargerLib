@@ -7,6 +7,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 
+/**
+ * A helper class that stores [SwerveModuleState]s in a more clear way.
+ * This is usually preferred over an array, as it is clear which [SwerveModuleState] corresponds to which module.
+ */
 public data class ModuleSpeeds(
     val topLeftSpeed: Velocity,
     val topRightSpeed: Velocity,
