@@ -9,6 +9,7 @@ import com.ctre.phoenix.sensors.CANCoder
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonSRXEncoderAdapter
 import kotlin.math.roundToInt
 
@@ -41,7 +42,7 @@ public open class ChargerTalonSRX(
     protected val encoderTicksPerRotation: Int
 ) : WPI_TalonSRX(deviceNumber), EncoderMotorController, MotorConfigurable<TalonSRXConfiguration> {
 
-    final override val encoder: TalonSRXEncoderAdapter
+    final override val encoder: Encoder
         get() = TalonSRXEncoderAdapter(
             ctreMotorController = this,
             pidIndex = 0,

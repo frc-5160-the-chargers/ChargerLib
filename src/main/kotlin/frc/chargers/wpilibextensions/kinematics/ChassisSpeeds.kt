@@ -62,7 +62,7 @@ public fun ChassisSpeeds.correctForDynamics(loopPeriod: Time = 0.02.seconds): Ch
         vyMetersPerSecond * loopPeriod.inUnit(seconds),
         Rotation2d.fromRadians(omegaRadiansPerSecond * loopPeriod.inUnit(seconds))
     )
-    val twistForPose: Twist2d = log(futureRobotPose)
+    val twistForPose: Twist2d = Pose2d().log(futureRobotPose)
     return ChassisSpeeds(
         twistForPose.dx / loopPeriod.inUnit(seconds),
         twistForPose.dy / loopPeriod.inUnit(seconds),

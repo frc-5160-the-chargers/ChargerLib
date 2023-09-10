@@ -11,13 +11,16 @@ public var MotorController.speed: Double
     get() = this.get()
     set(value) { this.set(value) }
 
+
 public var MotorController.voltage: Voltage
+    @JvmName("busVoltage")
     get() = RobotController.getInputVoltage().ofUnit(volts) * speed
+    @JvmName("busVoltage")
     set(value){
         setVoltage(value)
     }
 
-@JvmName("setVoltageFunction")
+
 public fun MotorController.setVoltage(voltage: Voltage){
     setVoltage(voltage.inUnit(volts))
 }
