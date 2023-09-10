@@ -1,7 +1,6 @@
 package frc.chargers.hardware.motorcontrol.swerve
 
 import com.batterystaple.kmeasure.dimensions.AngleDimension
-import com.batterystaple.kmeasure.dimensions.VoltageDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.volts
@@ -166,11 +165,12 @@ public open class NonConfigurableSwerveModule(
         }
 
     }else{
-        val controller = UnitSuperPIDController<AngleDimension,VoltageDimension>(
+        val controller = UnitSuperPIDController(
             pidConstants = turnPIDConstants,
             getInput = {turnEncoder.angularPosition},
             target = Angle(0.0),
-            selfSustain = true
+            selfSustain = true,
+            outputRange = -12.volts..12.volts
         )
 
         if(turnPrecision is Precision.Within){
@@ -211,7 +211,8 @@ public open class NonConfigurableSwerveModule(
             getInput = {driveMotor.encoder.angularVelocity},
             target = AngularVelocity(0.0),
             selfSustain = true,
-            feedforward = velocityFF
+            feedforward = velocityFF,
+            outputRange = -12.volts..12.volts
         );
         // return value
         {

@@ -12,15 +12,15 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
  * This is usually preferred over an array, as it is clear which [SwerveModuleState] corresponds to which module.
  */
 public data class ModuleSpeeds(
-    val topLeftSpeed: Velocity,
-    val topRightSpeed: Velocity,
-    val bottomLeftSpeed: Velocity,
-    val bottomRightSpeed: Velocity,
+    var topLeftSpeed: Velocity,
+    var topRightSpeed: Velocity,
+    var bottomLeftSpeed: Velocity,
+    var bottomRightSpeed: Velocity,
     
-    val topLeftAngle: Angle,
-    val topRightAngle: Angle,
-    val bottomLeftAngle: Angle,
-    val bottomRightAngle: Angle
+    var topLeftAngle: Angle,
+    var topRightAngle: Angle,
+    var bottomLeftAngle: Angle,
+    var bottomRightAngle: Angle,
 ) {
     public constructor(
         topLeftState: SwerveModuleState,
@@ -40,6 +40,36 @@ public data class ModuleSpeeds(
     )
 
     public fun toArray(): Array<SwerveModuleState> = a[topLeftState,topRightState,bottomLeftState,bottomRightState]
+
+    public fun desaturate(maxAttainableSpeed: Velocity){
+        // !! operator is 100% safe: list size is greater than 0.
+        val maxSpeed = listOf(topLeftSpeed,topRightSpeed,bottomLeftSpeed,bottomRightSpeed).maxOrNull()!!
+        if (maxSpeed > maxAttainableSpeed){
+            topLeftSpeed = topLeftSpeed / maxSpeed * maxAttainableSpeed
+            topRightSpeed = topRightSpeed / maxSpeed * maxAttainableSpeed
+            bottomLeftSpeed = bottomLeftSpeed / maxSpeed * maxAttainableSpeed
+            bottomRightSpeed = bottomRightSpeed / maxSpeed * maxAttainableSpeed
+        }
+    }
+
+    public fun asDesaturatedSpeeds(maxAttainableSpeed: Velocity): ModuleSpeeds{
+        // !! operator is 100% safe: list size is greater than 0.
+        val maxSpeed = listOf(topLeftSpeed,topRightSpeed,bottomLeftSpeed,bottomRightSpeed).maxOrNull()!!
+        return if (maxSpeed > maxAttainableSpeed){
+            ModuleSpeeds(
+                topLeftSpeed / maxSpeed * maxAttainableSpeed,
+                topRightSpeed / maxSpeed * maxAttainableSpeed,
+                bottomLeftSpeed / maxSpeed * maxAttainableSpeed,
+                bottomRightSpeed / maxSpeed * maxAttainableSpeed,
+                topLeftAngle,
+                topRightAngle,
+                bottomLeftAngle,
+                bottomRightAngle
+            )
+        }else{
+            this
+        }
+    }
     
     public val topLeftState: SwerveModuleState
         get() = SwerveModuleState(

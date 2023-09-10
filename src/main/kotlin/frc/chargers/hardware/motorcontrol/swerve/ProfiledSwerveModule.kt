@@ -20,7 +20,7 @@ import frc.chargers.wpilibextensions.kinematics.swerve.SwerveModulePosition
 import frc.chargers.wpilibextensions.kinematics.swerve.SwerveModuleState
 
 /**
- * Represents a basic swerve module w/ configuration.
+ * Represents a profiled swerve module w/ configuration.
  *
  * @see NonConfigurableSwerveModule
  */
@@ -132,7 +132,7 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
 }
 
 /**
- * Represents a Swerve Module without motor configuration.
+ * Represents a Profiled Swerve Module without motor configuration.
  *
  */
 public open class NonConfigurableProfiledSwerveModule(
@@ -195,7 +195,8 @@ public open class NonConfigurableProfiledSwerveModule(
             target = Angle(0.0),
             constraints = profileConstraints,
             feedforward = turnFF,
-            selfSustain = true
+            selfSustain = true,
+            outputRange = -12.volts..12.volts
         )
         // Needed so that the return lambda isn't confused to be part of the superPIDController
 
@@ -236,7 +237,8 @@ public open class NonConfigurableProfiledSwerveModule(
             getInput = {driveMotor.encoder.angularVelocity},
             target = AngularVelocity(0.0),
             selfSustain = true,
-            feedforward = velocityFF
+            feedforward = velocityFF,
+            outputRange = -12.volts..12.volts
         );
         // return value
         {
