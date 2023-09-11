@@ -1,10 +1,15 @@
 package frc.chargers.hardware.inputdevices
 
+import com.batterystaple.kmeasure.quantities.Angle
+import com.batterystaple.kmeasure.quantities.inUnit
+import com.batterystaple.kmeasure.units.degrees
+import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.event.EventLoop
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.chargers.utils.math.mapBetweenRanges
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 public typealias TriggerValue = Double
 
@@ -128,6 +133,19 @@ public open class ChargerController(
         }else{
             back(loop).apply(bindings)
         }
+    }
+
+    private val innerHID = GenericHID(port)
+
+    public val povValue: Int
+        get() = innerHID.pov
+
+    public inline fun pov(angle: Angle,bindings: Trigger.() -> Unit){
+        pov(angle.inUnit(degrees).roundToInt()).apply(bindings)
+    }
+
+    public inline fun povCenter(bindings: Trigger.() -> Unit){
+        povCenter().apply(bindings)
     }
 }
 
