@@ -50,9 +50,24 @@ public open class ChargerCANSparkMax(
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
 ) : CANSparkMax(deviceId, type), FeedbackMotorController, MotorConfigurable<SparkMaxConfiguration> {
 
+    private inner class EncoderConfiguration(
+        var averageDepth: Int? = null,
+        var inverted: Boolean? = null,
+        var measurementPeriod: Time? = null,
+        var positionConversionFactor: Double? = null,
+        var velocityConversionFactor: Double? = null,
+    )
 
+    private var encoderConfig = EncoderConfiguration()
+
+
+    /*
+    CANSparkMax throws some exception if this is initialized on motor creation,
+    so by lazy here delays the initialization until the encoder is accessed.
+    *Note: Exception is unknown; rohen forgot lol
+     */
     override val encoder: SparkMaxEncoderAdapter by lazy {
-        alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
+        (alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
             if (encoderType == null) {
                 SparkMaxEncoderAdapter(super.getAlternateEncoder(countsPerRev))
             } else {
@@ -60,6 +75,13 @@ public open class ChargerCANSparkMax(
             }
         }
             ?: SparkMaxEncoderAdapter(super.getEncoder())
+        ).apply{
+            encoderConfig.averageDepth?.let{averageDepth = it}
+            encoderConfig.inverted?.let{inverted = it}
+            encoderConfig.measurementPeriod?.let{measurementPeriod = (it.inUnit(seconds) * 1000).toInt()}
+            encoderConfig.positionConversionFactor?.let{positionConversionFactor = it}
+            encoderConfig.velocityConversionFactor?.let{velocityConversionFactor = it}
+        }
     }
 
     override fun configure(configuration: SparkMaxConfiguration) {
@@ -99,11 +121,12 @@ public open class ChargerCANSparkMax(
         for ((limitDirection, limit) in configuration.softLimits) {
             setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
         }
-        configuration.encoderAverageDepth?.let{encoder.averageDepth = it}
-        configuration.encoderInverted?.let{encoder.inverted = it}
-        configuration.encoderMeasurementPeriod?.let{encoder.measurementPeriod = (it.inUnit(seconds) * 1000).toInt()}
-        configuration.encoderPositionConversionFactor?.let{encoder.positionConversionFactor = it}
-        configuration.encoderVelocityConversionFactor?.let{encoder.velocityConversionFactor = it}
+        encoderConfig.averageDepth = configuration.encoderAverageDepth
+        encoderConfig.inverted = configuration.encoderInverted
+        encoderConfig.measurementPeriod = configuration.encoderMeasurementPeriod
+        encoderConfig.positionConversionFactor = configuration.encoderPositionConversionFactor
+        encoderConfig.velocityConversionFactor = configuration.encoderVelocityConversionFactor
+
 
         configuration.feedbackDFilter?.let{innerController.setDFilter(it,0)}
         configuration.feedbackIZone?.let{innerController.setIZone(it,0)}

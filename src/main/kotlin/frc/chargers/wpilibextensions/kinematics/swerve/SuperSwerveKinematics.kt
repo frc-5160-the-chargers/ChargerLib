@@ -13,7 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.utils.a
-import frc.chargers.wpilibextensions.Timer
+import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
@@ -142,7 +142,7 @@ public class SuperSwerveKinematics(
      */
     private fun correctHeading(desiredSpeed: ChassisSpeeds, inputHeading: Angle): ChassisSpeeds {
         //Determine time interval
-        val currentT: Time = Timer.getFPGATimestamp()
+        val currentT: Time = fpgaTimestamp()
         val dt: Time = currentT - previousT
         //Get desired rotational speed in radians per second and absolute translational speed in m/s
         val vr = desiredSpeed.rotationSpeed

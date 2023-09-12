@@ -19,7 +19,7 @@ import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.encoders.AverageEncoder
 import frc.chargers.utils.Measurement
 import frc.chargers.utils.WheelRatioProvider
-import frc.chargers.wpilibextensions.Timer
+import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
@@ -255,7 +255,7 @@ public class EncoderDifferentialDrivetrain(
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.estimatedPosition.ofUnit(meters),
-            Timer.getFPGATimestamp(),
+            fpgaTimestamp(),
             true
         )
 

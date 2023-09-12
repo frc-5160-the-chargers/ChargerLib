@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.trajectory.TrapezoidProfile
-import frc.chargers.wpilibextensions.Timer
+import frc.chargers.wpilibextensions.fpgaTimestamp
 
 /*
 NOTE TO SELF:
@@ -87,7 +87,7 @@ public class AngularTrapezoidProfile(
         baseProfile.calculate(deltaT.inUnit(seconds)).ofUnit(radians,seconds)
 
     public fun calculateCurrentState(): State{
-        val currentTime = Timer.getFPGATimestamp()
+        val currentTime = fpgaTimestamp()
         return calculate(currentTime - previousTime).also{
             previousTime = currentTime
         }

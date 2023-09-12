@@ -16,7 +16,6 @@ import frc.chargers.hardware.sensors.encoders.AverageEncoder
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.utils.Measurement
-import frc.chargers.wpilibextensions.Timer
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
@@ -26,10 +25,9 @@ import frc.chargers.hardware.motorcontrol.swerve.HolonomicModule
 import frc.chargers.hardware.motorcontrol.swerve.ModuleConfiguration
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.utils.a
+import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.kinematics.*
-import frc.chargers.wpilibextensions.kinematics.swerve.ModulePositions
-import frc.chargers.wpilibextensions.kinematics.swerve.ModuleSpeeds
-import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveKinematics
+import frc.chargers.wpilibextensions.kinematics.swerve.*
 
 /**
  * A convenience function to create a [EncoderHolonomicDrivetrain]
@@ -221,7 +219,7 @@ public class EncoderHolonomicDrivetrain(
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.estimatedPosition.ofUnit(meters),
-            Timer.getFPGATimestamp(),
+            fpgaTimestamp(),
             true
         )
 
@@ -244,9 +242,12 @@ public class EncoderHolonomicDrivetrain(
             topRightState = topRight.getModuleState(gearRatio,wheelDiameter),
             bottomLeftState = bottomLeft.getModuleState(gearRatio,wheelDiameter),
             bottomRightState = bottomRight.getModuleState(gearRatio,wheelDiameter)
-        )
+        ).also{
+            it.logAsCurrentSpeeds()
+        }
         set(ms){
             ms.desaturate(maxSpeed)
+            ms.logAsDesiredSpeeds()
             topLeft.setDirectionalVelocity(ms.topLeftSpeed,ms.topLeftAngle,gearRatio,wheelDiameter)
             topRight.setDirectionalVelocity(ms.topRightSpeed,ms.topRightAngle,gearRatio,wheelDiameter)
             bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed,ms.bottomLeftAngle,gearRatio,wheelDiameter)

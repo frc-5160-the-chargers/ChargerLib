@@ -18,7 +18,7 @@ import kotlin.math.tan
 import edu.wpi.first.wpilibj.DriverStation
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.utils.Measurement
-import frc.chargers.wpilibextensions.Timer
+import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.kinematics.StandardDeviation
 
@@ -74,7 +74,7 @@ public class Limelight(
             }
             return Measurement(
                 UnitPose2d(limelightPose[0].meters,limelightPose[1].meters,Angle(0.0)),
-                Timer.getFPGATimestamp() - latency,
+                fpgaTimestamp() - latency,
                 hasTarget && DriverStation.getAlliance() != DriverStation.Alliance.Invalid,
             )
         }

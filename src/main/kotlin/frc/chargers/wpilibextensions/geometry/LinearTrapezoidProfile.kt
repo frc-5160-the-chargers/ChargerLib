@@ -4,7 +4,8 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.trajectory.TrapezoidProfile
-import frc.chargers.wpilibextensions.Timer
+import frc.chargers.wpilibextensions.fpgaTimestamp
+
 /*
 NOTE TO SELF:
 WPILib API is changing in 2024, so class will have to be changed accordingly:
@@ -85,7 +86,7 @@ public class LinearTrapezoidProfile(
         baseProfile.calculate(deltaT.inUnit(seconds)).ofUnit(meters,seconds)
 
     public fun calculateCurrentState(): State{
-        val currentTime = Timer.getFPGATimestamp()
+        val currentTime = fpgaTimestamp()
         return calculate(currentTime - previousTime).also{
             previousTime = currentTime
         }

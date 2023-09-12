@@ -1,7 +1,7 @@
 package frc.chargers.utils
 
 import com.batterystaple.kmeasure.quantities.Time
-import frc.chargers.wpilibextensions.Timer
+import frc.chargers.wpilibextensions.fpgaTimestamp
 
 
 /**
@@ -13,8 +13,8 @@ public data class Measurement<T>(
     public val timestamp: Time,
     public val isValid: Boolean
 ){
-    public val latency: Time = Timer.getFPGATimestamp() - timestamp
+    public val latency: Time = fpgaTimestamp() - timestamp
 
     public val currentLatency: Time
-        get() = Timer.getFPGATimestamp() - timestamp
+        get() = fpgaTimestamp() - timestamp
 }
