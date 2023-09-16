@@ -13,7 +13,7 @@ You do not have to edit chargerlib at all; it should always be set up to work.
 
 A. paste these 2 lines into the "plugins" area in build.gradle:
 ```kotlin
-id 'org.jetbrains.kotlin.jvm' version '1.7.20-Beta'
+id 'org.jetbrains.kotlin.jvm' version '1.9.20-Beta'
 id 'io.gitlab.arturbosch.detekt' version '1.21.0'
 ```
 
