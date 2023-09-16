@@ -193,7 +193,7 @@ public data class TalonFXConfiguration(
 
     // Note: While this value is by default false in CTRE's configuration,
     // We want it to be true.
-    var closedLoopContinuousWrap: Boolean = true,
+    var closedLoopContinuousWrap: Boolean = false,
 
     // Closed Loop Ramps Configs
     var dutyCycleClosedLoopRampPeriod: Time = Time(0.0),

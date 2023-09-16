@@ -16,7 +16,7 @@ import frc.chargers.utils.PathPlannerAutoContext
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import kotlin.internal.LowPriorityInOverloadResolution
-
+/*
 context(CommandBuilder)
 @LowPriorityInOverloadResolution
 public fun EncoderDifferentialDrivetrain.followPath(
@@ -124,6 +124,7 @@ public inline fun EncoderDifferentialDrivetrain.runPathPlannerAuto(
     ramseteController,
     eventsBlock
 )
+ */
 
 
 

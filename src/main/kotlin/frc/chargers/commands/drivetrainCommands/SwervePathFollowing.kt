@@ -12,10 +12,10 @@ import frc.chargers.commands.CommandBuilder
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.constants
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
-import frc.chargers.utils.PathPlannerAutoContext
-import frc.chargers.utils.asPathPlannerConstants
+import frc.chargers.utils.*
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
+import kotlin.internal.LowPriorityInOverloadResolution
 
 /*
  * Stores all the commands related to path following with the [EncoderHolonomicDrivetrain],
@@ -23,16 +23,26 @@ import frc.chargers.wpilibextensions.geometry.ofUnit
  */
 
 
-
+/*
+context(CommandBuilder, PathData)
+@LowPriorityInOverloadResolution
+public fun EncoderHolonomicDrivetrain.followPath(
+    trajectoryName: String,
+    isFirstPath: Boolean = false
+): Command = followPath(
+    PathPlanner.loadPath(trajectoryName, constraints),
+    translationConstants,rotationConstants,isFirstPath
+)
 /**
  * Makes an [EncoderHolonomicDrivetrain] follow a designated path, using [PPSwerveControllerCommand] and a [PathPlannerTrajectory].
  */
 context(CommandBuilder)
+@LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.followPath(
     trajectory: PathPlannerTrajectory,
+    translationConstants: PIDConstants,
+    rotationConstants: PIDConstants,
     isFirstPath: Boolean = false,
-    translationOffsetConstants: PIDConstants,
-    rotationOffsetConstants: PIDConstants
 ): Command = runSequentially{
     // NOTE: this@followPath denotes the "this" of the followPath function
     // instead of the CommandBuilder's this,
@@ -47,13 +57,13 @@ public fun EncoderHolonomicDrivetrain.followPath(
         trajectory,
         {robotPose.inUnit(meters)},
         PIDController(0.0,0.0,0.0).apply{
-            constants = translationOffsetConstants
+            constants = translationConstants
         },
         PIDController(0.0,0.0,0.0).apply{
-            constants = translationOffsetConstants
+            constants = translationConstants
         },
         PIDController(0.0,0.0,0.0).apply{
-            constants = rotationOffsetConstants
+            constants = rotationConstants
         },
         ::swerveDrive,
         true,
@@ -70,32 +80,43 @@ public fun EncoderHolonomicDrivetrain.followPath(
  * Utilizes a [trajectoryName] and [LinearTrapezoidProfile.Constraints] instead of a [PathPlannerTrajectory].
  */
 context(CommandBuilder)
+@LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.followPath(
     trajectoryName: String,
-    pathConstraints: LinearTrapezoidProfile.Constraints,
+    translationConstants: PIDConstants,
+    rotationConstants: PIDConstants,
+    pathConstraints: PathConstraints,
     isFirstPath: Boolean = false,
-    translationOffsetConstants: PIDConstants,
-    rotationOffsetConstants: PIDConstants,
 ): Command = followPath(
     PathPlanner.loadPath(
         trajectoryName,
-        PathConstraints(
-            pathConstraints.maxVelocity.siValue,
-            pathConstraints.maxAcceleration.siValue
-        )
+        pathConstraints
     ),
-    isFirstPath,
-    translationOffsetConstants,
-    rotationOffsetConstants
+    translationConstants,
+    rotationConstants,
+    isFirstPath
 )
 
 
+context(CommandBuilder,PathData)
+@LowPriorityInOverloadResolution
+public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
+    pathGroupName: String,
+    eventsBlock: MappableContext<String, Command>.() -> Unit
+): Command = runPathPlannerAuto(
+    pathGroupName,
+    translationConstants,
+    rotationConstants,
+    allPathConstraints = a[constraints] + otherConstraints.toTypedArray(),
+    eventsBlock
+)
 context(CommandBuilder)
-public inline fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
+@LowPriorityInOverloadResolution
+public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     trajectories: List<PathPlannerTrajectory>,
-    translationOffsetConstants: PIDConstants,
-    rotationOffsetConstants: PIDConstants,
-    eventsBlock: PathPlannerAutoContext.() -> Unit
+    translationConstants: PIDConstants,
+    rotationConstants: PIDConstants,
+    eventsBlock: MappableContext<String, Command>.() -> Unit
 ): Command{
     // NOTE: this@runPathPlannerAuto denotes the "this" of the followPath function
     // instead of the CommandBuilder's this,
@@ -103,10 +124,10 @@ public inline fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     val autoBuilder = SwerveAutoBuilder(
         {robotPose.inUnit(meters)},  // Pose2d supplier
         {resetPose(it.ofUnit(meters))},  // Pose2d consumer, used to reset odometry at the beginning of auto
-        translationOffsetConstants.asPathPlannerConstants(),  // PID constants to correct for translation error (used to create the X and Y PID controllers)
-        rotationOffsetConstants.asPathPlannerConstants(),  // PID constants to correct for rotation error (used to create the rotation controller)
+        translationConstants.asPathPlannerConstants(),  // PID constants to correct for translation error (used to create the X and Y PID controllers)
+        rotationConstants.asPathPlannerConstants(),  // PID constants to correct for rotation error (used to create the rotation controller)
         ::swerveDrive,  // chassis speeds consumer
-        PathPlannerAutoContext().apply(eventsBlock).javaEventMap,
+        MappableContext<String,Command>().apply(eventsBlock).map,
         true,  // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true,
         this@runPathPlannerAuto // The drive subsystem. Used to properly set the requirements of path following commands
     )
@@ -115,46 +136,23 @@ public inline fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
 }
 
 context(CommandBuilder)
-public inline fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
+@LowPriorityInOverloadResolution
+public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     pathGroupName: String,
-    pathConstraints: LinearTrapezoidProfile.Constraints,
-    translationOffsetConstants: PIDConstants,
-    rotationOffsetConstants: PIDConstants,
-    eventsBlock: PathPlannerAutoContext.() -> Unit
+    translationConstants: PIDConstants,
+    rotationConstants: PIDConstants,
+    vararg allPathConstraints: PathConstraints,
+    eventsBlock: MappableContext<String,Command>.() -> Unit
 ): Command = runPathPlannerAuto(
     PathPlanner.loadPathGroup(
         pathGroupName,
-        PathConstraints(
-            pathConstraints.maxVelocity.siValue,
-            pathConstraints.maxAcceleration.siValue
-        )
+        listOf(*allPathConstraints)
     ),
-    translationOffsetConstants,
-    rotationOffsetConstants,
+    translationConstants,
+    rotationConstants,
     eventsBlock
 )
-
-context(CommandBuilder)
-public inline fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
-    pathGroupName: String,
-    allPathConstraints: List<LinearTrapezoidProfile.Constraints>,
-    translationOffsetConstants: PIDConstants,
-    rotationOffsetConstants: PIDConstants,
-    eventsBlock: PathPlannerAutoContext.() -> Unit
-): Command = runPathPlannerAuto(
-    PathPlanner.loadPathGroup(
-        pathGroupName,
-        allPathConstraints.map {
-            PathConstraints(
-                it.maxVelocity.siValue,
-                it.maxAcceleration.siValue
-            )
-        }
-    ),
-    translationOffsetConstants,
-    rotationOffsetConstants,
-    eventsBlock
-)
+ */
 
 
 

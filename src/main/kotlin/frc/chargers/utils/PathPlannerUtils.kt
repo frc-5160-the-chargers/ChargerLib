@@ -20,6 +20,35 @@ public fun PathConstraints(maxVelocity: Velocity, maxAcceleration: Acceleration)
     maxAcceleration.siValue
 )
 
+/**
+ * Represents Data pertinent to PathPlanner autonomous routines.
+ *
+ * @param translationConstants: The translation PID constants used to converge to the path.
+ * @param rotationConstants: The rotation PID constants used to converge to the path.
+ * @param constraints: The primary [PathConstraints] for PathPlanner.
+ * @param otherConstraints: The other PathConstraints pertinent.
+ * This is useful if you have multiple path constraints for multiple paths within a path group.
+ */
+public data class PathData(
+    val translationConstants: PIDConstants,
+    val rotationConstants: PIDConstants,
+    val constraints: PathConstraints,
+    val otherConstraints: List<PathConstraints>
+){
+    public constructor(
+        translationConstants: PIDConstants,
+        rotationConstants: PIDConstants,
+        constraints: PathConstraints,
+        vararg otherConstraints: PathConstraints
+    ): this(
+        translationConstants,
+        rotationConstants,
+        constraints,
+        listOf(*otherConstraints)
+    )
+}
+
+
 @DslMarker
 public annotation class PathPlannerAutoContextMarker
 

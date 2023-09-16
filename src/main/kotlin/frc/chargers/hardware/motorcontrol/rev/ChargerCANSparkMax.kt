@@ -121,6 +121,8 @@ public open class ChargerCANSparkMax(
         for ((limitDirection, limit) in configuration.softLimits) {
             setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
         }
+
+        /*
         encoderConfig.averageDepth = configuration.encoderAverageDepth
         encoderConfig.inverted = configuration.encoderInverted
         encoderConfig.measurementPeriod = configuration.encoderMeasurementPeriod
@@ -136,6 +138,7 @@ public open class ChargerCANSparkMax(
             innerController.setPositionPIDWrappingMinInput(it.start)
             innerController.setPositionPIDWrappingMaxInput(it.endInclusive)
         }
+         */
         burnFlash()
     }
 
