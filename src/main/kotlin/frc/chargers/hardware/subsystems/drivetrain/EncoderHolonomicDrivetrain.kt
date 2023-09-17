@@ -154,21 +154,18 @@ public class EncoderHolonomicDrivetrain(
     private val allPoseSuppliers: MutableList<RobotPoseSupplier> = poseSuppliers.toMutableList()
 
 
+
+    /*
+    Encoder-based functions below
+     */
     private val overallEncoder: Encoder = AverageEncoder(
         topLeft.distanceMeasurementEncoder,
         topRight.distanceMeasurementEncoder,
         bottomLeft.distanceMeasurementEncoder,
         bottomRight.distanceMeasurementEncoder)
 
-    
-
     // wheel radius is wheelDiameter / 2.
     private val wheelTravelPerMotorRadian: Distance = gearRatio * (wheelDiameter / 2)
-
-
-    /*
-    Encoder-based functions below
-     */
 
     private val distanceOffset: Distance = overallEncoder.angularPosition * wheelTravelPerMotorRadian
     public val distanceTraveled: Distance
@@ -183,17 +180,9 @@ public class EncoderHolonomicDrivetrain(
 
 
 
-
     /*
-    public val kinematics: SwerveDriveKinematics =
-        SwerveDriveKinematics(
-            UnitTranslation2d(trackWidth/2,wheelBase/2).inUnit(meters),
-            UnitTranslation2d(trackWidth/2,-wheelBase/2).inUnit(meters),
-            UnitTranslation2d(-trackWidth/2,wheelBase/2).inUnit(meters),
-            UnitTranslation2d(-trackWidth/2,-wheelBase/2).inUnit(meters)
-        )
+    Kinematics + pose estimator
      */
-
 
     public val kinematics: SuperSwerveKinematics = SuperSwerveKinematics(
         UnitTranslation2d(trackWidth/2,wheelBase/2),
@@ -201,8 +190,6 @@ public class EncoderHolonomicDrivetrain(
         UnitTranslation2d(-trackWidth/2,wheelBase/2),
         UnitTranslation2d(-trackWidth/2,-wheelBase/2)
     )
-
-
 
     private val poseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
         kinematics,
@@ -225,7 +212,6 @@ public class EncoderHolonomicDrivetrain(
 
     override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
 
-
     public fun resetPose(pose: UnitPose2d, gyroAngle: Angle = gyro.heading){
         poseEstimator.resetPosition(
             gyroAngle.asRotation2d(),
@@ -236,6 +222,9 @@ public class EncoderHolonomicDrivetrain(
 
 
 
+    /*
+    ModuleSpeeds(Essentially an object with 4 SwerveModuleStates) setter
+     */
     public var currentModuleStates: ModuleSpeeds
         get() = ModuleSpeeds(
             topLeftState = topLeft.getModuleState(gearRatio,wheelDiameter),
@@ -256,6 +245,9 @@ public class EncoderHolonomicDrivetrain(
 
 
 
+    /*
+    ModulePositions(distance+angle for all 4 modules) getter
+     */
     public val currentModulePositions: ModulePositions
         get() = ModulePositions(
             topLeftPosition = topLeft.getModulePosition(gearRatio,wheelDiameter),
@@ -314,6 +306,7 @@ public class EncoderHolonomicDrivetrain(
     /**
      * Drives the drivetrain with a specific speed at a specified angle.
      */
+    @JvmName("directionalDriveWithPower")
     public fun directionalDrive(power: Double, angle: Angle){
         topLeft.setDirectionalPower(power,angle)
         topRight.setDirectionalPower(power,angle)

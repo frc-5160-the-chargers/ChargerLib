@@ -36,16 +36,6 @@ public interface NonConfigurableHolonomicModule {
     public fun setDirectionalVelocity(velocity:Velocity,direction:Angle,gearRatio:Double,wheelDiameter:Length){
         setDirectionalVelocity(velocity/(gearRatio*wheelDiameter),direction)
     }
-    public fun setDesiredState(moduleState:SwerveModuleState,gearRatio:Double,wheelDiameter:Length){
-        setDirectionalVelocity(
-            moduleState.speedMetersPerSecond.ofUnit(meters/seconds),
-            moduleState.angle.asAngle(),
-            gearRatio,
-            wheelDiameter
-        )
-    }
-
-
 
     public fun halt()
 }
