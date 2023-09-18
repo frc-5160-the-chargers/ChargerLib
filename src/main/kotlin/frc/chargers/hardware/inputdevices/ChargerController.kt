@@ -38,7 +38,7 @@ public open class ChargerController(
     protected fun TriggerValue.withDeadband(): Double =
         if (abs(this) <= deadband) { 0.0 } else { this }
 
-    public fun TriggerValue.mapTo(to: ClosedRange<Double>): Double =
+    public fun TriggerValue.mapTriggerValue(to: ClosedRange<Double>): Double =
         mapBetweenRanges(0.0..1.0, to)
 
     public inline fun a(loop: EventLoop? = null, bindings: Trigger.() -> Unit){

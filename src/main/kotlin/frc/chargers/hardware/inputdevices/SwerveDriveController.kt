@@ -28,8 +28,8 @@ public class SwerveDriveController(
             port: Int,
             driveMultiplier: Double = 1.0,
             rotationMultiplier: Double = 1.0,
-            turboModeMultiplierRange: ClosedRange<Double> = 0.0..1.0,
-            precisionModeDividerRange: ClosedRange<Double> = 0.0..1.0,
+            turboModeMultiplierRange: ClosedRange<Double> = 1.0..1.0,
+            precisionModeDividerRange: ClosedRange<Double> = 1.0..1.0,
             deadband: Double = 0.0,
             defaultAxisThreshold: Double = 0.5
         ): SwerveDriveController =
@@ -38,8 +38,8 @@ public class SwerveDriveController(
                 {leftY * driveMultiplier},
                 {leftX * driveMultiplier},
                 {rightX * rotationMultiplier},
-                {leftTriggerAxis.mapTo(turboModeMultiplierRange)},
-                {1/rightTriggerAxis.mapTo(precisionModeDividerRange)},
+                {rightTriggerAxis.mapTriggerValue(turboModeMultiplierRange)},
+                {1/leftTriggerAxis.mapTriggerValue(precisionModeDividerRange)},
                 deadband,
                 defaultAxisThreshold
             )

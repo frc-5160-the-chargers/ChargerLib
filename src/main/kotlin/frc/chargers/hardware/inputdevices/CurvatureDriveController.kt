@@ -37,8 +37,8 @@ public class CurvatureDriveController(
                 port,
                 {leftY * driveMultiplier},
                 {rightX * rotationMultiplier},
-                {leftTriggerAxis.mapTo(turboModeMultiplierRange)},
-                {1/rightTriggerAxis.mapTo(precisionModeDividerRange)},
+                {rightTriggerAxis.mapTriggerValue(turboModeMultiplierRange)},
+                {1/leftTriggerAxis.mapTriggerValue(precisionModeDividerRange)},
                 deadband,
                 defaultAxisThreshold
             )

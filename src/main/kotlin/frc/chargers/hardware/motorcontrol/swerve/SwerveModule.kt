@@ -222,11 +222,9 @@ public open class NonConfigurableSwerveModule(
     }
 
     override fun setDirectionalPower(power: Double, direction: Angle) {
-
         if (abs(direction - turnEncoder.angularPosition) > 90.0.degrees){
             driveMotor.set(-power)
             turnMotorPositionSetter((direction + 180.degrees) % 360.degrees)
-
         }else{
             driveMotor.set(power)
             turnMotorPositionSetter(direction)

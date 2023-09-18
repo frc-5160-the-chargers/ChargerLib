@@ -74,7 +74,12 @@ public class SuperSwerveKinematics(
 
     public fun toFirstOrderModuleSpeeds(speeds: ChassisSpeeds): ModuleSpeeds{
         val arr = toSwerveModuleStates(speeds)
-        return ModuleSpeeds(arr[0],arr[1],arr[2],arr[3])
+        return ModuleSpeeds(
+            topLeftState = arr[0],
+            topRightState = arr[1],
+            bottomLeftState = arr[2],
+            bottomRightState = arr[3]
+        )
     }
 
 
