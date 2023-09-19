@@ -137,7 +137,7 @@ public open class NonConfigurableSwerveModule(
     /**
      * A base lambda for the SwerveModule class.
      */
-    private val turnMotorPositionSetter: (Angle) -> Unit = if(useOnboardPIDIfAvailable && turnMotor is FeedbackMotorController){
+    protected open val turnMotorPositionSetter: (Angle) -> Unit = if(useOnboardPIDIfAvailable && turnMotor is FeedbackMotorController){
         // turnMotor smart casts to FeedbackMotorController here, which means that setAngularPosition is allowed.
 
         if (turnPrecision is Precision.Within){

@@ -136,27 +136,20 @@ public class ProfiledSwerveModule<TMC: MotorConfiguration, DMC: MotorConfigurati
  *
  */
 public open class NonConfigurableProfiledSwerveModule(
-    public val turnMotor: EncoderMotorController,
-    public val turnEncoder: PositionEncoder,
-    public val driveMotor: EncoderMotorController,
-    public val turnPIDConstants: PIDConstants,
+    turnMotor: EncoderMotorController,
+    turnEncoder: PositionEncoder,
+    driveMotor: EncoderMotorController,
+    turnPIDConstants: PIDConstants,
     public val turnFF: AngularMotorFF = AngularMotorFF.None,
     public val profileConstraints: AngularTrapezoidProfile.Constraints,
-    public val drivePIDConstants: PIDConstants,
-    public val velocityFF: AngularMotorFF,
-    public val turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
+    drivePIDConstants: PIDConstants,
+    velocityFF: AngularMotorFF,
+    turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     useOnboardPIDIfAvailable: Boolean = false,
-): NonConfigurableHolonomicModule {
-
-    override val distanceMeasurementEncoder: Encoder = driveMotor.encoder
-
-
-
-
-    /**
-     * A base lambda for the SwerveModule class.
-     */
-    private val turnMotorPositionSetter: (Angle) -> Unit = if(useOnboardPIDIfAvailable && turnMotor is FeedbackMotorController){
+): NonConfigurableSwerveModule(
+    turnMotor, turnEncoder, driveMotor, turnPIDConstants, drivePIDConstants, velocityFF, turnPrecision, useOnboardPIDIfAvailable
+) {
+    protected override val turnMotorPositionSetter: (Angle) -> Unit = if(useOnboardPIDIfAvailable && turnMotor is FeedbackMotorController){
 
         // turnMotor smart casts to FeedbackMotorController here, which means that setAngularPosition is allowed.
 
@@ -218,70 +211,5 @@ public open class NonConfigurableProfiledSwerveModule(
             }
         }
     }
-
-    /**
-     * A base lambda for the SwerveModule class.
-     */
-    private val driveMotorVelocitySetter: (AngularVelocity) -> Unit = if(useOnboardPIDIfAvailable && driveMotor is FeedbackMotorController){
-        // return value
-        {
-            driveMotor.setAngularVelocity(
-                it,
-                drivePIDConstants,
-                velocityFF
-            )
-        }
-    }else{
-        val controller = UnitSuperPIDController(
-            pidConstants = drivePIDConstants,
-            getInput = {driveMotor.encoder.angularVelocity},
-            target = AngularVelocity(0.0),
-            selfSustain = true,
-            feedforward = velocityFF,
-            outputRange = -12.volts..12.volts
-        );
-        // return value
-        {
-            if(controller.target != it){controller.target = it}
-            driveMotor.setVoltage(controller.calculateOutput().inUnit(volts))
-        }
-    }
-
-    override fun setDirectionalPower(power: Double, direction: Angle) {
-        if (abs(direction - turnEncoder.angularPosition) > 90.0.degrees){
-            driveMotor.set(-power)
-            turnMotorPositionSetter((direction + 180.degrees) % 360.degrees)
-        }else{
-            driveMotor.set(power)
-            turnMotorPositionSetter(direction)
-        }
-    }
-
-    override fun setDirectionalVelocity(angularVelocity: AngularVelocity, direction: Angle) {
-        if (abs(direction - turnEncoder.angularPosition) > 90.0.degrees){
-            driveMotorVelocitySetter(-angularVelocity)
-            turnMotorPositionSetter((direction + 180.degrees) % 360.degrees)
-        }else{
-            driveMotorVelocitySetter(angularVelocity)
-            turnMotorPositionSetter(direction)
-        }
-    }
-
-    override fun halt(){
-        driveMotor.set(0.0)
-        turnMotor.set(0.0)
-    }
-
-    override fun getModuleState(gearRatio: Double, wheelDiameter: Length): SwerveModuleState =
-        SwerveModuleState(
-            driveMotor.encoder.angularVelocity * (gearRatio * wheelDiameter),
-            turnEncoder.angularPosition
-        )
-
-    override fun getModulePosition(gearRatio: Double, wheelDiameter: Length): SwerveModulePosition =
-        SwerveModulePosition(
-            driveMotor.encoder.angularPosition * (gearRatio * wheelDiameter),
-            turnEncoder.angularPosition
-        )
 
 }
