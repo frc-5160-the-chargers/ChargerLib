@@ -171,7 +171,8 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
  *
  * @see ChargerTalonFX
  */
-
+// blank config
+internal val bcfg = CTRETalonFXConfiguration()
 // Note to self: CustomParamConfigs might be able to be used by chargerlib, no idea how
 public data class TalonFXConfiguration(
     /*
@@ -214,7 +215,7 @@ public data class TalonFXConfiguration(
     // feedback configs
     var feedbackRemoteSensorID: Int = 0,
     var feedbackRotorOffset: Angle = Angle(0.0),
-    var feedbackSensorSource: FeedbackSensorSourceValue = FeedbackSensorSourceValue.RotorSensor,
+    var feedbackSensorSource: FeedbackSensorSourceValue = bcfg.Feedback.FeedbackSensorSource,
     var rotorToSensorRatio: Double = 1.0,
     var sensorToMechanismRatio: Double = 1.0,
 
@@ -222,8 +223,8 @@ public data class TalonFXConfiguration(
     var forwardLimitEnable: Boolean = false,
     var forwardLimitAutosetPositionValue: Angle? = null,
     var forwardLimitRemoteSensorID: Int = 0,
-    var forwardLimitSource: ForwardLimitSourceValue = ForwardLimitSourceValue.LimitSwitchPin,
-    var forwardLimitType: ForwardLimitTypeValue = ForwardLimitTypeValue.NormallyOpen,
+    var forwardLimitSource: ForwardLimitSourceValue = bcfg.HardwareLimitSwitch.ForwardLimitSource,
+    var forwardLimitType: ForwardLimitTypeValue = bcfg.HardwareLimitSwitch.ForwardLimitType,
 
     var reverseLimitEnable: Boolean = false,
     var reverseLimitAutosetPositionValue: Angle? = null,

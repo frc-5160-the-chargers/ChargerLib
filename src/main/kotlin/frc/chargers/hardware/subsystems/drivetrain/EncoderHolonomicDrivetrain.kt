@@ -29,19 +29,22 @@ import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
 
+@PublishedApi
+internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)
+
 /**
  * A convenience function to create a [EncoderHolonomicDrivetrain]
  * using Talon FX motor controllers.
  *
  * @see EncoderHolonomicDrivetrain
  */
-public fun talonFXHolonomicDrivetrain(
+public inline fun talonFXHolonomicDrivetrain(
     topLeft: HolonomicModule<TalonFXConfiguration, TalonFXConfiguration>,
     topRight: HolonomicModule<TalonFXConfiguration, TalonFXConfiguration>,
     bottomLeft: HolonomicModule<TalonFXConfiguration, TalonFXConfiguration>,
     bottomRight: HolonomicModule<TalonFXConfiguration, TalonFXConfiguration>,
     gyro: HeadingProvider,
-    maxSpeed: Velocity = 4.5.ofUnit(meters/seconds),
+    maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     trackWidth: Distance,
@@ -51,7 +54,7 @@ public fun talonFXHolonomicDrivetrain(
     vararg poseSuppliers: RobotPoseSupplier,
     configure: ModuleConfiguration<TalonFXConfiguration, TalonFXConfiguration>.() -> Unit = {}
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
-    topLeft, topRight, bottomLeft, bottomRight, gyro, maxSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
+    topLeft, topRight, bottomLeft, bottomRight, gyro, maxModuleSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
     *poseSuppliers,
     configuration = ModuleConfiguration(TalonFXConfiguration(),TalonFXConfiguration()).apply(configure),
 )
@@ -62,13 +65,13 @@ public fun talonFXHolonomicDrivetrain(
  *
  * @see EncoderHolonomicDrivetrain
  */
-public fun sparkMaxHolonomicDrivetrain(
+public inline fun sparkMaxHolonomicDrivetrain(
     topLeft: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
     topRight: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
     bottomLeft: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
     bottomRight: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
     gyro: HeadingProvider,
-    maxSpeed: Velocity = 4.5.ofUnit(meters/seconds),
+    maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     trackWidth: Distance,
@@ -78,7 +81,7 @@ public fun sparkMaxHolonomicDrivetrain(
     vararg poseSuppliers: RobotPoseSupplier,
     configure: ModuleConfiguration<SparkMaxConfiguration, SparkMaxConfiguration>.() -> Unit = {},
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
-    topLeft, topRight, bottomLeft, bottomRight, gyro, maxSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
+    topLeft, topRight, bottomLeft, bottomRight, gyro, maxModuleSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
     *poseSuppliers,
     configuration = ModuleConfiguration(SparkMaxConfiguration(),SparkMaxConfiguration()).apply(configure),
 )
@@ -93,7 +96,7 @@ public fun <TMC: MotorConfiguration, DMC: MotorConfiguration> EncoderHolonomicDr
     bottomLeft: HolonomicModule<TMC, DMC>,
     bottomRight: HolonomicModule<TMC, DMC>,
     gyro: HeadingProvider,
-    maxSpeed: Velocity = 4.5.ofUnit(meters/seconds),
+    maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     trackWidth: Distance,
@@ -122,7 +125,7 @@ public fun <TMC: MotorConfiguration, DMC: MotorConfiguration> EncoderHolonomicDr
         if(configuration != null){
             configure(configuration)
         }
-    }, gyro, maxSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive, *poseSuppliers
+    }, gyro, maxModuleSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive, *poseSuppliers
 )
 
 
@@ -140,7 +143,7 @@ public class EncoderHolonomicDrivetrain(
     private val bottomLeft: NonConfigurableHolonomicModule,
     private val bottomRight: NonConfigurableHolonomicModule,
     public val gyro: HeadingProvider,
-    public val maxSpeed: Velocity = 4.5.ofUnit(meters/seconds),
+    public val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,
     override val wheelDiameter: Length,
     trackWidth: Distance,
@@ -151,8 +154,22 @@ public class EncoderHolonomicDrivetrain(
     vararg poseSuppliers: RobotPoseSupplier
 ): SubsystemBase(), RobotPoseSupplier, WheelRatioProvider{
 
-    private val allPoseSuppliers: MutableList<RobotPoseSupplier> = poseSuppliers.toMutableList()
+    // not used anywhere else; only used for the setDesiredModuleStates function
+    private enum class ControlMode{
+        OPEN_LOOP,CLOSED_LOOP
+    }
+    private var currentControlMode = ControlMode.CLOSED_LOOP
 
+    // Stores the pose suppliers for the drivetrain
+    private val allPoseSuppliers: MutableList<RobotPoseSupplier> = poseSuppliers.toMutableList()
+    
+    /**
+     * adds a variable amount of pose suppliers to the drivetrain.
+     * these pose suppliers will fuse their poses into the pose estimator for more accurate measurements.
+     */
+    public fun addPoseSuppliers(vararg poseSuppliers: RobotPoseSupplier){
+        allPoseSuppliers.addAll(poseSuppliers)
+    }
 
 
     /*
@@ -182,6 +199,7 @@ public class EncoderHolonomicDrivetrain(
 
     /*
     Kinematics + pose estimator
+    Uses SuperSwerveKinematics, a custom wrapper around WPILib's SwerveDriveKinematics.
      */
 
     public val kinematics: SuperSwerveKinematics = SuperSwerveKinematics(
@@ -203,6 +221,9 @@ public class EncoderHolonomicDrivetrain(
         startingPose.inUnit(meters)
     )
 
+    /**
+     * The robot pose measurement that the subsystem provides.
+     */
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.estimatedPosition.ofUnit(meters),
@@ -221,9 +242,11 @@ public class EncoderHolonomicDrivetrain(
     }
 
 
-
-    /*
-    ModuleSpeeds(Essentially an object with 4 SwerveModuleStates) setter
+    /**
+     * A getter/setter variable that can either fetch the current speeds
+     * of each swerve module,
+     * or can set the desired speeds of each swerve module.
+     * It is reccomended that the [swerveDrive] and [velocityDrive] functions are used instead.
      */
     public var currentModuleStates: ModuleSpeeds
         get() = ModuleSpeeds(
@@ -235,18 +258,26 @@ public class EncoderHolonomicDrivetrain(
             it.logAsCurrentSpeeds()
         }
         set(ms){
-            ms.desaturate(maxSpeed)
+            ms.desaturate(maxModuleSpeed)
             ms.logAsDesiredSpeeds()
-            topLeft.setDirectionalVelocity(ms.topLeftSpeed,ms.topLeftAngle,gearRatio,wheelDiameter)
-            topRight.setDirectionalVelocity(ms.topRightSpeed,ms.topRightAngle,gearRatio,wheelDiameter)
-            bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed,ms.bottomLeftAngle,gearRatio,wheelDiameter)
-            bottomRight.setDirectionalVelocity(ms.bottomRightSpeed,ms.bottomRightAngle,gearRatio,wheelDiameter)
+            if (currentControlMode == ControlMode.CLOSED_LOOP){
+                topLeft.setDirectionalVelocity(ms.topLeftSpeed,ms.topLeftAngle,gearRatio,wheelDiameter)
+                topRight.setDirectionalVelocity(ms.topRightSpeed,ms.topRightAngle,gearRatio,wheelDiameter)
+                bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed,ms.bottomLeftAngle,gearRatio,wheelDiameter)
+                bottomRight.setDirectionalVelocity(ms.bottomRightSpeed,ms.bottomRightAngle,gearRatio,wheelDiameter)
+            }else{
+                topLeft.setDirectionalPower((ms.topLeftSpeed/maxModuleSpeed).siValue, ms.topLeftAngle)
+                topRight.setDirectionalPower((ms.topRightSpeed/maxModuleSpeed).siValue, ms.topRightAngle)
+                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/maxModuleSpeed).siValue, ms.bottomLeftAngle)
+                bottomRight.setDirectionalPower((ms.bottomRightSpeed/maxModuleSpeed).siValue, ms.bottomRightAngle)
+            }
         }
 
 
-
-    /*
-    ModulePositions(distance+angle for all 4 modules) getter
+    /**
+     * Gets the current module positions of each swerve module.
+     * Returns a [ModulePositions] object,
+     * a wrapper around 4 [SwerveModulePosition] objects with kmeasure support.
      */
     public val currentModulePositions: ModulePositions
         get() = ModulePositions(
@@ -257,13 +288,79 @@ public class EncoderHolonomicDrivetrain(
         )
 
 
+    /**
+     * The max linear velocity of the drivetrain, calculated by simulating
+     * driving each swerve module at their maximum potential,
+     * then calculating the output using the kinematics object.
+     */
+    public val maxLinearVelocity: Velocity = kinematics.toChassisSpeeds(
+        ModuleSpeeds(
+            topLeftSpeed = maxModuleSpeed,
+            topRightSpeed = maxModuleSpeed,
+            bottomLeftSpeed = maxModuleSpeed,
+            bottomRightSpeed = maxModuleSpeed,
+            topLeftAngle = Angle(0.0),
+            topRightAngle = Angle(0.0),
+            bottomLeftAngle = Angle(0.0),
+            bottomRightAngle = Angle(0.0)
+        )
+    ).xVelocity
+
+    /**
+     * The max angular velocity of the drivetrain, calculated by simulating
+     * driving each swerve module at their maximum potential(with each being oriented at a 45 or -45 degrees angle),
+     * then calculating the output using the kinematics object.
+     */
+    public val maxRotationalVelocity: AngularVelocity = kinematics.toChassisSpeeds(
+        ModuleSpeeds(
+            topLeftSpeed = maxModuleSpeed,
+            topRightSpeed = maxModuleSpeed,
+            bottomLeftSpeed = maxModuleSpeed,
+            bottomRightSpeed = maxModuleSpeed,
+            topLeftAngle = 45.degrees,
+            topRightAngle = -45.degrees,
+            bottomLeftAngle = -45.degrees,
+            bottomRightAngle = 45.degrees
+        )
+    ).rotationSpeed
+
+    /**
+     * The default drive function for swerve.
+     * accepts an xPower, yPower and rotationPower.
+     *
+     * Similar to open-loop control modes of other swerve drivetrains.
+     */
+    public fun swerveDrive(xPower: Double, yPower: Double, rotationPower: Double): Unit =
+        swerveDrive(ChassisPowers(xPower,yPower,rotationPower))
+
+    /**
+     * Drives with a ChassisPowers object storing xPower, yPower, and rotationPower.
+     *
+     * @see swerveDrive
+     */
+    public fun swerveDrive(powers: ChassisPowers){
+        var speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
+        if(fieldRelativeDrive){
+            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds,gyro.heading.asRotation2d()
+            ).correctForDynamics()
+        }
+        currentControlMode = ControlMode.OPEN_LOOP
+        currentModuleStates = kinematics.toFirstOrderModuleSpeeds(speeds)
+        // currentModuleStates = kinematics.toSecondOrderModuleSpeeds(speeds,gyro.heading)
+        currentControlMode = ControlMode.CLOSED_LOOP
+    }
+
+
     
     
 
     /**
-     * A version of swerveDrive that uses [ChassisSpeeds] instead.
+     * A version of velocityDrive that uses [ChassisSpeeds] instead.
+     *
+     * @see velocityDrive
      */
-    public fun swerveDrive(speeds: ChassisSpeeds): Unit = swerveDrive(
+    public fun velocityDrive(speeds: ChassisSpeeds): Unit = velocityDrive(
         speeds.xVelocity,
         speeds.yVelocity,
         speeds.rotationSpeed
@@ -272,9 +369,12 @@ public class EncoderHolonomicDrivetrain(
     /**
      * Drives the robot using certain velocities instead of certain amounts of power(or duty cycle output).
      * Relies on PID in order to be used effectively.
+     *
+     * This is also called closed-loop control in other swerve drivetrain subsystems.
      */
-    public fun swerveDrive(xVelocity: Velocity, yVelocity: Velocity, rotationVelocity: AngularVelocity){
+    public fun velocityDrive(xVelocity: Velocity, yVelocity: Velocity, rotationVelocity: AngularVelocity){
 
+        currentControlMode = ControlMode.CLOSED_LOOP
         val speeds = if(fieldRelativeDrive){
             FieldRelativeChassisSpeeds(
                 xVelocity,
@@ -348,6 +448,7 @@ public class EncoderHolonomicDrivetrain(
     /**
      * Makes the drivetrain rotate in place, with a specific power.
      */
+    @JvmName("rotateWithPower")
     public fun rotateInPlace(power: Double){
         topLeft.setDirectionalPower(power,45.degrees)
         topRight.setDirectionalPower(power,-45.degrees)
@@ -355,20 +456,23 @@ public class EncoderHolonomicDrivetrain(
         bottomRight.setDirectionalPower(power,45.degrees)
     }
 
-    /**
-     * adds a variable amount of pose suppliers to the drivetrain.
-     * these pose suppliers will fuse their poses into the pose estimator for more accurate measurements.
-     */
-    public fun addPoseSuppliers(vararg poseSuppliers: RobotPoseSupplier){
-        allPoseSuppliers.addAll(poseSuppliers)
-    }
 
+    /**
+     * Called periodically in the subsystem.
+     */
     override fun periodic() {
+        /*
+         * Updates the pose estimator with the current module positions,
+         * as well as the gyro's heading.
+         */
         poseEstimator.update(
             gyro.heading.asRotation2d(),
             currentModulePositions.toArray()
         )
 
+        /*
+         * Updates the pose estimator with the vision measurements from the pose suppliers.
+         */
         allPoseSuppliers.forEach{
             val poseMeasurement = it.robotPoseMeasurement
 

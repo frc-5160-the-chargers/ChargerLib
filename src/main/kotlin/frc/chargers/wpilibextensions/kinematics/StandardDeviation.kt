@@ -11,7 +11,7 @@ import edu.wpi.first.math.numbers.N3
  * Represents a standard deviation
  */
 public sealed class StandardDeviation {
-    public object Default: StandardDeviation()
+    public data object Default: StandardDeviation()
 
     public class Of(
         public val x: Distance,

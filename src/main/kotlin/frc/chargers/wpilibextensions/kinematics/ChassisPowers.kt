@@ -4,6 +4,7 @@
 package frc.chargers.wpilibextensions.kinematics
 
 import com.batterystaple.kmeasure.quantities.*
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 
 /**
  * A helper class that stores direction powers for drivetrain classes.
@@ -14,6 +15,12 @@ public class ChassisPowers(
     public var rotationPower: Double = 0.0
 ){
     public fun asFieldRelative(robotAngle: Angle): ChassisPowers = FieldRelativeChassisPowers(xPower,yPower,rotationPower,robotAngle)
+
+    public fun toChassisSpeeds(maxLinearVelocity: Velocity, maxRotationalVelocity: AngularVelocity): ChassisSpeeds = ChassisSpeeds(
+        xPower * maxLinearVelocity,
+        yPower * maxLinearVelocity,
+        rotationPower * maxRotationalVelocity
+    )
 }
 
 public fun FieldRelativeChassisPowers(

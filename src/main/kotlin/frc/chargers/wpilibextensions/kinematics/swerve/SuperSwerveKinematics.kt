@@ -82,6 +82,14 @@ public class SuperSwerveKinematics(
         )
     }
 
+    public fun toChassisSpeeds(moduleSpeeds: ModuleSpeeds): ChassisSpeeds =
+        toChassisSpeeds(
+            moduleSpeeds.topLeftState,
+            moduleSpeeds.topRightState,
+            moduleSpeeds.bottomLeftState,
+            moduleSpeeds.bottomRightState
+        )
+
 
 
 

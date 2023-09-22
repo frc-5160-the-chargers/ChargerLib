@@ -1,6 +1,6 @@
 package frc.chargers.hardware.inputdevices
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds
+import frc.chargers.wpilibextensions.kinematics.ChassisPowers
 
 /**
  * An extension of [ChargerController] that provides tools to assist with controlling a swerve drivetrain.
@@ -44,10 +44,10 @@ public class SwerveDriveController(
                 defaultAxisThreshold
             )
     }
-    public val swerveOutput: ChassisSpeeds
+    public val swerveOutput: ChassisPowers
         get(){
             val multiplier = getTurboPower() * getPrecisionPower()
-            return ChassisSpeeds(
+            return ChassisPowers(
                 getForwardsPower().withDeadband() * multiplier,
                 getStrafePower().withDeadband() * multiplier,
                 getRotationPower().withDeadband() * multiplier
