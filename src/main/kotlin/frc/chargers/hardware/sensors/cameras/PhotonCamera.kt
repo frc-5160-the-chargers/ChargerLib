@@ -17,7 +17,7 @@ import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.utils.Measurement
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.kinematics.StandardDeviation
+import frc.chargers.wpilibextensions.StandardDeviation
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
 import org.photonvision.PhotonUtils

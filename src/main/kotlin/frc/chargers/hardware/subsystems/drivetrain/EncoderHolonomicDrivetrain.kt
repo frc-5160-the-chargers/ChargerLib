@@ -25,9 +25,11 @@ import frc.chargers.hardware.motorcontrol.swerve.HolonomicModule
 import frc.chargers.hardware.motorcontrol.swerve.ModuleConfiguration
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.utils.a
+import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
+import frc.chargers.wpilibextensions.processValue
 
 @PublishedApi
 internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)

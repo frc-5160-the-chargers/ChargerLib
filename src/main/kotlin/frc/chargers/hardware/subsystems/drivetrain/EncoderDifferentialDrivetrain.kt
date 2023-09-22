@@ -23,8 +23,8 @@ import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.kinematics.StandardDeviation
-import frc.chargers.wpilibextensions.kinematics.processValue
+import frc.chargers.wpilibextensions.StandardDeviation
+import frc.chargers.wpilibextensions.processValue
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
 
 @PublishedApi

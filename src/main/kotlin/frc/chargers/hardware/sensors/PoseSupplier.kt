@@ -3,7 +3,7 @@ package frc.chargers.hardware.sensors
 import com.batterystaple.kmeasure.quantities.Distance
 import frc.chargers.utils.Measurement
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
-import frc.chargers.wpilibextensions.kinematics.StandardDeviation
+import frc.chargers.wpilibextensions.StandardDeviation
 
 /**
  * Represents a generic device that can supply the current pose of the robot it's in.
