@@ -113,11 +113,11 @@ public class EncoderDifferentialDrivetrain(
     invertMotors: Boolean = false,
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,
     override val wheelDiameter: Length,
-    protected val width: Distance,
-    private val leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    private val leftMotorFF: AngularMotorFF = AngularMotorFF.None,
-    private val rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    private val rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    private val width: Distance,
+    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
+    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
+    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
     private val startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier
 ) : BasicDifferentialDrivetrain(leftMotors, rightMotors, invertMotors),
@@ -215,7 +215,7 @@ public class EncoderDifferentialDrivetrain(
         )
     }
 
-    public val poseEstimator: DifferentialDrivePoseEstimator = DifferentialDrivePoseEstimator(
+    private val poseEstimator: DifferentialDrivePoseEstimator = DifferentialDrivePoseEstimator(
         kinematics,
         heading.asRotation2d(),
         (leftMotors.encoder.angularPosition * wheelTravelPerMotorRadian).inUnit(meters),
