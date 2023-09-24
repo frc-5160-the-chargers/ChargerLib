@@ -8,10 +8,10 @@ import frc.chargers.wpilibextensions.kinematics.ChassisPowers
  */
 public class CurvatureDriveController(
     port: Int,
-    private val getForwardsPower: CurvatureDriveController.() -> Double,
-    private val getRotationPower: CurvatureDriveController.() -> Double,
-    private val getTurboPower: CurvatureDriveController.() -> Double = {1.0},
-    private val getPrecisionPower: CurvatureDriveController.() -> Double = {1.0},
+    private val getForwardsPower: ChargerController.() -> Double,
+    private val getRotationPower: ChargerController.() -> Double,
+    private val getTurboPower: ChargerController.() -> Double = {1.0},
+    private val getPrecisionPower: ChargerController.() -> Double = {1.0},
     deadband: Double,
     defaultAxisThreshold: Double
 ): ChargerController(port, deadband, defaultAxisThreshold){
