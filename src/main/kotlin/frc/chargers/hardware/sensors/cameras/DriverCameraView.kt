@@ -5,16 +5,17 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.cameraserver.CameraServer
 
 public class DriverCameraView(
-    public val totalDriverCams: Int = 1,
+    totalDriverCams: Int = 1,
     public val defaultResWidth: Int,
     public val defaultResHeight: Int
 ){
-    private var driverCameras = List(totalDriverCams){ i -> CameraServer.startAutomaticCapture(i)}
+    private var driverCameras = List(totalDriverCams){ i ->
+        CameraServer.startAutomaticCapture(i).apply{
+            setResolution(defaultResWidth,defaultResHeight)
+        }
+    }
     private val cameraSelector: NetworkTableEntry = NetworkTableInstance.getDefault().getTable("").getEntry("CameraSelection")
 
-    init{
-        for (driverCamera in driverCameras){driverCamera.setResolution(defaultResWidth,defaultResHeight)}
-    }
 
     public fun switchToCamera(id: Int){
         cameraSelector.setString(driverCameras[id].name)

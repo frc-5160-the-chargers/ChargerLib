@@ -7,11 +7,11 @@ import frc.chargers.wpilibextensions.kinematics.ChassisPowers
  */
 public class SwerveDriveController(
     port: Int,
-    private val getForwardsPower: SwerveDriveController.() -> Double,
-    private val getStrafePower: SwerveDriveController.() -> Double,
-    private val getRotationPower: SwerveDriveController.() -> Double,
-    private val getTurboPower: SwerveDriveController.() -> Double = {1.0},
-    private val getPrecisionPower: SwerveDriveController.() -> Double = {1.0},
+    private val getForwardsPower: ChargerController.() -> Double,
+    private val getStrafePower: ChargerController.() -> Double,
+    private val getRotationPower: ChargerController.() -> Double,
+    private val getTurboPower: ChargerController.() -> Double = {1.0},
+    private val getPrecisionPower: ChargerController.() -> Double = {1.0},
     deadband: Double = 0.0,
     defaultAxisThreshold: Double = 0.5
 ): ChargerController(port, deadband, defaultAxisThreshold) {
