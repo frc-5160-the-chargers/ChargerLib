@@ -12,6 +12,7 @@ import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.utils.a
+import org.littletonrobotics.junction.Logger
 
 
 public fun simulatedDrivetrain(
@@ -91,6 +92,12 @@ public class EncoderDifferentialDrivetrainAK(
         io.inverted = invertMotors
     }
     private val inputs = EncoderDifferentialDrivetrainIO.Inputs()
+
+    override fun periodic(){
+        io.updateInputs(inputs)
+        Logger.getInstance().processInputs("DrivetrainDifferential",inputs)
+    }
+
     override fun tankDrive(leftPower: Double, rightPower: Double) {
         io.setVoltages(leftPower * 12.volts, rightPower * 12.volts)
     }

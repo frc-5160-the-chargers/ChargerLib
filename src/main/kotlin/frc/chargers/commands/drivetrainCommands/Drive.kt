@@ -10,7 +10,6 @@ import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
-import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
 import kotlin.internal.LowPriorityInOverloadResolution
 
@@ -137,6 +136,7 @@ public fun EncoderDifferentialDrivetrain.driveStraight(time: Time, velocity: Vel
     loopFor(time, this@driveStraight) { velocityDrive(ChassisSpeeds(velocity,Quantity(0.0),pid.calculateOutput())) }
 }
 
+/*
 context(CommandBuilder)
 @JvmName("swerveDriveTime")
 @LowPriorityInOverloadResolution
@@ -150,6 +150,7 @@ context(CommandBuilder)
 public fun EncoderHolonomicDrivetrain.driveStraight(direction: Angle = gyro.heading, distance: Distance, power: Double): Command = loopWhile({distanceTraveled < distance},this){
     directionalDrive(power,direction)
 }
+ */
 
 
 
