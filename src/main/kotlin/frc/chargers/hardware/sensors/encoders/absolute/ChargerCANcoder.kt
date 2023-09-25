@@ -8,8 +8,8 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration as CTRECANcoderConfigurat
 import com.ctre.phoenix6.hardware.CANcoder as CTRECANcoder
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
+import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
 import frc.chargers.utils.Measurement
@@ -24,7 +24,7 @@ import frc.chargers.utils.Measurement
 public class ChargerCANcoder(
     deviceID: Int,
     canBus: String? = null
-): CTRECANcoder(deviceID, canBus), ResettableTimestampedEncoder, MotorConfigurable<CANcoderConfiguration> {
+): CTRECANcoder(deviceID, canBus), ResettableTimestampedEncoder, EncoderConfigurable<CANcoderConfiguration> {
 
     public companion object{
         public inline operator fun invoke(
@@ -85,7 +85,7 @@ public data class CANcoderConfiguration(
     var sensorDirection: SensorDirectionValue = blankConfig.MagnetSensor.SensorDirection,
     var absoluteSensorRange: AbsoluteSensorRangeValue = blankConfig.MagnetSensor.AbsoluteSensorRange,
     var magnetOffset: Angle = Angle(0.0),
-): MotorConfiguration{
+): EncoderConfiguration{
     public fun toCTRECANCoderConfiguration(): CTRECANcoderConfiguration = CTRECANcoderConfiguration().apply{
         FutureProofConfigs = futureProofConfigs
         MagnetSensor = MagnetSensorConfigs().apply{

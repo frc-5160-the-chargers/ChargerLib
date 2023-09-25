@@ -6,15 +6,15 @@ import com.batterystaple.kmeasure.units.rotations
 import edu.wpi.first.wpilibj.DigitalSource
 import edu.wpi.first.wpilibj.DutyCycle
 import edu.wpi.first.wpilibj.DutyCycleEncoder
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
+import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 
 /**
  * An Adapter of WPILib's [DutyCycleEncoder] class; consists of REV through bore encoders, CTRE mag encoders.
  */
 public class ChargerDutyCycleEncoder: DutyCycleEncoder, PositionEncoder,
-    MotorConfigurable<DutyCycleEncoderConfiguration> {
+    EncoderConfigurable<DutyCycleEncoderConfiguration> {
 
     public constructor(channel: Int): super(channel)
     public constructor(source: DigitalSource): super(source)
@@ -39,4 +39,4 @@ public data class DutyCycleEncoderConfiguration(
     var connectedFrequencyThreshold: Int? = null,
     var dutyCycleRange: ClosedRange<Double>? = null,
     var positionOffset: Double? = null
-): MotorConfiguration
+): EncoderConfiguration
