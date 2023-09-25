@@ -9,7 +9,7 @@ import org.littletonrobotics.junction.inputs.LoggableInputs
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-public class ChargerLoggableInputs: LoggableInputs {
+public open class ChargerLoggableInputs: LoggableInputs {
     /**
      * A property delegate that acts identically to a regular variable,
      * but also exposes its get and set functions to a MutableList,
