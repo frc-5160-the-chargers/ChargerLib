@@ -14,20 +14,31 @@ import frc.chargers.utils.Precision
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.swerve.direction
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
+import org.littletonrobotics.junction.Logger
 
 
 public class SwerveModule(
-    private val turnMotor: EncoderMotorController,
-    private val turnEncoder: PositionEncoder,
+    private val io: ModuleIO,
     turnControl: TurnPID,
-    private val driveMotor: EncoderMotorController,
-    private val velocityControl: VelocityPID,
+    velocityControl: VelocityPID,
     private val staticVoltageStall: Boolean = false
 ): HolonomicModule {
 
+    private val staticStallVoltage = velocityControl.ff.kS
+
+
+    private val inputs: ModuleIO.Inputs = ModuleIO.Inputs()
+
+    override fun updateInputsAndLog(logName: String) {
+        io.updateInputs(inputs)
+        Logger.getInstance().processInputs(logName,inputs)
+    }
+
+
+
     private val velocityController = UnitSuperPIDController(
         velocityControl.pidConstants,
-        {driveMotor.encoder.angularVelocity},
+        {inputs.speed},
         -12.volts..12.volts,
         target = AngularVelocity(0.0),
         feedforward = velocityControl.ff,
@@ -43,7 +54,7 @@ public class SwerveModule(
         when(turnControl){
             is TurnPID.Basic -> UnitSuperPIDController(
                 turnControl.pidConstants,
-                {turnEncoder.angularPosition},
+                {inputs.direction},
                 -12.volts..12.volts,
                 target = Angle(0.0),
                 selfSustain = true
@@ -51,7 +62,7 @@ public class SwerveModule(
 
             is TurnPID.Profiled -> AngularProfiledPIDController(
                 turnControl.pidConstants,
-                {turnEncoder.angularPosition},
+                {inputs.direction},
                 -12.volts..12.volts,
                 target = Angle(0.0),
                 constraints = turnControl.constraints,
@@ -62,36 +73,36 @@ public class SwerveModule(
 
 
     override val currentDirection: Angle
-        get() = turnEncoder.angularPosition
+        get() = inputs.direction
 
     override fun setDirection(direction: Angle) {
         turnController.target = direction
         // custom extension function
         if(turnPrecision is Precision.Within && turnController.error in turnPrecision.allowableError){
-            turnMotor.set(0.0)
+            io.setTurnVoltage(0.0.volts)
         }else{
-            turnMotor.setVoltage(turnController.calculateOutput())
+            io.setTurnVoltage(turnController.calculateOutput())
         }
     }
 
     override fun setPower(power: Double) {
-        driveMotor.set(power)
+        io.setDriveVoltage(power * 12.volts)
     }
 
     override val currentVelocity: AngularVelocity
-        get() = driveMotor.encoder.angularVelocity
+        get() = inputs.speed
 
     override fun setVelocity(velocity: AngularVelocity) {
         velocityController.target = velocity
-        driveMotor.setVoltage(velocityController.calculateOutput())
+        io.setDriveVoltage(velocityController.calculateOutput())
     }
 
     override val wheelPosition: Angle
-        get() = driveMotor.encoder.angularPosition
+        get() = inputs.distance
 
     override fun optimizeDirection(inputAngle: Angle): DirectionOptimizationData {
         val oldState = SwerveModuleState(1.0,inputAngle.asRotation2d())
-        val newState = SwerveModuleState.optimize(oldState,turnEncoder.angularPosition.asRotation2d())
+        val newState = SwerveModuleState.optimize(oldState,inputs.direction.asRotation2d())
         return DirectionOptimizationData(
             // extension property
             newDirection = newState.direction,
@@ -101,10 +112,11 @@ public class SwerveModule(
 
     override fun halt() {
         if(staticVoltageStall){
-            driveMotor.setVoltage(velocityControl.ff.kS)
+            io.setDriveVoltage(staticStallVoltage)
         }else{
-            driveMotor.set(0.0)
+            io.setDriveVoltage(0.0.volts)
         }
+        io.setTurnVoltage(0.0.volts)
     }
 
 

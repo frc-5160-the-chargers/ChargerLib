@@ -35,6 +35,8 @@ public interface HolonomicModule {
     public val wheelPosition: Angle
     public fun optimizeDirection(inputAngle: Angle): DirectionOptimizationData
 
+    public fun updateInputsAndLog(logName: String)
+
 
 
 
