@@ -2,7 +2,7 @@ package frc.chargers.controls.pid
 
 import edu.wpi.first.math.controller.PIDController
 import frc.chargers.commands.RunCommand
-import frc.chargers.controls.Controller
+import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.Feedforward
 
 /**
@@ -31,7 +31,7 @@ public class SuperPIDController(
      * Intended to be callable as a function for other uses: I.E. controller.getFFOutput()
      */
     public val getFFOutput: SuperPIDController.() -> Double = {0.0}
-): Controller<Double> {
+): FeedbackController<Double, Double> {
 
     public companion object{
         /**
@@ -119,7 +119,7 @@ public class SuperPIDController(
     /**
      * The target is the value the PID controller is attempting to achieve.
      */
-    public var target: Double
+    override var target: Double
         get() = pidController.setpoint
         set(target) {
             if (target != pidController.setpoint) {
@@ -145,6 +145,6 @@ public class SuperPIDController(
     /**
      * The error is a signed value representing how far the PID system currently is from the target value.
      */
-    public val error: Double
+    override val error: Double
         get() = getPIDInput() - pidController.setpoint
 }

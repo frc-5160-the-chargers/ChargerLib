@@ -1,19 +1,14 @@
 package frc.chargers.hardware.subsystems.drivetrain
 
+import com.batterystaple.kmeasure.interop.average
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.hardware.motorcontrol.swerve.NonConfigurableHolonomicModule
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
-
-import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
-import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
+import frc.chargers.hardware.swerve.module.HolonomicModule
 import frc.chargers.hardware.sensors.RobotPoseSupplier
-import frc.chargers.hardware.sensors.encoders.AverageEncoder
-import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.utils.Measurement
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
@@ -21,8 +16,12 @@ import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import frc.chargers.hardware.motorcontrol.swerve.HolonomicModule
-import frc.chargers.hardware.motorcontrol.swerve.ModuleConfiguration
+import frc.chargers.hardware.swerve.SwerveDriveMotors
+import frc.chargers.hardware.swerve.SwerveEncoders
+import frc.chargers.hardware.swerve.SwerveTurnMotors
+import frc.chargers.hardware.swerve.control.TurnPID
+import frc.chargers.hardware.swerve.control.VelocityPID
+import frc.chargers.hardware.swerve.module.SwerveModule
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.StandardDeviation
@@ -34,44 +33,19 @@ import frc.chargers.wpilibextensions.processValue
 @PublishedApi
 internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)
 
-/**
- * A convenience function to create a [EncoderHolonomicDrivetrain]
- * using Talon FX motor controllers.
- *
- * @see EncoderHolonomicDrivetrain
- */
-public inline fun talonFXHolonomicDrivetrain(
-    topLeft: HolonomicModule<TalonFXConfiguration, TalonFXConfiguration>,
-    topRight: HolonomicModule<TalonFXConfiguration, TalonFXConfiguration>,
-    bottomLeft: HolonomicModule<TalonFXConfiguration, TalonFXConfiguration>,
-    bottomRight: HolonomicModule<TalonFXConfiguration, TalonFXConfiguration>,
-    gyro: HeadingProvider,
-    maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
-    gearRatio: Double = DEFAULT_GEAR_RATIO,
-    wheelDiameter: Length,
-    trackWidth: Distance,
-    wheelBase: Distance,
-    startingPose: UnitPose2d = UnitPose2d(),
-    fieldRelativeDrive: Boolean = true,
-    vararg poseSuppliers: RobotPoseSupplier,
-    configure: ModuleConfiguration<TalonFXConfiguration, TalonFXConfiguration>.() -> Unit = {}
-): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
-    topLeft, topRight, bottomLeft, bottomRight, gyro, maxModuleSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
-    *poseSuppliers,
-    configuration = ModuleConfiguration(TalonFXConfiguration(),TalonFXConfiguration()).apply(configure),
-)
 
 /**
- * A convenience function to create a [EncoderHolonomicDrivetrain]
- * using SparkMax motor controllers.
- *
- * @see EncoderHolonomicDrivetrain
+ * A Convenience function for creating an [EncoderHolonomicDrivetrain]
+ * Using the [SwerveTurnMotors], [SwerveEncoders] and [SwerveDriveMotors] classes
+ * Instead of defining individual swerve modules.
+ * This allows the motors and encoders to all be configured.
  */
-public inline fun sparkMaxHolonomicDrivetrain(
-    topLeft: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
-    topRight: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
-    bottomLeft: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
-    bottomRight: HolonomicModule<SparkMaxConfiguration, SparkMaxConfiguration>,
+public fun EncoderHolonomicDrivetrain(
+    turnMotors: SwerveTurnMotors,
+    turnEncoders: SwerveEncoders,
+    driveMotors: SwerveDriveMotors,
+    turnControl: TurnPID,
+    velocityControl: VelocityPID,
     gyro: HeadingProvider,
     maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     gearRatio: Double = DEFAULT_GEAR_RATIO,
@@ -80,55 +54,51 @@ public inline fun sparkMaxHolonomicDrivetrain(
     wheelBase: Distance,
     startingPose: UnitPose2d = UnitPose2d(),
     fieldRelativeDrive: Boolean = true,
-    vararg poseSuppliers: RobotPoseSupplier,
-    configure: ModuleConfiguration<SparkMaxConfiguration, SparkMaxConfiguration>.() -> Unit = {},
-): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
-    topLeft, topRight, bottomLeft, bottomRight, gyro, maxModuleSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive,
-    *poseSuppliers,
-    configuration = ModuleConfiguration(SparkMaxConfiguration(),SparkMaxConfiguration()).apply(configure),
-)
+    staticVoltageStall: Boolean = false,
+    vararg poseSuppliers: RobotPoseSupplier
+): EncoderHolonomicDrivetrain{
+    val topLeft = SwerveModule(
+        turnMotors.topLeft,
+        turnEncoders.topLeft,
+        turnControl,
+        driveMotors.topLeft,
+        velocityControl,
+        staticVoltageStall
+    )
 
-/**
- * A convenience function to create an [EncoderHolonomicDrivetrain]
- * allowing its motors to all be configured.
- */
-public fun <TMC: MotorConfiguration, DMC: MotorConfiguration> EncoderHolonomicDrivetrain(
-    topLeft: HolonomicModule<TMC, DMC>,
-    topRight: HolonomicModule<TMC, DMC>,
-    bottomLeft: HolonomicModule<TMC, DMC>,
-    bottomRight: HolonomicModule<TMC, DMC>,
-    gyro: HeadingProvider,
-    maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
-    gearRatio: Double = DEFAULT_GEAR_RATIO,
-    wheelDiameter: Length,
-    trackWidth: Distance,
-    wheelBase: Distance,
-    startingPose: UnitPose2d = UnitPose2d(),
-    fieldRelativeDrive: Boolean = true,
-    vararg poseSuppliers: RobotPoseSupplier,
-    configuration: ModuleConfiguration<TMC, DMC>? = null,
-): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
-    topLeft.apply{
-        if(configuration != null){
-            configure(configuration)
-        }
-    },
-    topRight.apply{
-        if(configuration != null){
-            configure(configuration)
-        }
-    },
-    bottomLeft.apply{
-        if(configuration != null){
-            configure(configuration)
-        }
-    },
-    bottomRight.apply{
-        if(configuration != null){
-            configure(configuration)
-        }
-    }, gyro, maxModuleSpeed, gearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive, *poseSuppliers
-)
+    val topRight = SwerveModule(
+        turnMotors.topRight,
+        turnEncoders.topRight,
+        turnControl,
+        driveMotors.topRight,
+        velocityControl,
+        staticVoltageStall
+    )
+
+    val bottomLeft = SwerveModule(
+        turnMotors.bottomLeft,
+        turnEncoders.bottomLeft,
+        turnControl,
+        driveMotors.bottomLeft,
+        velocityControl,
+        staticVoltageStall
+    )
+
+    val bottomRight = SwerveModule(
+        turnMotors.bottomRight,
+        turnEncoders.bottomRight,
+        turnControl,
+        driveMotors.bottomRight,
+        velocityControl,
+        staticVoltageStall
+    )
+
+    return EncoderHolonomicDrivetrain(
+        topLeft, topRight, bottomLeft, bottomRight,
+        gyro, maxModuleSpeed, gearRatio, wheelDiameter,
+        trackWidth, wheelBase, startingPose, fieldRelativeDrive, *poseSuppliers
+    )
+}
 
 
 
@@ -140,10 +110,10 @@ public fun <TMC: MotorConfiguration, DMC: MotorConfiguration> EncoderHolonomicDr
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
  */
 public class EncoderHolonomicDrivetrain(
-    private val topLeft: NonConfigurableHolonomicModule,
-    private val topRight: NonConfigurableHolonomicModule,
-    private val bottomLeft: NonConfigurableHolonomicModule,
-    private val bottomRight: NonConfigurableHolonomicModule,
+    private val topLeft: HolonomicModule,
+    private val topRight: HolonomicModule,
+    private val bottomLeft: HolonomicModule,
+    private val bottomRight: HolonomicModule,
     public val gyro: HeadingProvider,
     public val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,
@@ -177,23 +147,26 @@ public class EncoderHolonomicDrivetrain(
     /*
     Encoder-based functions below
      */
-    private val overallEncoder: Encoder = AverageEncoder(
-        topLeft.distanceMeasurementEncoder,
-        topRight.distanceMeasurementEncoder,
-        bottomLeft.distanceMeasurementEncoder,
-        bottomRight.distanceMeasurementEncoder)
+
+    private val moduleArray = a[topLeft,topRight,bottomLeft,bottomRight]
+    private fun averageEncoderPosition()=
+        moduleArray.map{it.wheelPosition}.average()
+
+    private fun averageEncoderVelocity() =
+        moduleArray.map{it.currentVelocity}.average()
 
     // wheel radius is wheelDiameter / 2.
     private val wheelTravelPerMotorRadian: Distance = gearRatio * (wheelDiameter / 2)
+    private val distanceOffset: Distance = averageEncoderPosition() * wheelTravelPerMotorRadian
 
-    private val distanceOffset: Distance = overallEncoder.angularPosition * wheelTravelPerMotorRadian
+
     public val distanceTraveled: Distance
         get() =
-            (overallEncoder.angularPosition *
+            (averageEncoderPosition() *
                     wheelTravelPerMotorRadian) - distanceOffset
     public val velocity: Velocity
         get() =
-            overallEncoder.angularVelocity *
+            averageEncoderVelocity() *
                     wheelTravelPerMotorRadian
 
 

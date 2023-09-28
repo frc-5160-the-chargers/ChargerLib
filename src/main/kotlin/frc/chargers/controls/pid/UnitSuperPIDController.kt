@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.dimensions.*
 import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.math.controller.PIDController
 import frc.chargers.commands.RunCommand
-import frc.chargers.controls.Controller
+import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.Feedforward
 
 
@@ -27,13 +27,13 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
      * Determines if the [UnitSuperPIDController] should call calculateOutput()
      * during every loop of the command scheduler. Normal PID controllers require the user to do this.
      */
-    private val selfSustain: Boolean = false,
+    selfSustain: Boolean = false,
     /**
      * A lambda that returns the feedforward output of the controller it's in.
      * Intended to be callable as a function for other uses: I.E. controller.getFFOutput()
      */
     public val getFFOutput: UnitSuperPIDController<I,O>.() -> Quantity<O> = {Quantity(0.0)}
-) : Controller<Quantity<O>> {
+) : FeedbackController<Quantity<I>, Quantity<O>> {
 
     public companion object{
         /**
@@ -119,7 +119,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     /**
      * The target is the value the PID controller is attempting to achieve.
      */
-    public var target: Quantity<I>
+    override var target: Quantity<I>
         get() = Quantity(pidController.setpoint)
         set(target) {
             if (target.siValue != pidController.setpoint) {
@@ -145,6 +145,6 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     /**
      * The error is a signed value representing how far the PID system currently is from the target value.
      */
-    public val error: Quantity<I>
+    override val error: Quantity<I>
         get() = Quantity(getInput().siValue - pidController.setpoint)
 }
