@@ -6,14 +6,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
-import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.swerve.control.TurnPID
 import frc.chargers.hardware.swerve.control.VelocityPID
-import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.utils.Precision
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.swerve.direction
-import frc.chargers.wpilibextensions.motorcontrol.setVoltage
 import org.littletonrobotics.junction.Logger
 
 
