@@ -5,7 +5,7 @@ import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.controller.ProfiledPIDController
 import frc.chargers.commands.RunCommand
-import frc.chargers.controls.Controller
+import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 
@@ -23,8 +23,8 @@ public class AngularProfiledPIDController(
      * Determines if the [UnitSuperPIDController] should call calculateOutput()
      * during every loop of the command scheduler. Normal PID controllers require the user to do this.
      */
-    private val selfSustain: Boolean = false
-) : Controller<Voltage> {
+    selfSustain: Boolean = false
+) : FeedbackController<Angle, Voltage> {
 
 
     init{
@@ -60,7 +60,7 @@ public class AngularProfiledPIDController(
     /**
      * The target is the value the PID controller is attempting to achieve.
      */
-    public var target: Angle
+    override var target: Angle
         get() = Quantity(pidController.goal.position)
         set(target) {
             if (target.siValue != pidController.goal.position) {
@@ -86,6 +86,6 @@ public class AngularProfiledPIDController(
     /**
      * The error is a signed value representing how far the PID system currently is from the target value.
      */
-    public val error: Angle
+    override val error: Angle
         get() = Angle(getInput().siValue - pidController.setpoint.position)
 }

@@ -6,16 +6,16 @@ import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.hal.SimDevice
 import edu.wpi.first.wpilibj.CounterBase.EncodingType
 import edu.wpi.first.wpilibj.DigitalSource
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
+import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
+import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import edu.wpi.first.wpilibj.Encoder as QuadratureEncoder
 
 /**
  * An adapter from the WPILib Encoder class to the ChargerLib Encoder interface.
  */
 public class ChargerQuadratureEncoder:
-    QuadratureEncoder, Encoder, MotorConfigurable<QuadratureEncoderConfiguration> {
+    QuadratureEncoder, Encoder, EncoderConfigurable<QuadratureEncoderConfiguration> {
 
     override val angularPosition: Angle
         get() = get() * anglePerPulse
@@ -135,4 +135,4 @@ public data class QuadratureEncoderConfiguration(
     var samplesPerAverage: Int? = null,
     var simDevice: SimDevice? = null,
     var reverseDirection: Boolean? = null
-): MotorConfiguration
+): EncoderConfiguration
