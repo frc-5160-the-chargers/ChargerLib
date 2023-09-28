@@ -158,7 +158,7 @@ public class EncoderHolonomicDrivetrain(
      */
 
     private val moduleArray = a[topLeft,topRight,bottomLeft,bottomRight]
-    private fun averageEncoderPosition()=
+    private fun averageEncoderPosition() =
         moduleArray.map{it.wheelPosition}.average()
 
     private fun averageEncoderVelocity() =
@@ -238,12 +238,9 @@ public class EncoderHolonomicDrivetrain(
             topRightState = topRight.getModuleState(gearRatio,wheelDiameter),
             bottomLeftState = bottomLeft.getModuleState(gearRatio,wheelDiameter),
             bottomRightState = bottomRight.getModuleState(gearRatio,wheelDiameter)
-        ).also{
-            it.logAsCurrentSpeeds()
-        }
+        )
         set(ms){
             ms.desaturate(maxModuleSpeed)
-            ms.logAsDesiredSpeeds()
             if (currentControlMode == ControlMode.CLOSED_LOOP){
                 topLeft.setDirectionalVelocity(ms.topLeftSpeed,ms.topLeftAngle,gearRatio,wheelDiameter)
                 topRight.setDirectionalVelocity(ms.topRightSpeed,ms.topRightAngle,gearRatio,wheelDiameter)
