@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.constants
-// import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
+import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.*
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
@@ -23,7 +23,7 @@ import kotlin.internal.LowPriorityInOverloadResolution
  */
 
 
-/*
+
 context(CommandBuilder, PathData)
 @LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.followPath(
@@ -65,7 +65,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
         PIDController(0.0,0.0,0.0).apply{
             constants = rotationConstants
         },
-        ::swerveDrive,
+        ::velocityDrive,
         true,
         this@followPath
     )
@@ -126,7 +126,7 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
         {resetPose(it.ofUnit(meters))},  // Pose2d consumer, used to reset odometry at the beginning of auto
         translationConstants.asPathPlannerConstants(),  // PID constants to correct for translation error (used to create the X and Y PID controllers)
         rotationConstants.asPathPlannerConstants(),  // PID constants to correct for rotation error (used to create the rotation controller)
-        ::swerveDrive,  // chassis speeds consumer
+        ::velocityDrive,  // chassis speeds consumer
         MappableContext<String,Command>().apply(eventsBlock).map,
         true,  // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true,
         this@runPathPlannerAuto // The drive subsystem. Used to properly set the requirements of path following commands
@@ -152,7 +152,7 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     rotationConstants,
     eventsBlock
 )
- */
+
 
 
 

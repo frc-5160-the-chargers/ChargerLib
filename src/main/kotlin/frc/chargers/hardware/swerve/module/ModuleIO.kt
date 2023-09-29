@@ -51,7 +51,8 @@ internal val DEFAULT_SWERVE_DRIVE_INERTIA: Inertia = 0.004096955.ofUnit(kilo.gra
 
 
 public class ModuleIOSim(
-    gearbox: DCMotor,
+    turnGearbox: DCMotor,
+    driveGearbox: DCMotor,
     private val loopPeriod: Time = 20.milli.seconds,
     turnGearRatio: Double = DEFAULT_GEAR_RATIO,
     driveGearRatio: Double = DEFAULT_GEAR_RATIO,
@@ -76,13 +77,13 @@ public class ModuleIOSim(
     }
 
     private val turnMotorSim = FlywheelSim(
-        gearbox,
+        turnGearbox,
         1/turnGearRatio,
         turnInertiaMoment.inUnit(kilo.grams * meters * meters)
     )
 
     private val driveMotorSim = FlywheelSim(
-        gearbox,
+        driveGearbox,
         1/driveGearRatio,
         driveInertiaMoment.inUnit(kilo.grams * meters * meters)
     )

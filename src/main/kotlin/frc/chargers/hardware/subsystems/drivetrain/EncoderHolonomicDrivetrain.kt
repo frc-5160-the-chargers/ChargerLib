@@ -4,10 +4,10 @@ import com.batterystaple.kmeasure.interop.average
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
+import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.hardware.swerve.module.HolonomicModule
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.utils.Measurement
@@ -16,15 +16,19 @@ import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.system.plant.DCMotor
 import frc.chargers.hardware.swerve.SwerveDriveMotors
 import frc.chargers.hardware.swerve.SwerveEncoders
 import frc.chargers.hardware.swerve.SwerveTurnMotors
 import frc.chargers.hardware.swerve.control.TurnPID
 import frc.chargers.hardware.swerve.control.VelocityPID
+import frc.chargers.hardware.swerve.module.DEFAULT_SWERVE_DRIVE_INERTIA
+import frc.chargers.hardware.swerve.module.DEFAULT_SWERVE_TURN_INERTIA
 import frc.chargers.hardware.swerve.module.ModuleIOReal
 import frc.chargers.hardware.swerve.module.SwerveModule
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.utils.a
+import frc.chargers.utils.math.units.Inertia
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.kinematics.*
@@ -33,6 +37,17 @@ import frc.chargers.wpilibextensions.processValue
 
 @PublishedApi
 internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)
+
+
+private fun simEncoderHolonomicDrivetrain(
+    turnGearbox: DCMotor,
+    driveGearbox: DCMotor,
+    loopPeriod: Time = 20.milli.seconds,
+    turnGearRatio: Double = DEFAULT_GEAR_RATIO,
+    driveGearRatio: Double = DEFAULT_GEAR_RATIO,
+    turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
+    driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
+) = null
 
 
 /**
@@ -119,10 +134,10 @@ public fun realEncoderHolonomicDrivetrain(
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
  */
 public class EncoderHolonomicDrivetrain(
-    private val topLeft: HolonomicModule,
-    private val topRight: HolonomicModule,
-    private val bottomLeft: HolonomicModule,
-    private val bottomRight: HolonomicModule,
+    private val topLeft: SwerveModule,
+    private val topRight: SwerveModule,
+    private val bottomLeft: SwerveModule,
+    private val bottomRight: SwerveModule,
     public val gyro: HeadingProvider,
     public val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,

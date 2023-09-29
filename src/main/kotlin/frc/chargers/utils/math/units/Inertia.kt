@@ -3,9 +3,10 @@ package frc.chargers.utils.math.units
 import com.batterystaple.kmeasure.dimensions.*
 import com.batterystaple.kmeasure.quantities.*
 
-public typealias InertiaDimension = Dimension<Mass1,Length2, Time0,Current0>
+public typealias InertiaDimension = MassAreaDimension
 
-public typealias Inertia = Quantity<InertiaDimension>
+public typealias Inertia = MassArea
+
 
 @JvmName("MassLengthTimesLength")
 public operator fun MassLength.times(other: Length): Inertia = Inertia(
@@ -16,4 +17,5 @@ public operator fun MassLength.times(other: Length): Inertia = Inertia(
 public operator fun Mass.times(other: Area): Inertia = Inertia(
     siValue * other.siValue
 )
+
 
