@@ -21,6 +21,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     pidConstants: PIDConstants,
     private val getInput: () -> Quantity<I>,
     public val outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
+    public val continuousInputRange: ClosedRange<Quantity<I>>? = null,
     public val integralRange: ClosedRange<Quantity<O>> = outputRange,
     target: Quantity<I>,
     /**
@@ -46,6 +47,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             pidConstants: PIDConstants,
             getInput: () -> Quantity<I>,
             outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
+            continuousInputRange: ClosedRange<Quantity<I>>? = null,
             integralRange: ClosedRange<Quantity<O>> = outputRange,
             target: Quantity<I>,
             selfSustain: Boolean = false,
@@ -55,6 +57,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             pidConstants,
             getInput,
             outputRange,
+            continuousInputRange,
             integralRange,
             target,
             selfSustain
@@ -69,6 +72,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             pidConstants: PIDConstants,
             getInput: () -> Quantity<I>,
             outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
+            continuousInputRange: ClosedRange<Quantity<I>>? = null,
             integralRange: ClosedRange<Quantity<O>> = outputRange,
             target: Quantity<I>,
             selfSustain: Boolean = false,
@@ -77,6 +81,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             pidConstants,
             getInput,
             outputRange,
+            continuousInputRange,
             integralRange,
             target,
             selfSustain,
@@ -101,6 +106,12 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             constants = pidConstants
             setpoint = target.siValue
             setIntegratorRange(integralRange.start.siValue, integralRange.endInclusive.siValue)
+            if (continuousInputRange != null){
+                enableContinuousInput(
+                    continuousInputRange.start.siValue,
+                    continuousInputRange.endInclusive.siValue
+                )
+            }
         }
 
     /**

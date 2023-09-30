@@ -6,6 +6,7 @@ import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.sensors.RobotPoseSupplier
@@ -22,10 +23,9 @@ import frc.chargers.hardware.swerve.SwerveEncoders
 import frc.chargers.hardware.swerve.SwerveTurnMotors
 import frc.chargers.hardware.swerve.control.TurnPID
 import frc.chargers.hardware.swerve.control.VelocityPID
+import frc.chargers.hardware.swerve.module.*
 import frc.chargers.hardware.swerve.module.DEFAULT_SWERVE_DRIVE_INERTIA
 import frc.chargers.hardware.swerve.module.DEFAULT_SWERVE_TURN_INERTIA
-import frc.chargers.hardware.swerve.module.ModuleIOReal
-import frc.chargers.hardware.swerve.module.SwerveModule
 import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.utils.a
 import frc.chargers.utils.math.units.Inertia
@@ -39,15 +39,48 @@ import frc.chargers.wpilibextensions.processValue
 internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)
 
 
-private fun simEncoderHolonomicDrivetrain(
+public fun simEncoderHolonomicDrivetrain(
     turnGearbox: DCMotor,
     driveGearbox: DCMotor,
     loopPeriod: Time = 20.milli.seconds,
     turnGearRatio: Double = DEFAULT_GEAR_RATIO,
     driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
-    driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
-) = null
+    driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
+    turnControl: TurnPID,
+    velocityControl: VelocityPID,
+    gyro: HeadingProvider,
+    maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
+    wheelDiameter: Length,
+    trackWidth: Distance,
+    wheelBase: Distance,
+    startingPose: UnitPose2d = UnitPose2d(),
+    fieldRelativeDrive: Boolean = true,
+    staticVoltageStall: Boolean = false,
+    vararg poseSuppliers: RobotPoseSupplier
+): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
+    topLeft = SwerveModule(
+        ModuleIOSim(
+            turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
+        ), turnControl, velocityControl, staticVoltageStall
+    ),
+    topRight = SwerveModule(
+        ModuleIOSim(
+            turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
+        ), turnControl, velocityControl, staticVoltageStall
+    ),
+    bottomLeft = SwerveModule(
+        ModuleIOSim(
+            turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
+        ), turnControl, velocityControl, staticVoltageStall
+    ),
+    bottomRight = SwerveModule(
+        ModuleIOSim(
+            turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
+        ), turnControl, velocityControl, staticVoltageStall
+    ),
+    gyro, maxModuleSpeed, driveGearRatio, wheelDiameter, trackWidth, wheelBase, startingPose, fieldRelativeDrive, *poseSuppliers
+)
 
 
 /**
@@ -134,10 +167,10 @@ public fun realEncoderHolonomicDrivetrain(
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
  */
 public class EncoderHolonomicDrivetrain(
-    private val topLeft: SwerveModule,
-    private val topRight: SwerveModule,
-    private val bottomLeft: SwerveModule,
-    private val bottomRight: SwerveModule,
+    public val topLeft: SwerveModule,
+    public val topRight: SwerveModule,
+    public val bottomLeft: SwerveModule,
+    public val bottomRight: SwerveModule,
     public val gyro: HeadingProvider,
     public val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,
@@ -308,15 +341,16 @@ public class EncoderHolonomicDrivetrain(
      * then calculating the output using the kinematics object.
      */
     public val maxRotationalVelocity: AngularVelocity = kinematics.toChassisSpeeds(
+
         ModuleSpeeds(
             topLeftSpeed = maxModuleSpeed,
-            topRightSpeed = maxModuleSpeed,
+            topRightSpeed = -maxModuleSpeed,
             bottomLeftSpeed = maxModuleSpeed,
-            bottomRightSpeed = maxModuleSpeed,
-            topLeftAngle = 45.degrees,
-            topRightAngle = -45.degrees,
-            bottomLeftAngle = -45.degrees,
-            bottomRightAngle = 45.degrees
+            bottomRightSpeed = -maxModuleSpeed,
+            topLeftAngle = -45.degrees,
+            topRightAngle = 45.degrees,
+            bottomLeftAngle = 45.degrees,
+            bottomRightAngle = -45.degrees
         )
     ).rotationSpeed
 

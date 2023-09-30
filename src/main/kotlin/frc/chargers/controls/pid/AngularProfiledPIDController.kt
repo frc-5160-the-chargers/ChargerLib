@@ -15,6 +15,7 @@ public class AngularProfiledPIDController(
     pidConstants: PIDConstants,
     private val getInput: () -> Angle,
     public val outputRange: ClosedRange<Voltage> = Voltage(Double.NEGATIVE_INFINITY)..Voltage(Double.POSITIVE_INFINITY),
+    public val continuousInputRange: ClosedRange<Angle>? = null,
     public val integralRange: ClosedRange<Voltage> = outputRange,
     target: Angle,
     constraints: AngularTrapezoidProfile.Constraints,
@@ -41,6 +42,12 @@ public class AngularProfiledPIDController(
             constants = pidConstants
             goal = AngularTrapezoidProfile.State(target,AngularVelocity(0.0)).inUnit(radians,seconds)
             setIntegratorRange(integralRange.start.siValue, integralRange.endInclusive.siValue)
+            if (continuousInputRange != null){
+                enableContinuousInput(
+                    continuousInputRange.start.inUnit(radians),
+                    continuousInputRange.endInclusive.inUnit(radians)
+                )
+            }
         }
 
     /**

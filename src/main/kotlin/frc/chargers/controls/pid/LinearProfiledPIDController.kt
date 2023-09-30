@@ -15,6 +15,7 @@ public class LinearProfiledPIDController(
     pidConstants: PIDConstants,
     private val getInput: () -> Distance,
     public val outputRange: ClosedRange<Voltage> = Voltage(Double.NEGATIVE_INFINITY)..Voltage(Double.POSITIVE_INFINITY),
+    public val continuousInputRange: ClosedRange<Distance>? = null,
     public val integralRange: ClosedRange<Voltage> = outputRange,
     target: Distance,
     constraints: LinearTrapezoidProfile.Constraints,
@@ -41,6 +42,12 @@ public class LinearProfiledPIDController(
             constants = pidConstants
             goal = LinearTrapezoidProfile.State(target,Velocity(0.0)).inUnit(meters,seconds)
             setIntegratorRange(integralRange.start.siValue, integralRange.endInclusive.siValue)
+            if (continuousInputRange != null){
+                enableContinuousInput(
+                    continuousInputRange.start.inUnit(meters),
+                    continuousInputRange.endInclusive.inUnit(meters)
+                )
+            }
         }
 
     /**

@@ -11,13 +11,13 @@ public fun swerveCANcoders(
     topRight: ChargerCANcoder,
     bottomLeft: ChargerCANcoder,
     bottomRight: ChargerCANcoder,
-    configure: CANcoderConfiguration.() -> Unit
+    configure: CANcoderConfiguration.() -> Unit = {}
 ): SwerveEncoders = SwerveEncoders(
     topLeft, topRight, bottomLeft, bottomRight, CANcoderConfiguration().apply(configure)
 )
 
 
-public data class SwerveEncoders (
+public data class SwerveEncoders(
     val topLeft: PositionEncoder,
     val topRight: PositionEncoder,
     val bottomLeft: PositionEncoder,

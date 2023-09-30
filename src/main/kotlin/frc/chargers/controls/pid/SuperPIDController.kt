@@ -19,6 +19,7 @@ public class SuperPIDController(
     pidConstants: PIDConstants,
     private val getPIDInput: () -> Double,
     public val outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
+    public val continuousInputRange: ClosedRange<Double>? = null,
     public val integralRange: ClosedRange<Double> = outputRange,
     target: Double,
     /**
@@ -44,6 +45,7 @@ public class SuperPIDController(
             pidConstants: PIDConstants,
             getInput: () -> Double,
             outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
+            continuousInputRange: ClosedRange<Double>? = null,
             integralRange: ClosedRange<Double> = outputRange,
             target: Double,
             selfSustain: Boolean = false,
@@ -53,6 +55,7 @@ public class SuperPIDController(
             pidConstants,
             getInput,
             outputRange,
+            continuousInputRange,
             integralRange,
             target,
             selfSustain
@@ -67,6 +70,7 @@ public class SuperPIDController(
             pidConstants: PIDConstants,
             getInput: () -> Double,
             outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
+            continuousInputRange: ClosedRange<Double>? = null,
             integralRange: ClosedRange<Double> = outputRange,
             target: Double,
             selfSustain: Boolean = false,
@@ -75,6 +79,7 @@ public class SuperPIDController(
             pidConstants,
             getInput,
             outputRange,
+            continuousInputRange,
             integralRange,
             target,
             selfSustain,
@@ -101,6 +106,12 @@ public class SuperPIDController(
             constants = pidConstants
             setpoint = target
             setIntegratorRange(integralRange.start, integralRange.endInclusive)
+            if (continuousInputRange != null){
+                enableContinuousInput(
+                    continuousInputRange.start,
+                    continuousInputRange.endInclusive
+                )
+            }
         }
 
     /**

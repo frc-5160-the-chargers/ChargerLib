@@ -15,16 +15,16 @@ import frc.chargers.hardware.swerve.control.VelocityPID
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.geometry.asRotation2d
-import frc.chargers.wpilibextensions.kinematics.swerve.direction
 import org.littletonrobotics.junction.Logger
 
 
 public class SwerveModule(
-    private val io: ModuleIO,
+    public val io: ModuleIO,
     turnControl: TurnPID,
     velocityControl: VelocityPID,
     private val staticVoltageStall: Boolean = false
 ){
+    private var logName = ""
 
     private val staticStallVoltage = velocityControl.ff.kS
 
@@ -33,8 +33,26 @@ public class SwerveModule(
 
     public fun updateInputsAndLog(logName: String) {
         io.updateInputs(inputs)
-        Logger.getInstance().processInputs(logName,inputs)
+        this.logName = logName
+        Logger.getInstance().processInputs(this.logName,inputs)
+        velocityController.calculateOutput()
+        turnController.calculateOutput()
     }
+
+    private fun angleDeltaBetween(angleOne: Angle, angleTwo: Angle): Angle{
+        // standardizes the angles into the 0-360 degree range
+        val a1 = angleOne % 360.degrees
+        val a2 = angleTwo % 360.degrees
+
+        val result = abs(a1-a2)
+
+        return if(360.degrees - result < result){
+            360.degrees-result
+        }else{
+            result
+        }
+    }
+
 
 
 
@@ -43,8 +61,7 @@ public class SwerveModule(
         {inputs.speed},
         -12.volts..12.volts,
         target = AngularVelocity(0.0),
-        feedforward = velocityControl.ff,
-        selfSustain = true
+        feedforward = velocityControl.ff
     )
 
     private val turnPrecision = when(turnControl){
@@ -57,28 +74,31 @@ public class SwerveModule(
             is TurnPID.Basic -> UnitSuperPIDController(
                 turnControl.pidConstants,
                 {inputs.direction % 360.degrees},
-                -12.volts..12.volts,
-                target = Angle(0.0),
-                selfSustain = true
+                outputRange = -12.volts..12.volts,
+                continuousInputRange = 0.degrees..360.degrees,
+                target = Angle(0.0)
             )
 
             is TurnPID.Profiled -> AngularProfiledPIDController(
                 turnControl.pidConstants,
                 {inputs.direction % 360.degrees},
-                -12.volts..12.volts,
+                outputRange = -12.volts..12.volts,
+                continuousInputRange = 0.degrees..360.degrees,
                 target = Angle(0.0),
                 constraints = turnControl.constraints,
-                feedforward = turnControl.turnFF,
-                selfSustain = true
+                feedforward = turnControl.turnFF
             )
         }
 
 
     public val currentDirection: Angle
-        get() = inputs.direction
+        get() = inputs.direction % 360.degrees
 
     public fun setDirection(direction: Angle) {
-        turnController.target = direction
+        turnController.target = direction % 360.degrees
+        if (logName != ""){
+            Logger.getInstance().recordOutput("$logName/postOptimizeDesiredDirection", turnController.target.inUnit(degrees))
+        }
         // custom extension function
         if(turnPrecision is Precision.Within && turnController.error in turnPrecision.allowableError){
             io.setTurnVoltage(0.0.volts)
@@ -106,12 +126,16 @@ public class SwerveModule(
         power:Double,
         direction:Angle
     ){
-        if (abs(direction - inputs.direction) > 90.degrees){
+        if (logName != ""){
+            Logger.getInstance().recordOutput("$logName/initialDesiredDirection", direction.inUnit(degrees))
+            Logger.getInstance().recordOutput("$logName/angleDelta", abs(direction - inputs.direction).inUnit(degrees))
+        }
+        if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
             setPower(-power)
-            setDirection((direction + 180.degrees) % 360.degrees)
+            setDirection(direction + 180.degrees)
         }else{
             setPower(power)
-            setDirection(direction % 360.degrees)
+            setDirection(direction)
         }
     }
 
@@ -119,12 +143,16 @@ public class SwerveModule(
         angularVelocity:AngularVelocity,
         direction:Angle
     ){
-        if (abs(direction - inputs.direction) > 90.degrees){
+        if (logName != ""){
+            Logger.getInstance().recordOutput("$logName/initialDesiredDirection", direction.inUnit(degrees))
+            Logger.getInstance().recordOutput("$logName/angleDelta", angleDeltaBetween(direction,inputs.direction).inUnit(degrees))
+        }
+        if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
             setVelocity(-angularVelocity)
-            setDirection((direction + 180.degrees) % 360.degrees)
+            setDirection(direction + 180.degrees)
         }else{
             setVelocity(angularVelocity)
-            setDirection(direction % 360.degrees)
+            setDirection(direction)
         }
     }
 
