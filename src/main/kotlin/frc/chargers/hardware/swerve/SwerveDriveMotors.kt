@@ -1,7 +1,6 @@
 package frc.chargers.hardware.swerve
 
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
-import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
@@ -16,10 +15,9 @@ public fun sparkMaxDriveMotors(
     topRight: ChargerCANSparkMax,
     bottomLeft: ChargerCANSparkMax,
     bottomRight: ChargerCANSparkMax,
-    onboardPIDEnabled: Boolean = false,
     configure: SparkMaxConfiguration.() -> Unit = {}
-): OnboardPIDSwerveDriveMotors = OnboardPIDSwerveDriveMotors(
-    topLeft, topRight, bottomLeft, bottomRight,onboardPIDEnabled,SparkMaxConfiguration().apply(configure)
+): SwerveDriveMotors = SwerveDriveMotors(
+    topLeft, topRight, bottomLeft, bottomRight,SparkMaxConfiguration().apply(configure)
 )
 
 public fun talonFXDriveMotors(
@@ -27,62 +25,11 @@ public fun talonFXDriveMotors(
     topRight: ChargerTalonFX,
     bottomLeft: ChargerTalonFX,
     bottomRight: ChargerTalonFX,
-    onboardPIDEnabled: Boolean = false,
     configure: TalonFXConfiguration.() -> Unit = {}
-): OnboardPIDSwerveDriveMotors = OnboardPIDSwerveDriveMotors(
-    topLeft, topRight, bottomLeft, bottomRight,onboardPIDEnabled,TalonFXConfiguration().apply(configure)
+): SwerveDriveMotors = SwerveDriveMotors(
+    topLeft, topRight, bottomLeft, bottomRight,TalonFXConfiguration().apply(configure)
 )
 
-
-/**
- * A Helper class to store all the drive motors needed for an [EncoderHolonomicDrivetrain],
- * where all the motors support onboard PID control.
- */
-public class OnboardPIDSwerveDriveMotors(
-    override val topLeft: FeedbackMotorController,
-    override val topRight: FeedbackMotorController,
-    override val bottomLeft: FeedbackMotorController,
-    override val bottomRight: FeedbackMotorController,
-    public val onboardPIDEnabled: Boolean = true
-): SwerveDriveMotors(topLeft,topRight,bottomLeft,bottomRight){
-    /**
-     * This companion object stores an [invoke] function, which creates a [OnboardPIDSwerveDriveMotors] instance
-     * where all the motors are configured on initialization.
-     */
-    public companion object{
-        public operator fun <M, C: MotorConfiguration>invoke(
-            topLeft: M,
-            topRight: M,
-            bottomLeft: M,
-            bottomRight: M,
-            onboardPIDEnabled: Boolean = true,
-            configuration: C? = null
-        ): OnboardPIDSwerveDriveMotors where M: FeedbackMotorController, M: MotorConfigurable<C> =
-            OnboardPIDSwerveDriveMotors(
-                topLeft.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                topRight.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                bottomLeft.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                bottomRight.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                onboardPIDEnabled
-            )
-    }
-}
 
 
 /**

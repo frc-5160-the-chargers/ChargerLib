@@ -376,8 +376,8 @@ public class EncoderHolonomicDrivetrain(
             ).correctForDynamics()
         }
         currentControlMode = ControlMode.OPEN_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleSpeeds(speeds)
-        // currentModuleStates = kinematics.toSecondOrderModuleSpeeds(speeds,gyro.heading)
+        // currentModuleStates = kinematics.toFirstOrderModuleSpeeds(speeds)
+        currentModuleStates = kinematics.toSecondOrderModuleSpeeds(speeds,gyro.heading)
         currentControlMode = ControlMode.CLOSED_LOOP
     }
 
