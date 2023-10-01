@@ -166,10 +166,10 @@ public fun realEncoderHolonomicDrivetrain(
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
  */
 public class EncoderHolonomicDrivetrain(
-    public val topLeft: SwerveModule,
-    public val topRight: SwerveModule,
-    public val bottomLeft: SwerveModule,
-    public val bottomRight: SwerveModule,
+    private val topLeft: SwerveModule,
+    private val topRight: SwerveModule,
+    private val bottomLeft: SwerveModule,
+    private val bottomRight: SwerveModule,
     public val gyro: HeadingProvider,
     public val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,
@@ -372,11 +372,10 @@ public class EncoderHolonomicDrivetrain(
         if(fieldRelativeDrive){
             speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 speeds,gyro.heading.asRotation2d()
-            ).correctForDynamics()
+            )
         }
         currentControlMode = ControlMode.OPEN_LOOP
-        // currentModuleStates = kinematics.toFirstOrderModuleSpeeds(speeds)
-        currentModuleStates = kinematics.toSecondOrderModuleSpeeds(speeds,gyro.heading)
+        currentModuleStates = kinematics.toSecondOrderModuleStateGroup(speeds.correctForDynamics(),gyro.heading)
         currentControlMode = ControlMode.CLOSED_LOOP
     }
 
@@ -410,16 +409,15 @@ public class EncoderHolonomicDrivetrain(
                 yVelocity,
                 rotationVelocity,
                 gyro.heading
-            ).correctForDynamics()
+            )
         }else{
             ChassisSpeeds(
                 xVelocity,
                 yVelocity,
                 rotationVelocity
-            ).correctForDynamics()
+            )
         }
-        currentModuleStates = kinematics.toFirstOrderModuleSpeeds(speeds)
-        // currentModuleStates = kinematics.toSecondOrderModuleSpeeds(speeds,gyro.heading)
+        currentModuleStates = kinematics.toSecondOrderModuleStateGroup(speeds.correctForDynamics(),gyro.heading)
     }
 
     /**

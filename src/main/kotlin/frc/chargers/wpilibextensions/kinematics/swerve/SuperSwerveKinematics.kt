@@ -58,7 +58,7 @@ public class SuperSwerveKinematics(
      * Credits: 5727/4481 second kinematics
      * @see convertSecondOrderChassisSpeeds
      */
-    public fun toSecondOrderModuleSpeeds(speeds: ChassisSpeeds, heading: Angle): ModuleStateGroup{
+    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle): ModuleStateGroup{
         val arr = convertSecondOrderChassisSpeeds(
             correctHeading(speeds,heading),
             heading.asRotation2d()
@@ -72,7 +72,7 @@ public class SuperSwerveKinematics(
         )
     }
 
-    public fun toFirstOrderModuleSpeeds(speeds: ChassisSpeeds): ModuleStateGroup{
+    public fun toFirstOrderModuleStateGroup(speeds: ChassisSpeeds): ModuleStateGroup{
         val arr = toSwerveModuleStates(speeds)
         return ModuleStateGroup(
             topLeftState = arr[0],
@@ -82,12 +82,12 @@ public class SuperSwerveKinematics(
         )
     }
 
-    public fun toChassisSpeeds(moduleSpeeds: ModuleStateGroup): ChassisSpeeds =
+    public fun toChassisSpeeds(stateGroup: ModuleStateGroup): ChassisSpeeds =
         toChassisSpeeds(
-            moduleSpeeds.topLeftState,
-            moduleSpeeds.topRightState,
-            moduleSpeeds.bottomLeftState,
-            moduleSpeeds.bottomRightState
+            stateGroup.topLeftState,
+            stateGroup.topRightState,
+            stateGroup.bottomLeftState,
+            stateGroup.bottomRightState
         )
 
 
