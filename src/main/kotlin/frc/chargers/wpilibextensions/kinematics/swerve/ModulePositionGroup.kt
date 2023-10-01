@@ -10,7 +10,7 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
  * A helper class that stores [SwerveModulePosition]s in a more clear way.
  * This is usually preferred over an array, as it is clear which [SwerveModulePosition] corresponds to which module.
  */
-public data class ModulePositions(
+public data class ModulePositionGroup(
     val topLeftDistance: Distance,
     val topRightDistance: Distance,
     val bottomLeftDistance: Distance,

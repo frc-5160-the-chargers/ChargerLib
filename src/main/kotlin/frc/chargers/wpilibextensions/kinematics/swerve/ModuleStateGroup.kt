@@ -1,11 +1,9 @@
 package frc.chargers.wpilibextensions.kinematics.swerve
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 
@@ -13,7 +11,7 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
  * A helper class that stores [SwerveModuleState]s in a more clear way.
  * This is usually preferred over an array, as it is clear which [SwerveModuleState] corresponds to which module.
  */
-public data class ModuleSpeeds(
+public data class ModuleStateGroup(
     var topLeftSpeed: Velocity,
     var topRightSpeed: Velocity,
     var bottomLeftSpeed: Velocity,
@@ -54,11 +52,11 @@ public data class ModuleSpeeds(
         }
     }
 
-    public fun asDesaturatedSpeeds(maxAttainableSpeed: Velocity): ModuleSpeeds{
+    public fun asDesaturatedSpeeds(maxAttainableSpeed: Velocity): ModuleStateGroup{
         // !! operator is 100% safe: list size is greater than 0.
         val maxSpeed = listOf(topLeftSpeed,topRightSpeed,bottomLeftSpeed,bottomRightSpeed).maxOrNull()!!
         return if (maxSpeed > maxAttainableSpeed){
-            ModuleSpeeds(
+            ModuleStateGroup(
                 topLeftSpeed / maxSpeed * maxAttainableSpeed,
                 topRightSpeed / maxSpeed * maxAttainableSpeed,
                 bottomLeftSpeed / maxSpeed * maxAttainableSpeed,
@@ -98,27 +96,3 @@ public data class ModuleSpeeds(
     )
 }
 
-
-public fun ModuleSpeeds.logAsDesiredSpeeds(){
-    SmartDashboard.putNumber("top left DESIRED speed mps: ", topLeftSpeed.inUnit(meters/seconds))
-    SmartDashboard.putNumber("top right DESIRED speed mps: ", topRightSpeed.inUnit(meters/seconds))
-    SmartDashboard.putNumber("bottom left DESIRED speed mps: ", bottomLeftSpeed.inUnit(meters/seconds))
-    SmartDashboard.putNumber("bottom right DESIRED speed mps: ", bottomRightSpeed.inUnit(meters/seconds))
-
-    SmartDashboard.putNumber("top left DESIRED angle degrees: ", topLeftAngle.inUnit(degrees))
-    SmartDashboard.putNumber("top right DESIRED angle degrees: ", topRightAngle.inUnit(degrees))
-    SmartDashboard.putNumber("bottom left DESIRED angle degrees: ", bottomLeftAngle.inUnit(degrees))
-    SmartDashboard.putNumber("bottom right DESIRED angle degrees: ", bottomRightAngle.inUnit(degrees))
-}
-
-public fun ModuleSpeeds.logAsCurrentSpeeds(){
-    SmartDashboard.putNumber("top left current speed mps: ", topLeftSpeed.inUnit(meters/seconds))
-    SmartDashboard.putNumber("top right current speed mps: ", topRightSpeed.inUnit(meters/seconds))
-    SmartDashboard.putNumber("bottom left current speed mps: ", bottomLeftSpeed.inUnit(meters/seconds))
-    SmartDashboard.putNumber("bottom right current speed mps: ", bottomRightSpeed.inUnit(meters/seconds))
-
-    SmartDashboard.putNumber("top left current angle degrees: ", topLeftAngle.inUnit(degrees))
-    SmartDashboard.putNumber("top right current angle degrees: ", topRightAngle.inUnit(degrees))
-    SmartDashboard.putNumber("bottom left current angle degrees: ", bottomLeftAngle.inUnit(degrees))
-    SmartDashboard.putNumber("bottom right current angle degrees: ", bottomRightAngle.inUnit(degrees))
-}

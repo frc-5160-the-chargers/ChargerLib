@@ -279,8 +279,8 @@ public class EncoderHolonomicDrivetrain(
      * or can set the desired speeds of each swerve module.
      * It is reccomended that the [swerveDrive] and [velocityDrive] functions are used instead.
      */
-    public var currentModuleStates: ModuleSpeeds
-        get() = ModuleSpeeds(
+    public var currentModuleStates: ModuleStateGroup
+        get() = ModuleStateGroup(
             topLeftState = topLeft.getModuleState(gearRatio,wheelDiameter),
             topRightState = topRight.getModuleState(gearRatio,wheelDiameter),
             bottomLeftState = bottomLeft.getModuleState(gearRatio,wheelDiameter),
@@ -304,11 +304,11 @@ public class EncoderHolonomicDrivetrain(
 
     /**
      * Gets the current module positions of each swerve module.
-     * Returns a [ModulePositions] object,
+     * Returns a [ModulePositionGroup] object,
      * a wrapper around 4 [SwerveModulePosition] objects with kmeasure support.
      */
-    public val currentModulePositions: ModulePositions
-        get() = ModulePositions(
+    public val currentModulePositions: ModulePositionGroup
+        get() = ModulePositionGroup(
             topLeftPosition = topLeft.getModulePosition(gearRatio,wheelDiameter),
             topRightPosition = topRight.getModulePosition(gearRatio,wheelDiameter),
             bottomLeftPosition = bottomLeft.getModulePosition(gearRatio,wheelDiameter),
@@ -322,7 +322,7 @@ public class EncoderHolonomicDrivetrain(
      * then calculating the output using the kinematics object.
      */
     public val maxLinearVelocity: Velocity = kinematics.toChassisSpeeds(
-        ModuleSpeeds(
+        ModuleStateGroup(
             topLeftSpeed = maxModuleSpeed,
             topRightSpeed = maxModuleSpeed,
             bottomLeftSpeed = maxModuleSpeed,
@@ -341,7 +341,7 @@ public class EncoderHolonomicDrivetrain(
      */
     public val maxRotationalVelocity: AngularVelocity = kinematics.toChassisSpeeds(
 
-        ModuleSpeeds(
+        ModuleStateGroup(
             topLeftSpeed = maxModuleSpeed,
             topRightSpeed = -maxModuleSpeed,
             bottomLeftSpeed = maxModuleSpeed,

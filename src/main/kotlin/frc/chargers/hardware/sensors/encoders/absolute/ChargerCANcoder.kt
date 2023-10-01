@@ -38,7 +38,7 @@ public class ChargerCANcoder(
 
     public val absolute: TimestampedEncoder = AbsoluteEncoderAdaptor()
 
-    private inner class AbsoluteEncoderAdaptor: TimestampedEncoder by this{
+    private inner class AbsoluteEncoderAdaptor: TimestampedEncoder by this, EncoderConfigurable<CANcoderConfiguration> by this{
         override val timestampedAngularPosition: Measurement<Angle>
             get(){
                 val statusSignal = absolutePosition

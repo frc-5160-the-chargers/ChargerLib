@@ -1,5 +1,6 @@
 package frc.chargers.hardware.swerve
 
+import com.batterystaple.kmeasure.quantities.Angle
 import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
 import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
@@ -11,10 +12,31 @@ public fun swerveCANcoders(
     topRight: ChargerCANcoder,
     bottomLeft: ChargerCANcoder,
     bottomRight: ChargerCANcoder,
+    useAbsoluteSensor: Boolean,
     configure: CANcoderConfiguration.() -> Unit = {}
-): SwerveEncoders = SwerveEncoders(
-    topLeft, topRight, bottomLeft, bottomRight, CANcoderConfiguration().apply(configure)
-)
+): SwerveEncoders{
+    topLeft.configure(CANcoderConfiguration().apply(configure))
+    topRight.configure(CANcoderConfiguration().apply(configure))
+    bottomLeft.configure(CANcoderConfiguration().apply(configure))
+    bottomRight.configure(CANcoderConfiguration().apply(configure))
+
+    return if(useAbsoluteSensor){
+        SwerveEncoders(
+            topLeft.absolute,
+            topRight.absolute,
+            bottomLeft.absolute,
+            bottomRight.absolute
+        )
+    }else{
+        SwerveEncoders(
+            topLeft,
+            topRight,
+            bottomLeft,
+            bottomRight
+        )
+    }
+
+}
 
 
 public data class SwerveEncoders(

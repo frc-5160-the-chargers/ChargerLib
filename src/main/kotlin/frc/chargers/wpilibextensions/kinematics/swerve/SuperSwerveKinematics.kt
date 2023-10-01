@@ -23,7 +23,7 @@ import kotlin.math.sqrt
 
 /**
  * A wrapper for WPILib's [SwerveDriveKinematics], with support for second kinematics,
- * and integration with [ModuleSpeeds].
+ * and integration with [ModuleStateGroup].
  *
  * Big Thanks to WitherSlayer67 for helping with this!
  *
@@ -58,13 +58,13 @@ public class SuperSwerveKinematics(
      * Credits: 5727/4481 second kinematics
      * @see convertSecondOrderChassisSpeeds
      */
-    public fun toSecondOrderModuleSpeeds(speeds: ChassisSpeeds, heading: Angle): ModuleSpeeds{
+    public fun toSecondOrderModuleSpeeds(speeds: ChassisSpeeds, heading: Angle): ModuleStateGroup{
         val arr = convertSecondOrderChassisSpeeds(
             correctHeading(speeds,heading),
             heading.asRotation2d()
         )
 
-        return ModuleSpeeds(
+        return ModuleStateGroup(
             topLeftState = arr[0],
             topRightState = arr[1],
             bottomLeftState = arr[2],
@@ -72,9 +72,9 @@ public class SuperSwerveKinematics(
         )
     }
 
-    public fun toFirstOrderModuleSpeeds(speeds: ChassisSpeeds): ModuleSpeeds{
+    public fun toFirstOrderModuleSpeeds(speeds: ChassisSpeeds): ModuleStateGroup{
         val arr = toSwerveModuleStates(speeds)
-        return ModuleSpeeds(
+        return ModuleStateGroup(
             topLeftState = arr[0],
             topRightState = arr[1],
             bottomLeftState = arr[2],
@@ -82,7 +82,7 @@ public class SuperSwerveKinematics(
         )
     }
 
-    public fun toChassisSpeeds(moduleSpeeds: ModuleSpeeds): ChassisSpeeds =
+    public fun toChassisSpeeds(moduleSpeeds: ModuleStateGroup): ChassisSpeeds =
         toChassisSpeeds(
             moduleSpeeds.topLeftState,
             moduleSpeeds.topRightState,
