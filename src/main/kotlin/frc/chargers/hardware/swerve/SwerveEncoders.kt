@@ -1,6 +1,5 @@
 package frc.chargers.hardware.swerve
 
-import com.batterystaple.kmeasure.quantities.Angle
 import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
 import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
