@@ -1,10 +1,9 @@
-
+package utils;
 // used for limelight.kt
 // copied from https://github.com/LimelightVision/limelightlib-wpijava/blob/main/LimelightHelpers.java
 // use is for parsing json from limelight object.
 // note: I have deleted some unnessecary stuff.
-package frc.chargers.utils;
-//LimelightHelpers v1.2.1 (March 1, 2023)
+//utils.LimelightHelpers v1.2.1 (March 1, 2023)
 
 
 import edu.wpi.first.networktables.NetworkTableInstance;
