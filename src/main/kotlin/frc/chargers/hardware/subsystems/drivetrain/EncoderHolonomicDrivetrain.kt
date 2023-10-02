@@ -7,6 +7,7 @@ import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
+import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
@@ -33,6 +34,7 @@ import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
 import frc.chargers.wpilibextensions.processValue
+import org.littletonrobotics.junction.Logger
 
 @PublishedApi
 internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)
@@ -166,10 +168,10 @@ public fun realEncoderHolonomicDrivetrain(
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
  */
 public class EncoderHolonomicDrivetrain(
-    private val topLeft: SwerveModule,
-    private val topRight: SwerveModule,
-    private val bottomLeft: SwerveModule,
-    private val bottomRight: SwerveModule,
+    public val topLeft: SwerveModule,
+    public val topRight: SwerveModule,
+    public val bottomLeft: SwerveModule,
+    public val bottomRight: SwerveModule,
     public val gyro: HeadingProvider,
     public val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,
@@ -456,20 +458,20 @@ public class EncoderHolonomicDrivetrain(
      * Stops the drivetrain in an X.
      */
     public fun stopInX(){
-        topLeft.setDirectionalPower(0.0,-45.degrees)
-        topRight.setDirectionalPower(0.0,45.degrees)
-        bottomLeft.setDirectionalPower(0.0,45.degrees)
-        bottomRight.setDirectionalPower(0.0,-45.degrees)
+        topLeft.setDirectionalPower(0.0,45.degrees)
+        topRight.setDirectionalPower(0.0,-45.degrees)
+        bottomLeft.setDirectionalPower(0.0,-45.degrees)
+        bottomRight.setDirectionalPower(0.0,45.degrees)
     }
 
     /**
      * Makes the drivetrain rotate in place, with a specific velocity.
      */
     public fun rotateInPlace(speed: Velocity) {
-        topLeft.setDirectionalVelocity(speed,45.degrees,gearRatio, wheelDiameter)
-        topRight.setDirectionalVelocity(speed,-45.degrees,gearRatio,wheelDiameter)
-        bottomLeft.setDirectionalVelocity(speed,-45.degrees,gearRatio,wheelDiameter)
-        bottomRight.setDirectionalVelocity(speed,45.degrees,gearRatio,wheelDiameter)
+        topLeft.setDirectionalVelocity(speed,-45.degrees,gearRatio, wheelDiameter)
+        topRight.setDirectionalVelocity(speed,45.degrees,gearRatio,wheelDiameter)
+        bottomLeft.setDirectionalVelocity(speed,45.degrees,gearRatio,wheelDiameter)
+        bottomRight.setDirectionalVelocity(speed,-45.degrees,gearRatio,wheelDiameter)
     }
 
     /**
@@ -477,10 +479,10 @@ public class EncoderHolonomicDrivetrain(
      */
     @JvmName("rotateWithPower")
     public fun rotateInPlace(power: Double){
-        topLeft.setDirectionalPower(power,45.degrees)
-        topRight.setDirectionalPower(power,-45.degrees)
-        bottomLeft.setDirectionalPower(power,-45.degrees)
-        bottomRight.setDirectionalPower(power,45.degrees)
+        topLeft.setDirectionalPower(power,-45.degrees)
+        topRight.setDirectionalPower(power,45.degrees)
+        bottomLeft.setDirectionalPower(power,45.degrees)
+        bottomRight.setDirectionalPower(power,-45.degrees)
     }
 
 
@@ -488,11 +490,11 @@ public class EncoderHolonomicDrivetrain(
      * Called periodically in the subsystem.
      */
     override fun periodic() {
-        topLeft.updateInputsAndLog("TopLeftSwerveModule")
-        topRight.updateInputsAndLog("TopRightSwerveModule")
-        bottomLeft.updateInputsAndLog("BottomLeftSwerveModule")
-        bottomRight.updateInputsAndLog("BottomRightSwerveModule")
-
+        topLeft.updateInputsAndLog("Drivetrain/TopLeftSwerveModule")
+        topRight.updateInputsAndLog("Drivetrain/TopRightSwerveModule")
+        bottomLeft.updateInputsAndLog("Drivetrain/BottomLeftSwerveModule")
+        bottomRight.updateInputsAndLog("Drivetrain/BottomRightSwerveModule")
+        Logger.getInstance().recordOutput("Drivetrain/Pose(2d)", robotPose.inUnit(meters))
 
         /*
          * Updates the pose estimator with the current module positions,

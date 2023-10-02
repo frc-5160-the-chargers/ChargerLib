@@ -60,8 +60,10 @@ public class ModuleIOSim(
     driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
 ): ModuleIO{
 
-    private var driveAppliedVoltage = 0.0.volts
-    private var turnAppliedVoltage = 0.0.volts
+    public var driveAppliedVoltage: Voltage = 0.0.volts
+        private set
+    public var turnAppliedVoltage: Voltage = 0.0.volts
+        private set
     private var moduleDirection = 0.0.degrees
 
 
