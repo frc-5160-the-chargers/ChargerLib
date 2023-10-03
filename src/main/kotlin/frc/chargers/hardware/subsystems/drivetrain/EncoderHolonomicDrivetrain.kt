@@ -18,6 +18,8 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.smartdashboard.Field2d
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.chargers.hardware.swerve.SwerveDriveMotors
 import frc.chargers.hardware.swerve.SwerveEncoders
 import frc.chargers.hardware.swerve.SwerveTurnMotors
@@ -183,6 +185,14 @@ public class EncoderHolonomicDrivetrain(
     public var fieldRelativeDrive: Boolean = true,
     vararg poseSuppliers: RobotPoseSupplier
 ): SubsystemBase(), RobotPoseSupplier, WheelRatioProvider{
+
+    /**
+     * A representation of the field, for simulation and pose-visualizing purposes.
+     */
+    public val field: Field2d = Field2d().also{
+        SmartDashboard.putData("Field",it)
+    }
+
 
     // not used anywhere else; only used for the setDesiredModuleStates function
     private enum class ControlMode{
@@ -490,11 +500,11 @@ public class EncoderHolonomicDrivetrain(
      * Called periodically in the subsystem.
      */
     override fun periodic() {
-        topLeft.updateInputsAndLog("Drivetrain/TopLeftSwerveModule")
-        topRight.updateInputsAndLog("Drivetrain/TopRightSwerveModule")
-        bottomLeft.updateInputsAndLog("Drivetrain/BottomLeftSwerveModule")
-        bottomRight.updateInputsAndLog("Drivetrain/BottomRightSwerveModule")
-        Logger.getInstance().recordOutput("Drivetrain/Pose(2d)", robotPose.inUnit(meters))
+        topLeft.updateInputsAndLog("Drivetrain(Swerve)/TopLeftSwerveModule")
+        topRight.updateInputsAndLog("Drivetrain(Swerve)/TopRightSwerveModule")
+        bottomLeft.updateInputsAndLog("Drivetrain(Swerve)/BottomLeftSwerveModule")
+        bottomRight.updateInputsAndLog("Drivetrain(Swerve)/BottomRightSwerveModule")
+        Logger.getInstance().recordOutput("Drivetrain(Swerve)/Pose2d(meters)", robotPose.inUnit(meters))
 
         /*
          * Updates the pose estimator with the current module positions,
@@ -528,6 +538,10 @@ public class EncoderHolonomicDrivetrain(
             )
 
         }
+
+        // robotPose is a property of the RobotPoseSupplier interface; value retreived from the
+        // robotPoseMeasurement getter(seen in this class).
+        field.robotPose = robotPose.inUnit(meters)
 
     }
 

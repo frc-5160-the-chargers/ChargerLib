@@ -8,6 +8,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
+import edu.wpi.first.wpilibj.smartdashboard.Field2d
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
@@ -143,9 +145,17 @@ public class EncoderDifferentialDrivetrain(
     }
     private val inputs = EncoderDifferentialDrivetrainIO.Inputs()
 
+    /**
+     * A representation of the field, for simulation and pose-visualizing purposes.
+     */
+    public val field: Field2d = Field2d().also{
+        SmartDashboard.putData("Field",it)
+    }
+
     override fun periodic(){
         io.updateInputs(inputs)
-        Logger.getInstance().processInputs("DrivetrainDifferential",inputs)
+        Logger.getInstance().processInputs("Drivetrain(Differential)",inputs)
+        Logger.getInstance().recordOutput("Drivetrain(Differential)/Pose2d(meters)", robotPose.inUnit(meters))
         
         leftController.calculateOutput()
         rightController.calculateOutput()
@@ -175,6 +185,10 @@ public class EncoderDifferentialDrivetrain(
                 }
             )
         }
+
+        // robotPose is a property of the RobotPoseSupplier interface; value retreived from the
+        // robotPoseMeasurement getter(seen in this class).
+        field.robotPose = robotPose.inUnit(meters)
     }
 
     override fun tankDrive(leftPower: Double, rightPower: Double) {
