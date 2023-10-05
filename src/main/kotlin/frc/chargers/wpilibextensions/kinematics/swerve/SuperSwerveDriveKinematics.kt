@@ -17,8 +17,7 @@ import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
 
 /**
@@ -29,7 +28,7 @@ import kotlin.math.sqrt
  *
  * Credits: [5727 codebase](https://github.com/FRC5727/SwervyBoi/blob/THOR2023), [4481 codebase](https://github.com/FRC-4481-Team-Rembrandts/4481-Stock-Robot-2023-Public/tree/1988b5b9fb01f0fb2fd15d67197a3968efbd52d5)
  */
-public class SuperSwerveKinematics(
+public class SuperSwerveDriveKinematics(
     topLeftLocation: UnitTranslation2d,
     topRightLocation: UnitTranslation2d,
     bottomLeftLocation: UnitTranslation2d,
@@ -126,22 +125,22 @@ public class SuperSwerveKinematics(
                 )
             ) //Angle that the module location vector makes with respect to the robot
             val moduleAngleFieldCentric =
-                moduleAngle.plus(robotHeading) //Angle that the module location vector makes with respect to the field
-            val moduleX = moduleLocations[i].norm * kotlin.math.cos(moduleAngleFieldCentric.radians)
-            val moduleY = moduleLocations[i].norm * kotlin.math.sin(moduleAngleFieldCentric.radians)
+                moduleAngle + robotHeading //Angle that the module location vector makes with respect to the field
+            val moduleX = moduleLocations[i].norm * cos(moduleAngleFieldCentric.radians)
+            val moduleY = moduleLocations[i].norm * sin(moduleAngleFieldCentric.radians)
             firstOrderMatrix[0, 2] = -moduleY //-r_y
             firstOrderMatrix[1, 2] = moduleX //r_x
-            val firstOrderOutput = firstOrderMatrix.times(firstOrderInputMatrix)
+            val firstOrderOutput = firstOrderMatrix * firstOrderInputMatrix
             val moduleHeading = kotlin.math.atan2(firstOrderOutput[1, 0], firstOrderOutput[0, 0])
             val moduleSpeed = sqrt(firstOrderOutput.elementPower(2).elementSum())
             secondOrderMatrix[0, 2] = -moduleX
             secondOrderMatrix[0, 3] = -moduleY
             secondOrderMatrix[1, 2] = -moduleY
             secondOrderMatrix[1, 3] = moduleX
-            rotationMatrix[0, 0] = kotlin.math.cos(moduleHeading)
-            rotationMatrix[0, 1] = kotlin.math.sin(moduleHeading)
-            rotationMatrix[1, 0] = -kotlin.math.sin(moduleHeading)
-            rotationMatrix[1, 1] = kotlin.math.cos(moduleHeading)
+            rotationMatrix[0, 0] = cos(moduleHeading)
+            rotationMatrix[0, 1] = sin(moduleHeading)
+            rotationMatrix[1, 0] = -sin(moduleHeading)
+            rotationMatrix[1, 1] = cos(moduleHeading)
             val secondOrderOutput = rotationMatrix.times(secondOrderMatrix.times(secondOrderInputMatrix))
             swerveModuleStates[i] = SwerveModuleState(moduleSpeed, Rotation2d(moduleHeading).minus(robotHeading))
             moduleTurnSpeeds[i] = secondOrderOutput[1, 0] / moduleSpeed - desiredSpeed.omegaRadiansPerSecond

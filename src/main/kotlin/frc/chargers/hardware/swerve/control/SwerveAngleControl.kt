@@ -6,17 +6,20 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.utils.Precision
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 
-// used to denote control type for turning PID of swerve
-public sealed class TurnPID {
+/**
+ * A Helper class used to denote the direction control type of a [frc.chargers.hardware.swerve.module.SwerveModule]: Either
+ * Basic PID(regular PID controller) or ProfiledPID(motion profile + PID control, with optional feedforward).
+ */
+public sealed class SwerveAngleControl {
 
-    public class Basic(
+    public class PID(
         public val pidConstants: PIDConstants,
         public val precision: Precision<AngleDimension> = Precision.AllowOvershoot
-    ): TurnPID()
-    public class Profiled(
+    ): SwerveAngleControl()
+    public class ProfiledPID(
         public val pidConstants: PIDConstants,
         public val constraints: AngularTrapezoidProfile.Constraints,
         public val turnFF: AngularMotorFF = AngularMotorFF.None,
         public val precision: Precision<AngleDimension> = Precision.AllowOvershoot
-    ): TurnPID()
+    ): SwerveAngleControl()
 }

@@ -10,18 +10,20 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
-import frc.chargers.hardware.swerve.control.TurnPID
-import frc.chargers.hardware.swerve.control.VelocityPID
+import frc.chargers.hardware.swerve.control.SwerveAngleControl
+import frc.chargers.hardware.swerve.control.SwerveSpeedControl
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import org.littletonrobotics.junction.Logger
 
-
+/**
+ * Represents a single Swerve Module in a [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
+ */
 public class SwerveModule(
     public val io: ModuleIO,
-    turnControl: TurnPID,
-    velocityControl: VelocityPID,
+    turnControl: SwerveAngleControl,
+    velocityControl: SwerveSpeedControl,
     private val staticVoltageStall: Boolean = false
 ){
 
@@ -74,13 +76,13 @@ public class SwerveModule(
     )
 
     private val turnPrecision = when(turnControl){
-        is TurnPID.Basic -> turnControl.precision
-        is TurnPID.Profiled -> turnControl.precision
+        is SwerveAngleControl.PID -> turnControl.precision
+        is SwerveAngleControl.ProfiledPID -> turnControl.precision
     }
 
     private val turnController: FeedbackController<Angle, Voltage> =
         when(turnControl){
-            is TurnPID.Basic -> UnitSuperPIDController(
+            is SwerveAngleControl.PID -> UnitSuperPIDController(
                 turnControl.pidConstants,
                 {inputs.direction.standardize()},
                 outputRange = -12.volts..12.volts,
@@ -88,7 +90,7 @@ public class SwerveModule(
                 target = Angle(0.0)
             )
 
-            is TurnPID.Profiled -> AngularProfiledPIDController(
+            is SwerveAngleControl.ProfiledPID -> AngularProfiledPIDController(
                 turnControl.pidConstants,
                 {inputs.direction.standardize()},
                 outputRange = -12.volts..12.volts,

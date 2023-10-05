@@ -1,4 +1,4 @@
-package utils;
+package frc.chargers.utils;
 // used for limelight.kt
 // copied from https://github.com/LimelightVision/limelightlib-wpijava/blob/main/LimelightHelpers.java
 // use is for parsing json from limelight object.

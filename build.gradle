@@ -12,7 +12,7 @@ gversion {
     srcDir       = "src/main/java/"           // path is relative to the sub-project by default
     // Gradle variables can also be used
     // E.g. "${project.rootDir}/module/src/main/java"
-    classPackage = "builddata"
+    classPackage = "frc.chargers.builddata"
     className    = "ChargerLibBuildConstants"                // optional. If not specified GVersion is used
     dateFormat   = "yyyy-MM-dd'T'HH:mm:ss'Z'" // optional. This is the default
     timeZone     = "UTC"                      // optional. UTC is default

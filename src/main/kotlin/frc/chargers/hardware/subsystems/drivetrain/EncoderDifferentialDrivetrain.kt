@@ -49,7 +49,7 @@ public fun simulatedDrivetrain(
     vararg poseSuppliers: RobotPoseSupplier,
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
     EncoderDifferentialDrivetrainIOSim(simMotors,loopPeriod),
-    invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers
+    invertMotors, gearRatio, wheelDiameter, width, null, leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers
 )
 
 /**
@@ -62,6 +62,7 @@ public inline fun sparkMaxDrivetrain(
     invertMotors: Boolean = false, gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     width: Distance,
+    gyro: HeadingProvider? = null,
     leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
@@ -70,7 +71,7 @@ public inline fun sparkMaxDrivetrain(
     vararg poseSuppliers: RobotPoseSupplier,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers,
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, gyro, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers,
         configuration = SparkMaxConfiguration().apply(configure))
 
 /**
@@ -84,6 +85,7 @@ public inline fun talonFXDrivetrain(
     gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     width: Distance,
+    gyro: HeadingProvider? = null,
     leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
@@ -92,7 +94,7 @@ public inline fun talonFXDrivetrain(
     vararg poseSuppliers: RobotPoseSupplier,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers,
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, gyro, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers,
         configuration = TalonFXConfiguration().apply(configure))
 
 /**
@@ -105,6 +107,7 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
     invertMotors: Boolean = false, gearRatio: Double,
     wheelDiameter: Length,
     width: Distance,
+    gyro: HeadingProvider? = null,
     leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
@@ -122,6 +125,7 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
         gearRatio = gearRatio,
         wheelDiameter = wheelDiameter,
         width = width,
+        gyro = gyro,
         leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers
     )
 
@@ -133,6 +137,7 @@ public class EncoderDifferentialDrivetrain(
     override val gearRatio: Double = DEFAULT_GEAR_RATIO,
     override val wheelDiameter: Length,
     private val width: Distance,
+    private val gyro: HeadingProvider? = null,
     leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
@@ -144,6 +149,8 @@ public class EncoderDifferentialDrivetrain(
         io.inverted = invertMotors
     }
     private val inputs = EncoderDifferentialDrivetrainIO.Inputs()
+
+    private fun mostAccurateHeadingValue(): Angle = gyro?.heading ?: heading
 
     /**
      * A representation of the field, for simulation and pose-visualizing purposes.
@@ -161,7 +168,7 @@ public class EncoderDifferentialDrivetrain(
         rightController.calculateOutput()
 
         poseEstimator.update(
-            heading.asRotation2d(),
+            mostAccurateHeadingValue().asRotation2d(),
             (inputs.leftAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
             (inputs.rightAngularPosition * wheelTravelPerMotorRadian).inUnit(meters)
         )
@@ -303,7 +310,7 @@ public class EncoderDifferentialDrivetrain(
 
     private val poseEstimator: DifferentialDrivePoseEstimator = DifferentialDrivePoseEstimator(
         kinematics,
-        heading.asRotation2d(),
+        mostAccurateHeadingValue().asRotation2d(),
         (inputs.leftAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
         (inputs.rightAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
         startingPose.inUnit(meters),
@@ -331,7 +338,7 @@ public class EncoderDifferentialDrivetrain(
 
     public fun resetPose(pose: UnitPose2d){
         poseEstimator.resetPosition(
-            heading.asRotation2d(),
+            mostAccurateHeadingValue().asRotation2d(),
             (inputs.leftAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
             (inputs.rightAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
             pose.inUnit(meters)

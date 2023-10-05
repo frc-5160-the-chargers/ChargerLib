@@ -14,15 +14,15 @@ import edu.wpi.first.wpilibj.Encoder as QuadratureEncoder
 /**
  * An adapter from the WPILib Encoder class to the ChargerLib Encoder interface.
  */
-public class ChargerQuadratureEncoder:
-    QuadratureEncoder, Encoder, EncoderConfigurable<QuadratureEncoderConfiguration> {
+public class ChargerQuadEncoder:
+    QuadratureEncoder, Encoder, EncoderConfigurable<QuadEncoderConfiguration> {
 
     override val angularPosition: Angle
         get() = get() * anglePerPulse
     override val angularVelocity: AngularVelocity
         get() = rate * anglePerPulse / 1.seconds
 
-    override fun configure(configuration: QuadratureEncoderConfiguration) {
+    override fun configure(configuration: QuadEncoderConfiguration) {
         configuration.samplesPerAverage?.let{ samplesToAverage = it }
         configuration.simDevice?.let{setSimDevice(it)}
         configuration.reverseDirection?.let{setReverseDirection(it)}
@@ -39,10 +39,10 @@ public class ChargerQuadratureEncoder:
         channelB: Int,
         reverseDirection: Boolean = false,
         encodingType: EncodingType = EncodingType.k4X,
-        configure: QuadratureEncoderConfiguration.() -> Unit = {}
+        configure: QuadEncoderConfiguration.() -> Unit = {}
     ) : super(channelA, channelB, reverseDirection, encodingType){
         this.anglePerPulse = anglePerPulse
-        configure(QuadratureEncoderConfiguration().apply(configure))
+        configure(QuadEncoderConfiguration().apply(configure))
     }
 
     public constructor(
@@ -51,10 +51,10 @@ public class ChargerQuadratureEncoder:
         channelB: Int,
         reverseDirection: Boolean = false,
         encodingType: EncodingType = EncodingType.k4X,
-        configure: QuadratureEncoderConfiguration.() -> Unit = {}
+        configure: QuadEncoderConfiguration.() -> Unit = {}
     ) : super(channelA, channelB, reverseDirection, encodingType){
         this.anglePerPulse = (1/pulsesPerRotation.toDouble()).ofUnit(rotations)
-        configure(QuadratureEncoderConfiguration().apply(configure))
+        configure(QuadEncoderConfiguration().apply(configure))
     }
 
     public constructor(
@@ -63,10 +63,10 @@ public class ChargerQuadratureEncoder:
         channelB: Int,
         indexChannel: Int,
         reverseDirection: Boolean = false,
-        configure: QuadratureEncoderConfiguration.() -> Unit = {}
+        configure: QuadEncoderConfiguration.() -> Unit = {}
     ): super(channelA, channelB,indexChannel, reverseDirection){
         this.anglePerPulse = anglePerPulse
-        configure(QuadratureEncoderConfiguration().apply(configure))
+        configure(QuadEncoderConfiguration().apply(configure))
     }
 
     public constructor(
@@ -75,10 +75,10 @@ public class ChargerQuadratureEncoder:
         channelB: Int,
         indexChannel: Int,
         reverseDirection: Boolean = false,
-        configure: QuadratureEncoderConfiguration.() -> Unit = {}
+        configure: QuadEncoderConfiguration.() -> Unit = {}
     ): super(channelA, channelB,indexChannel, reverseDirection){
         this.anglePerPulse = (1/pulsesPerRotation.toDouble()).ofUnit(rotations)
-        configure(QuadratureEncoderConfiguration().apply(configure))
+        configure(QuadEncoderConfiguration().apply(configure))
     }
 
     public constructor(
@@ -87,10 +87,10 @@ public class ChargerQuadratureEncoder:
         sourceB: DigitalSource,
         reverseDirection: Boolean = false,
         encodingType: EncodingType = EncodingType.k4X,
-        configure: QuadratureEncoderConfiguration.() -> Unit = {}
+        configure: QuadEncoderConfiguration.() -> Unit = {}
     ): super(sourceA, sourceB, reverseDirection, encodingType){
         this.anglePerPulse = anglePerPulse
-        configure(QuadratureEncoderConfiguration().apply(configure))
+        configure(QuadEncoderConfiguration().apply(configure))
     }
 
     public constructor(
@@ -99,10 +99,10 @@ public class ChargerQuadratureEncoder:
         sourceB: DigitalSource,
         reverseDirection: Boolean = false,
         encodingType: EncodingType = EncodingType.k4X,
-        configure: QuadratureEncoderConfiguration.() -> Unit = {}
+        configure: QuadEncoderConfiguration.() -> Unit = {}
     ): super(sourceA, sourceB, reverseDirection, encodingType){
         this.anglePerPulse = (1/pulsesPerRotation.toDouble()).ofUnit(rotations)
-        configure(QuadratureEncoderConfiguration().apply(configure))
+        configure(QuadEncoderConfiguration().apply(configure))
     }
 
     public constructor(
@@ -111,10 +111,10 @@ public class ChargerQuadratureEncoder:
         sourceB: DigitalSource,
         indexSource: DigitalSource,
         reverseDirection: Boolean,
-        configure: QuadratureEncoderConfiguration.() -> Unit = {}
+        configure: QuadEncoderConfiguration.() -> Unit = {}
     ): super(sourceA, sourceB, indexSource, reverseDirection){
         this.anglePerPulse = anglePerPulse
-        configure(QuadratureEncoderConfiguration().apply(configure))
+        configure(QuadEncoderConfiguration().apply(configure))
     }
 
     public constructor(
@@ -123,15 +123,15 @@ public class ChargerQuadratureEncoder:
         sourceB: DigitalSource,
         indexSource: DigitalSource,
         reverseDirection: Boolean,
-        configure: QuadratureEncoderConfiguration.() -> Unit = {}
+        configure: QuadEncoderConfiguration.() -> Unit = {}
     ): super(sourceA, sourceB, indexSource, reverseDirection){
         this.anglePerPulse = (1/pulsesPerRotation.toDouble()).ofUnit(rotations)
-        configure(QuadratureEncoderConfiguration().apply(configure))
+        configure(QuadEncoderConfiguration().apply(configure))
     }
 
 }
 
-public data class QuadratureEncoderConfiguration(
+public data class QuadEncoderConfiguration(
     var samplesPerAverage: Int? = null,
     var simDevice: SimDevice? = null,
     var reverseDirection: Boolean? = null

@@ -1,6 +1,6 @@
 package frc.chargers.advantagekitextensions
 
-import builddata.ChargerLibBuildConstants
+import frc.chargers.builddata.ChargerLibBuildConstants
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import org.littletonrobotics.junction.Logger
 

@@ -10,7 +10,7 @@ import com.batterystaple.kmeasure.units.meters
 
 import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.networktables.NetworkTableInstance
-import utils.LimelightHelpers
+import frc.chargers.utils.LimelightHelpers
 
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -73,9 +73,9 @@ public class Limelight(
                 }
             }
             return Measurement(
-                UnitPose2d(limelightPose[0].meters,limelightPose[1].meters,Angle(0.0)),
+                UnitPose2d(limelightPose[0].meters,limelightPose[1].meters,limelightPose[5].degrees),
                 fpgaTimestamp() - latency,
-                hasTarget && DriverStation.getAlliance() != DriverStation.Alliance.Invalid,
+                hasTarget,
             )
         }
 

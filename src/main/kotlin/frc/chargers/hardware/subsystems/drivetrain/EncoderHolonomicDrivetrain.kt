@@ -22,8 +22,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import frc.chargers.hardware.swerve.SwerveDriveMotors
 import frc.chargers.hardware.swerve.SwerveEncoders
 import frc.chargers.hardware.swerve.SwerveTurnMotors
-import frc.chargers.hardware.swerve.control.TurnPID
-import frc.chargers.hardware.swerve.control.VelocityPID
+import frc.chargers.hardware.swerve.control.SwerveAngleControl
+import frc.chargers.hardware.swerve.control.SwerveSpeedControl
 import frc.chargers.hardware.swerve.module.*
 import frc.chargers.hardware.swerve.module.DEFAULT_SWERVE_DRIVE_INERTIA
 import frc.chargers.hardware.swerve.module.DEFAULT_SWERVE_TURN_INERTIA
@@ -40,7 +40,9 @@ import org.littletonrobotics.junction.Logger
 @PublishedApi
 internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)
 
-
+/**
+ * A convenience function used to create an [EncoderHolonomicDrivetrain], with [ModuleIOSim] as the Module IO.
+ */
 public fun simEncoderHolonomicDrivetrain(
     turnGearbox: DCMotor,
     driveGearbox: DCMotor,
@@ -49,8 +51,8 @@ public fun simEncoderHolonomicDrivetrain(
     driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
     driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
-    turnControl: TurnPID,
-    velocityControl: VelocityPID,
+    turnControl: SwerveAngleControl,
+    velocityControl: SwerveSpeedControl,
     gyro: HeadingProvider,
     maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     wheelDiameter: Length,
@@ -86,17 +88,19 @@ public fun simEncoderHolonomicDrivetrain(
 
 
 /**
- * A Convenience function for creating an [EncoderHolonomicDrivetrain]
- * Using the [SwerveTurnMotors], [SwerveEncoders] and [SwerveDriveMotors] classes
- * Instead of defining individual swerve modules.
- * This allows the motors and encoders to all be configured.
+ * A Convenience function for creating an [EncoderHolonomicDrivetrain] with [ModuleIOReal] as the swerve module IO.
+ *
+ * It uses the [SwerveTurnMotors], [SwerveEncoders] and [SwerveDriveMotors] classes
+ * instead of defining individual swerve modules.
+ *
+ * This allows the motors and encoders to all be group-configured.
  */
 public fun realEncoderHolonomicDrivetrain(
     turnMotors: SwerveTurnMotors,
     turnEncoders: SwerveEncoders,
     driveMotors: SwerveDriveMotors,
-    turnControl: TurnPID,
-    velocityControl: VelocityPID,
+    turnControl: SwerveAngleControl,
+    velocityControl: SwerveSpeedControl,
     gyro: HeadingProvider,
     maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     gearRatio: Double = DEFAULT_GEAR_RATIO,
@@ -244,7 +248,7 @@ public class EncoderHolonomicDrivetrain(
     Uses SuperSwerveKinematics, a custom wrapper around WPILib's SwerveDriveKinematics.
      */
 
-    public val kinematics: SuperSwerveKinematics = SuperSwerveKinematics(
+    public val kinematics: SuperSwerveDriveKinematics = SuperSwerveDriveKinematics(
         UnitTranslation2d(trackWidth/2,wheelBase/2),
         UnitTranslation2d(trackWidth/2,-wheelBase/2),
         UnitTranslation2d(-trackWidth/2,wheelBase/2),
@@ -386,7 +390,7 @@ public class EncoderHolonomicDrivetrain(
             )
         }
         currentControlMode = ControlMode.OPEN_LOOP
-        currentModuleStates = kinematics.toSecondOrderModuleStateGroup(speeds.correctForDynamics(),gyro.heading)
+        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamics())
         currentControlMode = ControlMode.CLOSED_LOOP
     }
 
@@ -504,6 +508,8 @@ public class EncoderHolonomicDrivetrain(
         bottomLeft.updateInputsAndLog("Drivetrain(Swerve)/BottomLeftSwerveModule")
         bottomRight.updateInputsAndLog("Drivetrain(Swerve)/BottomRightSwerveModule")
         Logger.getInstance().recordOutput("Drivetrain(Swerve)/Pose2d(meters)", robotPose.inUnit(meters))
+        Logger.getInstance().recordOutput("Drivetrain(Swerve)/Heading(deg)", gyro.heading.inUnit(degrees))
+
 
         /*
          * Updates the pose estimator with the current module positions,
