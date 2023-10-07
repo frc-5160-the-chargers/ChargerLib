@@ -1,8 +1,13 @@
 package frc.chargers.advantagekitextensions
 
+import edu.wpi.first.wpilibj.DriverStation
 import frc.chargers.builddata.ChargerLibBuildConstants
 import edu.wpi.first.wpilibj2.command.CommandScheduler
+import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.wpilog.WPILOGWriter
+import java.nio.file.Files
+import java.nio.file.Path
 
 public fun CommandScheduler.startCommandLog(){
     onCommandInitialize{
@@ -15,6 +20,19 @@ public fun CommandScheduler.startCommandLog(){
 
     onCommandInterrupt {
         Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", false)
+    }
+}
+
+private val noUsbSignalAlert by lazy{
+    Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
+}
+public fun Logger.addRioUSBReceiver(){
+    if (Files.exists(Path.of("media/sda1"))){
+        addDataReceiver(WPILOGWriter("media/sda1"))
+    }else if (Files.exists(Path.of("media/sda2"))){
+        addDataReceiver(WPILOGWriter("media/sda2"))
+    }else{
+        noUsbSignalAlert.active = true
     }
 }
 

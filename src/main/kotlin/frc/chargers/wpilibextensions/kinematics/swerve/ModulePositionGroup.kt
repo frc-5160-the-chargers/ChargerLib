@@ -3,6 +3,7 @@ package frc.chargers.wpilibextensions.kinematics.swerve
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.kinematics.SwerveModulePosition
+import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 
@@ -11,15 +12,15 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
  * This is usually preferred over an array, as it is clear which [SwerveModulePosition] corresponds to which module.
  */
 public data class ModulePositionGroup(
-    val topLeftDistance: Distance,
-    val topRightDistance: Distance,
-    val bottomLeftDistance: Distance,
-    val bottomRightDistance: Distance,
+    var topLeftDistance: Distance = Distance(0.0),
+    var topRightDistance: Distance = Distance(0.0),
+    var bottomLeftDistance: Distance = Distance(0.0),
+    var bottomRightDistance: Distance = Distance(0.0),
 
-    val topLeftAngle: Angle,
-    val topRightAngle: Angle,
-    val bottomLeftAngle: Angle,
-    val bottomRightAngle: Angle
+    var topLeftAngle: Angle = Angle(0.0),
+    var topRightAngle: Angle = Angle(0.0),
+    var bottomLeftAngle: Angle = Angle(0.0),
+    var bottomRightAngle: Angle = Angle(0.0)
 ) {
     public constructor(
         topLeftPosition: SwerveModulePosition,
@@ -40,22 +41,29 @@ public data class ModulePositionGroup(
 
     public fun toArray(): Array<SwerveModulePosition> = a[topLeftPosition,topRightPosition,bottomLeftPosition,bottomRightPosition]
 
-    public val topLeftPosition: SwerveModulePosition = SwerveModulePosition(
+    public inline fun forEachPosition(action: (SwerveModulePosition) -> Unit){
+        action(topLeftPosition)
+        action(topRightPosition)
+        action(bottomLeftPosition)
+        action(bottomRightPosition)
+    }
+
+    public val topLeftPosition: SwerveModulePosition get() = SwerveModulePosition(
         topLeftDistance.inUnit(meters),
         topLeftAngle.asRotation2d()
     )
 
-    public val topRightPosition: SwerveModulePosition = SwerveModulePosition(
+    public val topRightPosition: SwerveModulePosition get() = SwerveModulePosition(
         topRightDistance.inUnit(meters),
         topRightAngle.asRotation2d()
     )
 
-    public val bottomLeftPosition: SwerveModulePosition = SwerveModulePosition(
+    public val bottomLeftPosition: SwerveModulePosition get() = SwerveModulePosition(
         bottomLeftDistance.inUnit(meters),
         bottomLeftAngle.asRotation2d()
     )
 
-    public val bottomRightPosition: SwerveModulePosition = SwerveModulePosition(
+    public val bottomRightPosition: SwerveModulePosition get() = SwerveModulePosition(
         bottomRightDistance.inUnit(meters),
         bottomRightAngle.asRotation2d()
     )

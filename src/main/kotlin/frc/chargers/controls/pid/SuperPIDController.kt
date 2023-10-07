@@ -35,31 +35,6 @@ public class SuperPIDController(
 ): FeedbackController<Double, Double> {
 
     public companion object{
-        /**
-         * Fake Constructor of [SuperPIDController]
-         * which supports the native feedforward class with an input lambda,
-         * instead of a Feedforward output lambda.
-         *
-         */
-        public operator fun invoke(
-            pidConstants: PIDConstants,
-            getInput: () -> Double,
-            outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
-            continuousInputRange: ClosedRange<Double>? = null,
-            integralRange: ClosedRange<Double> = outputRange,
-            target: Double,
-            selfSustain: Boolean = false,
-            getFFInput: () -> Double,
-            feedforward: Feedforward<Double,Double>
-        ): SuperPIDController = SuperPIDController(
-            pidConstants,
-            getInput,
-            outputRange,
-            continuousInputRange,
-            integralRange,
-            target,
-            selfSustain
-        ) { feedforward.calculate(getFFInput()) }
 
         /**
          * Fake Constructor of [SuperPIDController]
@@ -75,17 +50,15 @@ public class SuperPIDController(
             target: Double,
             selfSustain: Boolean = false,
             feedforward: Feedforward<Double,Double> = Feedforward{0.0}
-        ): SuperPIDController = invoke(
+        ): SuperPIDController = SuperPIDController(
             pidConstants,
             getInput,
             outputRange,
             continuousInputRange,
             integralRange,
             target,
-            selfSustain,
-            getInput,
-            feedforward,
-        )
+            selfSustain
+        ) { feedforward.calculate(this.target) }
 
     }
 

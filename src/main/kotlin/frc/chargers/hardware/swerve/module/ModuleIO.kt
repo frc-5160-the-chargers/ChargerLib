@@ -16,7 +16,9 @@ import frc.chargers.utils.math.units.times
 public class ModuleIOReal(
     private val turnMotor: EncoderMotorController,
     private val turnEncoder: PositionEncoder,
-    private val driveMotor: EncoderMotorController
+    private val driveMotor: EncoderMotorController,
+    private val driveGearRatio: Double = DEFAULT_GEAR_RATIO,
+    private val turnGearRatio: Double = DEFAULT_GEAR_RATIO
 ): ModuleIO{
     override fun setDriveVoltage(driveV: Voltage) {
         // custom extension property
@@ -31,12 +33,12 @@ public class ModuleIOReal(
     override fun updateInputs(inputs: ModuleIO.Inputs) {
         inputs.apply{
             direction = turnEncoder.angularPosition
-            turnSpeed = turnMotor.encoder.angularVelocity
+            turnSpeed = turnMotor.encoder.angularVelocity * turnGearRatio
             turnVoltage = turnMotor.voltage
 
-            speed = driveMotor.encoder.angularVelocity
+            speed = driveMotor.encoder.angularVelocity * driveGearRatio
             driveVoltage = driveMotor.voltage
-            distance = driveMotor.encoder.angularPosition
+            distance = driveMotor.encoder.angularPosition * driveGearRatio
         }
     }
 

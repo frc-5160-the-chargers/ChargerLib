@@ -1,10 +1,9 @@
 package frc.chargers.hardware.swerve.module
 
+import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
+import com.batterystaple.kmeasure.dimensions.VoltageDimension
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.degrees
-import com.batterystaple.kmeasure.units.meters
-import com.batterystaple.kmeasure.units.seconds
-import com.batterystaple.kmeasure.units.volts
+import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.controls.FeedbackController
@@ -41,7 +40,7 @@ public class SwerveModule(
         this % 360.degrees
     }
 
-    public fun updateInputsAndLog(logName: String) {
+    public fun updateAndProcessInputs(logName: String) {
         io.updateInputs(inputs)
         Logger.getInstance().processInputs(logName,inputs)
         velocityController.calculateOutput()
@@ -67,7 +66,7 @@ public class SwerveModule(
 
 
 
-    private val velocityController = UnitSuperPIDController(
+    public val velocityController: UnitSuperPIDController<AngularVelocityDimension,VoltageDimension> = UnitSuperPIDController(
         velocityControl.pidConstants,
         {inputs.speed},
         -12.volts..12.volts,
@@ -135,11 +134,12 @@ public class SwerveModule(
         direction:Angle
     ){
         if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
-            setPower(-power)
             setDirection(direction + 180.degrees)
+            setPower(-power * cos(turnController.error))
         }else{
-            setPower(power)
+
             setDirection(direction)
+            setPower(power * cos(turnController.error))
         }
     }
 
@@ -148,30 +148,28 @@ public class SwerveModule(
         direction:Angle
     ){
         if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
-            setVelocity(-angularVelocity)
             setDirection(direction + 180.degrees)
+            setVelocity(-angularVelocity * cos(turnController.error))
+
         }else{
-            setVelocity(angularVelocity)
             setDirection(direction)
+            setVelocity(angularVelocity * cos(turnController.error))
         }
     }
 
 
-    public fun getModuleState(gearRatio:Double,wheelDiameter:Length): SwerveModuleState =
+    public fun getModuleState(wheelRadius: Length): SwerveModuleState =
         SwerveModuleState(
-            (currentVelocity * gearRatio * wheelDiameter / 2).inUnit(meters / seconds),
+            currentVelocity.inUnit(radians/seconds) * wheelRadius.inUnit(meters),
             currentDirection.asRotation2d()
         )
 
-    public fun getModulePosition(gearRatio:Double,wheelDiameter:Length): SwerveModulePosition =
+    public fun getModulePosition(wheelRadius: Length): SwerveModulePosition =
         SwerveModulePosition(
-            (wheelPosition * gearRatio * wheelDiameter / 2).inUnit(meters),
+            wheelPosition.inUnit(radians) * wheelRadius.inUnit(meters),
             currentDirection.asRotation2d()
         )
 
-    public fun setDirectionalVelocity(velocity:Velocity,direction:Angle,gearRatio:Double,wheelDiameter:Length){
-        setDirectionalVelocity(velocity/(gearRatio*wheelDiameter),direction)
-    }
 
     public fun halt() {
         if(staticVoltageStall){

@@ -12,15 +12,15 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
  * This is usually preferred over an array, as it is clear which [SwerveModuleState] corresponds to which module.
  */
 public data class ModuleStateGroup(
-    var topLeftSpeed: Velocity,
-    var topRightSpeed: Velocity,
-    var bottomLeftSpeed: Velocity,
-    var bottomRightSpeed: Velocity,
+    var topLeftSpeed: Velocity = Velocity(0.0),
+    var topRightSpeed: Velocity = Velocity(0.0),
+    var bottomLeftSpeed: Velocity = Velocity(0.0),
+    var bottomRightSpeed: Velocity = Velocity(0.0),
     
-    var topLeftAngle: Angle,
-    var topRightAngle: Angle,
-    var bottomLeftAngle: Angle,
-    var bottomRightAngle: Angle,
+    var topLeftAngle: Angle = Angle(0.0),
+    var topRightAngle: Angle = Angle(0.0),
+    var bottomLeftAngle: Angle = Angle(0.0),
+    var bottomRightAngle: Angle = Angle(0.0),
 ) {
     public constructor(
         topLeftState: SwerveModuleState,
@@ -69,6 +69,13 @@ public data class ModuleStateGroup(
         }else{
             this
         }
+    }
+
+    public inline fun forEachState(action: (SwerveModuleState) -> Unit){
+        action(topLeftState)
+        action(topRightState)
+        action(bottomLeftState)
+        action(bottomRightState)
     }
     
     public val topLeftState: SwerveModuleState

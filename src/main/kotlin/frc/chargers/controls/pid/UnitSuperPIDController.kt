@@ -37,35 +37,10 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
 ) : FeedbackController<Quantity<I>, Quantity<O>> {
 
     public companion object{
-        /**
-         * Fake Constructor of [UnitSuperPIDController]
-         * which supports the native feedforward class with a separate input lambda,
-         * instead of a Feedforward output lambda.
-         *
-         */
-        public operator fun <I: AnyDimension, FI: AnyDimension, O: AnyDimension> invoke(
-            pidConstants: PIDConstants,
-            getInput: () -> Quantity<I>,
-            outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
-            continuousInputRange: ClosedRange<Quantity<I>>? = null,
-            integralRange: ClosedRange<Quantity<O>> = outputRange,
-            target: Quantity<I>,
-            selfSustain: Boolean = false,
-            getFFInput: () -> Quantity<FI>,
-            feedforward: Feedforward<Quantity<FI>,Quantity<O>> = Feedforward{Quantity(0.0)}
-        ): UnitSuperPIDController<I,O> = UnitSuperPIDController(
-            pidConstants,
-            getInput,
-            outputRange,
-            continuousInputRange,
-            integralRange,
-            target,
-            selfSustain
-        ) { feedforward.calculate(getFFInput()) }
 
         /**
          * Fake Constructor of [UnitSuperPIDController]
-         * where the input of the feedforward and the input of the PID controller are shared.
+         * where the input of the feedforward and the input of the PID controller.
          *
          */
         public operator fun <I: AnyDimension, O: AnyDimension> invoke(
@@ -77,17 +52,15 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             target: Quantity<I>,
             selfSustain: Boolean = false,
             feedforward: Feedforward<Quantity<I>,Quantity<O>>
-        ): UnitSuperPIDController<I,O> = invoke(
+        ): UnitSuperPIDController<I,O> = UnitSuperPIDController(
             pidConstants,
             getInput,
             outputRange,
             continuousInputRange,
             integralRange,
             target,
-            selfSustain,
-            getInput,
-            feedforward,
-        )
+            selfSustain
+        ) { feedforward.calculate(this.target) }
     }
 
 

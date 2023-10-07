@@ -57,7 +57,7 @@ public class SuperSwerveDriveKinematics(
      * Credits: 5727/4481 second kinematics
      * @see convertSecondOrderChassisSpeeds
      */
-    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle): ModuleStateGroup{
+    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle, correctHeading: Boolean = false): ModuleStateGroup{
         val arr = convertSecondOrderChassisSpeeds(
             correctHeading(speeds,heading),
             heading.asRotation2d()

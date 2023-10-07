@@ -15,6 +15,9 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.*
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
+import frc.chargers.wpilibextensions.kinematics.rotationSpeed
+import frc.chargers.wpilibextensions.kinematics.xVelocity
+import frc.chargers.wpilibextensions.kinematics.yVelocity
 import kotlin.internal.LowPriorityInOverloadResolution
 
 /*
@@ -65,7 +68,9 @@ public fun EncoderHolonomicDrivetrain.followPath(
         PIDController(0.0,0.0,0.0).apply{
             constants = rotationConstants
         },
-        ::velocityDrive,
+        {speeds ->
+        velocityDrive(speeds.xVelocity,-speeds.yVelocity,speeds.rotationSpeed)
+        },
         true,
         this@followPath
     )
