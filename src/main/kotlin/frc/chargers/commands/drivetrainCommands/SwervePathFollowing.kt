@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.constants
+import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.*
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
@@ -25,8 +26,30 @@ import kotlin.internal.LowPriorityInOverloadResolution
  * using pathplannerlib.
  */
 
+/**
+ * A helper class for drivetrain path following.
+ */
+public class SwervePathDirector(
+    private val poseEstimator: RobotPoseSupplier,
+    private val drivetrain: EncoderHolonomicDrivetrain,
+    private val translationConstants: PIDConstants,
+    private val rotationConstants: PIDConstants,
+    private val pathMap: Map<String, Command>
+){
+    public fun followPath(
+        trajectoryName: String,
+        constraints: PathConstraints,
+        shouldResetPose: Boolean = false
+    ){
+
+    }
 
 
+
+}
+
+
+/*
 context(CommandBuilder, PathData)
 @LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.followPath(
@@ -157,6 +180,7 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     rotationConstants,
     eventsBlock
 )
+ */
 
 
 

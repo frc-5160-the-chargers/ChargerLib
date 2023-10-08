@@ -23,27 +23,6 @@ public fun ChassisSpeeds(xVelocity: Velocity, yVelocity: Velocity, rotationSpeed
         /* omegaRadiansPerSecond = */ rotationSpeed.inUnit(radians/seconds)
     )
 
-/**
- * A convenience function that creates a field-relative [ChassisSpeeds]
- *
- * with kmeasure units instead.
- */
-public fun FieldRelativeChassisSpeeds(speeds: ChassisSpeeds, robotAngle: Angle): ChassisSpeeds =
-    ChassisSpeeds.fromFieldRelativeSpeeds(
-        speeds,
-        robotAngle.asRotation2d()
-    )
-
-/**
- * A convenience function that creates a field-relative [ChassisSpeeds]
- *
- * with kmeasure units instead.
- */
-public fun FieldRelativeChassisSpeeds(xVelocity: Velocity, yVelocity: Velocity, rotationSpeed: AngularVelocity, robotAngle: Angle): ChassisSpeeds =
-    FieldRelativeChassisSpeeds(
-        ChassisSpeeds(xVelocity,yVelocity,rotationSpeed),
-        robotAngle
-    )
 
 public val ChassisSpeeds.xVelocity: Velocity
     get() = vxMetersPerSecond.ofUnit(meters/seconds)

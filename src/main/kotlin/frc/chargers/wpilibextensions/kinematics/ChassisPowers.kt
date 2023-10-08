@@ -14,8 +14,6 @@ public class ChassisPowers(
     public var yPower: Double = 0.0,
     public var rotationPower: Double = 0.0
 ){
-    public fun asFieldRelative(robotAngle: Angle): ChassisPowers = FieldRelativeChassisPowers(xPower,yPower,rotationPower,robotAngle)
-
     public fun toChassisSpeeds(maxLinearVelocity: Velocity, maxRotationalVelocity: AngularVelocity): ChassisSpeeds = ChassisSpeeds(
         xPower * maxLinearVelocity,
         yPower * maxLinearVelocity,
@@ -23,15 +21,7 @@ public class ChassisPowers(
     )
 }
 
-public fun FieldRelativeChassisPowers(
-    xPower: Double,
-    yPower: Double,
-    rotationPower: Double,
-    robotAngle: Angle): ChassisPowers =
-    ChassisPowers(
-        xPower * cos(robotAngle) + yPower * sin(robotAngle),
-        -xPower * sin(robotAngle) + yPower * cos(robotAngle),
-        rotationPower)
+
 
 
 

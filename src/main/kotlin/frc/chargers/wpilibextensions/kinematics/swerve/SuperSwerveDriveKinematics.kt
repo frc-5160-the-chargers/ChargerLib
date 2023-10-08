@@ -57,10 +57,10 @@ public class SuperSwerveDriveKinematics(
      * Credits: 5727/4481 second kinematics
      * @see convertSecondOrderChassisSpeeds
      */
-    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle, correctHeading: Boolean = false): ModuleStateGroup{
+    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, getHeading: () -> Angle): ModuleStateGroup{
         val arr = convertSecondOrderChassisSpeeds(
-            correctHeading(speeds,heading),
-            heading.asRotation2d()
+            correctHeading(speeds,getHeading),
+            getHeading().asRotation2d()
         )
 
         return ModuleStateGroup(
@@ -152,7 +152,7 @@ public class SuperSwerveDriveKinematics(
     /**
      * Credits: 4481, 5727 codebase
      */
-    private fun correctHeading(desiredSpeed: ChassisSpeeds, inputHeading: Angle): ChassisSpeeds {
+    private inline fun correctHeading(desiredSpeed: ChassisSpeeds, getHeading: () -> Angle): ChassisSpeeds {
         //Determine time interval
         val currentT: Time = fpgaTimestamp()
         val dt: Time = currentT - previousT
@@ -160,17 +160,17 @@ public class SuperSwerveDriveKinematics(
         val vr = desiredSpeed.rotationSpeed
         if (vr > 0.01.ofUnit(radians/seconds) || vr < -(0.01.ofUnit(radians/seconds)) ) {
             offT = currentT
-            targetHeading = inputHeading
+            targetHeading = getHeading()
             return desiredSpeed
         }
         if (currentT - offT < 0.5.seconds) {
-            targetHeading = inputHeading
+            targetHeading = getHeading()
             return desiredSpeed
         }
         //Determine target and current heading
         targetHeading += vr * dt
         //Calculate the change in heading that is needed to achieve the target
-        val deltaHeading = targetHeading - inputHeading
+        val deltaHeading = targetHeading - getHeading()
         if (abs(deltaHeading) < 0.05.degrees) {
             return desiredSpeed
         }
