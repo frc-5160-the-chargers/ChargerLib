@@ -1,4 +1,4 @@
-package frc.chargers.hardware.subsystems.drivetrain
+package frc.chargers.hardware.subsystems.posemonitors
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.advantagekitextensions.ChargerLoggableInputs
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.Measurement
 import frc.chargers.utils.PoseEstimator
 import frc.chargers.utils.PoseEstimator.TimestampedVisionUpdate
@@ -30,10 +31,10 @@ import org.littletonrobotics.junction.Logger
  * A Helper class used to get the pose of an [EncoderHolonomicDrivetrain],
  * with heading-supplying utilities.
  */
-public class BasicSwervePoseEstimator(
+public class SwervePoseMonitor(
     private val drivetrain: EncoderHolonomicDrivetrain,
     private val gyro: HeadingProvider? = null,
-    private val poseSuppliers: MutableList<RobotPoseSupplier>,
+    private val poseSuppliers: List<RobotPoseSupplier>,
     startingPose: UnitPose2d = UnitPose2d()
 ): SubsystemBase(), RobotPoseSupplier, HeadingProvider{
 
@@ -45,7 +46,7 @@ public class BasicSwervePoseEstimator(
     ): this(
         drivetrain,
         gyro,
-        poseSuppliers.toMutableList(),
+        poseSuppliers.toList(),
         startingPose
     )
 
@@ -143,7 +144,6 @@ public class BasicSwervePoseEstimator(
             twist.dtheta = headingInputs.gyroInputHeading.inUnit(radians)
         }
         poseEstimator.addDriveData(fpgaTimestamp().inUnit(seconds),twist)
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
 
 
         val visionUpdates: MutableList<TimestampedVisionUpdate> = mutableListOf()
@@ -170,6 +170,7 @@ public class BasicSwervePoseEstimator(
 
 
         field.robotPose = poseEstimator.latestPose
+        Logger.getInstance().recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
 
 
     }

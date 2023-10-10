@@ -2,14 +2,14 @@ package frc.chargers.hardware.subsystems.drivetrain
 
 import com.batterystaple.kmeasure.interop.average
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.*
-import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator
+import com.batterystaple.kmeasure.units.meters
+import com.batterystaple.kmeasure.units.milli
+import com.batterystaple.kmeasure.units.seconds
+import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
-import edu.wpi.first.wpilibj.smartdashboard.Field2d
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
@@ -18,17 +18,8 @@ import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
-import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
-import frc.chargers.utils.Measurement
-import frc.chargers.utils.WheelRatioProvider
 import frc.chargers.utils.a
-import frc.chargers.wpilibextensions.StandardDeviation
-import frc.chargers.wpilibextensions.fpgaTimestamp
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
-import frc.chargers.wpilibextensions.geometry.asRotation2d
-import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.processValue
 import org.littletonrobotics.junction.Logger
 
 @PublishedApi
@@ -45,11 +36,9 @@ public fun simulatedDrivetrain(
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     rightMotorFF: AngularMotorFF = AngularMotorFF.None,
-    startingPose: UnitPose2d = UnitPose2d(),
-    vararg poseSuppliers: RobotPoseSupplier,
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
     EncoderDifferentialDrivetrainIOSim(simMotors,loopPeriod),
-    invertMotors, gearRatio, wheelDiameter, width, null, leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers
+    invertMotors, gearRatio, wheelDiameter, width,  leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF
 )
 
 /**
@@ -62,16 +51,13 @@ public inline fun sparkMaxDrivetrain(
     invertMotors: Boolean = false, gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     width: Distance,
-    gyro: HeadingProvider? = null,
     leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     rightMotorFF: AngularMotorFF = AngularMotorFF.None,
-    startingPose: UnitPose2d = UnitPose2d(),
-    vararg poseSuppliers: RobotPoseSupplier,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, gyro, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers,
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF,
         configuration = SparkMaxConfiguration().apply(configure))
 
 /**
@@ -85,16 +71,13 @@ public inline fun talonFXDrivetrain(
     gearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     width: Distance,
-    gyro: HeadingProvider? = null,
     leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     rightMotorFF: AngularMotorFF = AngularMotorFF.None,
-    startingPose: UnitPose2d = UnitPose2d(),
-    vararg poseSuppliers: RobotPoseSupplier,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, gyro, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers,
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF,
         configuration = TalonFXConfiguration().apply(configure))
 
 /**
@@ -107,13 +90,10 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
     invertMotors: Boolean = false, gearRatio: Double,
     wheelDiameter: Length,
     width: Distance,
-    gyro: HeadingProvider? = null,
     leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     rightMotorFF: AngularMotorFF = AngularMotorFF.None,
-    startingPose: UnitPose2d = UnitPose2d(),
-    vararg poseSuppliers: RobotPoseSupplier,
     configuration: C
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
@@ -125,8 +105,7 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
         gearRatio = gearRatio,
         wheelDiameter = wheelDiameter,
         width = width,
-        gyro = gyro,
-        leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF, startingPose, *poseSuppliers
+        leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF
     )
 
 
@@ -134,68 +113,27 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
 public class EncoderDifferentialDrivetrain(
     private val io: EncoderDifferentialDrivetrainIO,
     invertMotors: Boolean = false,
-    override val gearRatio: Double = DEFAULT_GEAR_RATIO,
-    override val wheelDiameter: Length,
+    private val gearRatio: Double = DEFAULT_GEAR_RATIO,
+    private val wheelDiameter: Length,
     private val width: Distance,
-    private val gyro: HeadingProvider? = null,
     leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     leftMotorFF: AngularMotorFF = AngularMotorFF.None,
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     rightMotorFF: AngularMotorFF = AngularMotorFF.None,
-    private val startingPose: UnitPose2d = UnitPose2d(),
-    vararg poseSuppliers: RobotPoseSupplier
-): SubsystemBase(), DifferentialDrivetrain, HeadingProvider, WheelRatioProvider, RobotPoseSupplier {
+): SubsystemBase(), DifferentialDrivetrain, HeadingProvider{
     init{
         io.inverted = invertMotors
     }
-    private val inputs = EncoderDifferentialDrivetrainIO.Inputs()
+    internal val inputs = EncoderDifferentialDrivetrainIO.Inputs()
 
-    private fun mostAccurateHeadingValue(): Angle = gyro?.heading ?: heading
-
-    /**
-     * A representation of the field, for simulation and pose-visualizing purposes.
-     */
-    public val field: Field2d = Field2d().also{
-        SmartDashboard.putData("Field",it)
-    }
 
     override fun periodic(){
         io.updateInputs(inputs)
         Logger.getInstance().processInputs("Drivetrain(Differential)",inputs)
-        Logger.getInstance().recordOutput("Drivetrain(Differential)/Pose2d(meters)", robotPose.inUnit(meters))
         
         leftController.calculateOutput()
         rightController.calculateOutput()
 
-        poseEstimator.update(
-            mostAccurateHeadingValue().asRotation2d(),
-            (inputs.leftAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
-            (inputs.rightAngularPosition * wheelTravelPerMotorRadian).inUnit(meters)
-        )
-
-        allPoseSuppliers.forEach{
-            val poseMeasurement = it.robotPoseMeasurement
-
-            it.poseStandardDeviation.processValue(
-                whenValueExists = { stdDev ->
-                    poseEstimator.addVisionMeasurement(
-                        poseMeasurement.value.inUnit(meters),
-                        poseMeasurement.timestamp.inUnit(seconds),
-                        stdDev.getVector()
-                    )
-                },
-                whenDefault = {
-                    poseEstimator.addVisionMeasurement(
-                        poseMeasurement.value.inUnit(meters),
-                        poseMeasurement.timestamp.inUnit(seconds)
-                    )
-                }
-            )
-        }
-
-        // robotPose is a property of the RobotPoseSupplier interface; value retreived from the
-        // robotPoseMeasurement getter(seen in this class).
-        field.robotPose = robotPose.inUnit(meters)
     }
 
     override fun tankDrive(leftPower: Double, rightPower: Double) {
@@ -218,7 +156,7 @@ public class EncoderDifferentialDrivetrain(
 
 
     private val wheelRadius = wheelDiameter / 2
-    private val wheelTravelPerMotorRadian = gearRatio * wheelRadius
+    internal val wheelTravelPerMotorRadian = gearRatio * wheelRadius
 
     /**
      * The total linear distance traveled from the zero point of the encoders.
@@ -308,51 +246,11 @@ public class EncoderDifferentialDrivetrain(
         )
     }
 
-    private val poseEstimator: DifferentialDrivePoseEstimator = DifferentialDrivePoseEstimator(
-        kinematics,
-        mostAccurateHeadingValue().asRotation2d(),
-        (inputs.leftAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
-        (inputs.rightAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
-        startingPose.inUnit(meters),
-    )
-
-    private val allPoseSuppliers: MutableList<RobotPoseSupplier> = poseSuppliers.toMutableList()
 
 
-    /**
-     * adds a variable amount of pose suppliers to the drivetrain.
-     * these pose suppliers will fuse their poses into the pose estimator for more accurate measurements.
-     */
-    public fun addPoseSuppliers(vararg poseSuppliers: RobotPoseSupplier){
-        allPoseSuppliers.addAll(poseSuppliers)
-    }
 
-    public fun resetPose(pose: UnitPose2d, gyroAngle: Angle){
-        poseEstimator.resetPosition(
-            gyroAngle.asRotation2d(),
-            (inputs.leftAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
-            (inputs.rightAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
-            pose.inUnit(meters)
-        )
-    }
 
-    public fun resetPose(pose: UnitPose2d){
-        poseEstimator.resetPosition(
-            mostAccurateHeadingValue().asRotation2d(),
-            (inputs.leftAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
-            (inputs.rightAngularPosition * wheelTravelPerMotorRadian).inUnit(meters),
-            pose.inUnit(meters)
-        )
-    }
 
-    override val robotPoseMeasurement: Measurement<UnitPose2d>
-        get() = Measurement(
-            poseEstimator.estimatedPosition.ofUnit(meters),
-            fpgaTimestamp(),
-            true
-        )
-
-    override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
     
 
 }
