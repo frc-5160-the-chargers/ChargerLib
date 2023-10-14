@@ -22,12 +22,15 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
         get() = -ahrs.fusedHeading.toDouble().ofUnit(degrees) // Negative sign because the navX reports clockwise as positive
                                                               // whereas we want counterclockwise to be positive
 
-    public val altitude: Distance?
+    override val altitude: Distance?
         get() = if (ahrs.isAltitudeValid) ahrs.altitude.toDouble().ofUnit(meters) else null
 
     public val firmwareVersion: String get() = ahrs.firmwareVersion
 
-    public val isConnected: Boolean
+    override val name: String
+        get() = "NavX: Version $firmwareVersion"
+
+    override val isConnected: Boolean
         get() = ahrs.isConnected
 
     override val gyroscope: Gyroscope = Gyroscope()
@@ -35,7 +38,7 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
     override val accelerometer: Accelerometer = Accelerometer()
     override val speedometer: Speedometer = Speedometer()
 
-    public inner class Gyroscope internal constructor(): ThreeAxisGyroscope, HeadingProvider {
+    public inner class Gyroscope internal constructor(): ThreeAxisGyroscope {
         public override val yaw: Angle
             get() = ahrs.yaw.toDouble().ofUnit(degrees)
         override val pitch: Angle

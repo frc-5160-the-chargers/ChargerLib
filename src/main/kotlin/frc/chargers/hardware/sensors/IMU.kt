@@ -1,5 +1,6 @@
 package frc.chargers.hardware.sensors
 
+import com.batterystaple.kmeasure.quantities.Distance
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
 
@@ -9,6 +10,9 @@ import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
  */
 public interface IMU: HeadingProvider {
     public fun reset()
+    public val isConnected: Boolean
+    public val altitude: Distance?
+    public val name: String get() = "Generic IMU"
 
     public val gyroscope: ThreeAxisGyroscope
     public val compass: HeadingProvider

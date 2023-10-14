@@ -31,18 +31,6 @@ public val ChassisSpeeds.yVelocity: Velocity
 public val ChassisSpeeds.rotationSpeed: AngularVelocity
     get() = omegaRadiansPerSecond.ofUnit(radians/seconds)
 
-private fun log(transform: Pose2d): Twist2d {
-    val dtheta = transform.rotation.radians
-    val half_dtheta = 0.5 * dtheta
-    val cos_minus_one = kotlin.math.cos(transform.rotation.radians) - 1.0
-    val halftheta_by_tan_of_halfdtheta: Double = if (kotlin.math.abs(cos_minus_one) < 1E-9) {
-        1.0 - 1.0 / 12.0 * dtheta * dtheta
-    } else {
-        -(half_dtheta * kotlin.math.sin(transform.rotation.radians)) / cos_minus_one
-    }
-    val translation_part = transform.translation.rotateBy(Rotation2d(halftheta_by_tan_of_halfdtheta, -half_dtheta))
-    return Twist2d(translation_part.x, translation_part.y, dtheta)
-}
 
 /**
  * A function used to correct for drift on swerve drive when simultaneously rotating and driving in a singular direction.
@@ -53,13 +41,13 @@ public fun ChassisSpeeds.correctForDynamics(loopPeriod: Time = 0.02.seconds): Ch
     val futureRobotPose = Pose2d(
         vxMetersPerSecond * loopPeriod.inUnit(seconds),
         vyMetersPerSecond * loopPeriod.inUnit(seconds),
-        Rotation2d.fromRadians(omegaRadiansPerSecond * loopPeriod.inUnit(seconds))
+        Rotation2d.fromRadians(omegaRadiansPerSecond * loopPeriod.inUnit(seconds) * 4.0)
     )
-    val twistForPose: Twist2d = log(futureRobotPose)
+    val twistForPose: Twist2d = Pose2d().log(futureRobotPose)
     return ChassisSpeeds(
         twistForPose.dx / loopPeriod.inUnit(seconds),
         twistForPose.dy / loopPeriod.inUnit(seconds),
-        twistForPose.dtheta / loopPeriod.inUnit(seconds)
+        this.omegaRadiansPerSecond
     )
 }
 

@@ -5,6 +5,7 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.swerve.SwerveDriveMotors
@@ -249,7 +250,9 @@ public class EncoderHolonomicDrivetrain(
             topRightState = topRight.getModuleState(wheelRadius),
             bottomLeftState = bottomLeft.getModuleState(wheelRadius),
             bottomRightState = bottomRight.getModuleState(wheelRadius)
-        )
+        ).also{
+            Logger.getInstance().recordOutput("Drivetrain(Swerve)/CurrentModuleStates",*it.toArray())
+        }
         set(ms){
             ms.desaturate(maxModuleSpeed)
             if (currentControlMode == ControlMode.CLOSED_LOOP){
@@ -344,6 +347,13 @@ public class EncoderHolonomicDrivetrain(
 
 
 
+    private fun ChassisSpeeds.correctForDynamicsIfReal(): ChassisSpeeds =
+        if (RobotBase.isReal()){
+            correctForDynamics()
+        }else{
+            this
+        }
+
 
 
 
@@ -363,10 +373,9 @@ public class EncoderHolonomicDrivetrain(
      */
     @LowPriorityInOverloadResolution
     public fun swerveDrive(powers: ChassisPowers){
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/FieldOrientedEnabled",false)
         val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
         currentControlMode = ControlMode.OPEN_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamics())
+        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsIfReal())
         currentControlMode = ControlMode.CLOSED_LOOP
     }
 
@@ -378,16 +387,15 @@ public class EncoderHolonomicDrivetrain(
     context(HeadingProvider)
     @JvmName("SwerveDriveFieldOriented")
     public fun swerveDrive(powers: ChassisPowers){
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/FieldOrientedHeadingDeg",heading.inUnit(degrees))
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/FieldOrientedEnabled",true)
         val speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity),
             heading.asRotation2d()
         )
         currentControlMode = ControlMode.OPEN_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamics())
+        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsIfReal())
         currentControlMode = ControlMode.CLOSED_LOOP
     }
+
 
 
 
@@ -413,9 +421,8 @@ public class EncoderHolonomicDrivetrain(
      */
     @LowPriorityInOverloadResolution
     public fun velocityDrive(speeds: ChassisSpeeds){
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/FieldOrientedEnabled",false)
         currentControlMode = ControlMode.CLOSED_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamics())
+        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsIfReal())
     }
 
     /**
@@ -434,9 +441,7 @@ public class EncoderHolonomicDrivetrain(
             speeds, heading.asRotation2d()
         )
         currentControlMode = ControlMode.CLOSED_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(newSpeeds.correctForDynamics())
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/FieldOrientedHeadingDeg",heading.inUnit(degrees))
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/FieldOrientedEnabled",true)
+        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(newSpeeds.correctForDynamicsIfReal())
     }
 
     context(HeadingProvider)

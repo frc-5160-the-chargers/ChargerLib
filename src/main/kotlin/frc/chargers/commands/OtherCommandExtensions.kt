@@ -3,10 +3,7 @@ package frc.chargers.commands
 import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.units.seconds
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.CommandBase
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup
-import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.*
 
 /**
  * A way to link up 2 commands in a more concise way.
@@ -35,6 +32,9 @@ public fun Command.repeatFor(numTimes: Int): Command = buildCommand{
         +this@repeatFor
     }
 }
+
+public fun Command.beforeStarting(vararg subsystems: Subsystem, toRun: () -> Unit): Command =
+    beforeStarting(toRun,*subsystems)
 
 
 

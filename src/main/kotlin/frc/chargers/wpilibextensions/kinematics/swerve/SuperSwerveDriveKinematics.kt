@@ -10,6 +10,7 @@ import frc.chargers.utils.HeadingCorrector
 import frc.chargers.utils.SecondOrderSwerveKinematics
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
+import frc.chargers.wpilibextensions.geometry.asAngle
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import kotlin.math.*
@@ -68,13 +69,13 @@ public class SuperSwerveDriveKinematics(
 
         val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,standardizedHeading.asRotation2d())
 
-        val arr = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,standardizedHeading.asRotation2d())
+        val states = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,standardizedHeading.asRotation2d())
 
         return ModuleStateGroup(
-            topLeftState = arr[0],
-            topRightState = arr[1],
-            bottomLeftState = arr[2],
-            bottomRightState = arr[3]
+            topLeftState = states[0],
+            topRightState = states[1],
+            bottomLeftState = states[2],
+            bottomRightState = states[3]
         )
     }
 

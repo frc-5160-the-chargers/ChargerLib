@@ -101,6 +101,7 @@ public class SwervePoseMonitor(
 
     public fun resetPose(pose: UnitPose2d){
         poseEstimator.resetPose(pose.inUnit(meters))
+        headingInputs.calculatedHeading = pose.rotation
     }
 
 
