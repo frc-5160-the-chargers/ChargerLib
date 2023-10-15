@@ -165,7 +165,7 @@ public class EncoderHolonomicDrivetrain(
     public val bottomLeft: SwerveModule,
     public val bottomRight: SwerveModule,
     public val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
-    public val wheelDiameter: Length,
+    wheelDiameter: Length,
     trackWidth: Distance,
     wheelBase: Distance,
 ): SubsystemBase(){

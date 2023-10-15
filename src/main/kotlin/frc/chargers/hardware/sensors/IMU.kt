@@ -37,7 +37,7 @@ public interface IMU: HeadingProvider {
         private val getChassisSpeeds: () -> ChassisSpeeds = { ChassisSpeeds(0.0,0.0,0.0) }
     ): IMU{
         override fun reset() {
-            TODO("Not yet implemented")
+
         }
 
         override val isConnected: Boolean = false
