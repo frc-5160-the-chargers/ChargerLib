@@ -26,6 +26,18 @@ public interface IMU: HeadingProvider {
     public val speedometer: ThreeAxisSpeedometer
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Represents a Sim IMU, with dummy values for most outputs.
      *

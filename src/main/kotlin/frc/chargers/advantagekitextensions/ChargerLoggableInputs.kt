@@ -103,8 +103,8 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
             boolLoggers.add(
                 BoolLogger(
                     logName = logName + "IsValid",
-                    getBoolValue = {innerValue == null},
-                    setBoolValue = {innerValue = null}
+                    getBoolValue = {innerValue != null},
+                    setBoolValue = { if (!it) {innerValue = null} }
                 )
             )
         }
@@ -164,8 +164,8 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
                 boolLoggers.add(
                     BoolLogger(
                         logName = logName + "IsValid",
-                        getBoolValue = {innerValue == null},
-                        setBoolValue = {innerValue = null}
+                        getBoolValue = {innerValue != null},
+                        setBoolValue = {if (!it) {innerValue = null}}
                     )
                 )
             }
