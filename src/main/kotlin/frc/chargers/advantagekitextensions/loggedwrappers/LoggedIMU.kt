@@ -47,7 +47,7 @@ public class LoggedIMU(
             meters
         )
 
-        var name: String by loggedString(
+        var baseIMUName: String by loggedString(
             defaultValue = "",
             logName = "name"
         )
@@ -57,7 +57,7 @@ public class LoggedIMU(
             fusedHeading = imu.heading
             compassHeading = imu.compass.heading
             altitude = imu.altitude
-            name = imu.name
+            baseIMUName = imu.imuName
         }
     }
 
@@ -65,7 +65,12 @@ public class LoggedIMU(
     override val heading: Angle get() = generalInputs.fusedHeading
     override val isConnected: Boolean get() = generalInputs.isConnected
     override val altitude: Distance? get() = generalInputs.altitude
-    override val name: String get() = generalInputs.name
+
+
+    // getter cannot be used here; will cause accidental override kotlin error
+    // with the getName() function of SubsystemBase()
+    override val imuName: String
+        get() = generalInputs.baseIMUName
 
     override val compass: HeadingProvider = object: HeadingProvider{
         override val heading: Angle get() = generalInputs.compassHeading
@@ -169,10 +174,10 @@ public class LoggedIMU(
         // note: The gyroscope, speedometer and accelerometer all act as Inputs classes
         // in addition to holding public API values.
         Logger.getInstance().apply{
-            processInputs(name,generalInputs)
-            processInputs("$name/Gyroscope",gyroscope)
-            processInputs("$name/Speedometer",speedometer)
-            processInputs("$name/Accelerometer",accelerometer)
+            processInputs(imuName,generalInputs)
+            processInputs("$imuName/Gyroscope",gyroscope)
+            processInputs("$imuName/Speedometer",speedometer)
+            processInputs("$imuName/Accelerometer",accelerometer)
         }
 
     }

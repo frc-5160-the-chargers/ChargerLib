@@ -17,4 +17,9 @@ public interface HeadingProvider {
      * due to wrapping around.
      */
     public val heading: Angle
+
+    /**
+     * Represents a [HeadingProvider] with a static heading value.
+     */
+    public class Static(override val heading: Angle = Angle(0.0)) : HeadingProvider
 }

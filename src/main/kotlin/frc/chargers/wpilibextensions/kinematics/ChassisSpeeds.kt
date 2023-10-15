@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Twist2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import frc.chargers.wpilibextensions.geometry.asRotation2d
 
 
 /**
