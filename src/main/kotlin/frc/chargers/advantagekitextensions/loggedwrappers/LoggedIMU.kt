@@ -120,7 +120,7 @@ public class LoggedIMU(
         )
 
         override var zAcceleration: Acceleration by loggedQuantity(
-            logName = "yAccel(MetersPerSecSquared)",
+            logName = "zAccel(MetersPerSecSquared)",
             logUnit = meters/seconds/seconds
         )
         
@@ -143,7 +143,7 @@ public class LoggedIMU(
         )
 
         override var zVelocity: Velocity by loggedQuantity(
-            logName = "yVelocity(MetersPerSec)",
+            logName = "zVelocity(MetersPerSec)",
             logUnit = meters/seconds
         )
 

@@ -27,7 +27,7 @@ public interface IMU: HeadingProvider {
 
 
     /**
-     * Represents a Sim IMU, with dummy values for most things.
+     * Represents a Sim IMU, with dummy values for most outputs.
      *
      * Contains headingProviderImpl and getChassisSpeeds in order to use simulated readings from the drivetrain
      * as a stand-in for values.
@@ -40,6 +40,7 @@ public interface IMU: HeadingProvider {
 
         }
 
+        override val imuName: String = "Sim IMU"
         override val isConnected: Boolean = false
         override val altitude: Distance? = null
         override val gyroscope: ThreeAxisGyroscope = object: ThreeAxisGyroscope{
