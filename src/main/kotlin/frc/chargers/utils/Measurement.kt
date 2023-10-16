@@ -17,4 +17,19 @@ public data class Measurement<T>(
 
     public val currentLatency: Time
         get() = fpgaTimestamp() - timestamp
+
+
+
+
+    override fun equals(other: Any?): Boolean {
+        return other is Measurement<*> && other.value == value && other.isValid == isValid
+    }
+
+    override fun hashCode(): Int {
+        var result = value?.hashCode() ?: 0
+        result = 31 * result + timestamp.hashCode()
+        result = 31 * result + isValid.hashCode()
+        result = 31 * result + latency.hashCode()
+        return result
+    }
 }

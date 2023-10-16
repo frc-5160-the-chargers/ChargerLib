@@ -88,7 +88,7 @@ public class ChargerCANcoder(
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations / seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = absolutePosition.timestamp.isValid
+                isValid = statusSignal.timestamp.isValid
             )
         }
 }
