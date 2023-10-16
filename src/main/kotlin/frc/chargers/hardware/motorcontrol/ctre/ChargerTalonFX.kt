@@ -50,6 +50,27 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
 
     final override fun configure(configuration: TalonFXConfiguration){
         configurator.apply(configuration.toCTRETalonFXConfiguration())
+        configuration.apply{
+            positionUpdateFrequency?.let{
+                position.setUpdateFrequency(it.inUnit(hertz))
+            }
+
+            velocityUpdateFrequency?.let{
+                velocity.setUpdateFrequency(it.inUnit(hertz))
+            }
+
+            motorOutputUpdateFrequency?.let{
+                supplyVoltage.setUpdateFrequency(it.inUnit(hertz))
+                dutyCycle.setUpdateFrequency(it.inUnit(hertz))
+            }
+
+            currentUpdateFrequency?.let{
+                torqueCurrent.setUpdateFrequency(it.inUnit(hertz))
+                supplyCurrent.setUpdateFrequency(it.inUnit(hertz))
+                statorCurrent.setUpdateFrequency(it.inUnit(hertz))
+            }
+        }
+
     }
 
 
@@ -254,7 +275,12 @@ public data class TalonFXConfiguration(
 
     var peakForwardVoltage: Voltage = 12.volts,
     var peakReverseVoltage: Voltage = -12.volts,
-    var supplyVoltageTimeConstant: Time = Time(0.0)
+    var supplyVoltageTimeConstant: Time = Time(0.0),
+
+    var positionUpdateFrequency: Frequency? = null,
+    var velocityUpdateFrequency: Frequency? = null,
+    var motorOutputUpdateFrequency: Frequency? = null,
+    var currentUpdateFrequency: Frequency? = null
 
 ): MotorConfiguration{
 

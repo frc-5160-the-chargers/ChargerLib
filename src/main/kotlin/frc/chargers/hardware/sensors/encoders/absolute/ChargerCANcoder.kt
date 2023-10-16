@@ -1,6 +1,7 @@
 package frc.chargers.hardware.sensors.encoders.absolute
 
 import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.hertz
 import com.batterystaple.kmeasure.units.rotations
 import com.batterystaple.kmeasure.units.seconds
 import com.ctre.phoenix6.configs.MagnetSensorConfigs
@@ -26,6 +27,7 @@ public class ChargerCANcoder(
     canBus: String? = null
 ): CTRECANcoder(deviceID, canBus), ResettableTimestampedEncoder, EncoderConfigurable<CANcoderConfiguration> {
 
+    public var filterVelocity: Boolean = true
     public companion object{
         public inline operator fun invoke(
             deviceID: Int,
@@ -52,6 +54,19 @@ public class ChargerCANcoder(
     
     override fun configure(configuration: CANcoderConfiguration) {
         configurator.apply(configuration.toCTRECANCoderConfiguration())
+
+        configuration.positionUpdateFrequency?.let{
+            position.setUpdateFrequency(it.inUnit(hertz))
+            absolutePosition.setUpdateFrequency(it.inUnit(hertz))
+        }
+
+        configuration.velocityUpdateFrequency?.let{
+            velocity.setUpdateFrequency(it.inUnit(hertz))
+            unfilteredVelocity.setUpdateFrequency(it.inUnit(hertz))
+        }
+
+        filterVelocity = configuration.filterVelocity
+
     }
 
     override fun setZero(newZero: Angle){
@@ -69,7 +84,7 @@ public class ChargerCANcoder(
 
     override val timestampedAngularVelocity: Measurement<AngularVelocity>
         get(){
-            val statusSignal = velocity
+            val statusSignal = if (filterVelocity) velocity else unfilteredVelocity
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations / seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
@@ -85,6 +100,10 @@ public data class CANcoderConfiguration(
     var sensorDirection: SensorDirectionValue = blankConfig.MagnetSensor.SensorDirection,
     var absoluteSensorRange: AbsoluteSensorRangeValue = blankConfig.MagnetSensor.AbsoluteSensorRange,
     var magnetOffset: Angle = Angle(0.0),
+    var filterVelocity: Boolean = true,
+
+    var positionUpdateFrequency: Frequency? = null,
+    var velocityUpdateFrequency: Frequency? = null
 ): EncoderConfiguration{
     public fun toCTRECANCoderConfiguration(): CTRECANcoderConfiguration = CTRECANcoderConfiguration().apply{
         FutureProofConfigs = futureProofConfigs
