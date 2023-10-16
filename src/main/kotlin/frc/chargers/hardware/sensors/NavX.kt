@@ -65,7 +65,7 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
             get() = ahrs.worldLinearAccelZ.toDouble().ofUnit(g)
     }
 
-    public inner class Speedometer: ThreeAxisSpeedometer{
+    public inner class Speedometer internal constructor(): ThreeAxisSpeedometer{
         override val xVelocity: Velocity
             get() = ahrs.velocityX.toDouble().ofUnit(meters / seconds)
         override val yVelocity: Velocity

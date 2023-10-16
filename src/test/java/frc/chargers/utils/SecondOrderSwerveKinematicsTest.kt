@@ -2,6 +2,7 @@ package frc.chargers.utils
 
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
+import edu.wpi.first.hal.HAL
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -9,13 +10,20 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveDriveKinematics
-import junit.framework.TestCase.assertEquals
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+
 internal class SecondOrderSwerveKinematicsTest {
+
+    @BeforeEach
+    fun setup(){
+        assert(HAL.initialize(500, 0))
+    }
     @Test
-    fun toSwerveModuleState() {
+    public fun `to swerve module state`() {
         val secondKinematics = SecondOrderSwerveKinematics(
             Translation2d(0.5,0.5),
             Translation2d(-0.5,0.5),
@@ -45,7 +53,7 @@ internal class SecondOrderSwerveKinematicsTest {
 
     @Test
     fun toSwerveModuleStateGroup(){
-        /*
+
         val speeds = ChassisSpeeds(1.5,0.0,1.0)
         val angle = 0.0.degrees
         val combinedKinematics = SuperSwerveDriveKinematics(
@@ -64,7 +72,7 @@ internal class SecondOrderSwerveKinematicsTest {
         val headingCorrector = HeadingCorrector()
 
         val combinedModuleStates = combinedKinematics.toSecondOrderModuleStateGroup(
-            speeds, 0.0.degrees
+            speeds, angle
         ).toArray()
 
         val baseModuleStates = secondKinematics.toSwerveModuleState(
@@ -76,9 +84,14 @@ internal class SecondOrderSwerveKinematicsTest {
             Assertions.assertEquals(combinedModuleStates[i], baseModuleStates[i])
         }
 
-         */
+    }
 
-
+    @Test
+    fun thisTestPurposelyFailsTest(){
+        println("hi")
+        verify{
+            Assertions.assertEquals(0,1)
+        }
 
     }
 }

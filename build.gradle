@@ -82,6 +82,15 @@ publishing {
     }
 }
 
+allprojects {
+    test {
+        scanForTestClasses false
+        include "**/*Test.class"
+    }
+}
+
+
+
 dokkaHtml {
     dokkaSourceSets {
         configureEach {
