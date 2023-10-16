@@ -85,12 +85,4 @@ internal class SecondOrderSwerveKinematicsTest {
 
     }
 
-    @Test
-    fun thisTestPurposelyFailsTest(){
-        println("hi")
-        verify{
-            Assertions.assertEquals(0,1)
-        }
-
-    }
 }
