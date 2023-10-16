@@ -15,12 +15,11 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-
 internal class SecondOrderSwerveKinematicsTest {
 
     @BeforeEach
     fun setup(){
-        assert(HAL.initialize(500, 0))
+        assert(HAL.initialize(500,0))
     }
     @Test
     public fun `to swerve module state`() {
