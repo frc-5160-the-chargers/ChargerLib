@@ -17,7 +17,7 @@ import frc.chargers.wpilibextensions.kinematics.yVelocity
  * as a stand-in for values.
  */
 public class IMUSim(
-    private val headingProviderImpl: HeadingProvider,
+    private val headingProviderImpl: HeadingProvider = HeadingProvider.Static(),
     private val getChassisSpeeds: () -> ChassisSpeeds = { ChassisSpeeds(0.0,0.0,0.0) }
 ): IMU{
     override fun reset() {
