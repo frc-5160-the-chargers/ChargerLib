@@ -1,6 +1,5 @@
 package frc.chargers.advantagekitextensions
 
-import edu.wpi.first.wpilibj.DriverStation
 import frc.chargers.builddata.ChargerLibBuildConstants
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.chargers.wpilibextensions.Alert

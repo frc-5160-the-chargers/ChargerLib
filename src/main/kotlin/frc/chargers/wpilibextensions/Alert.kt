@@ -85,25 +85,21 @@ public class Alert(group: String = "Alerts", text: String, type: AlertType) {
         /**
          * A convenience function to create an [Alert] with the [AlertType] of Error.
          */
-        public fun error(group: String = "Alerts", text: String): Alert = Alert(group,text,AlertType.ERROR)
+        public fun error(group: String = "Alerts", text: String): Alert = Alert(group,text, AlertType.ERROR)
         /**
          * A convenience function to create an [Alert] with the [AlertType] of Warning.
          */
-        public fun warning(group: String = "Alerts", text: String): Alert = Alert(group,text,AlertType.WARNING)
+        public fun warning(group: String = "Alerts", text: String): Alert = Alert(group,text, AlertType.WARNING)
         /**
          * A convenience function to create an [Alert] with the [AlertType] of Info.
          */
-        public fun info(group: String = "Alerts", text: String): Alert = Alert(group,text,AlertType.INFO)
+        public fun info(group: String = "Alerts", text: String): Alert = Alert(group,text, AlertType.INFO)
     }
 
     /**
      * Creates a new Alert. If this is the first to be instantiated in its group, the appropriate
      *
      * entries will be added to NetworkTables.
-     *
-     * @param group Group identifier, also used as NetworkTables title
-     * @param text Text to be displayed when the alert is active.
-     * @param type Alert level specifying urgency.
      */
     init {
         if (!groups.containsKey(group)) {

@@ -36,7 +36,6 @@ internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)
 public fun simEncoderHolonomicDrivetrain(
     turnGearbox: DCMotor,
     driveGearbox: DCMotor,
-    loopPeriod: Time = 20.milli.seconds,
     turnGearRatio: Double = DEFAULT_GEAR_RATIO,
     driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
@@ -47,7 +46,8 @@ public fun simEncoderHolonomicDrivetrain(
     wheelDiameter: Length,
     trackWidth: Distance,
     wheelBase: Distance,
-    staticVoltageStall: Boolean = false
+    staticVoltageStall: Boolean = false,
+    loopPeriod: Time = 20.milli.seconds,
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft = SwerveModule(
         ModuleIOSim(
@@ -93,7 +93,8 @@ public fun realEncoderHolonomicDrivetrain(
     wheelDiameter: Length,
     trackWidth: Distance,
     wheelBase: Distance,
-    staticVoltageStall: Boolean = false
+    staticVoltageStall: Boolean = false,
+    loopPeriod: Time = 20.milli.seconds,
 ): EncoderHolonomicDrivetrain{
     val topLeft = SwerveModule(
         ModuleIOReal(
@@ -146,7 +147,7 @@ public fun realEncoderHolonomicDrivetrain(
     return EncoderHolonomicDrivetrain(
         topLeft, topRight, bottomLeft, bottomRight,
         maxModuleSpeed, wheelDiameter,
-        trackWidth, wheelBase
+        trackWidth, wheelBase, loopPeriod
     )
 }
 
@@ -164,10 +165,11 @@ public class EncoderHolonomicDrivetrain(
     public val topRight: SwerveModule,
     public val bottomLeft: SwerveModule,
     public val bottomRight: SwerveModule,
-    public val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
+    private val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     wheelDiameter: Length,
     trackWidth: Distance,
     wheelBase: Distance,
+    private val loopPeriod: Time = 0.02.seconds
 ): SubsystemBase(){
 
     /**
@@ -312,7 +314,7 @@ public class EncoderHolonomicDrivetrain(
      * driving each swerve module at their maximum potential,
      * then calculating the output using the kinematics object.
      */
-    public val maxLinearVelocity: Velocity = kinematics.toChassisSpeeds(
+    public val maxLinearVelocity: Velocity = abs(kinematics.toChassisSpeeds(
         ModuleStateGroup(
             topLeftSpeed = maxModuleSpeed,
             topRightSpeed = maxModuleSpeed,
@@ -323,14 +325,14 @@ public class EncoderHolonomicDrivetrain(
             bottomLeftAngle = Angle(0.0),
             bottomRightAngle = Angle(0.0)
         )
-    ).xVelocity
+    ).xVelocity)
 
     /**
      * The max angular velocity of the drivetrain, calculated by simulating
      * driving each swerve module at their maximum potential(with each being oriented at a 45 or -45 degrees angle),
      * then calculating the output using the kinematics object.
      */
-    public val maxRotationalVelocity: AngularVelocity = kinematics.toChassisSpeeds(
+    public val maxRotationalVelocity: AngularVelocity = abs(kinematics.toChassisSpeeds(
 
         ModuleStateGroup(
             topLeftSpeed = maxModuleSpeed,
@@ -342,14 +344,14 @@ public class EncoderHolonomicDrivetrain(
             bottomLeftAngle = 45.degrees,
             bottomRightAngle = -45.degrees
         )
-    ).rotationSpeed
+    ).rotationSpeed)
 
 
 
 
     private fun ChassisSpeeds.correctForDynamicsIfReal(): ChassisSpeeds =
         if (RobotBase.isReal()){
-            correctForDynamics()
+            correctForDynamics(loopPeriod)
         }else{
             this
         }
@@ -492,6 +494,8 @@ public class EncoderHolonomicDrivetrain(
         bottomRight.updateAndProcessInputs("Drivetrain(Swerve)/BottomRightSwerveModule")
 
         Logger.getInstance().recordOutput("Drivetrain(Swerve)/CurrentModuleStates", *currentModuleStates.toArray())
+        Logger.getInstance().recordOutput("Drivetrain(Swerve)/DistanceTraveledMeters", distanceTraveled.inUnit(meters))
+        Logger.getInstance().recordOutput("Drivetrain(Swerve)/OverallVelocityMetersPerSec",velocity.inUnit(meters/seconds))
     }
 
 
