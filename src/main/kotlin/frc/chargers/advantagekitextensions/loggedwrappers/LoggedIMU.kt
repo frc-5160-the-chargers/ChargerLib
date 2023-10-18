@@ -28,28 +28,28 @@ public class LoggedIMU(
     private val generalInputs = GeneralInputs()
     private inner class GeneralInputs: ChargerLoggableInputs() {
         var isConnected: Boolean by loggedBoolean(
-            false,
-            "isConnected"
+            "isConnected",
+            false
         )
         var fusedHeading: Angle by loggedQuantity(
-            0.0.degrees,
+            degrees,
             "fusedHeadingDeg",
-            degrees
+            0.0.degrees
         )
         var compassHeading: Angle by loggedQuantity(
-            0.0.degrees,
+            degrees,
             "compassHeadingDeg",
-            degrees
+            0.0.degrees
         )
         var altitude: Distance? by loggedNullableQuantity(
-            Distance(0.0),
+            meters,
             "altitudeMeters",
-            meters
+            Distance(0.0)
         )
 
         var baseIMUName: String by loggedString(
-            defaultValue = "",
-            logName = "name"
+            logName = "name",
+            defaultValue = ""
         )
 
         fun update(){
@@ -79,24 +79,24 @@ public class LoggedIMU(
     
     public inner class GyroscopeInputs: ChargerLoggableInputs(), ThreeAxisGyroscope{
         override var yaw: Angle by loggedQuantity(
-            Angle(0.0),
+            degrees,
             "yawDeg",
-            degrees
+            Angle(0.0)
         )
         override var pitch: Angle by loggedQuantity(
-            Angle(0.0),
+            degrees,
             "pitchDeg",
-            degrees
+            Angle(0.0)
         )
         override var roll: Angle by loggedQuantity(
-            Angle(0.0),
+            degrees,
             "rollDeg",
-            degrees
+            Angle(0.0)
         )
         override var heading: Angle by loggedQuantity(
-            Angle(0.0),
+            degrees,
             "continuousHeadingDeg",
-            degrees
+            Angle(0.0)
         )
 
         internal fun update(){
@@ -110,18 +110,18 @@ public class LoggedIMU(
 
     public inner class AccelerometerInputs: ChargerLoggableInputs(), ThreeAxisAccelerometer{
         override var xAcceleration: Acceleration by loggedQuantity(
-            logName = "xAccel(MetersPerSecSquared)",
-            logUnit = meters/seconds/seconds
+            logUnit = meters/seconds/seconds,
+            logName = "xAccel(MetersPerSecSquared)"
         )
 
         override var yAcceleration: Acceleration by loggedQuantity(
-            logName = "yAccel(MetersPerSecSquared)",
-            logUnit = meters/seconds/seconds
+            logUnit = meters/seconds/seconds,
+            logName = "yAccel(MetersPerSecSquared)"
         )
 
         override var zAcceleration: Acceleration by loggedQuantity(
-            logName = "zAccel(MetersPerSecSquared)",
-            logUnit = meters/seconds/seconds
+            logUnit = meters/seconds/seconds,
+            logName = "zAccel(MetersPerSecSquared)"
         )
         
         internal fun update(){
@@ -133,18 +133,18 @@ public class LoggedIMU(
 
     public inner class SpeedometerInputs: ChargerLoggableInputs(), ThreeAxisSpeedometer{
         override var xVelocity: Velocity by loggedQuantity(
-            logName = "xVelocity(MetersPerSec)",
-            logUnit = meters/seconds
+            logUnit = meters/seconds,
+            logName = "xVelocity(MetersPerSec)"
         )
 
         override var yVelocity: Velocity by loggedQuantity(
-            logName = "yVelocity(MetersPerSec)",
-            logUnit = meters/seconds
+            logUnit = meters/seconds,
+            logName = "yVelocity(MetersPerSec)"
         )
 
         override var zVelocity: Velocity by loggedQuantity(
-            logName = "zVelocity(MetersPerSec)",
-            logUnit = meters/seconds
+            logUnit = meters/seconds,
+            logName = "zVelocity(MetersPerSec)"
         )
 
         internal fun update(){

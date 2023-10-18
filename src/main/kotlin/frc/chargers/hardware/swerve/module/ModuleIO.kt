@@ -137,37 +137,37 @@ public class ModuleIOSim(
 public interface ModuleIO{
     public class Inputs: ChargerLoggableInputs(){
         public var direction: Angle by loggedQuantity(
-            Angle(0.0),
+            logUnit = degrees,
             logName = "directionDegrees",
-            logUnit = degrees
+            Angle(0.0)
         )
         public var turnSpeed: AngularVelocity by loggedQuantity(
-            AngularVelocity(0.0),
+            logUnit = degrees/seconds,
             logName = "turnSpeedDegPerSec",
-            logUnit = degrees/seconds
+            AngularVelocity(0.0)
         )
         public var turnVoltage: Voltage by loggedQuantity(
-            Voltage(0.0),
+            logUnit = volts,
             logName = "turnVoltageVolts",
-            logUnit = volts
+            Voltage(0.0)
         )
 
 
 
         public var speed: AngularVelocity by loggedQuantity(
-            AngularVelocity(0.0),
+            degrees/seconds,
             "speedDegreesPerSec",
-            degrees/seconds
+            AngularVelocity(0.0)
         )
         public var driveVoltage: Voltage by loggedQuantity(
-            Voltage(0.0),
+            logUnit = volts,
             logName = "driveVoltageVolts",
-            logUnit = volts
+            Voltage(0.0)
         )
         public var distance: Angle by loggedQuantity(
-            Angle(0.0),
+            degrees,
             "distanceDegrees",
-            degrees
+            Angle(0.0)
         )
     }
 

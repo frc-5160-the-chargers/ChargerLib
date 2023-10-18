@@ -58,8 +58,8 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
      * which allows the fromLog and toLog functions of [LoggableInputs] to modify its value.
      */
     public fun loggedDouble(
-        defaultValue: Double = 0.0,
-        logName: String
+        logName: String,
+        defaultValue: Double = 0.0
     ): ReadWriteProperty<Any?,Double> =
         object: ReadWriteProperty<Any?,Double>{
             private var innerValue = defaultValue
@@ -85,8 +85,8 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
      * in addition to adding an "isValid" log category checking if the value is null or not.
      */
     public fun loggedNullableDouble(
-        defaultValue: Double? = null,
-        logName: String
+        logName: String,
+        defaultValue: Double? = null
     ): ReadWriteProperty<Any?,Double?> = object: ReadWriteProperty<Any?,Double?>{
         private var innerValue = defaultValue
 
@@ -122,10 +122,10 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
      * which allows the fromLog and toLog functions of [LoggableInputs] to modify its value.
      */
     public fun <D: AnyDimension> loggedQuantity(
-        defaultValue: Quantity<D> = Quantity(0.0),
+        logUnit: Quantity<D>,
         logName: String,
-        logUnit: Quantity<D>
-    ): ReadWriteProperty<Any?,Quantity<D>> =
+        defaultValue: Quantity<D> = Quantity(0.0)
+    ): ReadWriteProperty<Any?, Quantity<D>> =
         object: ReadWriteProperty<Any?,Quantity<D>>{
             private var innerValue = defaultValue
             init{
@@ -145,10 +145,10 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
         }
 
     public fun <D: AnyDimension> loggedNullableQuantity(
-        defaultValue: Quantity<D>? = null,
+        logUnit: Quantity<D>,
         logName: String,
-        logUnit: Quantity<D>
-    ): ReadWriteProperty<Any?,Quantity<D>?> =
+        defaultValue: Quantity<D>? = null
+    ): ReadWriteProperty<Any?, Quantity<D>?> =
         object: ReadWriteProperty<Any?,Quantity<D>?>{
             private var innerValue = defaultValue
             init{
@@ -181,8 +181,8 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
      * which allows the fromLog and toLog functions of [LoggableInputs] to modify its value.
      */
     public fun loggedBoolean(
-        defaultValue: Boolean = false,
-        logName: String
+        logName: String,
+        defaultValue: Boolean = false
     ): ReadWriteProperty<Any?,Boolean> =
         object: ReadWriteProperty<Any?,Boolean>{
             private var innerValue = defaultValue
@@ -211,8 +211,8 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
      * which allows the fromLog and toLog functions of [LoggableInputs] to modify its value.
      */
     public fun loggedString(
-        defaultValue: String = "NO_VALUE",
-        logName: String
+        logName: String,
+        defaultValue: String = "NO_VALUE"
     ): ReadWriteProperty<Any?,String> =
         object: ReadWriteProperty<Any?,String>{
             private var innerValue = defaultValue

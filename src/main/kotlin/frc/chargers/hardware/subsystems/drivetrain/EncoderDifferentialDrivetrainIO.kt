@@ -100,37 +100,37 @@ public class EncoderDifferentialDrivetrainIOSim(
 public interface EncoderDifferentialDrivetrainIO{
     public class Inputs: ChargerLoggableInputs(){
         public var leftAngularPosition: Angle by loggedQuantity(
-            Angle(0.0),
+            degrees,
             "leftPositionDeg",
-            degrees
+            Angle(0.0)
         )
         public var rightAngularPosition: Angle by loggedQuantity(
-            Angle(0.0),
+            degrees,
             "leftPositionDeg",
-            degrees
+            Angle(0.0)
         )
 
         public var leftAngularVelocity: AngularVelocity by loggedQuantity(
-            AngularVelocity(0.0),
+            degrees / seconds,
             "leftVelocityDegPerSecond",
-            degrees / seconds
+            AngularVelocity(0.0)
         )
         public var rightAngularVelocity: AngularVelocity by loggedQuantity(
-            AngularVelocity(0.0),
+            degrees / seconds,
             "rightVelocityDegPerSecond",
-            degrees / seconds
+            AngularVelocity(0.0)
         )
 
         public var leftVoltage: Voltage by loggedQuantity(
-            Voltage(0.0),
+            volts,
             "leftVoltage",
-            volts
+            Voltage(0.0)
         )
 
         public var rightVoltage: Voltage by loggedQuantity(
-            Voltage(0.0),
+            volts,
             "rightVoltage",
-            volts
+            Voltage(0.0)
         )
     }
 

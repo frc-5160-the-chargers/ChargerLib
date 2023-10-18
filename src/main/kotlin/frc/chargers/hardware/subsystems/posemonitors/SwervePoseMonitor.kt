@@ -68,9 +68,9 @@ public class SwervePoseMonitor(
 
     private val headingInputs = HeadingInputs()
     private inner class HeadingInputs: ChargerLoggableInputs(){
-        var gyroUsed by loggedBoolean(false, "realGyroUsedInEstimation")
-        var gyroInputHeading by loggedQuantity(Angle(0.0),"gyroInputHeading", degrees)
-        var calculatedHeading by loggedQuantity(Angle(0.0),"calculatedHeadingDeg",degrees)
+        var gyroUsed by loggedBoolean("realGyroUsedInEstimation", false)
+        var gyroInputHeading by loggedQuantity(degrees, "gyroInputHeading", Angle(0.0))
+        var calculatedHeading by loggedQuantity(degrees, "calculatedHeadingDeg", Angle(0.0))
     }
 
     private fun updateInputs(calculatedHeading: Angle){
