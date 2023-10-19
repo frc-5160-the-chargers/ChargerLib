@@ -37,7 +37,7 @@ public fun simulatedDrivetrain(
     rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
     rightMotorFF: AngularMotorFF = AngularMotorFF.None,
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
-    EncoderDifferentialDrivetrainIOSim(simMotors,loopPeriod),
+    DifferentialDriveIOSim(simMotors,loopPeriod),
     invertMotors, gearRatio, wheelDiameter, width,  leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF
 )
 
@@ -97,7 +97,7 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
     configuration: C
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
-        io = EncoderDifferentialDrivetrainIOReal(
+        io = DifferentialDriveIOReal(
             leftMotors = leftMotors.apply { configure(configuration) },
             rightMotors = rightMotors.apply { configure(configuration) }
         ),
@@ -111,7 +111,7 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
 
 
 public class EncoderDifferentialDrivetrain(
-    private val io: EncoderDifferentialDrivetrainIO,
+    private val io: DifferentialDriveIO,
     invertMotors: Boolean = false,
     private val gearRatio: Double = DEFAULT_GEAR_RATIO,
     private val wheelDiameter: Length,
@@ -124,7 +124,7 @@ public class EncoderDifferentialDrivetrain(
     init{
         io.inverted = invertMotors
     }
-    internal val inputs = EncoderDifferentialDrivetrainIO.Inputs()
+    internal val inputs = DifferentialDriveIO.Inputs()
 
 
     override fun periodic(){

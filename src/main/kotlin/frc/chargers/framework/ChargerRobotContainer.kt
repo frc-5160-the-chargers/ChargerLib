@@ -15,8 +15,6 @@ public abstract class ChargerRobotContainer {
     /*
     Here are functions that replicate functionality of the Robot class.
      */
-    public open fun robotInit(){}
-    public open fun robotPeriodic(){}
     public open fun disabledInit() {}
     public open fun disabledPeriodic() {}
     public open fun autonomousInit() {}

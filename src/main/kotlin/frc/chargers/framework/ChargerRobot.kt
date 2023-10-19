@@ -133,7 +133,6 @@ public open class ChargerRobot(
                 Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", false)
             }
         }
-        robotContainer.robotInit()
     }
 
     /**
@@ -153,7 +152,6 @@ public open class ChargerRobot(
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run()
-        robotContainer.robotPeriodic()
         Logger.getInstance().apply{
             recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
             logReceiverQueueAlert.active = receiverQueueFault
