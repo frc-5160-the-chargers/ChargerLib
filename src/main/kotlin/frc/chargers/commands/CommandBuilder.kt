@@ -4,6 +4,9 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior
+import frc.chargers.utils.MappableContext
+import frc.chargers.utils.a
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -13,8 +16,17 @@ import kotlin.reflect.KProperty
  * See [here](https://kotlinlang.org/docs/type-safe-builders.html#how-it-works)
  * for an explanation of DSLs and how they are built.
  */
-public inline fun buildCommand(block: CommandBuilder.() -> Unit): Command =
-    SequentialCommandGroup(*CommandBuilder().apply(block).commands.toTypedArray())
+public inline fun buildCommand(
+    vararg globalRequirements: Subsystem,
+    name: String = "Generic BuildCommand",
+    block: CommandBuilder.() -> Unit
+): Command =
+    SequentialCommandGroup(
+        *CommandBuilder().apply(block).commands.toTypedArray()
+    ).also{
+        it.name = name
+        it.addRequirements(*globalRequirements)
+    }
 
 
 @DslMarker
@@ -45,12 +57,33 @@ public class CommandBuilder {
 
 
     /**
+     * Adds a command that will run the command onTrue or only if a condition is met.
+     */
+    public fun runIf(condition: () -> Boolean, onTrue: Command, onFalse: Command): ConditionalCommand =
+        ConditionalCommand(onTrue,onFalse,condition).also(commands::add)
+
+    /**
+     * Adds a command that will run the appropriate mapped command, depending on the key given.
+     *
+     * @param key: A lambda that gets a generic value, used for choosing an appropriate command.
+     * @param default: The default command called if the key does not match anything given within the [MappableContext] block.
+     * @param block: The [MappableContext] that maps the key's value to a specific command.
+     */
+    public fun <T: Any> runWhen(key: () -> T, default: Command, block: MappableContext<T, Command>.() -> Unit): Command =
+        CustomSelectCommand(
+            key,
+            MappableContext<T,Command>().apply(block).map,
+            default
+        ).also(commands::add)
+
+
+    /**
      * Adds a command that will run *until* [condition] is met.
      *
      * @param condition the condition to be met
      * @param command the command to run until [condition] is met
      */
-    public fun loopUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
+    public fun runUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
         command.until { CodeBlockContext.condition() }
             .also(commands::add)
 
@@ -62,7 +95,7 @@ public class CommandBuilder {
      * @param execute the code to be run until [condition] is met
      */
     public inline fun loopUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        loopUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() })
+        runUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() })
 
     /**
      * Adds a command that will run *while* [condition] is true.
@@ -204,6 +237,52 @@ public class CommandBuilder {
                 initializeValue()
                 value
             }
+    }
+
+    private inner class CustomSelectCommand<T: Any>(
+        val getValue: () -> T,
+        val commandMap: Map<T,Command>,
+        default: Command
+    ): CommandBase(){
+        var allRequirements: Array<Subsystem> = arrayOf()
+        var runsWhenDisabled = true
+
+        var selectedCommand = default
+
+        var interruptBehavior = InterruptionBehavior.kCancelIncoming
+
+        init{
+            for (command in commandMap.values){
+                allRequirements += command.requirements.toTypedArray()
+                runsWhenDisabled = runsWhenDisabled && command.runsWhenDisabled()
+                if (command.interruptionBehavior == InterruptionBehavior.kCancelSelf) {
+                    interruptBehavior = InterruptionBehavior.kCancelSelf
+                }
+            }
+            CommandScheduler.getInstance().registerComposedCommands(
+                *(a[default] + commandMap.values.toTypedArray())
+            )
+            addRequirements(
+                *allRequirements
+            )
+        }
+
+        override fun initialize(){
+            val selector = getValue()
+
+            commandMap[selector]?.let{
+                selectedCommand = it
+            }
+
+            selectedCommand.initialize()
+        }
+
+        override fun execute() = selectedCommand.execute()
+        override fun isFinished() = selectedCommand.isFinished
+        override fun end(interrupted: Boolean) = selectedCommand.end(interrupted)
+        override fun runsWhenDisabled() = runsWhenDisabled
+        override fun getInterruptionBehavior() = interruptBehavior
+
     }
 }
 

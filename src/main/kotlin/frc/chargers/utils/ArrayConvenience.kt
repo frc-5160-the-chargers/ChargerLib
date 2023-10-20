@@ -37,9 +37,11 @@ public object a {
  * These arrays have no boxing overhead, but function the same as regular arrays.
  *
  * Usage:
- *
- * p[1.0,2.0,3.0]
- * p[1,2,3]
+ * ```
+ * val arrOne = p[1.0,2.0,3.0]
+ * val arrTwo: IntArray = p[1,2,3]
+ * val arrThree = p['a','b','c']
+ * ```
  * @see a
  */
 public object p{

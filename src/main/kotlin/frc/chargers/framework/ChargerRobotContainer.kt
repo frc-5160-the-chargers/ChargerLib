@@ -2,11 +2,18 @@ package frc.chargers.framework
 
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.InstantCommand
+import frc.chargers.hardware.subsystems.TunableSubsystem
 
 /**
  * Represents a basic Robot Container, for use in Command-Based programming.
  */
 public abstract class ChargerRobotContainer {
+
+    public fun setTuningMode(status: Boolean){
+        TunableSubsystem.tuningMode = status
+    }
+
+
     public abstract val autonomousCommand: Command
 
     // instantCommand is used over DoNothing in case the test command isn't canceled for some reason

@@ -19,14 +19,20 @@ import kotlin.reflect.KProperty
  * Represents a Subsystem with tunable values.
  */
 public abstract class TunableSubsystem: SubsystemBase(){
+
     public companion object{
+        
         public var tuningMode: Boolean = false
             set(value){
-                if (DriverStation.isFMSAttached()){
+                if (!value){
+                    field = false
+                    isCompAlert.active = false
+                }else if (DriverStation.isFMSAttached()){
                     isCompAlert.active = true
                 }else{
-                    field = value
+                    field = true
                     tuningModeEnabledAlert.active = true
+                    isCompAlert.active = false
                 }
             }
 
@@ -34,7 +40,6 @@ public abstract class TunableSubsystem: SubsystemBase(){
 
         private val isCompAlert = Alert.warning(text = "Tuning mode WAS NOT SET: It looks like you're in a match right now.")
         private val tuningModeEnabledAlert = Alert.warning(text = "Tuning mode is enabled; Expect loop times to be greater. ")
-
     }
 
     init{

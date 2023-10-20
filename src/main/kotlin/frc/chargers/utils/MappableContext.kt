@@ -10,8 +10,7 @@ public annotation class MappableContextMarker
  */
 @MappableContextMarker
 public class MappableContext<K,V> {
-    @PublishedApi
-    internal var map: MutableMap<K,V> = mutableMapOf()
+    public var map: MutableMap<K,V> = mutableMapOf()
 
     public infix fun K.to(other: V){
         map[this] = other
