@@ -2,7 +2,6 @@ package frc.chargers.commands
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
-import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.*
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior
 import frc.chargers.utils.MappableContext

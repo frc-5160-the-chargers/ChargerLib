@@ -72,7 +72,7 @@ public fun simEncoderHolonomicDrivetrain(
 /**
  * A Convenience function for creating an [EncoderHolonomicDrivetrain] with [ModuleIOReal] as the swerve module IO.
  *
- * It uses the [SwerveTurnMotors], [SwerveEncoders] and [SwerveMotors] classes
+ * It uses the [SwerveMotors] and [SwerveEncoders] classes
  * instead of defining individual swerve modules.
  *
  * This allows the motors and encoders to all be group-configured.
