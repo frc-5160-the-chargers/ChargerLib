@@ -19,12 +19,19 @@ import kotlin.reflect.KProperty
 public inline fun buildCommand(
     vararg globalRequirements: Subsystem,
     name: String = "Generic BuildCommand",
+    log: Boolean = true,
     block: CommandBuilder.() -> Unit
 ): Command =
-    SequentialCommandGroup(
-        *CommandBuilder().apply(block).commands.toTypedArray()
-    ).also{
-        it.name = name
+    if(log){
+        loggedSequentialCommandGroup(
+            name,
+            *CommandBuilder().apply(block).commands.toTypedArray()
+        )
+    }else{
+        SequentialCommandGroup(
+            *CommandBuilder().apply(block).commands.toTypedArray()
+        ).withName(name)
+    }.also{
         it.addRequirements(*globalRequirements)
     }
 
@@ -286,21 +293,11 @@ public class CommandBuilder {
     }
 }
 
-/**
- * Adds various utility properties and functions to the local context.
- */
-@CommandBuilderMarker
-public interface TimeContext {
-    public val time: Time get() = Timer.getFPGATimestamp().ofUnit(seconds)
-    public val approximateTimeSinceMatchStart: Time get() = Timer.getMatchTime().ofUnit(seconds)
-    public fun delay(time: Time) { Timer.delay(time.inUnit(seconds)) }
 
-    public companion object : TimeContext
-}
 
 /**
  * The context provided to any code block in a CommandBuilder,
  * allowing code blocks to access various utility properties and functions.
  */
 @CommandBuilderMarker
-public object CodeBlockContext : TimeContext
+public object CodeBlockContext

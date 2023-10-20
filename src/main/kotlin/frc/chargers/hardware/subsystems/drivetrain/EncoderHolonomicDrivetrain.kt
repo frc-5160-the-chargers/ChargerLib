@@ -8,11 +8,10 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
-import frc.chargers.hardware.swerve.SwerveDriveMotors
+import frc.chargers.hardware.swerve.SwerveMotors
 import frc.chargers.hardware.swerve.SwerveEncoders
-import frc.chargers.hardware.swerve.SwerveTurnMotors
-import frc.chargers.hardware.swerve.control.SecondOrderControlScheme
-import frc.chargers.hardware.swerve.control.SwerveControl
+import frc.chargers.hardware.swerve.SecondOrderControlScheme
+import frc.chargers.hardware.swerve.SwerveControl
 import frc.chargers.hardware.swerve.module.*
 import frc.chargers.utils.a
 import frc.chargers.utils.math.units.Inertia
@@ -73,15 +72,15 @@ public fun simEncoderHolonomicDrivetrain(
 /**
  * A Convenience function for creating an [EncoderHolonomicDrivetrain] with [ModuleIOReal] as the swerve module IO.
  *
- * It uses the [SwerveTurnMotors], [SwerveEncoders] and [SwerveDriveMotors] classes
+ * It uses the [SwerveTurnMotors], [SwerveEncoders] and [SwerveMotors] classes
  * instead of defining individual swerve modules.
  *
  * This allows the motors and encoders to all be group-configured.
  */
 public fun realEncoderHolonomicDrivetrain(
-    turnMotors: SwerveTurnMotors,
+    turnMotors: SwerveMotors,
     turnEncoders: SwerveEncoders,
-    driveMotors: SwerveDriveMotors,
+    driveMotors: SwerveMotors,
     controlScheme: SwerveControl,
     maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     turnGearRatio: Double = DEFAULT_GEAR_RATIO,

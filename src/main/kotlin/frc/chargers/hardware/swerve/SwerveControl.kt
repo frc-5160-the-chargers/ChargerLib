@@ -1,4 +1,4 @@
-package frc.chargers.hardware.swerve.control
+package frc.chargers.hardware.swerve
 
 import com.batterystaple.kmeasure.dimensions.AngleDimension
 import frc.chargers.controls.feedforward.AngularMotorFF
@@ -46,7 +46,8 @@ public sealed class SwerveControl(
         drivePIDConstants: PIDConstants,
         driveFF: AngularMotorFF,
         staticVoltageStall: Boolean = false
-    ): SwerveControl(turnPIDConstants, turnPrecision, drivePIDConstants, driveFF, staticVoltageStall), SecondOrderControlScheme
+    ): SwerveControl(turnPIDConstants, turnPrecision, drivePIDConstants, driveFF, staticVoltageStall),
+        SecondOrderControlScheme
 
 
     /**
@@ -61,7 +62,8 @@ public sealed class SwerveControl(
         drivePIDConstants: PIDConstants,
         driveFF: AngularMotorFF,
         staticVoltageStall: Boolean = false
-    ): SwerveControl(turnPIDConstants, turnPrecision, drivePIDConstants, driveFF, staticVoltageStall), ProfiledPIDControlScheme
+    ): SwerveControl(turnPIDConstants, turnPrecision, drivePIDConstants, driveFF, staticVoltageStall),
+        ProfiledPIDControlScheme
 
     /**
      * Holds constants for Profiled PID control + second order kinematics/module state output for an
@@ -75,7 +77,8 @@ public sealed class SwerveControl(
         drivePIDConstants: PIDConstants,
         driveFF: AngularMotorFF,
         staticVoltageStall: Boolean = false
-    ): SwerveControl(turnPIDConstants, turnPrecision, drivePIDConstants, driveFF, staticVoltageStall), SecondOrderControlScheme, ProfiledPIDControlScheme
+    ): SwerveControl(turnPIDConstants, turnPrecision, drivePIDConstants, driveFF, staticVoltageStall),
+        SecondOrderControlScheme, ProfiledPIDControlScheme
 
 }
 

@@ -1,12 +1,14 @@
 package frc.chargers.hardware.swerve
 
-import com.batterystaple.kmeasure.quantities.Angle
 import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
 import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.absolute.CANcoderConfiguration
 import frc.chargers.hardware.sensors.encoders.absolute.ChargerCANcoder
 
+/**
+ * Constructs an instance of [SwerveEncoders] with CTRE CANcoders.
+ */
 public fun swerveCANcoders(
     topLeft: ChargerCANcoder,
     topRight: ChargerCANcoder,

@@ -9,8 +9,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
-import frc.chargers.hardware.swerve.control.ProfiledPIDControlScheme
-import frc.chargers.hardware.swerve.control.SwerveControl
+import frc.chargers.hardware.swerve.ProfiledPIDControlScheme
+import frc.chargers.hardware.swerve.SwerveControl
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.geometry.asRotation2d
