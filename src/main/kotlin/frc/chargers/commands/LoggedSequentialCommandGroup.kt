@@ -24,10 +24,10 @@ internal fun Command.withLogInCommandGroup(commandGroupName: String): Command{
 
     fun logCommand(active: Boolean) = InstantCommand{
         Logger.getInstance().recordOutput(
-            "/ActiveCommands/$commandGroupName-subcommands/$name",active
+            "/ActiveCommands/Subcommands Of: $commandGroupName/$name",active
         )
     }
 
     // uses custom infix "then" operator(more concise way to do andThen)
-    return logCommand(true) then this.withStartEndLog() then logCommand(false)
+    return logCommand(true) then this then logCommand(false)
 }

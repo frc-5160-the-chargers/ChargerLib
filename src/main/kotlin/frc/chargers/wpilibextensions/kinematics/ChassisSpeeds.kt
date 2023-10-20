@@ -36,11 +36,11 @@ public val ChassisSpeeds.rotationSpeed: AngularVelocity
  *
  * Credits: [254](https://github.com/Team254/FRC-2022-Public), [5727](https://github.com/FRC5727/SwervyBoi/tree/THOR2023) repositories
  */
-public fun ChassisSpeeds.correctForDynamics(loopPeriod: Time = 0.02.seconds): ChassisSpeeds {
+public fun ChassisSpeeds.correctForDynamics(loopPeriod: Time = 0.02.seconds, multiplier: Double = 1.0): ChassisSpeeds {
     val futureRobotPose = Pose2d(
         vxMetersPerSecond * loopPeriod.inUnit(seconds),
         vyMetersPerSecond * loopPeriod.inUnit(seconds),
-        Rotation2d.fromRadians(omegaRadiansPerSecond * loopPeriod.inUnit(seconds) * 4.0)
+        Rotation2d.fromRadians(omegaRadiansPerSecond * loopPeriod.inUnit(seconds) * multiplier)
     )
     val twistForPose: Twist2d = Pose2d().log(futureRobotPose)
     return ChassisSpeeds(

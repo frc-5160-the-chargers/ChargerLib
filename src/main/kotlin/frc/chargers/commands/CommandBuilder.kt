@@ -14,14 +14,19 @@ import kotlin.reflect.KProperty
  *
  * See [here](https://kotlinlang.org/docs/type-safe-builders.html#how-it-works)
  * for an explanation of DSLs and how they are built.
+ *
+ * @param globalRequirements Subsystems that are required through the entirety of the buildCommand.
+ * @param name The name of the buildCommand(defaults to "Generic BuildCommand").
+ * @param logIndividualCommands If true, will log the individual commands that are part of the DSL. Defaults to false.
+ * @param block The entry point to the DSL. Has the context of [CommandBuilder].
  */
 public inline fun buildCommand(
     vararg globalRequirements: Subsystem,
     name: String = "Generic BuildCommand",
-    log: Boolean = true,
+    logIndividualCommands: Boolean = false,
     block: CommandBuilder.() -> Unit
 ): Command =
-    if(log){
+    if(logIndividualCommands){
         loggedSequentialCommandGroup(
             name,
             *CommandBuilder().apply(block).commands.toTypedArray()

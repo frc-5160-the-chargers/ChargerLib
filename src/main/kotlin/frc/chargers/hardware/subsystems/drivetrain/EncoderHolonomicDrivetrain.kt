@@ -371,12 +371,17 @@ public class EncoderHolonomicDrivetrain(
 
 
 
-    private fun ChassisSpeeds.correctForDynamicsIfReal(): ChassisSpeeds =
-        if (RobotBase.isReal()){
-            correctForDynamics(loopPeriod)
-        }else{
-            this
-        }
+    private val isReal by lazy{ RobotBase.isReal()}
+    /*
+    Adds different multipliers for CorrectForDynamics, depending on if the robot is sim or if it is real.
+
+    Note: numbers were based off of empirical observation.
+     */
+    private fun ChassisSpeeds.correctForDynamicsOptimized(): ChassisSpeeds =
+        correctForDynamics(
+            loopPeriod,
+            multiplier = if(isReal) 3.0 else 0.7
+        )
 
 
 
@@ -399,7 +404,7 @@ public class EncoderHolonomicDrivetrain(
     public fun swerveDrive(powers: ChassisPowers){
         val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
         currentControlMode = ControlMode.OPEN_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsIfReal())
+        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsOptimized())
         currentControlMode = ControlMode.CLOSED_LOOP
     }
 
@@ -419,11 +424,11 @@ public class EncoderHolonomicDrivetrain(
 
         currentModuleStates = if (controlScheme is SecondOrderControlScheme){
             kinematics.toSecondOrderModuleStateGroup(
-                speeds.correctForDynamicsIfReal(),
+                speeds.correctForDynamicsOptimized(),
                 heading
             )
         }else{
-            kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsIfReal())
+            kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsOptimized())
         }
         currentControlMode = ControlMode.CLOSED_LOOP
     }
@@ -454,7 +459,7 @@ public class EncoderHolonomicDrivetrain(
     @LowPriorityInOverloadResolution
     public fun velocityDrive(speeds: ChassisSpeeds){
         currentControlMode = ControlMode.CLOSED_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsIfReal())
+        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsOptimized())
     }
 
     /**
@@ -475,9 +480,9 @@ public class EncoderHolonomicDrivetrain(
         currentControlMode = ControlMode.CLOSED_LOOP
 
         currentModuleStates = if(controlScheme is SecondOrderControlScheme){
-            kinematics.toSecondOrderModuleStateGroup(newSpeeds.correctForDynamicsIfReal(),heading)
+            kinematics.toSecondOrderModuleStateGroup(newSpeeds.correctForDynamicsOptimized(),heading)
         }else{
-            kinematics.toFirstOrderModuleStateGroup(newSpeeds.correctForDynamicsIfReal())
+            kinematics.toFirstOrderModuleStateGroup(newSpeeds.correctForDynamicsOptimized())
         }
     }
 
