@@ -11,24 +11,23 @@ import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.swerve.SwerveDriveMotors
 import frc.chargers.hardware.swerve.SwerveEncoders
 import frc.chargers.hardware.swerve.SwerveTurnMotors
-import frc.chargers.hardware.swerve.control.SwerveAngleControl
-import frc.chargers.hardware.swerve.control.SwerveSpeedControl
+import frc.chargers.hardware.swerve.control.SecondOrderControlScheme
+import frc.chargers.hardware.swerve.control.SwerveControl
 import frc.chargers.hardware.swerve.module.*
 import frc.chargers.utils.a
 import frc.chargers.utils.math.units.Inertia
+import frc.chargers.utils.p
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
-import frc.chargers.wpilibextensions.kinematics.swerve.ModulePositionGroup
-import frc.chargers.wpilibextensions.kinematics.swerve.ModuleStateGroup
-import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveDriveKinematics
-import frc.chargers.wpilibextensions.kinematics.swerve.SwerveModulePosition
+import frc.chargers.wpilibextensions.kinematics.swerve.*
 import org.littletonrobotics.junction.Logger
 import kotlin.internal.LowPriorityInOverloadResolution
 
 
 @PublishedApi
 internal val DEFAULT_MAX_MODULE_SPEED: Velocity = 4.5.ofUnit(meters/seconds)
+
 
 /**
  * A convenience function used to create an [EncoderHolonomicDrivetrain], with [ModuleIOSim] as the Module IO.
@@ -40,36 +39,34 @@ public fun simEncoderHolonomicDrivetrain(
     driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
     driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
-    turnControl: SwerveAngleControl,
-    velocityControl: SwerveSpeedControl,
+    controlScheme: SwerveControl,
     maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     wheelDiameter: Length,
     trackWidth: Distance,
     wheelBase: Distance,
-    staticVoltageStall: Boolean = false,
     loopPeriod: Time = 20.milli.seconds,
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft = SwerveModule(
         ModuleIOSim(
             turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
-        ), turnControl, velocityControl, staticVoltageStall
+        ), controlScheme
     ),
     topRight = SwerveModule(
         ModuleIOSim(
             turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
-        ), turnControl, velocityControl, staticVoltageStall
+        ), controlScheme
     ),
     bottomLeft = SwerveModule(
         ModuleIOSim(
             turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
-        ), turnControl, velocityControl, staticVoltageStall
+        ), controlScheme
     ),
     bottomRight = SwerveModule(
         ModuleIOSim(
             turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
-        ), turnControl, velocityControl, staticVoltageStall
+        ), controlScheme
     ),
-    maxModuleSpeed, wheelDiameter, trackWidth, wheelBase
+    controlScheme, maxModuleSpeed, wheelDiameter, trackWidth, wheelBase
 )
 
 
@@ -85,15 +82,13 @@ public fun realEncoderHolonomicDrivetrain(
     turnMotors: SwerveTurnMotors,
     turnEncoders: SwerveEncoders,
     driveMotors: SwerveDriveMotors,
-    turnControl: SwerveAngleControl,
-    velocityControl: SwerveSpeedControl,
+    controlScheme: SwerveControl,
     maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     turnGearRatio: Double = DEFAULT_GEAR_RATIO,
     driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     wheelDiameter: Length,
     trackWidth: Distance,
     wheelBase: Distance,
-    staticVoltageStall: Boolean = false,
     loopPeriod: Time = 20.milli.seconds,
 ): EncoderHolonomicDrivetrain{
     val topLeft = SwerveModule(
@@ -103,9 +98,7 @@ public fun realEncoderHolonomicDrivetrain(
             driveMotor = driveMotors.topLeft,
             driveGearRatio, turnGearRatio
         ),
-        turnControl,
-        velocityControl,
-        staticVoltageStall
+        controlScheme
     )
 
     val topRight = SwerveModule(
@@ -115,9 +108,7 @@ public fun realEncoderHolonomicDrivetrain(
             driveMotor = driveMotors.topRight,
             driveGearRatio, turnGearRatio
         ),
-        turnControl,
-        velocityControl,
-        staticVoltageStall
+        controlScheme
     )
 
     val bottomLeft = SwerveModule(
@@ -127,9 +118,7 @@ public fun realEncoderHolonomicDrivetrain(
             driveMotor = driveMotors.bottomLeft,
             driveGearRatio,turnGearRatio
         ),
-        turnControl,
-        velocityControl,
-        staticVoltageStall
+        controlScheme
     )
 
     val bottomRight = SwerveModule(
@@ -139,17 +128,17 @@ public fun realEncoderHolonomicDrivetrain(
             driveMotor = driveMotors.bottomRight,
             driveGearRatio, turnGearRatio
         ),
-        turnControl,
-        velocityControl,
-        staticVoltageStall
+        controlScheme
     )
 
     return EncoderHolonomicDrivetrain(
         topLeft, topRight, bottomLeft, bottomRight,
-        maxModuleSpeed, wheelDiameter,
+        controlScheme, maxModuleSpeed, wheelDiameter,
         trackWidth, wheelBase, loopPeriod
     )
 }
+
+
 
 
 
@@ -165,6 +154,7 @@ public class EncoderHolonomicDrivetrain(
     public val topRight: SwerveModule,
     public val bottomLeft: SwerveModule,
     public val bottomRight: SwerveModule,
+    public val controlScheme: SwerveControl,
     private val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     wheelDiameter: Length,
     trackWidth: Distance,
@@ -257,18 +247,51 @@ public class EncoderHolonomicDrivetrain(
         }
         set(ms){
             ms.desaturate(maxModuleSpeed)
+            var topLeftV = 0.0.volts
+            var topRightV = 0.0.volts
+            var bottomLeftV = 0.0.volts
+            var bottomRightV = 0.0.volts
+            if (controlScheme is SecondOrderControlScheme && ms.stateOutput is ModuleStateOutput.SecondOrder){
+                topLeftV = controlScheme.turnFF.calculate(ms.stateOutput.topLeftTurnSpeed)
+                topRightV = controlScheme.turnFF.calculate(ms.stateOutput.topRightTurnSpeed)
+                bottomLeftV = controlScheme.turnFF.calculate(ms.stateOutput.bottomLeftTurnSpeed)
+                bottomRightV = controlScheme.turnFF.calculate(ms.stateOutput.bottomRightTurnSpeed)
+
+                Logger.getInstance().recordOutput(
+                    "Drivetrain(Swerve)/SecondOrderTurnSpeedsRadPerSec",
+                    p[
+                        ms.stateOutput.topLeftTurnSpeed.inUnit(radians/seconds),
+                        ms.stateOutput.topRightTurnSpeed.inUnit(radians/seconds),
+                        ms.stateOutput.bottomLeftTurnSpeed.inUnit(radians/seconds),
+                        ms.stateOutput.bottomRightTurnSpeed.inUnit(radians/seconds),
+                    ]
+                )
+
+                Logger.getInstance().recordOutput(
+                    "Drivetrain(Swerve)/SecondOrderTurnAppliedVolts",
+                    p[
+                        topLeftV.inUnit(volts),
+                        topRightV.inUnit(volts),
+                        bottomLeftV.inUnit(volts),
+                        bottomRightV.inUnit(volts)
+                    ]
+                )
+
+            }
             if (currentControlMode == ControlMode.CLOSED_LOOP){
-                topLeft.setDirectionalVelocity(ms.topLeftSpeed / wheelRadius,ms.topLeftAngle)
-                topRight.setDirectionalVelocity(ms.topRightSpeed / wheelRadius,ms.topRightAngle)
-                bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed / wheelRadius,ms.bottomLeftAngle)
-                bottomRight.setDirectionalVelocity(ms.bottomRightSpeed / wheelRadius,ms.bottomRightAngle)
+
+                topLeft.setDirectionalVelocity(ms.topLeftSpeed / wheelRadius,ms.topLeftAngle,topLeftV)
+                topRight.setDirectionalVelocity(ms.topRightSpeed / wheelRadius,ms.topRightAngle,topRightV)
+                bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed / wheelRadius,ms.bottomLeftAngle,bottomLeftV)
+                bottomRight.setDirectionalVelocity(ms.bottomRightSpeed / wheelRadius,ms.bottomRightAngle,bottomRightV)
             }else{
-                topLeft.setDirectionalPower((ms.topLeftSpeed/maxModuleSpeed).siValue, ms.topLeftAngle)
-                topRight.setDirectionalPower((ms.topRightSpeed/maxModuleSpeed).siValue, ms.topRightAngle)
-                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/maxModuleSpeed).siValue, ms.bottomLeftAngle)
-                bottomRight.setDirectionalPower((ms.bottomRightSpeed/maxModuleSpeed).siValue, ms.bottomRightAngle)
+                topLeft.setDirectionalPower((ms.topLeftSpeed/maxModuleSpeed).siValue, ms.topLeftAngle,topLeftV)
+                topRight.setDirectionalPower((ms.topRightSpeed/maxModuleSpeed).siValue, ms.topRightAngle,topRightV)
+                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/maxModuleSpeed).siValue, ms.bottomLeftAngle,bottomLeftV)
+                bottomRight.setDirectionalPower((ms.bottomRightSpeed/maxModuleSpeed).siValue, ms.bottomRightAngle,bottomRightV)
             }
             Logger.getInstance().recordOutput("Drivetrain(Swerve)/DesiredModuleStates", ms.topLeftState,ms.topRightState,ms.bottomLeftState,ms.bottomRightState)
+
         }
 
 
@@ -394,7 +417,15 @@ public class EncoderHolonomicDrivetrain(
             heading.asRotation2d()
         )
         currentControlMode = ControlMode.OPEN_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsIfReal())
+
+        currentModuleStates = if (controlScheme is SecondOrderControlScheme){
+            kinematics.toSecondOrderModuleStateGroup(
+                speeds.correctForDynamicsIfReal(),
+                heading
+            )
+        }else{
+            kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsIfReal())
+        }
         currentControlMode = ControlMode.CLOSED_LOOP
     }
 
@@ -443,7 +474,12 @@ public class EncoderHolonomicDrivetrain(
             speeds, heading.asRotation2d()
         )
         currentControlMode = ControlMode.CLOSED_LOOP
-        currentModuleStates = kinematics.toFirstOrderModuleStateGroup(newSpeeds.correctForDynamicsIfReal())
+
+        currentModuleStates = if(controlScheme is SecondOrderControlScheme){
+            kinematics.toSecondOrderModuleStateGroup(newSpeeds.correctForDynamicsIfReal(),heading)
+        }else{
+            kinematics.toFirstOrderModuleStateGroup(newSpeeds.correctForDynamicsIfReal())
+        }
     }
 
     context(HeadingProvider)

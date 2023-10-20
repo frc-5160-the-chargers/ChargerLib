@@ -3,17 +3,14 @@ package frc.chargers.wpilibextensions.kinematics.swerve
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
-import edu.wpi.first.math.geometry.Translation2d
+import com.batterystaple.kmeasure.units.radians
+import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import frc.chargers.utils.HeadingCorrector
 import frc.chargers.utils.SecondOrderSwerveKinematics
-import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
-import frc.chargers.wpilibextensions.geometry.asAngle
 import frc.chargers.wpilibextensions.geometry.asRotation2d
-import frc.chargers.wpilibextensions.kinematics.*
-import kotlin.math.*
 
 
 /**
@@ -35,17 +32,6 @@ public class SuperSwerveDriveKinematics(
     bottomLeftLocation.inUnit(meters),
     bottomRightLocation.inUnit(meters)
 ){
-    private var targetHeading: Angle = Angle(0.0)
-
-    private var previousT: Time = Time(0.0)
-    private var offT: Time = Time(0.0)
-
-    private val moduleLocations: Array<Translation2d> = a[
-        topLeftLocation.inUnit(meters),
-        topRightLocation.inUnit(meters),
-        bottomLeftLocation.inUnit(meters),
-        bottomRightLocation.inUnit(meters)
-    ]
 
     private val secondKinematics = SecondOrderSwerveKinematics(
         topLeftLocation.inUnit(meters),
@@ -60,22 +46,30 @@ public class SuperSwerveDriveKinematics(
 
 
 
+
     /**
      * Credits: 5727/4481 second kinematics
-     * @see convertSecondOrderChassisSpeeds
+     * @see SecondOrderSwerveKinematics
      */
     public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle): ModuleStateGroup{
         val standardizedHeading = if(heading < 0.degrees) heading + 360.degrees else heading
 
         val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,standardizedHeading.asRotation2d())
 
-        val states = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,standardizedHeading.asRotation2d())
+        val output = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,standardizedHeading.asRotation2d())
+        val states = output.moduleStates
+        val turnSpeeds = output.turnSpeeds.map{
+            it.ofUnit(radians/seconds)
+        }
 
         return ModuleStateGroup(
             topLeftState = states[0],
             topRightState = states[1],
             bottomLeftState = states[2],
-            bottomRightState = states[3]
+            bottomRightState = states[3],
+            stateOutput = ModuleStateOutput.SecondOrder(
+                turnSpeeds[0], turnSpeeds[1], turnSpeeds[2], turnSpeeds[3]
+            )
         )
     }
 

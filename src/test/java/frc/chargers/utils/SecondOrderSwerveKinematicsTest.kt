@@ -10,7 +10,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveDriveKinematics
-import io.mockk.verify
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,7 +21,7 @@ internal class SecondOrderSwerveKinematicsTest {
         assert(HAL.initialize(500,0))
     }
     @Test
-    public fun `to swerve module state`() {
+    fun `to swerve module state`() {
         val secondKinematics = SecondOrderSwerveKinematics(
             Translation2d(0.5,0.5),
             Translation2d(-0.5,0.5),
@@ -44,7 +43,7 @@ internal class SecondOrderSwerveKinematicsTest {
         )
 
         for (i in 0..<4){
-            Assertions.assertEquals(firstModuleStates[i], secondModuleStates[i])
+            Assertions.assertEquals(firstModuleStates[i], secondModuleStates.moduleStates[i])
         }
 
 
@@ -80,7 +79,7 @@ internal class SecondOrderSwerveKinematicsTest {
         )
 
         for (i in 0..<4){
-            Assertions.assertEquals(combinedModuleStates[i], baseModuleStates[i])
+            Assertions.assertEquals(combinedModuleStates[i], baseModuleStates.moduleStates[i])
         }
 
     }

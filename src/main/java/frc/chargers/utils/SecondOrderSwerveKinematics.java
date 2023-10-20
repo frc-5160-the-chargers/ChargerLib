@@ -18,7 +18,12 @@ import static edu.wpi.first.math.Nat.N4;
 
 public class SecondOrderSwerveKinematics {
 
-    private Translation2d[] moduleLocations = new Translation2d[4]; //Module location vectors from the center of rotation (center of the robot)
+    public record Output(
+            SwerveModuleState[] moduleStates,
+            double[] turnSpeeds
+    ){}
+
+    private final Translation2d[] moduleLocations = new Translation2d[4]; //Module location vectors from the center of rotation (center of the robot)
 
     /**
      * Creates a new {@code SecondOrderSwerveKinematics}
@@ -47,7 +52,7 @@ public class SecondOrderSwerveKinematics {
      * @param robotHeading heading of the robot relative to the field
      * @return SecondOrderSwerveModuleState[] array of the speed direction and turn speed of the swerve modules
      */
-    public SwerveModuleState[] toSwerveModuleState(ChassisSpeeds desiredSpeed, Rotation2d robotHeading){
+    public Output toSwerveModuleState(ChassisSpeeds desiredSpeed, Rotation2d robotHeading){
         Matrix<N3, N1> firstOrderInputMatrix = new Matrix<>(N3(),N1());
         Matrix<N2, N3> firstOrderMatrix = new Matrix<>(N2(),N3());
         Matrix<N4, N1> secondOrderInputMatrix = new Matrix<>(N4(),N1());
@@ -98,6 +103,6 @@ public class SecondOrderSwerveKinematics {
             moduleTurnSpeeds[i] = secondOrderOutput.get(1,0) / moduleSpeed - desiredSpeed.omegaRadiansPerSecond;
         }
 
-        return swerveModuleStates;
+        return new Output(swerveModuleStates, moduleTurnSpeeds);
     }
 }

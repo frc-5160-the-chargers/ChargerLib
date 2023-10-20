@@ -81,5 +81,5 @@ public class PathPlannerAutoContext{
     public inline fun onEvent(
         eventName: String,
         context: CommandBuilder.() -> Unit
-    ): Unit = onEvent(eventName, buildCommand(context))
+    ): Unit = onEvent(eventName, buildCommand(block = context))
 }

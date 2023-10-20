@@ -9,24 +9,19 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
-import frc.chargers.hardware.swerve.control.SwerveAngleControl
-import frc.chargers.hardware.swerve.control.SwerveSpeedControl
+import frc.chargers.hardware.swerve.control.ProfiledPIDControlScheme
+import frc.chargers.hardware.swerve.control.SwerveControl
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import org.littletonrobotics.junction.Logger
 
-/**
- * Represents a single Swerve Module in a [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
- */
 public class SwerveModule(
     public val io: ModuleIO,
-    turnControl: SwerveAngleControl,
-    velocityControl: SwerveSpeedControl,
-    private val staticVoltageStall: Boolean = false
+    private val controlScheme: SwerveControl
 ){
 
-    private val staticStallVoltage = velocityControl.ff.kS
+    private val staticStallVoltage = controlScheme.driveFF.kS
 
 
     private val inputs: ModuleIO.Inputs = ModuleIO.Inputs()
@@ -66,37 +61,35 @@ public class SwerveModule(
 
 
 
-    public val velocityController: UnitSuperPIDController<AngularVelocityDimension,VoltageDimension> = UnitSuperPIDController(
-        velocityControl.pidConstants,
+    public val velocityController: UnitSuperPIDController<AngularVelocityDimension, VoltageDimension> = UnitSuperPIDController(
+        controlScheme.drivePIDConstants,
         {inputs.speed},
         -12.volts..12.volts,
         target = AngularVelocity(0.0),
-        feedforward = velocityControl.ff
+        feedforward = controlScheme.driveFF
     )
 
-    private val turnPrecision = when(turnControl){
-        is SwerveAngleControl.PID -> turnControl.precision
-        is SwerveAngleControl.ProfiledPID -> turnControl.precision
-    }
+
 
     private val turnController: FeedbackController<Angle, Voltage> =
-        when(turnControl){
-            is SwerveAngleControl.PID -> UnitSuperPIDController(
-                turnControl.pidConstants,
-                {inputs.direction.standardize()},
-                outputRange = -12.volts..12.volts,
-                continuousInputRange = 0.degrees..360.degrees,
-                target = Angle(0.0)
-            )
+        when(controlScheme){
 
-            is SwerveAngleControl.ProfiledPID -> AngularProfiledPIDController(
-                turnControl.pidConstants,
+            is ProfiledPIDControlScheme -> AngularProfiledPIDController(
+                controlScheme.turnPIDConstants,
                 {inputs.direction.standardize()},
                 outputRange = -12.volts..12.volts,
                 continuousInputRange = 0.degrees..360.degrees,
                 target = Angle(0.0),
-                constraints = turnControl.constraints,
-                feedforward = turnControl.turnFF
+                constraints = controlScheme.turnConstraints,
+                feedforward = controlScheme.turnFF
+            )
+
+            else -> UnitSuperPIDController(
+                controlScheme.turnPIDConstants,
+                {inputs.direction.standardize()},
+                outputRange = -12.volts..12.volts,
+                continuousInputRange = 0.degrees..360.degrees,
+                target = Angle(0.0)
             )
         }
 
@@ -104,13 +97,13 @@ public class SwerveModule(
     public val currentDirection: Angle
         get() = inputs.direction.standardize()
 
-    public fun setDirection(direction: Angle) {
+    public fun setDirection(direction: Angle, extraTurnVoltage: Voltage = Voltage(0.0)) {
         turnController.target = direction.standardize()
         // custom extension function
-        if(turnPrecision is Precision.Within && turnController.error in turnPrecision.allowableError){
+        if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
             io.setTurnVoltage(0.0.volts)
         }else{
-            io.setTurnVoltage(turnController.calculateOutput())
+            io.setTurnVoltage(turnController.calculateOutput() + extraTurnVoltage)
         }
     }
 
@@ -131,28 +124,29 @@ public class SwerveModule(
 
     public fun setDirectionalPower(
         power:Double,
-        direction:Angle
+        direction:Angle,
+        extraTurnVoltage: Voltage = Voltage(0.0)
     ){
         if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
-            setDirection(direction + 180.degrees)
+            setDirection(direction + 180.degrees,extraTurnVoltage)
             setPower(-power * cos(turnController.error))
         }else{
-
-            setDirection(direction)
+            setDirection(direction,extraTurnVoltage)
             setPower(power * cos(turnController.error))
         }
     }
 
     public fun setDirectionalVelocity(
         angularVelocity:AngularVelocity,
-        direction:Angle
+        direction:Angle,
+        extraTurnVoltage: Voltage = Voltage(0.0)
     ){
         if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
-            setDirection(direction + 180.degrees)
+            setDirection(direction + 180.degrees,extraTurnVoltage)
             setVelocity(-angularVelocity * cos(turnController.error))
 
         }else{
-            setDirection(direction)
+            setDirection(direction,extraTurnVoltage)
             setVelocity(angularVelocity * cos(turnController.error))
         }
     }
@@ -160,7 +154,7 @@ public class SwerveModule(
 
     public fun getModuleState(wheelRadius: Length): SwerveModuleState =
         SwerveModuleState(
-            currentVelocity.inUnit(radians/seconds) * wheelRadius.inUnit(meters),
+            currentVelocity.inUnit(radians / seconds) * wheelRadius.inUnit(meters),
             currentDirection.asRotation2d()
         )
 
@@ -172,7 +166,7 @@ public class SwerveModule(
 
 
     public fun halt() {
-        if(staticVoltageStall){
+        if(controlScheme.staticVoltageStall){
             io.setDriveVoltage(staticStallVoltage)
         }else{
             io.setDriveVoltage(0.0.volts)

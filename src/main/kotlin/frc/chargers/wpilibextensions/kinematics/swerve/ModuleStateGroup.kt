@@ -7,6 +7,18 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 
+public sealed class ModuleStateOutput{
+    public data object FirstOrder: ModuleStateOutput()
+
+    public data class SecondOrder(
+        val topLeftTurnSpeed: AngularVelocity,
+        val topRightTurnSpeed: AngularVelocity,
+        val bottomLeftTurnSpeed: AngularVelocity,
+        val bottomRightTurnSpeed: AngularVelocity
+    ): ModuleStateOutput()
+
+}
+
 /**
  * A helper class that stores [SwerveModuleState]s in a more clear way.
  * This is usually preferred over an array, as it is clear which [SwerveModuleState] corresponds to which module.
@@ -16,17 +28,25 @@ public data class ModuleStateGroup(
     var topRightSpeed: Velocity = Velocity(0.0),
     var bottomLeftSpeed: Velocity = Velocity(0.0),
     var bottomRightSpeed: Velocity = Velocity(0.0),
-    
+
     var topLeftAngle: Angle = Angle(0.0),
     var topRightAngle: Angle = Angle(0.0),
     var bottomLeftAngle: Angle = Angle(0.0),
     var bottomRightAngle: Angle = Angle(0.0),
+
+    val stateOutput: ModuleStateOutput = ModuleStateOutput.FirstOrder
 ) {
+
+
+    
+
+    
     public constructor(
         topLeftState: SwerveModuleState,
         topRightState: SwerveModuleState,
         bottomLeftState: SwerveModuleState,
         bottomRightState: SwerveModuleState,
+        stateOutput: ModuleStateOutput = ModuleStateOutput.FirstOrder
     ): this(
         topLeftState.speed,
         topRightState.speed,
@@ -36,7 +56,8 @@ public data class ModuleStateGroup(
         topLeftState.direction,
         topRightState.direction,
         bottomLeftState.direction,
-        bottomRightState.direction
+        bottomRightState.direction,
+        stateOutput
     )
 
     public fun toArray(): Array<SwerveModuleState> = a[topLeftState,topRightState,bottomLeftState,bottomRightState]
@@ -64,7 +85,8 @@ public data class ModuleStateGroup(
                 topLeftAngle,
                 topRightAngle,
                 bottomLeftAngle,
-                bottomRightAngle
+                bottomRightAngle,
+                stateOutput
             )
         }else{
             this
