@@ -51,8 +51,8 @@ public class SuperSwerveDriveKinematics(
      * Credits: 5727/4481 second kinematics
      * @see SecondOrderSwerveKinematics
      */
-    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle): ModuleStateGroup{
-        val standardizedHeading = if(heading < 0.degrees) heading + 360.degrees else heading
+    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle): SecondOrderModuleStateGroup{
+        val standardizedHeading = if (heading < 0.degrees) heading + 360.degrees else heading
 
         val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,standardizedHeading.asRotation2d())
 
@@ -62,14 +62,12 @@ public class SuperSwerveDriveKinematics(
             it.ofUnit(radians/seconds)
         }
 
-        return ModuleStateGroup(
+        return SecondOrderModuleStateGroup(
             topLeftState = states[0],
             topRightState = states[1],
             bottomLeftState = states[2],
             bottomRightState = states[3],
-            stateOutput = ModuleStateOutput.SecondOrder(
-                turnSpeeds[0], turnSpeeds[1], turnSpeeds[2], turnSpeeds[3]
-            )
+            turnSpeeds[0], turnSpeeds[1], turnSpeeds[2], turnSpeeds[3]
         )
     }
 

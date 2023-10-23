@@ -142,11 +142,12 @@ public fun realEncoderHolonomicDrivetrain(
 
 
 
-// note: trackwidth is horizontal and wheelBase is vertical
-// second note: DEFAULT_GEAR_RATIO is defined in encoderdifferentialdrivetrain.
+
 /**
  * An implementation of Swerve drive, with encoders, to be used in future robot code.
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
+ *
+ * Note: TrackWidth is the horizontal length of the robot, while wheelBase is the vertical length of the robot.
  */
 public class EncoderHolonomicDrivetrain(
     public val topLeft: SwerveModule,
@@ -183,7 +184,7 @@ public class EncoderHolonomicDrivetrain(
     /*
     Control Mode-based functions:
     OPEN_LOOP indicates percent-out(power) based drive,
-    while CLOSED_LOOP uses PID and feedtopLeft.setPower(0.5)forward for velocity-based driving.
+    while CLOSED_LOOP uses PID and feedforward for velocity-based driving.
      */
     private enum class ControlMode{
         OPEN_LOOP,CLOSED_LOOP
@@ -250,19 +251,19 @@ public class EncoderHolonomicDrivetrain(
             var topRightV = 0.0.volts
             var bottomLeftV = 0.0.volts
             var bottomRightV = 0.0.volts
-            if (controlScheme is SecondOrderControlScheme && ms.stateOutput is ModuleStateOutput.SecondOrder){
-                topLeftV = controlScheme.turnFF.calculate(ms.stateOutput.topLeftTurnSpeed)
-                topRightV = controlScheme.turnFF.calculate(ms.stateOutput.topRightTurnSpeed)
-                bottomLeftV = controlScheme.turnFF.calculate(ms.stateOutput.bottomLeftTurnSpeed)
-                bottomRightV = controlScheme.turnFF.calculate(ms.stateOutput.bottomRightTurnSpeed)
+            if (controlScheme is SecondOrderControlScheme && ms is SecondOrderModuleStateGroup){
+                topLeftV = controlScheme.turnFF.calculate(ms.topLeftTurnSpeed)
+                topRightV = controlScheme.turnFF.calculate(ms.topRightTurnSpeed)
+                bottomLeftV = controlScheme.turnFF.calculate(ms.bottomLeftTurnSpeed)
+                bottomRightV = controlScheme.turnFF.calculate(ms.bottomRightTurnSpeed)
 
                 Logger.getInstance().recordOutput(
                     "Drivetrain(Swerve)/SecondOrderTurnSpeedsRadPerSec",
                     p[
-                        ms.stateOutput.topLeftTurnSpeed.inUnit(radians/seconds),
-                        ms.stateOutput.topRightTurnSpeed.inUnit(radians/seconds),
-                        ms.stateOutput.bottomLeftTurnSpeed.inUnit(radians/seconds),
-                        ms.stateOutput.bottomRightTurnSpeed.inUnit(radians/seconds),
+                        ms.topLeftTurnSpeed.inUnit(radians/seconds),
+                        ms.topRightTurnSpeed.inUnit(radians/seconds),
+                        ms.bottomLeftTurnSpeed.inUnit(radians/seconds),
+                        ms.bottomRightTurnSpeed.inUnit(radians/seconds),
                     ]
                 )
 

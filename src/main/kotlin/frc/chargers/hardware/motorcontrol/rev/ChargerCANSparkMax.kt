@@ -16,6 +16,7 @@ import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
+import frc.chargers.wpilibextensions.delay
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import kotlin.math.roundToInt
 
@@ -122,24 +123,10 @@ public open class ChargerCANSparkMax(
             setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
         }
 
-        /*
-        encoderConfig.averageDepth = configuration.encoderAverageDepth
-        encoderConfig.inverted = configuration.encoderInverted
-        encoderConfig.measurementPeriod = configuration.encoderMeasurementPeriod
-        encoderConfig.positionConversionFactor = configuration.encoderPositionConversionFactor
-        encoderConfig.velocityConversionFactor = configuration.encoderVelocityConversionFactor
-
-
-        configuration.feedbackDFilter?.let{innerController.setDFilter(it,0)}
-        configuration.feedbackIZone?.let{innerController.setIZone(it,0)}
-        configuration.feedbackOutputRange?.let{innerController.setOutputRange(it.start,it.endInclusive,0)}
-        configuration.positionPIDWrappingEnabled?.let{innerController.setPositionPIDWrappingEnabled(it)}
-        configuration.positionPIDWrappingInputRange?.let{
-            innerController.setPositionPIDWrappingMinInput(it.start)
-            innerController.setPositionPIDWrappingMaxInput(it.endInclusive)
-        }
-         */
+        // apparently, these delays are nessecary for configuration to be set right
+        delay(200.milli.seconds)
         burnFlash()
+        delay(200.milli.seconds)
     }
 
 

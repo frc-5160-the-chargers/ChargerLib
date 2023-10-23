@@ -7,46 +7,29 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 
-public sealed class ModuleStateOutput{
-    public data object FirstOrder: ModuleStateOutput()
-
-    public data class SecondOrder(
-        val topLeftTurnSpeed: AngularVelocity,
-        val topRightTurnSpeed: AngularVelocity,
-        val bottomLeftTurnSpeed: AngularVelocity,
-        val bottomRightTurnSpeed: AngularVelocity
-    ): ModuleStateOutput()
-
-}
 
 /**
  * A helper class that stores [SwerveModuleState]s in a more clear way.
  * This is usually preferred over an array, as it is clear which [SwerveModuleState] corresponds to which module.
  */
-public data class ModuleStateGroup(
-    var topLeftSpeed: Velocity = Velocity(0.0),
-    var topRightSpeed: Velocity = Velocity(0.0),
-    var bottomLeftSpeed: Velocity = Velocity(0.0),
-    var bottomRightSpeed: Velocity = Velocity(0.0),
+public open class ModuleStateGroup(
+    public var topLeftSpeed: Velocity = Velocity(0.0),
+    public var topRightSpeed: Velocity = Velocity(0.0),
+    public var bottomLeftSpeed: Velocity = Velocity(0.0),
+    public var bottomRightSpeed: Velocity = Velocity(0.0),
 
-    var topLeftAngle: Angle = Angle(0.0),
-    var topRightAngle: Angle = Angle(0.0),
-    var bottomLeftAngle: Angle = Angle(0.0),
-    var bottomRightAngle: Angle = Angle(0.0),
-
-    val stateOutput: ModuleStateOutput = ModuleStateOutput.FirstOrder
+    public var topLeftAngle: Angle = Angle(0.0),
+    public var topRightAngle: Angle = Angle(0.0),
+    public var bottomLeftAngle: Angle = Angle(0.0),
+    public var bottomRightAngle: Angle = Angle(0.0)
 ) {
-
-
-    
 
     
     public constructor(
         topLeftState: SwerveModuleState,
         topRightState: SwerveModuleState,
         bottomLeftState: SwerveModuleState,
-        bottomRightState: SwerveModuleState,
-        stateOutput: ModuleStateOutput = ModuleStateOutput.FirstOrder
+        bottomRightState: SwerveModuleState
     ): this(
         topLeftState.speed,
         topRightState.speed,
@@ -56,8 +39,7 @@ public data class ModuleStateGroup(
         topLeftState.direction,
         topRightState.direction,
         bottomLeftState.direction,
-        bottomRightState.direction,
-        stateOutput
+        bottomRightState.direction
     )
 
     public fun toArray(): Array<SwerveModuleState> = a[topLeftState,topRightState,bottomLeftState,bottomRightState]
@@ -70,26 +52,6 @@ public data class ModuleStateGroup(
             topRightSpeed = topRightSpeed / maxSpeed * maxAttainableSpeed
             bottomLeftSpeed = bottomLeftSpeed / maxSpeed * maxAttainableSpeed
             bottomRightSpeed = bottomRightSpeed / maxSpeed * maxAttainableSpeed
-        }
-    }
-
-    public fun asDesaturatedSpeeds(maxAttainableSpeed: Velocity): ModuleStateGroup{
-        // !! operator is 100% safe: list size is greater than 0.
-        val maxSpeed = listOf(topLeftSpeed,topRightSpeed,bottomLeftSpeed,bottomRightSpeed).maxOrNull()!!
-        return if (maxSpeed > maxAttainableSpeed){
-            ModuleStateGroup(
-                topLeftSpeed / maxSpeed * maxAttainableSpeed,
-                topRightSpeed / maxSpeed * maxAttainableSpeed,
-                bottomLeftSpeed / maxSpeed * maxAttainableSpeed,
-                bottomRightSpeed / maxSpeed * maxAttainableSpeed,
-                topLeftAngle,
-                topRightAngle,
-                bottomLeftAngle,
-                bottomRightAngle,
-                stateOutput
-            )
-        }else{
-            this
         }
     }
 
