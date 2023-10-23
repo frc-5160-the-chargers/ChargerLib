@@ -27,30 +27,21 @@ public class LoggedIMU(
 
     private val generalInputs = GeneralInputs()
     private inner class GeneralInputs: ChargerLoggableInputs() {
-        var isConnected: Boolean by loggedBoolean(
-            "isConnected",
-            false
-        )
+        var isConnected: Boolean by loggedBoolean(logName = "isConnected")
         var fusedHeading: Angle by loggedQuantity(
-            degrees,
-            "fusedHeadingDeg",
-            0.0.degrees
+            logUnit = degrees,
+            logName = "fusedHeadingDeg"
         )
         var compassHeading: Angle by loggedQuantity(
-            degrees,
-            "compassHeadingDeg",
-            0.0.degrees
+            logUnit = degrees,
+            logName = "compassHeadingDeg"
         )
         var altitude: Distance? by loggedNullableQuantity(
-            meters,
-            "altitudeMeters",
-            Distance(0.0)
+            logUnit = meters,
+            logName = "altitudeMeters",
+            defaultValue = Distance(0.0)
         )
-
-        var baseIMUName: String by loggedString(
-            logName = "name",
-            defaultValue = ""
-        )
+        var baseIMUName: String by loggedString(logName = "name")
 
         fun update(){
             isConnected = imu.isConnected
@@ -79,24 +70,20 @@ public class LoggedIMU(
     
     public inner class GyroscopeInputs: ChargerLoggableInputs(), ThreeAxisGyroscope{
         override var yaw: Angle by loggedQuantity(
-            degrees,
-            "yawDeg",
-            Angle(0.0)
+            logUnit = degrees,
+            logName = "yawDeg"
         )
         override var pitch: Angle by loggedQuantity(
-            degrees,
-            "pitchDeg",
-            Angle(0.0)
+            logUnit = degrees,
+            logName = "pitchDeg"
         )
         override var roll: Angle by loggedQuantity(
-            degrees,
-            "rollDeg",
-            Angle(0.0)
+            logUnit = degrees,
+            logName = "rollDeg",
         )
         override var heading: Angle by loggedQuantity(
-            degrees,
-            "continuousHeadingDeg",
-            Angle(0.0)
+            logUnit = degrees,
+            logName = "continuousHeadingDeg"
         )
 
         internal fun update(){

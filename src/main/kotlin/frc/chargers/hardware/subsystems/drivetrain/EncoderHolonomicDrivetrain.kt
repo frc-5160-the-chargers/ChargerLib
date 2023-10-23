@@ -186,10 +186,10 @@ public class EncoderHolonomicDrivetrain(
     OPEN_LOOP indicates percent-out(power) based drive,
     while CLOSED_LOOP uses PID and feedforward for velocity-based driving.
      */
-    private enum class ControlMode{
+    public enum class ControlMode{
         OPEN_LOOP,CLOSED_LOOP
     }
-    private var currentControlMode = ControlMode.CLOSED_LOOP
+    public var currentControlMode: ControlMode = ControlMode.CLOSED_LOOP
 
 
 
@@ -374,15 +374,14 @@ public class EncoderHolonomicDrivetrain(
 
     private val isReal by lazy{ RobotBase.isReal()}
     /*
-    Adds different multipliers for CorrectForDynamics, depending on if the robot is sim or if it is real.
-
-    Note: numbers were based off of empirical observation.
+    Only corrects for dynamics if the robot is real; it is unoptimized in simulation.
      */
     private fun ChassisSpeeds.correctForDynamicsOptimized(): ChassisSpeeds =
-        correctForDynamics(
-            loopPeriod,
-            multiplier = if(isReal) 3.0 else 0.7
-        )
+        if (isReal){
+            correctForDynamics(loopPeriod)
+        }else{
+            this
+        }
 
 
 
@@ -417,10 +416,19 @@ public class EncoderHolonomicDrivetrain(
     context(HeadingProvider)
     @JvmName("SwerveDriveFieldOriented")
     public fun swerveDrive(powers: ChassisPowers){
-        val speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity),
-            heading.asRotation2d()
-        )
+        var speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
+
+
+        // Avoids making the speeds field relative if the second order kinematics is used,
+        // and the rotation speeds is non-zero.
+        // without this if statement check, second order kinematics becomes bugged
+        // and drives in a circle when driving while turning; this is a temporary fix for that.
+        if (speeds.rotationSpeed == AngularVelocity(0.0) || controlScheme !is SecondOrderControlScheme){
+            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds,
+                heading.asRotation2d()
+            )
+        }
         currentControlMode = ControlMode.OPEN_LOOP
 
         currentModuleStates = if (controlScheme is SecondOrderControlScheme){
@@ -475,9 +483,19 @@ public class EncoderHolonomicDrivetrain(
     context(HeadingProvider)
     @JvmName("VelocityDriveFieldOriented")
     public fun velocityDrive(speeds: ChassisSpeeds){
-        val newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            speeds, heading.asRotation2d()
-        )
+        var newSpeeds = speeds
+
+        // Avoids making the speeds field relative if the second order kinematics is used,
+        // and the rotation speeds is non-zero.
+        // without this if statement check, second order kinematics becomes bugged
+        // and drives in a circle when driving while turning; this is a temporary fix for that.
+        if (newSpeeds.rotationSpeed == AngularVelocity(0.0) || controlScheme !is SecondOrderControlScheme){
+            newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds,
+                heading.asRotation2d()
+            )
+        }
+
         currentControlMode = ControlMode.CLOSED_LOOP
 
         currentModuleStates = if(controlScheme is SecondOrderControlScheme){
