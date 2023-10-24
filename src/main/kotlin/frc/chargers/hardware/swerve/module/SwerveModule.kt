@@ -21,9 +21,6 @@ public class SwerveModule(
     private val controlScheme: SwerveControl
 ){
 
-    private val staticStallVoltage = controlScheme.driveFF.kS
-
-
     private val inputs: ModuleIO.Inputs = ModuleIO.Inputs()
 
     /**
@@ -167,7 +164,7 @@ public class SwerveModule(
 
     public fun halt() {
         if(controlScheme.staticVoltageStall){
-            io.setDriveVoltage(staticStallVoltage)
+            io.setDriveVoltage(controlScheme.driveFF.kS)
         }else{
             io.setDriveVoltage(0.0.volts)
         }

@@ -419,7 +419,7 @@ public class EncoderHolonomicDrivetrain(
         var speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
 
 
-        // Avoids making the speeds field relative if the second order kinematics is used,
+        // Avoids making the speeds field relative if second order kinematics is used,
         // and the rotation speeds is non-zero.
         // without this if statement check, second order kinematics becomes bugged
         // and drives in a circle when driving while turning; this is a temporary fix for that.
@@ -485,7 +485,7 @@ public class EncoderHolonomicDrivetrain(
     public fun velocityDrive(speeds: ChassisSpeeds){
         var newSpeeds = speeds
 
-        // Avoids making the speeds field relative if the second order kinematics is used,
+        // Avoids making the speeds field relative if second order kinematics is used,
         // and the rotation speeds is non-zero.
         // without this if statement check, second order kinematics becomes bugged
         // and drives in a circle when driving while turning; this is a temporary fix for that.

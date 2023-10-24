@@ -59,7 +59,7 @@ public class AngularMotorFF(
             .calculate(
                 value.inUnit(angleUnit/timeUnit),
                 getAcceleration().inUnit(angleUnit/timeUnit/timeUnit)
-            ).ofUnit(volts) + gravity.getOutput()
+            ).ofUnit(volts) + gravity.get()
 
     public fun getAccelerationVoltage(): Voltage =
         (kA * getAcceleration().inUnit(angleUnit/timeUnit/timeUnit)).ofUnit(volts)

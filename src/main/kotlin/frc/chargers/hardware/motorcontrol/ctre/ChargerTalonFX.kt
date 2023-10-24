@@ -100,7 +100,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         }
 
         velocityRequest.Velocity = target.inUnit(rotations/seconds)
-        velocityRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.getOutput()).inUnit(volts)
+        velocityRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.get()).inUnit(volts)
         setControl(velocityRequest)
     }
 
@@ -164,7 +164,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         }else{
             mmRequest.Position = (encoder.angularPosition - (absoluteEncoder.angularPosition - target)).inUnit(rotations)
         }
-        mmRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.getOutput()).inUnit(volts)
+        mmRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.get()).inUnit(volts)
         setControl(mmRequest)
     }
 

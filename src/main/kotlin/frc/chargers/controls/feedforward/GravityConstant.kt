@@ -12,14 +12,23 @@ import com.batterystaple.kmeasure.quantities.*
  * @see AngularMotorFF
  * @see LinearMotorFF
  */
-public sealed class Gravity private constructor(
-    public val getOutput: () -> Voltage = {Voltage(0.0)}
-) {
-    public object None: Gravity()
+public fun interface Gravity{
+    public fun get(): Voltage
 
-    public class Custom(getGravity: () -> Voltage): Gravity(getGravity)
 
-    public class Arm(public val kG: Voltage, getAngle: () -> Angle): Gravity({kG * getAngle()})
 
-    public class Elevator(public val kG: Voltage): Gravity({kG})
+
+
+
+    public data object None: Gravity{
+        override fun get(): Voltage = Voltage(0.0)
+    }
+
+    public class Arm(public val kG: Voltage, private val getAngle: () -> Angle): Gravity{
+        override fun get(): Voltage = kG * getAngle()
+    }
+
+    public class Elevator(public val kG: Voltage): Gravity{
+        override fun get(): Voltage = kG
+    }
 }

@@ -23,7 +23,7 @@ public class LinearMotorFF(
     public val kS: Voltage,
     private val kV: Double,
     private val kA: Double,
-    public val gravity: Gravity,
+    public val gravity: Gravity = Gravity.None,
     public val distanceUnit: Distance,
     public val timeUnit: Time = seconds,
     public val getAcceleration: () -> Acceleration = {Acceleration(0.0)}
@@ -56,7 +56,7 @@ public class LinearMotorFF(
             .calculate(
                 value.inUnit(distanceUnit/ timeUnit),
                 getAcceleration().inUnit(distanceUnit/ timeUnit / timeUnit)
-            ).ofUnit(volts) + gravity.getOutput()
+            ).ofUnit(volts) + gravity.get()
 
     public fun convertToAngular(distancePerRadian: Distance): AngularMotorFF{
         val radiansPerMeter: Angle = (1 /distancePerRadian.inUnit(meters) ).ofUnit(radians)
