@@ -1,6 +1,7 @@
 package frc.chargers.hardware.inputdevices
 
 import frc.chargers.wpilibextensions.kinematics.ChassisPowers
+import frc.chargers.wpilibextensions.ratelimit.ScalarRateLimiter
 
 /**
  * An extension of [ChargerController] that provides tools to assist with controlling a swerve drivetrain.
@@ -31,13 +32,24 @@ public class SwerveDriveController(
             turboModeMultiplierRange: ClosedRange<Double> = 1.0..1.0,
             precisionModeDividerRange: ClosedRange<Double> = 1.0..1.0,
             deadband: Double = 0.0,
-            defaultAxisThreshold: Double = 0.5
+            defaultAxisThreshold: Double = 0.5,
+            driveRateLimiter: ScalarRateLimiter? = null,
+            rotationRateLimiter: ScalarRateLimiter? = null
         ): SwerveDriveController =
             SwerveDriveController(
                 port,
-                {leftY * driveMultiplier},
-                {leftX * driveMultiplier},
-                {rightX * rotationMultiplier},
+                {
+                    driveRateLimiter?.calculate(leftY * driveMultiplier)
+                        ?: (leftY * driveMultiplier)
+                },
+                {
+                    driveRateLimiter?.calculate(leftX * driveMultiplier)
+                        ?: (leftX * driveMultiplier)
+                },
+                {
+                    rotationRateLimiter?.calculate(rightX * rotationMultiplier)
+                        ?: (rightX * rotationMultiplier)
+                },
                 {rightTriggerAxis.mapTriggerValue(turboModeMultiplierRange)},
                 {1/leftTriggerAxis.mapTriggerValue(precisionModeDividerRange)},
                 deadband,

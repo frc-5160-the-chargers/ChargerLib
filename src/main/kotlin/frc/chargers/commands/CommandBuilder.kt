@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.*
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior
 import frc.chargers.utils.MappableContext
 import frc.chargers.utils.a
+import org.littletonrobotics.junction.Logger
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -63,8 +64,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run
      */
-    public fun runOnce(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): InstantCommand =
-        InstantCommand(*requirements) { CodeBlockContext.execute() }.also(commands::add)
+    public fun runOnce(vararg requirements: Subsystem, execute: () -> Unit): InstantCommand =
+        InstantCommand(*requirements) { execute() }.also(commands::add)
 
 
     /**
@@ -94,8 +95,8 @@ public class CommandBuilder {
      * @param condition the condition to be met
      * @param command the command to run until [condition] is met
      */
-    public fun runUntil(condition: CodeBlockContext.() -> Boolean, command: Command): ParallelRaceGroup =
-        command.until { CodeBlockContext.condition() }
+    public fun runUntil(condition: () -> Boolean, command: Command): ParallelRaceGroup =
+        command.until { condition() }
             .also(commands::add)
 
     /**
@@ -105,8 +106,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run until [condition] is met
      */
-    public inline fun loopUntil(noinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        runUntil(condition, RunCommand(*requirements) { CodeBlockContext.execute() })
+    public inline fun loopUntil(noinline condition: () -> Boolean, vararg requirements: Subsystem, crossinline execute: () -> Unit): ParallelRaceGroup =
+        runUntil(condition, RunCommand(*requirements) { execute() })
 
     /**
      * Adds a command that will run *while* [condition] is true.
@@ -115,7 +116,7 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command uses
      * @param execute the code to be run
      */
-    public inline fun loopWhile(crossinline condition: CodeBlockContext.() -> Boolean, vararg requirements: Subsystem, noinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
+    public inline fun loopWhile(crossinline condition: () -> Boolean, vararg requirements: Subsystem, noinline execute: () -> Unit): ParallelRaceGroup =
         loopUntil({ !condition() }, *requirements, execute=execute)
 
     /**
@@ -173,8 +174,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public inline fun loopFor(timeInterval: Time, vararg requirements: Subsystem, crossinline execute: CodeBlockContext.() -> Unit): ParallelRaceGroup =
-        loopFor(timeInterval, RunCommand(*requirements) { CodeBlockContext.execute() })
+    public inline fun loopFor(timeInterval: Time, vararg requirements: Subsystem, crossinline execute: () -> Unit): ParallelRaceGroup =
+        loopFor(timeInterval, RunCommand(*requirements) { execute() })
 
     /**
      * Adds a command to be run continuously.
@@ -182,8 +183,8 @@ public class CommandBuilder {
      * @param requirements the Subsystems this command requires
      * @param execute the code to be run
      */
-    public fun loopForever(vararg requirements: Subsystem, execute: CodeBlockContext.() -> Unit): RunCommand =
-            RunCommand(*requirements) { CodeBlockContext.execute() }
+    public fun loopForever(vararg requirements: Subsystem, execute: () -> Unit): RunCommand =
+            RunCommand(*requirements) { execute() }
                 .also(commands::add)
 
     /**
@@ -200,7 +201,7 @@ public class CommandBuilder {
      * Useful if some condition must be met before proceeding to the next command in a [SequentialCommandGroup].
      * Note that running this in parallel with other commands is unlikely to be useful.
      */
-    public fun waitUntil(condition: CodeBlockContext.() -> Boolean): ParallelRaceGroup = loopUntil(condition) {}
+    public fun waitUntil(condition: () -> Boolean): ParallelRaceGroup = loopUntil(condition) {}
 
     /**
      * Adds a command that prints a message.
@@ -217,10 +218,10 @@ public class CommandBuilder {
      * Returns a property delegate; see [here](https://kotlinlang.org/docs/delegated-properties.html#standard-delegates)
      * for an explanation of property delegates.
      */
-    public fun <T : Any> getOnceDuringRun(get: CodeBlockContext.() -> T) : ReadOnlyProperty<Any?, T> =
+    public fun <T : Any> getOnceDuringRun(get: () -> T) : ReadOnlyProperty<Any?, T> =
         DuringRunGetter(get)
 
-    private inner class DuringRunGetter<T : Any>(private val get: CodeBlockContext.() -> T) : ReadOnlyProperty<Any?, T> {
+    private inner class DuringRunGetter<T : Any>(private val get: () -> T) : ReadOnlyProperty<Any?, T> {
         init {
             commands.add(
                 object : CommandBase() { // Add a new command that initializes this value in its initialize() function.
@@ -236,7 +237,7 @@ public class CommandBuilder {
         }
 
         private fun initializeValue() {
-            value = CodeBlockContext.get()
+            value = get()
         }
 
         private lateinit var value: T
@@ -299,9 +300,30 @@ public class CommandBuilder {
 
 
 
+
 /**
- * The context provided to any code block in a CommandBuilder,
- * allowing code blocks to access various utility properties and functions.
+ * Utility functions used for logging commands within the buildCommand DSL.
  */
-@CommandBuilderMarker
-public object CodeBlockContext
+
+@PublishedApi
+internal fun loggedSequentialCommandGroup(name: String, vararg commands: Command): SequentialCommandGroup{
+    val loggedCommands: Array<Command> = commands.map{it.withLogInCommandGroup(name)}.toTypedArray()
+    return SequentialCommandGroup(
+        *loggedCommands
+    ).also{
+        it.name = name
+    }
+}
+
+internal fun Command.withLogInCommandGroup(commandGroupName: String): Command{
+
+
+    fun logCommand(active: Boolean) = InstantCommand{
+        Logger.getInstance().recordOutput(
+            "/ActiveCommands/Subcommands Of: $commandGroupName/$name",active
+        )
+    }
+
+    // uses custom infix "then" operator(more concise way to do andThen)
+    return logCommand(true) then this then logCommand(false)
+}

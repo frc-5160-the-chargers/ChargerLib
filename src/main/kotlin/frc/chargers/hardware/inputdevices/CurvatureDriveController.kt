@@ -1,6 +1,7 @@
 package frc.chargers.hardware.inputdevices
 
 import frc.chargers.wpilibextensions.kinematics.ChassisPowers
+import frc.chargers.wpilibextensions.ratelimit.ScalarRateLimiter
 
 /**
  * A subclass of [ChargerController] which has the capacity to control a differential drivetrain.
@@ -31,12 +32,20 @@ public class CurvatureDriveController(
             turboModeMultiplierRange: ClosedRange<Double> = 0.0..1.0,
             precisionModeDividerRange: ClosedRange<Double> = 0.0..1.0,
             deadband: Double = 0.0,
-            defaultAxisThreshold: Double = 0.5
+            defaultAxisThreshold: Double = 0.5,
+            driveRateLimiter: ScalarRateLimiter? = null,
+            rotationRateLimiter: ScalarRateLimiter? = null
         ): CurvatureDriveController =
             CurvatureDriveController(
                 port,
-                {leftY * driveMultiplier},
-                {rightX * rotationMultiplier},
+                {
+                    driveRateLimiter?.calculate(leftY * driveMultiplier)
+                        ?: (leftY * driveMultiplier)
+                },
+                {
+                    rotationRateLimiter?.calculate(rightX * rotationMultiplier)
+                        ?: (rightX * rotationMultiplier)
+                },
                 {rightTriggerAxis.mapTriggerValue(turboModeMultiplierRange)},
                 {1/leftTriggerAxis.mapTriggerValue(precisionModeDividerRange)},
                 deadband,
