@@ -36,7 +36,7 @@ public abstract class TunableSubsystem: SubsystemBase(){
                 }
             }
 
-        internal const val dashKey = "TunableValues"
+        internal const val DASH_KEY = "TunableValues"
 
         private val isCompAlert = Alert.warning(text = "Tuning mode WAS NOT SET: It looks like you're in a match right now.")
         private val tuningModeEnabledAlert = Alert.warning(text = "Tuning mode is enabled; Expect loop times to be greater. ")
@@ -107,7 +107,7 @@ public abstract class TunableSubsystem: SubsystemBase(){
     protected fun tunableDouble(defaultValue: Double, key: String): ReadOnlyProperty<Any?,Double> =
         object: ReadOnlyProperty<Any?,Double>{
 
-            val dashNumber = LoggedDashboardNumber("$dashKey/$key",defaultValue)
+            val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",defaultValue)
             private var value = defaultValue
 
             init{
@@ -132,7 +132,7 @@ public abstract class TunableSubsystem: SubsystemBase(){
     protected fun <D: AnyDimension> tunableQuantity(defaultValue: Quantity<D>, key: String, logUnit: Quantity<D>): ReadOnlyProperty<Any?,Quantity<D>> =
         object : ReadOnlyProperty<Any?,Quantity<D>>{
 
-            val dashNumber = LoggedDashboardNumber("$dashKey/$key",defaultValue.inUnit(logUnit))
+            val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",defaultValue.inUnit(logUnit))
             private var value = defaultValue
 
             init{
@@ -176,9 +176,9 @@ public abstract class TunableSubsystem: SubsystemBase(){
      */
     protected fun tunablePIDConstants(defaultValue: PIDConstants, key: String): ReadOnlyProperty<Any?,PIDConstants> =
         object: ReadOnlyProperty<Any?,PIDConstants>{
-            val kpDashNumber = LoggedDashboardNumber("$dashKey/$key/kP",defaultValue.kP)
-            val kiDashNumber = LoggedDashboardNumber("$dashKey/$key/kI",defaultValue.kI)
-            val kdDashNumber = LoggedDashboardNumber("$dashKey/$key/kD",defaultValue.kD)
+            val kpDashNumber = LoggedDashboardNumber("$DASH_KEY/$key/kP",defaultValue.kP)
+            val kiDashNumber = LoggedDashboardNumber("$DASH_KEY/$key/kI",defaultValue.kI)
+            val kdDashNumber = LoggedDashboardNumber("$DASH_KEY/$key/kD",defaultValue.kD)
 
             private var value = defaultValue
             // ap test stuff; cs and math

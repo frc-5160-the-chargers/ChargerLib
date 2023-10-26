@@ -103,7 +103,7 @@ public interface DifferentialDriveIO{
         )
         public var rightAngularPosition: Angle by loggedQuantity(
             logUnit = degrees,
-            "leftPositionDeg"
+            "rightPositionDeg"
         )
 
         public var leftAngularVelocity: AngularVelocity by loggedQuantity(

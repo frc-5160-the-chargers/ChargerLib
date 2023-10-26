@@ -1,10 +1,8 @@
 package frc.chargers.hardware.sensors.cameras
 
 
-import com.batterystaple.kmeasure.quantities.Angle
-import com.batterystaple.kmeasure.quantities.Distance
-
-
+import com.batterystaple.kmeasure.quantities.*
+import kotlin.math.sqrt
 
 
 public interface VisionCamera3d: VisionCamera{
@@ -12,18 +10,19 @@ public interface VisionCamera3d: VisionCamera{
      * gets how far in the x direction the camera has to travel to reach the target.
      * Here, it is pointing left-right.
      */
-    public val xDistanceOffset: Distance
+    public val xDistance: Distance
     /**
      * gets how far in the y direction the camera has to travel to reach the target.
      * Here, it is pointing up-down.
      */
-    public val yDistanceOffset: Distance
+    public val yDistance: Distance
 
     /**
      * gets how far in the z direction the camera has to travel to reach the target.
      * Here, it is pointing forward-backward.
      */
-    public val zDistanceOffset: Distance
+    public val zDistance: Distance
+
 
 
 }
@@ -37,12 +36,12 @@ public interface VisionCamera {
      * gets the x(left-right) angular offset from the target.
      * in the case of the limelight, it is tx. In the case of photoncamera, it's getYaw()/yaw.
      */
-    public val xAngularOffset: Angle
+    public val thetaX: Angle
     /**
      * gets the y(up-down) angular offset from the target.
      * in the case of the limelight, it is tx. In the case of photoncamera, it's getYaw()/yaw.
      */
-    public val yAngularOffset: Angle
+    public val thetaY: Angle
 
     /**
      * Gets the area of the target.
@@ -52,7 +51,12 @@ public interface VisionCamera {
 
     public fun getDistance(height: Distance): Distance
 
-    public fun getDiagonalDistance(height: Distance): Distance
+    public fun getDiagonalDistance(height: Distance): Distance{
+        val distanceSquared = (getDistance(height) * getDistance(height)).siValue
+        val heightSquared = (height * height).siValue
+        return Distance(sqrt(distanceSquared + heightSquared))
+    }
+
 
 
 }

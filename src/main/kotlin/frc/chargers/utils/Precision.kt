@@ -30,7 +30,8 @@ public sealed class Precision<out D : AnyDimension> {
 
 public inline fun <D: AnyDimension> Precision<D>.processValue(
     whenValueExists: (Precision.Within<D>) -> Unit,
-    whenAllowOvershoot: () -> Unit){
+    whenAllowOvershoot: () -> Unit
+){
     if (this is Precision.Within<D>){
         whenValueExists(this)
     }else{

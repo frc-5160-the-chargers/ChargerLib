@@ -256,7 +256,15 @@ public class EncoderHolonomicDrivetrain(
                 topRightV = controlScheme.turnFF.calculate(ms.topRightTurnSpeed)
                 bottomLeftV = controlScheme.turnFF.calculate(ms.bottomLeftTurnSpeed)
                 bottomRightV = controlScheme.turnFF.calculate(ms.bottomRightTurnSpeed)
+                /*
+                if (ms.topLeftTurnSpeed.siValue.isNaN()){
+                    println("ONE OF THE TURN SPEEDS IS NAN")
+                }
 
+                if (topLeftV.siValue.isNaN()){
+                    println("ONE OF THE VOLTAGES IS NAN")
+                }
+                 */
                 Logger.getInstance().recordOutput(
                     "Drivetrain(Swerve)/SecondOrderTurnSpeedsRadPerSec",
                     p[

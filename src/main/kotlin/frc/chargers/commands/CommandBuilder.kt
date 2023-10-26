@@ -57,6 +57,11 @@ public class CommandBuilder {
         return this
     }
 
+    /**
+     * Returns a command, then removes it from the set of commands within the [CommandBuilder].
+     */
+    public fun Command.withoutAdd(): Command = this.also(commands::remove)
+
 
     /**
      * Adds a command that will run once and then complete.
@@ -77,6 +82,8 @@ public class CommandBuilder {
     /**
      * Adds a command that will run the appropriate mapped command, depending on the key given.
      *
+     * Commands that are specified within the [MappableContext] are automatically removed from the command set of the [CommandBuilder].
+     *
      * @param key: A lambda that gets a generic value, used for choosing an appropriate command.
      * @param default: The default command called if the key does not match anything given within the [MappableContext] block.
      * @param block: The [MappableContext] that maps the key's value to a specific command.
@@ -84,7 +91,9 @@ public class CommandBuilder {
     public fun <T: Any> runWhen(key: () -> T, default: Command, block: MappableContext<T, Command>.() -> Unit): Command =
         CustomSelectCommand(
             key,
-            MappableContext<T,Command>().apply(block).map,
+            MappableContext<T,Command>().apply(block).map.onEach { (_: T, command: Command) ->
+                commands.remove(command)
+            },
             default
         ).also(commands::add)
 
@@ -327,3 +336,5 @@ internal fun Command.withLogInCommandGroup(commandGroupName: String): Command{
     // uses custom infix "then" operator(more concise way to do andThen)
     return logCommand(true) then this then logCommand(false)
 }
+
+public object CodeBlockContext

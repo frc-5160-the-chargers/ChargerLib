@@ -21,7 +21,6 @@ import frc.chargers.wpilibextensions.StandardDeviation
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
 import org.photonvision.PhotonUtils
-import kotlin.math.pow
 
 /**
  * A [PhotonCamera] wrapper, which implements the VisionCamera3d interface.
@@ -35,40 +34,30 @@ public open class BasicPhotonCamera(
 
     override val hasTarget: Boolean
         get() = latestResult.hasTargets()
-    override val xAngularOffset: Angle
+    override val thetaX: Angle
         get() = latestResult.bestTarget.yaw.degrees
 
-    override val yAngularOffset: Angle
+    override val thetaY: Angle
         get() = latestResult.bestTarget.pitch.degrees
 
     override val area: Double
         get() = latestResult.bestTarget.area
 
-    override val xDistanceOffset: Distance
+    override val xDistance: Distance
         get() = latestResult.bestTarget.bestCameraToTarget.x.meters
 
-    override val yDistanceOffset: Distance
+    override val yDistance: Distance
         get() = latestResult.bestTarget.bestCameraToTarget.y.meters
 
-    override val zDistanceOffset: Distance
+    override val zDistance: Distance
         get() = latestResult.bestTarget.bestCameraToTarget.z.meters
-
-
-    override fun getDiagonalDistance(height: Distance): Distance {
-        return (PhotonUtils.calculateDistanceToTargetMeters(
-            lensHeight.inUnit(meters),
-            height.inUnit(meters),
-            mountAngle.inUnit(radians),
-            yAngularOffset.inUnit(radians)).pow(2.0) + height.inUnit(meters).pow(2.0)
-                ).meters
-    }
 
     override fun getDistance(height: Distance): Distance {
         return PhotonUtils.calculateDistanceToTargetMeters(
             lensHeight.inUnit(meters),
             height.inUnit(meters),
             mountAngle.inUnit(radians),
-            yAngularOffset.inUnit(radians)
+            thetaY.inUnit(radians)
         ).meters
     }
 

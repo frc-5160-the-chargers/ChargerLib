@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
 import com.revrobotics.SparkMaxAlternateEncoder
 import com.revrobotics.SparkMaxPIDController
+import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
@@ -50,6 +51,12 @@ public open class ChargerCANSparkMax(
     type: MotorType,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
 ) : CANSparkMax(deviceId, type), FeedbackMotorController, MotorConfigurable<SparkMaxConfiguration> {
+
+    init{
+        if (RobotBase.isSimulation()){
+            error("Looks like you instantiated a motor IN SIM. Make sure to use a lazy initializer! ")
+        }
+    }
 
     private inner class EncoderConfiguration(
         var averageDepth: Int? = null,

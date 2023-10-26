@@ -12,8 +12,6 @@ import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.networktables.NetworkTableInstance
 import frc.chargers.utils.LimelightHelpers
 
-import kotlin.math.pow
-import kotlin.math.sqrt
 import kotlin.math.tan
 import edu.wpi.first.wpilibj.DriverStation
 import frc.chargers.hardware.sensors.RobotPoseSupplier
@@ -45,18 +43,18 @@ public class Limelight(
     // these all just implement the VisionCamera interface.
     override val hasTarget: Boolean
         get() = nt.getEntry("tv").getDouble(0.0) == 1.0
-    override val xAngularOffset: Angle
+    override val thetaX: Angle
         get() = tx.degrees
-    override val yAngularOffset: Angle
+    override val thetaY: Angle
         get() = ty.degrees
 
     override val area: Double
         get() = ta
-    override val xDistanceOffset: Distance
+    override val xDistance: Distance
         get() = nt.getEntry("camerapose_targetspace").getDoubleArray(Array(6){0.0})[0].meters
-    override val yDistanceOffset: Distance
+    override val yDistance: Distance
         get() = nt.getEntry("camerapose_targetspace").getDoubleArray(Array(6){0.0})[1].meters
-    override val zDistanceOffset: Distance
+    override val zDistance: Distance
         get() = nt.getEntry("camerapose_targetspace").getDoubleArray(Array(6){0.0})[2].meters
 
     override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
@@ -239,18 +237,9 @@ public class Limelight(
      */
     override fun getDistance(height: Distance): Distance{
         if (lensHeight == null || mountAngle == null){return 0.0.meters}
-        val angleToGoal: Angle = (mountAngle + yAngularOffset)
+        val angleToGoal: Angle = (mountAngle + thetaY)
         return (height.inUnit(meters)/ tan(angleToGoal.inUnit(radians))).meters
     }
 
-    /*
-    gets diagonal distance from lens to target.
-    How to use:
-    limelight.getDistance(5.meters).inUnit(meters)
-    obviously returns in meters
-     */
-    override fun getDiagonalDistance(height: Distance): Distance{
-        return sqrt(getDistance(height).inUnit(meters).pow(2.0) + height.inUnit(meters).pow(2.0)).meters
-    }
 
 }
