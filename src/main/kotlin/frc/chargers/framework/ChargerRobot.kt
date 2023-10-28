@@ -52,6 +52,13 @@ public open class ChargerRobot(
     private val logReceiverQueueAlert = Alert.error(text = "Logging queue exceeded capacity, data will NOT be logged.")
 
 
+    // Cancels a command; doing nothing if the command is not yet initialized.
+    private inline fun cancelCommand(getCommand: () -> Command){
+        try{
+            val command = getCommand()
+            command.cancel()
+        }catch(_: UninitializedPropertyAccessException){}
+    }
     /**
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
@@ -116,10 +123,11 @@ public open class ChargerRobot(
 
             LiveWindow.disableAllTelemetry()
 
+            TunableSubsystem.tuningMode = config.tuningMode
+
             // inits robotContainer
             robotContainer = getRobotContainer()
 
-            TunableSubsystem.tuningMode = config.tuningMode
 
             robotContainer.robotInit()
 
@@ -198,7 +206,7 @@ public open class ChargerRobot(
     /** This autonomous runs the autonomous command selected by your RobotContainer class.  */
     override fun autonomousInit() {
         try{
-            testCommand.cancel()
+            cancelCommand{testCommand}
             autonomousCommand = robotContainer.autonomousCommand
             autonomousCommand.schedule()
             robotContainer.autonomousInit()
@@ -221,8 +229,9 @@ public open class ChargerRobot(
     }
     override fun teleopInit() {
         try{
-            autonomousCommand.cancel()
-            testCommand.cancel()
+            cancelCommand{autonomousCommand}
+            cancelCommand{testCommand}
+            
             robotContainer.teleopInit()
         }catch(e: Exception){
             config.onError(e)

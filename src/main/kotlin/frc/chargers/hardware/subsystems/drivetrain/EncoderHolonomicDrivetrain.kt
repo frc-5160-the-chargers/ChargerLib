@@ -16,6 +16,7 @@ import frc.chargers.hardware.swerve.module.*
 import frc.chargers.utils.a
 import frc.chargers.utils.math.units.Inertia
 import frc.chargers.utils.p
+import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
@@ -46,21 +47,25 @@ public fun simEncoderHolonomicDrivetrain(
     loopPeriod: Time = 20.milli.seconds,
 ): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
     topLeft = SwerveModule(
+        "Drivetrain(Swerve)/TopLeftSwerveModule",
         ModuleIOSim(
             turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
         ), controlScheme
     ),
     topRight = SwerveModule(
+        "Drivetrain(Swerve)/TopRightSwerveModule",
         ModuleIOSim(
             turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
         ), controlScheme
     ),
     bottomLeft = SwerveModule(
+        "Drivetrain(Swerve)/BottomLeftSwerveModule",
         ModuleIOSim(
             turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
         ), controlScheme
     ),
     bottomRight = SwerveModule(
+        "Drivetrain(Swerve)/BottomRightSwerveModule",
         ModuleIOSim(
             turnGearbox, driveGearbox, loopPeriod, turnGearRatio, driveGearRatio, turnInertiaMoment, driveInertiaMoment
         ), controlScheme
@@ -91,6 +96,7 @@ public fun realEncoderHolonomicDrivetrain(
     loopPeriod: Time = 20.milli.seconds,
 ): EncoderHolonomicDrivetrain{
     val topLeft = SwerveModule(
+        "Drivetrain(Swerve)/TopLeftSwerveModule",
         ModuleIOReal(
             turnMotor = turnMotors.topLeft,
             turnEncoder = turnEncoders.topLeft,
@@ -101,6 +107,7 @@ public fun realEncoderHolonomicDrivetrain(
     )
 
     val topRight = SwerveModule(
+        "Drivetrain(Swerve)/TopRightSwerveModule",
         ModuleIOReal(
             turnMotor = turnMotors.topRight,
             turnEncoder = turnEncoders.topRight,
@@ -111,6 +118,7 @@ public fun realEncoderHolonomicDrivetrain(
     )
 
     val bottomLeft = SwerveModule(
+        "Drivetrain(Swerve)/BottomLeftSwerveModule",
         ModuleIOReal(
             turnMotor = turnMotors.bottomLeft,
             turnEncoder = turnEncoders.bottomLeft,
@@ -121,6 +129,7 @@ public fun realEncoderHolonomicDrivetrain(
     )
 
     val bottomRight = SwerveModule(
+        "Drivetrain(Swerve)/BottomRightSwerveModule",
         ModuleIOReal(
             turnMotor = turnMotors.bottomRight,
             turnEncoder = turnEncoders.bottomRight,
@@ -379,17 +388,20 @@ public class EncoderHolonomicDrivetrain(
 
 
 
+    private var previousTimestamp = fpgaTimestamp()
 
     private val isReal by lazy{ RobotBase.isReal()}
     /*
     Only corrects for dynamics if the robot is real; it is unoptimized in simulation.
      */
-    private fun ChassisSpeeds.correctForDynamicsOptimized(): ChassisSpeeds =
-        if (isReal){
-            correctForDynamics(loopPeriod)
-        }else{
-            this
-        }
+    private fun ChassisSpeeds.correctForDynamicsOptimized(): ChassisSpeeds{
+        if (!isReal) return this
+
+        val currentTimestamp = fpgaTimestamp()
+        val dt = currentTimestamp - previousTimestamp
+        previousTimestamp = currentTimestamp
+        return correctForDynamics(dt)
+    }
 
 
 
@@ -447,7 +459,6 @@ public class EncoderHolonomicDrivetrain(
         }else{
             kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsOptimized())
         }
-        currentControlMode = ControlMode.CLOSED_LOOP
     }
 
 
@@ -551,14 +562,15 @@ public class EncoderHolonomicDrivetrain(
 
 
 
+
     /**
      * Called periodically in the subsystem.
      */
     override fun periodic() {
-        topLeft.updateAndProcessInputs("Drivetrain(Swerve)/TopLeftSwerveModule")
-        topRight.updateAndProcessInputs("Drivetrain(Swerve)/TopRightSwerveModule")
-        bottomLeft.updateAndProcessInputs("Drivetrain(Swerve)/BottomLeftSwerveModule")
-        bottomRight.updateAndProcessInputs("Drivetrain(Swerve)/BottomRightSwerveModule")
+        topLeft.updateAndProcessInputs()
+        topRight.updateAndProcessInputs()
+        bottomLeft.updateAndProcessInputs()
+        bottomRight.updateAndProcessInputs()
 
         Logger.getInstance().recordOutput("Drivetrain(Swerve)/CurrentModuleStates", *currentModuleStates.toArray())
         Logger.getInstance().recordOutput("Drivetrain(Swerve)/DistanceTraveledMeters", distanceTraveled.inUnit(meters))

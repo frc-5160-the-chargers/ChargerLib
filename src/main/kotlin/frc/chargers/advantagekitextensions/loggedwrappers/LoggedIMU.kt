@@ -163,6 +163,8 @@ public class LoggedIMU(
         Logger.getInstance().apply{
             processInputs(imuName,generalInputs)
             processInputs("$imuName/Gyroscope",gyroscope)
+
+
             processInputs("$imuName/Speedometer",speedometer)
             processInputs("$imuName/Accelerometer",accelerometer)
         }

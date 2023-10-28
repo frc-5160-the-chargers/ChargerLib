@@ -20,15 +20,22 @@ public fun interface Gravity{
 
 
 
+
     public data object None: Gravity{
         override fun get(): Voltage = Voltage(0.0)
+
+        override fun toString(): String = "NO gravity compensation"
     }
 
     public class Arm(public val kG: Voltage, private val getAngle: () -> Angle): Gravity{
         override fun get(): Voltage = kG * getAngle()
+
+        override fun toString(): String = "Arm gravity compensation"
     }
 
     public class Elevator(public val kG: Voltage): Gravity{
         override fun get(): Voltage = kG
+
+        override fun toString(): String = "Elevator Gravity Compensation"
     }
 }

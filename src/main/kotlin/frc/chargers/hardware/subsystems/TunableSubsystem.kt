@@ -56,6 +56,7 @@ public abstract class TunableSubsystem: SubsystemBase(){
                     allRefreshables.forEach{
                         it.refresh()
                     }
+                    println("Values have been refreshed for a Tunable Subsystem.")
                 }
             }
         }
@@ -85,7 +86,7 @@ public abstract class TunableSubsystem: SubsystemBase(){
      * A value that simply refreshes itself when a tunableValue is changed,
      * and tuning mode is enabled.
      */
-    protected fun <T: Any?> refreshable(getValue: () -> T): ReadOnlyProperty<Any?,T> =
+    protected fun <T: Any?> refreshWhenTuned(getValue: () -> T): ReadOnlyProperty<Any?,T> =
         object: ReadOnlyProperty<Any?,T>{
 
             private var value: T = getValue()
@@ -200,6 +201,20 @@ public abstract class TunableSubsystem: SubsystemBase(){
             override fun getValue(thisRef: Any?, property: KProperty<*>): PIDConstants = value
 
         }
+
+
+    /**
+     * Represents [PIDConstants] that can be tuned from the dashboard.
+     */
+    protected fun tunablePIDConstants(
+        defaultKP: Double,
+        defaultKI: Double,
+        defaultKD: Double,
+        key: String
+    ): ReadOnlyProperty<Any?, PIDConstants> = tunablePIDConstants(
+        PIDConstants(defaultKP,defaultKI,defaultKD),
+        key
+    )
 
 }
 

@@ -21,8 +21,8 @@ import frc.chargers.utils.WheelRatioProvider
 
 public class AngularMotorFF(
     public val kS: Voltage,
-    private val kV: Double,
-    private val kA: Double = 0.0,
+    public val kV: Double,
+    public val kA: Double = 0.0,
     public val gravity: Gravity = Gravity.None,
     public val angleUnit: Angle,
     public val timeUnit: Time = seconds,

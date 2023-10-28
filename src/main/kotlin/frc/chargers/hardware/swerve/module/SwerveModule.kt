@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.hardware.subsystems.TunableSubsystem
 import frc.chargers.hardware.swerve.ProfiledPIDControlScheme
 import frc.chargers.hardware.swerve.SwerveControl
 import frc.chargers.utils.Precision
@@ -17,9 +18,10 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
 import org.littletonrobotics.junction.Logger
 
 public class SwerveModule(
+    private val name: String,
     public val io: ModuleIO,
     private val controlScheme: SwerveControl
-){
+): TunableSubsystem(){
 
     private val inputs: ModuleIO.Inputs = ModuleIO.Inputs()
 
@@ -32,9 +34,9 @@ public class SwerveModule(
         this % 360.degrees
     }
 
-    public fun updateAndProcessInputs(logName: String) {
+    public fun updateAndProcessInputs() {
         io.updateInputs(inputs)
-        Logger.getInstance().processInputs(logName,inputs)
+        Logger.getInstance().processInputs(name,inputs)
         velocityController.calculateOutput()
         turnController.calculateOutput()
     }
@@ -55,40 +57,55 @@ public class SwerveModule(
         }
     }
 
+    private val turnPIDConstants by tunablePIDConstants(
+        controlScheme.turnPIDConstants,
+        "$name/Turning PID Constants"
+    )
 
-
-
-    public val velocityController: UnitSuperPIDController<AngularVelocityDimension, VoltageDimension> = UnitSuperPIDController(
+    private val drivePIDConstants by tunablePIDConstants(
         controlScheme.drivePIDConstants,
-        {inputs.speed},
-        -12.volts..12.volts,
-        target = AngularVelocity(0.0),
-        feedforward = controlScheme.driveFF
+        "$name/Driving PID Constants"
     )
 
 
 
-    private val turnController: FeedbackController<Angle, Voltage> =
-        when(controlScheme){
 
-            is ProfiledPIDControlScheme -> AngularProfiledPIDController(
-                controlScheme.turnPIDConstants,
-                {inputs.direction.standardize()},
-                outputRange = -12.volts..12.volts,
-                continuousInputRange = 0.degrees..360.degrees,
-                target = Angle(0.0),
-                constraints = controlScheme.turnConstraints,
-                feedforward = controlScheme.turnFF
-            )
-
-            else -> UnitSuperPIDController(
-                controlScheme.turnPIDConstants,
-                {inputs.direction.standardize()},
-                outputRange = -12.volts..12.volts,
-                continuousInputRange = 0.degrees..360.degrees,
-                target = Angle(0.0)
+    public val velocityController: UnitSuperPIDController<AngularVelocityDimension, VoltageDimension>
+        by refreshWhenTuned{
+            UnitSuperPIDController(
+                drivePIDConstants,
+                {inputs.speed},
+                -12.volts..12.volts,
+                target = AngularVelocity(0.0),
+                feedforward = controlScheme.driveFF
             )
         }
+
+
+
+    private val turnController: FeedbackController<Angle, Voltage>
+        by refreshWhenTuned{
+            when(controlScheme){
+                is ProfiledPIDControlScheme -> AngularProfiledPIDController(
+                    turnPIDConstants,
+                    {inputs.direction.standardize()},
+                    outputRange = -12.volts..12.volts,
+                    continuousInputRange = 0.degrees..360.degrees,
+                    target = Angle(0.0),
+                    constraints = controlScheme.turnConstraints,
+                    feedforward = controlScheme.turnFF
+                )
+
+                else -> UnitSuperPIDController(
+                    turnPIDConstants,
+                    {inputs.direction.standardize()},
+                    outputRange = -12.volts..12.volts,
+                    continuousInputRange = 0.degrees..360.degrees,
+                    target = Angle(0.0)
+                )
+            }
+        }
+
 
 
     public val currentDirection: Angle
