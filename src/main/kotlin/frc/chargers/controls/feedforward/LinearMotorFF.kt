@@ -1,6 +1,8 @@
 package frc.chargers.controls.feedforward
 
 
+import com.batterystaple.kmeasure.dimensions.DistanceDimension
+import com.batterystaple.kmeasure.dimensions.TimeDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
@@ -9,6 +11,7 @@ import edu.wpi.first.math.controller.*
 import com.batterystaple.kmeasure.quantities.div
 import com.batterystaple.kmeasure.units.meters
 import frc.chargers.utils.WheelRatioProvider
+import frc.chargers.utils.math.units.KmeasureUnit
 
 
 /**
@@ -24,8 +27,8 @@ public class LinearMotorFF(
     private val kV: Double,
     private val kA: Double,
     public val gravity: Gravity = Gravity.None,
-    public val distanceUnit: Distance,
-    public val timeUnit: Time = seconds,
+    public val distanceUnit: KmeasureUnit<DistanceDimension>,
+    public val timeUnit: KmeasureUnit<TimeDimension> = seconds,
     public val getAcceleration: () -> Acceleration = {Acceleration(0.0)}
 ): Feedforward<Velocity,Voltage>{
 

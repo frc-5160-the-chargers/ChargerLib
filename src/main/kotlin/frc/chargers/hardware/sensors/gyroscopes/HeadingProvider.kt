@@ -18,8 +18,18 @@ public interface HeadingProvider {
      */
     public val heading: Angle
 
-    /**
-     * Represents a [HeadingProvider] with a static heading value.
-     */
-    public class Static(override val heading: Angle = Angle(0.0)) : HeadingProvider
+    public companion object{
+        /**
+         * Inline syntax to create a generic [HeadingProvider].
+         *
+         * Syntax:
+         * ```
+         * val headingProvider = HeadingProvider{ Angle(0.0) }
+         */
+        public inline operator fun invoke(crossinline getHeading: () -> Angle): HeadingProvider =
+            object: HeadingProvider{
+                override val heading: Angle get() = getHeading()
+            }
+
+    }
 }

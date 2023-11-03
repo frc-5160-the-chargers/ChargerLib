@@ -7,6 +7,7 @@ import com.batterystaple.kmeasure.quantities.ofUnit
 import edu.wpi.first.wpilibj.DriverStation
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.framework.ChargerRobot
+import frc.chargers.utils.math.units.KmeasureUnit
 import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber
@@ -155,7 +156,7 @@ public open class DashboardTuner{
      * @see Quantity
      * @see LoggedDashboardNumber
      */
-    public fun <D: AnyDimension> quantity(default: Quantity<D>, key: String, logUnit: Quantity<D>): ReadOnlyProperty<Any?, Quantity<D>> =
+    public fun <D: AnyDimension> quantity(default: Quantity<D>, key: String, logUnit: KmeasureUnit<D>): ReadOnlyProperty<Any?, Quantity<D>> =
         object : ReadOnlyProperty<Any?, Quantity<D>> {
 
             val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",default.inUnit(logUnit))

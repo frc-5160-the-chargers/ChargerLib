@@ -11,6 +11,11 @@ import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+
+/**
+ * A Generic Loggable Input; a property delegate provider
+ * which provides a read-write property needed for the LoggableInputs class.
+ */
 public typealias LoggableInput<T> = PropertyDelegateProvider<Any?,ReadWriteProperty<Any?,T>>
 
 
@@ -143,7 +148,7 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
      * which allows the fromLog and toLog functions of [LoggableInputs] to modify its value.
      */
     protected fun <D: AnyDimension> loggedQuantity(
-        logUnit: Quantity<D> = Quantity(1.0),
+        logUnit: KmeasureUnit<D> = KmeasureUnit(1.0),
         logName: String? = null,
         defaultValue: Quantity<D> = Quantity(0.0)
     ): LoggableInput<Quantity<D>> =
@@ -157,7 +162,7 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
         }
 
     private inner class LoggedQuantityDelegate<D: AnyDimension>(
-        logUnit: Quantity<D>,
+        logUnit: KmeasureUnit<D>,
         logName: String,
         private var innerValue: Quantity<D> = Quantity(0.0)
     ): ReadWriteProperty<Any?,Quantity<D>>{
@@ -185,7 +190,7 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
      * which allows the fromLog and toLog functions of [LoggableInputs] to modify its value.
      */
     protected fun <D: AnyDimension> loggedNullableQuantity(
-        logUnit: Quantity<D> = Quantity(1.0),
+        logUnit: KmeasureUnit<D> = KmeasureUnit(1.0),
         logName: String? = null,
         defaultValue: Quantity<D> = Quantity(0.0)
     ): LoggableInput<Quantity<D>?> =
@@ -199,7 +204,7 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
         }
 
     private inner class LoggedNullableQuantityDelegate<D: AnyDimension>(
-        logUnit: Quantity<D>,
+        logUnit: KmeasureUnit<D>,
         logName: String,
         private var innerValue: Quantity<D>? = Quantity(0.0)
     ): ReadWriteProperty<Any?,Quantity<D>?>{

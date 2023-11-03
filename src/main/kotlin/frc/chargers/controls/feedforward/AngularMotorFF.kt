@@ -1,5 +1,7 @@
 package frc.chargers.controls.feedforward
 
+import com.batterystaple.kmeasure.dimensions.AngleDimension
+import com.batterystaple.kmeasure.dimensions.TimeDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
@@ -7,6 +9,7 @@ import com.batterystaple.kmeasure.units.seconds
 import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.math.controller.*
 import frc.chargers.utils.WheelRatioProvider
+import frc.chargers.utils.math.units.KmeasureUnit
 
 
 /**
@@ -24,8 +27,8 @@ public class AngularMotorFF(
     public val kV: Double,
     public val kA: Double = 0.0,
     public val gravity: Gravity = Gravity.None,
-    public val angleUnit: Angle,
-    public val timeUnit: Time = seconds,
+    public val angleUnit: KmeasureUnit<AngleDimension>,
+    public val timeUnit: KmeasureUnit<TimeDimension> = seconds,
     public val getAcceleration: () -> AngularAcceleration = {AngularAcceleration(0.0)}
 ): Feedforward<AngularVelocity,Voltage>{
 
