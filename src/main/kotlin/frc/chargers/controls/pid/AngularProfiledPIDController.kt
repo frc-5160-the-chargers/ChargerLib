@@ -8,7 +8,7 @@ import frc.chargers.commands.RunCommand
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
-
+import frc.chargers.wpilibextensions.geometry.ofUnit
 
 
 public class AngularProfiledPIDController(
@@ -75,6 +75,19 @@ public class AngularProfiledPIDController(
                 pidController.goal = AngularTrapezoidProfile.State(target,AngularVelocity(0.0)).inUnit(radians,seconds)
             }
         }
+
+    /**
+     * An alternative to the target variable; sets the profiled PID controller to a specific [AngularTrapezoidProfile.State].
+     */
+    public var targetState: AngularTrapezoidProfile.State
+        get() = pidController.goal.ofUnit(radians,seconds)
+        set(target){
+            if (target != pidController.goal.ofUnit(radians,seconds)){
+                pidController.reset(getInput().inUnit(radians))
+                pidController.goal = target.inUnit(radians,seconds)
+            }
+        }
+
 
     /**
      * The PID Constants control exactly how the PID Controller attempts to reach the target.

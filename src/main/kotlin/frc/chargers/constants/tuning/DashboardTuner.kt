@@ -1,11 +1,10 @@
-package frc.chargers.hardware.subsystems
+package frc.chargers.constants.tuning
 
 import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.quantities.ofUnit
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.wpilibextensions.Alert
@@ -14,14 +13,39 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardNumber
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-
 /**
- * Represents a Subsystem with tunable values.
+ * A class that interfaces with Smart Dashboard's tuning functionality.
+ *
+ * Acts as a wrapper around AdvantageKit's [LoggedDashboardNumber] and [LoggedDashboardBoolean],
+ * which uses Kotlin's property delegates to support tunable
+ * [Double]'s, [Quantity]'s, [Boolean]'s and [PIDConstants].
+ *
+ * Example usage:
+ *
+ * ```
+ * class BasicSubsystem: SubsystemBase(){
+ *      val tuner = DashboardTuner()
+ *
+ *
+ *      val proximalJointConstants by tuner.pidConstants(
+ *          default = PIDConstants(0.1,0.0,0.0),
+ *          key = "proximalJointPIDConstants"
+ *      )
+ *
+ *      val proximalJointOffset by tuner.quantity(
+ *          default = 0.0.degrees,
+ *          key = "proximalJointOffsetDegrees",
+ *          logUnit = degrees
+ *      )
+ *
+ * }
+ * ```
+ *
  */
-public abstract class TunableSubsystem: SubsystemBase(){
+public open class DashboardTuner{
 
     public companion object{
-        
+
         public var tuningMode: Boolean = false
             set(value){
                 if (!value){
@@ -36,7 +60,7 @@ public abstract class TunableSubsystem: SubsystemBase(){
                 }
             }
 
-        internal const val DASH_KEY = "TunableValues"
+        private const val DASH_KEY = "TunableValues"
 
         private val isCompAlert = Alert.warning(text = "Tuning mode WAS NOT SET: It looks like you're in a match right now.")
         private val tuningModeEnabledAlert = Alert.warning(text = "Tuning mode is enabled; Expect loop times to be greater. ")
@@ -86,8 +110,8 @@ public abstract class TunableSubsystem: SubsystemBase(){
      * A value that simply refreshes itself when a tunableValue is changed,
      * and tuning mode is enabled.
      */
-    protected fun <T: Any?> refreshWhenTuned(getValue: () -> T): ReadOnlyProperty<Any?,T> =
-        object: ReadOnlyProperty<Any?,T>{
+    public fun <T: Any?> refreshWhenTuned(getValue: () -> T): ReadOnlyProperty<Any?, T> =
+        object: ReadOnlyProperty<Any?, T> {
 
             private var value: T = getValue()
 
@@ -97,6 +121,7 @@ public abstract class TunableSubsystem: SubsystemBase(){
                 )
             }
 
+
             override fun getValue(thisRef: Any?, property: KProperty<*>): T = value
         }
 
@@ -105,11 +130,11 @@ public abstract class TunableSubsystem: SubsystemBase(){
      *
      * @see LoggedDashboardNumber
      */
-    protected fun tunableDouble(defaultValue: Double, key: String): ReadOnlyProperty<Any?,Double> =
-        object: ReadOnlyProperty<Any?,Double>{
+    public fun double(default: Double, key: String): ReadOnlyProperty<Any?, Double> =
+        object: ReadOnlyProperty<Any?, Double> {
 
-            val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",defaultValue)
-            private var value = defaultValue
+            val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",default)
+            private var value = default
 
             init{
                 allTunables.add(
@@ -130,11 +155,11 @@ public abstract class TunableSubsystem: SubsystemBase(){
      * @see Quantity
      * @see LoggedDashboardNumber
      */
-    protected fun <D: AnyDimension> tunableQuantity(defaultValue: Quantity<D>, key: String, logUnit: Quantity<D>): ReadOnlyProperty<Any?,Quantity<D>> =
-        object : ReadOnlyProperty<Any?,Quantity<D>>{
+    public fun <D: AnyDimension> quantity(default: Quantity<D>, key: String, logUnit: Quantity<D>): ReadOnlyProperty<Any?, Quantity<D>> =
+        object : ReadOnlyProperty<Any?, Quantity<D>> {
 
-            val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",defaultValue.inUnit(logUnit))
-            private var value = defaultValue
+            val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",default.inUnit(logUnit))
+            private var value = default
 
             init{
                 allTunables.add(
@@ -154,11 +179,11 @@ public abstract class TunableSubsystem: SubsystemBase(){
      *
      * @see LoggedDashboardBoolean
      */
-    protected fun tunableBoolean(defaultValue: Boolean, key: String): ReadOnlyProperty<Any?,Boolean> =
-        object: ReadOnlyProperty<Any?,Boolean>{
+    public fun boolean(default: Boolean, key: String): ReadOnlyProperty<Any?, Boolean> =
+        object: ReadOnlyProperty<Any?, Boolean> {
 
-            val dashBool = LoggedDashboardBoolean(key,defaultValue)
-            private var value = defaultValue
+            val dashBool = LoggedDashboardBoolean(key,default)
+            private var value = default
 
             init{
                 allTunables.add(
@@ -175,13 +200,13 @@ public abstract class TunableSubsystem: SubsystemBase(){
     /**
      * Represents [PIDConstants] that can be tuned from the dashboard.
      */
-    protected fun tunablePIDConstants(defaultValue: PIDConstants, key: String): ReadOnlyProperty<Any?,PIDConstants> =
-        object: ReadOnlyProperty<Any?,PIDConstants>{
-            val kpDashNumber = LoggedDashboardNumber("$DASH_KEY/$key/kP",defaultValue.kP)
-            val kiDashNumber = LoggedDashboardNumber("$DASH_KEY/$key/kI",defaultValue.kI)
-            val kdDashNumber = LoggedDashboardNumber("$DASH_KEY/$key/kD",defaultValue.kD)
+    public fun pidConstants(default: PIDConstants, key: String): ReadOnlyProperty<Any?, PIDConstants> =
+        object: ReadOnlyProperty<Any?, PIDConstants> {
+            val kpDashNumber = LoggedDashboardNumber("$DASH_KEY/$key-kP",default.kP)
+            val kiDashNumber = LoggedDashboardNumber("$DASH_KEY/$key-kI",default.kI)
+            val kdDashNumber = LoggedDashboardNumber("$DASH_KEY/$key-kD",default.kD)
 
-            private var value = defaultValue
+            private var value = default
             // ap test stuff; cs and math
             private fun getConstants() = PIDConstants(
                 kpDashNumber.get(),
@@ -202,25 +227,10 @@ public abstract class TunableSubsystem: SubsystemBase(){
 
         }
 
-
     /**
      * Represents [PIDConstants] that can be tuned from the dashboard.
      */
-    protected fun tunablePIDConstants(
-        defaultKP: Double,
-        defaultKI: Double,
-        defaultKD: Double,
-        key: String
-    ): ReadOnlyProperty<Any?, PIDConstants> = tunablePIDConstants(
-        PIDConstants(defaultKP,defaultKI,defaultKD),
-        key
-    )
+    public fun pidConstants(kP: Double, kI: Double, kD: Double, key: String): ReadOnlyProperty<Any?,PIDConstants> =
+        pidConstants(PIDConstants(kP,kI,kD),key)
 
 }
-
-
-
-
-
-
-

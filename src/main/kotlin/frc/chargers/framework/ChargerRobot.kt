@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.chargers.builddata.ChargerLibBuildConstants
-import frc.chargers.hardware.subsystems.TunableSubsystem
+import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.LoggedRobot
 import java.nio.file.Files
@@ -123,7 +123,7 @@ public open class ChargerRobot(
 
             LiveWindow.disableAllTelemetry()
 
-            TunableSubsystem.tuningMode = config.tuningMode
+            DashboardTuner.tuningMode = config.tuningMode
 
             // inits robotContainer
             robotContainer = getRobotContainer()

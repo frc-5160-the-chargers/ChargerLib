@@ -136,39 +136,14 @@ public class ModuleIOSim(
 
 public interface ModuleIO{
     public class Inputs: ChargerLoggableInputs(){
-        public var direction: Angle by loggedQuantity(
-            logUnit = degrees,
-            logName = "directionDegrees",
-            Angle(0.0)
-        )
-        public var turnSpeed: AngularVelocity by loggedQuantity(
-            logUnit = degrees/seconds,
-            logName = "turnSpeedDegPerSec",
-            AngularVelocity(0.0)
-        )
-        public var turnVoltage: Voltage by loggedQuantity(
-            logUnit = volts,
-            logName = "turnVoltageVolts",
-            Voltage(0.0)
-        )
+        public var direction: Angle by loggedQuantity(logUnit = degrees, logName = "directionDegrees")
+        public var turnSpeed: AngularVelocity by loggedQuantity(logUnit = degrees/seconds, logName = "turnSpeedDegPerSec")
+        public var turnVoltage: Voltage by loggedQuantity(logUnit = volts, logName = "turnVoltageVolts")
 
 
-
-        public var speed: AngularVelocity by loggedQuantity(
-            degrees/seconds,
-            "speedDegreesPerSec",
-            AngularVelocity(0.0)
-        )
-        public var driveVoltage: Voltage by loggedQuantity(
-            logUnit = volts,
-            logName = "driveVoltageVolts",
-            Voltage(0.0)
-        )
-        public var distance: Angle by loggedQuantity(
-            degrees,
-            "distanceDegrees",
-            Angle(0.0)
-        )
+        public var speed: AngularVelocity by loggedQuantity(logUnit = degrees/seconds, logName = "speedDegreesPerSec")
+        public var driveVoltage: Voltage by loggedQuantity(logUnit = volts, logName = "driveVoltageVolts")
+        public var distance: Angle by loggedQuantity(logUnit = degrees, logName = "distanceDegrees")
     }
 
     public fun setDriveVoltage(driveV: Voltage)

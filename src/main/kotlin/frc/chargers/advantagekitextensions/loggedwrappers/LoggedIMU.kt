@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.Logger
 /**
  * An IMU which has logging & replay capabilities from advantagekit.
  * 
- * Note: All of the Inputs classes also act as implementations of the 
+ * Note: All the Inputs classes also act as implementations of the
  * [ThreeAxisGyroscope], [ThreeAxisAccelerometer] and [ThreeAxisSpeedometer] interfaces,
  * to reduce boilerplate code.
  */
@@ -27,7 +27,7 @@ public class LoggedIMU(
 
     private val generalInputs = GeneralInputs()
     private inner class GeneralInputs: ChargerLoggableInputs() {
-        var isConnected: Boolean by loggedBoolean(logName = "isConnected")
+        var isConnected: Boolean by loggedBoolean()
         var fusedHeading: Angle by loggedQuantity(
             logUnit = degrees,
             logName = "fusedHeadingDeg"
@@ -38,10 +38,9 @@ public class LoggedIMU(
         )
         var altitude: Distance? by loggedNullableQuantity(
             logUnit = meters,
-            logName = "altitudeMeters",
-            defaultValue = Distance(0.0)
+            logName = "altitudeMeters"
         )
-        var baseIMUName: String by loggedString(logName = "name")
+        var baseIMUName: String by loggedString()
 
         fun update(){
             isConnected = imu.isConnected

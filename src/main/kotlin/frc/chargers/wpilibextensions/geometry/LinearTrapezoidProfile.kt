@@ -56,15 +56,6 @@ public class LinearTrapezoidProfile(
         val position: Distance,
         val velocity: Velocity
     ){
-        public override fun equals(other: Any?): Boolean {
-           return if (other is State) (((position == other.position) && (velocity == other.velocity))) else false
-        }
-        override fun hashCode(): Int {
-            var result = position.hashCode()
-            result = 31 * result + velocity.hashCode()
-            return result
-        }
-
         public fun inUnit(distanceUnit: Distance, timeUnit: Time): TrapezoidProfile.State = TrapezoidProfile.State(
             position.inUnit(distanceUnit),
             velocity.inUnit(distanceUnit/timeUnit)

@@ -15,7 +15,6 @@ import frc.chargers.hardware.swerve.SwerveControl
 import frc.chargers.hardware.swerve.module.*
 import frc.chargers.utils.a
 import frc.chargers.utils.math.units.Inertia
-import frc.chargers.utils.p
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
@@ -195,40 +194,41 @@ public class EncoderHolonomicDrivetrain(
     OPEN_LOOP indicates percent-out(power) based drive,
     while CLOSED_LOOP uses PID and feedforward for velocity-based driving.
      */
-    public enum class ControlMode{
+    private enum class ControlMode{
         OPEN_LOOP,CLOSED_LOOP
     }
-    public var currentControlMode: ControlMode = ControlMode.CLOSED_LOOP
+    private var currentControlMode: ControlMode = ControlMode.CLOSED_LOOP
 
 
 
 
 
 
-    private val wheelRadius = wheelDiameter / 2.0
+
 
 
     /*
     Encoder-based functions below. They use similar tactics to the EncoderDifferentialDrivetrain class.
      */
+    private val wheelRadius = wheelDiameter / 2.0
     private val moduleArray = a[topLeft,topRight,bottomLeft,bottomRight]
-    
-    // gear ratio compensated
-    private fun averageEncoderPosition() =
-        moduleArray.map{it.wheelPosition}.average()
-    private fun averageEncoderVelocity() =
-        moduleArray.map{it.currentVelocity}.average()
+    private fun averageEncoderPosition() = moduleArray.map{it.wheelPosition}.average()
+    private fun averageEncoderVelocity() = moduleArray.map{it.currentVelocity}.average()
     
     private val distanceOffset: Distance = averageEncoderPosition() * wheelRadius
 
-    public val distanceTraveled: Distance
-        get() =
-            (averageEncoderPosition() *
-                    wheelRadius) - distanceOffset
-    public val velocity: Velocity
-        get() =
-            averageEncoderVelocity() *
-                    wheelRadius
+
+
+
+    /**
+     * The distance the robot has traveled in total.
+     */
+    public val distanceTraveled: Distance get() = (averageEncoderPosition() * wheelRadius) - distanceOffset
+
+    /**
+     * The current overall velocity of the robot.
+     */
+    public val velocity: Velocity get() = averageEncoderVelocity() * wheelRadius
 
 
 
@@ -256,56 +256,27 @@ public class EncoderHolonomicDrivetrain(
         }
         set(ms){
             ms.desaturate(maxModuleSpeed)
-            var topLeftV = 0.0.volts
-            var topRightV = 0.0.volts
-            var bottomLeftV = 0.0.volts
-            var bottomRightV = 0.0.volts
+            var secondOrderTurnSpeedTL = AngularVelocity(0.0)
+            var secondOrderTurnSpeedTR = AngularVelocity(0.0)
+            var secondOrderTurnSpeedBL = AngularVelocity(0.0)
+            var secondOrderTurnSpeedBR = AngularVelocity(0.0)
             if (controlScheme is SecondOrderControlScheme && ms is SecondOrderModuleStateGroup){
-                topLeftV = controlScheme.turnFF.calculate(ms.topLeftTurnSpeed)
-                topRightV = controlScheme.turnFF.calculate(ms.topRightTurnSpeed)
-                bottomLeftV = controlScheme.turnFF.calculate(ms.bottomLeftTurnSpeed)
-                bottomRightV = controlScheme.turnFF.calculate(ms.bottomRightTurnSpeed)
-                /*
-                if (ms.topLeftTurnSpeed.siValue.isNaN()){
-                    println("ONE OF THE TURN SPEEDS IS NAN")
-                }
-
-                if (topLeftV.siValue.isNaN()){
-                    println("ONE OF THE VOLTAGES IS NAN")
-                }
-                 */
-                Logger.getInstance().recordOutput(
-                    "Drivetrain(Swerve)/SecondOrderTurnSpeedsRadPerSec",
-                    p[
-                        ms.topLeftTurnSpeed.inUnit(radians/seconds),
-                        ms.topRightTurnSpeed.inUnit(radians/seconds),
-                        ms.bottomLeftTurnSpeed.inUnit(radians/seconds),
-                        ms.bottomRightTurnSpeed.inUnit(radians/seconds),
-                    ]
-                )
-
-                Logger.getInstance().recordOutput(
-                    "Drivetrain(Swerve)/SecondOrderTurnAppliedVolts",
-                    p[
-                        topLeftV.inUnit(volts),
-                        topRightV.inUnit(volts),
-                        bottomLeftV.inUnit(volts),
-                        bottomRightV.inUnit(volts)
-                    ]
-                )
-
+                secondOrderTurnSpeedTL = ms.topLeftTurnSpeed
+                secondOrderTurnSpeedTR = ms.topRightTurnSpeed
+                secondOrderTurnSpeedBL = ms.bottomLeftTurnSpeed
+                secondOrderTurnSpeedBR = ms.bottomRightTurnSpeed
             }
             if (currentControlMode == ControlMode.CLOSED_LOOP){
 
-                topLeft.setDirectionalVelocity(ms.topLeftSpeed / wheelRadius,ms.topLeftAngle,topLeftV)
-                topRight.setDirectionalVelocity(ms.topRightSpeed / wheelRadius,ms.topRightAngle,topRightV)
-                bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed / wheelRadius,ms.bottomLeftAngle,bottomLeftV)
-                bottomRight.setDirectionalVelocity(ms.bottomRightSpeed / wheelRadius,ms.bottomRightAngle,bottomRightV)
+                topLeft.setDirectionalVelocity(ms.topLeftSpeed / wheelRadius,ms.topLeftAngle,secondOrderTurnSpeedTL)
+                topRight.setDirectionalVelocity(ms.topRightSpeed / wheelRadius,ms.topRightAngle,secondOrderTurnSpeedTR)
+                bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed / wheelRadius,ms.bottomLeftAngle,secondOrderTurnSpeedBL)
+                bottomRight.setDirectionalVelocity(ms.bottomRightSpeed / wheelRadius,ms.bottomRightAngle,secondOrderTurnSpeedBR)
             }else{
-                topLeft.setDirectionalPower((ms.topLeftSpeed/maxModuleSpeed).siValue, ms.topLeftAngle,topLeftV)
-                topRight.setDirectionalPower((ms.topRightSpeed/maxModuleSpeed).siValue, ms.topRightAngle,topRightV)
-                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/maxModuleSpeed).siValue, ms.bottomLeftAngle,bottomLeftV)
-                bottomRight.setDirectionalPower((ms.bottomRightSpeed/maxModuleSpeed).siValue, ms.bottomRightAngle,bottomRightV)
+                topLeft.setDirectionalPower((ms.topLeftSpeed/maxModuleSpeed).siValue, ms.topLeftAngle,secondOrderTurnSpeedTL)
+                topRight.setDirectionalPower((ms.topRightSpeed/maxModuleSpeed).siValue, ms.topRightAngle,secondOrderTurnSpeedTR)
+                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/maxModuleSpeed).siValue, ms.bottomLeftAngle,secondOrderTurnSpeedBL)
+                bottomRight.setDirectionalPower((ms.bottomRightSpeed/maxModuleSpeed).siValue, ms.bottomRightAngle,secondOrderTurnSpeedBR)
             }
             Logger.getInstance().recordOutput("Drivetrain(Swerve)/DesiredModuleStates", ms.topLeftState,ms.topRightState,ms.bottomLeftState,ms.bottomRightState)
 
@@ -388,7 +359,6 @@ public class EncoderHolonomicDrivetrain(
 
 
 
-    private var previousTimestamp = fpgaTimestamp()
 
     private val isReal by lazy{ RobotBase.isReal()}
     /*
@@ -396,11 +366,7 @@ public class EncoderHolonomicDrivetrain(
      */
     private fun ChassisSpeeds.correctForDynamicsOptimized(): ChassisSpeeds{
         if (!isReal) return this
-
-        val currentTimestamp = fpgaTimestamp()
-        val dt = currentTimestamp - previousTimestamp
-        previousTimestamp = currentTimestamp
-        return correctForDynamics(dt)
+        return correctForDynamics(loopPeriod)
     }
 
 

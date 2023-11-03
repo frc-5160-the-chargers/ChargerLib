@@ -6,14 +6,15 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
-import frc.chargers.hardware.subsystems.TunableSubsystem
 import frc.chargers.hardware.swerve.ProfiledPIDControlScheme
 import frc.chargers.hardware.swerve.SwerveControl
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
+import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import org.littletonrobotics.junction.Logger
 
@@ -21,7 +22,9 @@ public class SwerveModule(
     private val name: String,
     public val io: ModuleIO,
     private val controlScheme: SwerveControl
-): TunableSubsystem(){
+){
+
+    private val tuner = DashboardTuner()
 
     private val inputs: ModuleIO.Inputs = ModuleIO.Inputs()
 
@@ -57,12 +60,12 @@ public class SwerveModule(
         }
     }
 
-    private val turnPIDConstants by tunablePIDConstants(
+    private val turnPIDConstants by tuner.pidConstants(
         controlScheme.turnPIDConstants,
         "$name/Turning PID Constants"
     )
 
-    private val drivePIDConstants by tunablePIDConstants(
+    private val drivePIDConstants by tuner.pidConstants(
         controlScheme.drivePIDConstants,
         "$name/Driving PID Constants"
     )
@@ -71,7 +74,7 @@ public class SwerveModule(
 
 
     public val velocityController: UnitSuperPIDController<AngularVelocityDimension, VoltageDimension>
-        by refreshWhenTuned{
+        by tuner.refreshWhenTuned{
             UnitSuperPIDController(
                 drivePIDConstants,
                 {inputs.speed},
@@ -84,11 +87,11 @@ public class SwerveModule(
 
 
     private val turnController: FeedbackController<Angle, Voltage>
-        by refreshWhenTuned{
+        by tuner.refreshWhenTuned{
             when(controlScheme){
                 is ProfiledPIDControlScheme -> AngularProfiledPIDController(
                     turnPIDConstants,
-                    {inputs.direction.standardize()},
+                    getInput = {inputs.direction.standardize()},
                     outputRange = -12.volts..12.volts,
                     continuousInputRange = 0.degrees..360.degrees,
                     target = Angle(0.0),
@@ -98,7 +101,7 @@ public class SwerveModule(
 
                 else -> UnitSuperPIDController(
                     turnPIDConstants,
-                    {inputs.direction.standardize()},
+                    getInput = {inputs.direction.standardize()},
                     outputRange = -12.volts..12.volts,
                     continuousInputRange = 0.degrees..360.degrees,
                     target = Angle(0.0)
@@ -111,14 +114,55 @@ public class SwerveModule(
     public val currentDirection: Angle
         get() = inputs.direction.standardize()
 
-    public fun setDirection(direction: Angle, extraTurnVoltage: Voltage = Voltage(0.0)) {
-        turnController.target = direction.standardize()
-        // custom extension function
+
+
+    // Note: turnSpeed will only be set if the control scheme includes second order kinematics functionality.
+    public fun setDirection(direction: Angle, secondOrderTurnSpeed: AngularVelocity = AngularVelocity(0.0)){
+
+
+        println("controller output: " + turnController.calculateOutput())
         if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
             io.setTurnVoltage(0.0.volts)
-        }else{
-            io.setTurnVoltage(turnController.calculateOutput() + extraTurnVoltage)
+            return
         }
+
+
+        when (controlScheme) {
+            is SwerveControl.PIDSecondOrder -> {
+                turnController.target = direction.standardize()
+                io.setTurnVoltage(
+                    turnController.calculateOutput() + controlScheme.turnFF.calculate(secondOrderTurnSpeed)
+                )
+                Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
+            }
+
+            is SwerveControl.ProfiledPIDSecondOrder -> {
+                // cast is 100% safe; turnController can only become an AngularProfiledPIDcontroller
+                // if the control scheme is profiled.
+                (turnController as AngularProfiledPIDController).targetState = AngularTrapezoidProfile.State(
+                    direction.standardize(),
+                    secondOrderTurnSpeed
+                )
+
+                io.setTurnVoltage(turnController.calculateOutput())
+
+                Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
+            }
+
+            else -> {
+                if (secondOrderTurnSpeed != AngularVelocity(0.0)){
+                    println("WARNING: Second order turn speed is not being used. Something is wrong with the system.")
+                }else{
+                    println("First order control currently being utilized")
+                }
+
+                // if PID control is first order, simply take the output of the controller.
+                turnController.target = direction.standardize()
+                io.setTurnVoltage(turnController.calculateOutput())
+            }
+        }
+
+
     }
 
     public fun setPower(power: Double) {
@@ -139,13 +183,13 @@ public class SwerveModule(
     public fun setDirectionalPower(
         power:Double,
         direction:Angle,
-        extraTurnVoltage: Voltage = Voltage(0.0)
+        secondOrderTurnSpeed: AngularVelocity = AngularVelocity(0.0)
     ){
         if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
-            setDirection(direction + 180.degrees,extraTurnVoltage)
+            setDirection(direction + 180.degrees,secondOrderTurnSpeed)
             setPower(-power * cos(turnController.error))
         }else{
-            setDirection(direction,extraTurnVoltage)
+            setDirection(direction,secondOrderTurnSpeed)
             setPower(power * cos(turnController.error))
         }
     }
@@ -153,14 +197,14 @@ public class SwerveModule(
     public fun setDirectionalVelocity(
         angularVelocity:AngularVelocity,
         direction:Angle,
-        extraTurnVoltage: Voltage = Voltage(0.0)
+        secondOrderTurnSpeed: AngularVelocity
     ){
         if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
-            setDirection(direction + 180.degrees,extraTurnVoltage)
+            setDirection(direction + 180.degrees,secondOrderTurnSpeed)
             setVelocity(-angularVelocity * cos(turnController.error))
 
         }else{
-            setDirection(direction,extraTurnVoltage)
+            setDirection(direction,secondOrderTurnSpeed)
             setVelocity(angularVelocity * cos(turnController.error))
         }
     }

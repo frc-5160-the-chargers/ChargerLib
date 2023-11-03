@@ -57,15 +57,6 @@ public class AngularTrapezoidProfile(
         val position: Angle,
         val velocity: AngularVelocity
     ){
-        public override fun equals(other: Any?): Boolean {
-            return if (other is State) (((position == other.position) && (velocity == other.velocity))) else false
-        }
-        override fun hashCode(): Int {
-            var result = position.hashCode()
-            result = 31 * result + velocity.hashCode()
-            return result
-        }
-
         public fun inUnit(angleUnit: Angle, timeUnit: Time): TrapezoidProfile.State = TrapezoidProfile.State(
             position.inUnit(angleUnit),
             velocity.inUnit(angleUnit/timeUnit)
