@@ -11,8 +11,12 @@ import frc.chargers.utils.math.units.KmeasureUnit
 import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber
+import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
+
+public typealias TunableDelegate<T> = PropertyDelegateProvider<Any?, ReadOnlyProperty<Any?,T>>
+
 
 /**
  * A class that interfaces with Smart Dashboard's tuning functionality.
@@ -89,25 +93,6 @@ public open class DashboardTuner{
 
 
     /**
-     * represents a generic value that can be refreshed.
-     */
-    private class Tunable(
-        val updateValue: () -> Unit,
-        val needsUpdate: () -> Boolean
-    )
-
-    /**
-     * Represents a generic item which depends on tunables, and can be refreshed when nessecary.
-     */
-    private fun interface Refreshable{
-        fun refresh()
-    }
-
-    private val allTunables: MutableList<Tunable> = mutableListOf()
-    private val allRefreshables: MutableList<Refreshable> = mutableListOf()
-
-
-    /**
      * A value that simply refreshes itself when a tunableValue is changed,
      * and tuning mode is enabled.
      */
@@ -131,24 +116,27 @@ public open class DashboardTuner{
      *
      * @see LoggedDashboardNumber
      */
-    public fun double(default: Double, key: String): ReadOnlyProperty<Any?, Double> =
-        object: ReadOnlyProperty<Any?, Double> {
+    public fun double(default: Double, key: String? = null): TunableDelegate<Double> = PropertyDelegateProvider{
+        _, variable -> TunableDouble( key ?: variable.name, default)
+    }
 
-            val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",default)
-            private var value = default
+    private inner class TunableDouble(key: String, default: Double): ReadOnlyProperty<Any?, Double> {
 
-            init{
-                allTunables.add(
-                    Tunable(
-                        {value = dashNumber.get()},
-                        {dashNumber.get() == value}
-                    )
+        val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",default)
+        private var value = default
+
+        init{
+            allTunables.add(
+                Tunable(
+                    {value = dashNumber.get()},
+                    {dashNumber.get() == value}
                 )
-            }
-
-
-            override fun getValue(thisRef: Any?, property: KProperty<*>): Double = value
+            )
         }
+
+
+        override fun getValue(thisRef: Any?, property: KProperty<*>): Double = value
+    }
 
     /**
      * A property delegate that represents a tunable [Quantity].
@@ -233,5 +221,27 @@ public open class DashboardTuner{
      */
     public fun pidConstants(kP: Double, kI: Double, kD: Double, key: String): ReadOnlyProperty<Any?,PIDConstants> =
         pidConstants(PIDConstants(kP,kI,kD),key)
+
+
+
+
+
+    /**
+     * represents a generic value that can be refreshed.
+     */
+    private class Tunable(
+        val updateValue: () -> Unit,
+        val needsUpdate: () -> Boolean
+    )
+
+    /**
+     * Represents a generic item which depends on tunables, and can be refreshed when nessecary.
+     */
+    private fun interface Refreshable{
+        fun refresh()
+    }
+
+    private val allTunables: MutableList<Tunable> = mutableListOf()
+    private val allRefreshables: MutableList<Refreshable> = mutableListOf()
 
 }

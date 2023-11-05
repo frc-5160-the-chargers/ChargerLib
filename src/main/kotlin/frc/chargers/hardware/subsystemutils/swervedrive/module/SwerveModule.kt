@@ -1,4 +1,4 @@
-package frc.chargers.hardware.swerve.module
+package frc.chargers.hardware.subsystemutils.swervedrive.module
 
 import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
 import com.batterystaple.kmeasure.dimensions.VoltageDimension
@@ -10,8 +10,8 @@ import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
-import frc.chargers.hardware.swerve.ProfiledPIDControlScheme
-import frc.chargers.hardware.swerve.SwerveControl
+import frc.chargers.hardware.subsystemutils.swervedrive.ProfiledPIDControlScheme
+import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile

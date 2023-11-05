@@ -1,10 +1,11 @@
-package frc.chargers.hardware.swerve.module
+package frc.chargers.hardware.subsystemutils.swervedrive.module
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.FlywheelSim
 import frc.chargers.advantagekitextensions.ChargerLoggableInputs
+import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.subsystems.drivetrain.DEFAULT_GEAR_RATIO
@@ -19,7 +20,7 @@ public class ModuleIOReal(
     private val driveMotor: EncoderMotorController,
     private val driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     private val turnGearRatio: Double = DEFAULT_GEAR_RATIO
-): ModuleIO{
+): ModuleIO {
     override fun setDriveVoltage(driveV: Voltage) {
         // custom extension property
         driveMotor.voltage = driveV
@@ -55,12 +56,11 @@ internal val DEFAULT_SWERVE_DRIVE_INERTIA: Inertia = 0.004096955.ofUnit(kilo.gra
 public class ModuleIOSim(
     turnGearbox: DCMotor,
     driveGearbox: DCMotor,
-    private val loopPeriod: Time = 20.milli.seconds,
     turnGearRatio: Double = DEFAULT_GEAR_RATIO,
     driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
     driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
-): ModuleIO{
+): ModuleIO {
 
     public var driveAppliedVoltage: Voltage = 0.0.volts
         private set
@@ -93,12 +93,12 @@ public class ModuleIOSim(
     )
 
     override fun updateInputs(inputs: ModuleIO.Inputs) {
-        turnMotorSim.update(loopPeriod.inUnit(seconds))
-        driveMotorSim.update(loopPeriod.inUnit(seconds))
+        turnMotorSim.update(ChargerRobot.LOOP_PERIOD.inUnit(seconds))
+        driveMotorSim.update(ChargerRobot.LOOP_PERIOD.inUnit(seconds))
 
         val turnVel = turnMotorSim.angularVelocityRadPerSec.ofUnit(radians/seconds)
 
-        setDirection(moduleDirection + turnVel * loopPeriod)
+        setDirection(moduleDirection + turnVel * ChargerRobot.LOOP_PERIOD)
 
 
         inputs.apply{
@@ -108,7 +108,7 @@ public class ModuleIOSim(
 
 
             speed = driveMotorSim.angularVelocityRadPerSec.ofUnit(radians/seconds)
-            distance += speed * loopPeriod
+            distance += speed * ChargerRobot.LOOP_PERIOD
             driveVoltage = driveAppliedVoltage
         }
 

@@ -31,20 +31,19 @@ import org.littletonrobotics.junction.Logger
  * A Helper class used to get the pose of an [EncoderHolonomicDrivetrain],
  * with heading-supplying utilities.
  */
+
+context(EncoderHolonomicDrivetrain)
 public class SwervePoseMonitor(
-    private val drivetrain: EncoderHolonomicDrivetrain,
     private val gyro: HeadingProvider? = null,
     private val poseSuppliers: List<RobotPoseSupplier>,
     startingPose: UnitPose2d = UnitPose2d()
 ): SubsystemBase(), RobotPoseSupplier, HeadingProvider{
 
     public constructor(
-        drivetrain: EncoderHolonomicDrivetrain,
         vararg poseSuppliers: RobotPoseSupplier,
         gyro: HeadingProvider? = null,
         startingPose: UnitPose2d = UnitPose2d()
     ): this(
-        drivetrain,
         gyro,
         poseSuppliers.toList(),
         startingPose
@@ -109,7 +108,7 @@ public class SwervePoseMonitor(
 
     override fun periodic(){
         val wheelDeltas = ModulePositionGroup()
-        val currentMPs = drivetrain.currentModulePositions
+        val currentMPs = currentModulePositions
 
 
         wheelDeltas.apply{
@@ -131,7 +130,7 @@ public class SwervePoseMonitor(
             bottomRightAngle = currentMPs.bottomRightAngle
         }
 
-        val twist = drivetrain.kinematics.toTwist2d(*wheelDeltas.toArray())
+        val twist = kinematics.toTwist2d(*wheelDeltas.toArray())
 
 
         val currentEstimatedHeading =

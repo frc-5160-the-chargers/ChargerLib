@@ -1,4 +1,4 @@
-package frc.chargers.hardware.swerve
+package frc.chargers.hardware.subsystemutils.swervedrive
 
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable

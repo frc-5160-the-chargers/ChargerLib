@@ -11,15 +11,21 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.controls.feedforward.AngularMotorFF
-import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.constants.drivetrain.TankDriveConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
+import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.subsystems.posemonitors.DifferentialPoseMonitor
+import frc.chargers.hardware.subsystemutils.differentialdrive.DifferentialDriveIO
+import frc.chargers.hardware.subsystemutils.differentialdrive.DifferentialDriveIOReal
+import frc.chargers.hardware.subsystemutils.differentialdrive.DifferentialDriveIOSim
+import frc.chargers.hardware.subsystemutils.differentialdrive.TankDriveControl
 import frc.chargers.utils.a
+import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import org.littletonrobotics.junction.Logger
 
 @PublishedApi
@@ -28,17 +34,11 @@ internal const val DEFAULT_GEAR_RATIO: Double = 1.0
 public fun simulatedDrivetrain(
     simMotors: DifferentialDrivetrainSim.KitbotMotor,
     loopPeriod: Time = 20.milli.seconds,
-    invertMotors: Boolean = false,
-    gearRatio: Double = DEFAULT_GEAR_RATIO,
-    wheelDiameter: Length,
-    width: Distance,
-    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
-    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    constants: TankDriveConstants = TankDriveConstants.andymark(),
+    controlScheme: TankDriveControl = TankDriveControl()
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
     DifferentialDriveIOSim(simMotors,loopPeriod),
-    invertMotors, gearRatio, wheelDiameter, width,  leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF
+    constants, controlScheme
 )
 
 /**
@@ -48,16 +48,11 @@ public fun simulatedDrivetrain(
 public inline fun sparkMaxDrivetrain(
     leftMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
     rightMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
-    invertMotors: Boolean = false, gearRatio: Double = DEFAULT_GEAR_RATIO,
-    wheelDiameter: Length,
-    width: Distance,
-    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
-    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    constants: TankDriveConstants,
+    controlScheme: TankDriveControl,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF,
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme,
         configuration = SparkMaxConfiguration().apply(configure))
 
 /**
@@ -67,17 +62,11 @@ public inline fun sparkMaxDrivetrain(
 public inline fun talonFXDrivetrain(
     leftMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
     rightMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
-    invertMotors: Boolean = false,
-    gearRatio: Double = DEFAULT_GEAR_RATIO,
-    wheelDiameter: Length,
-    width: Distance,
-    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
-    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    constants: TankDriveConstants = TankDriveConstants.andymark(),
+    controlScheme: TankDriveControl = TankDriveControl(),
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, invertMotors, gearRatio, wheelDiameter, width, leftVelocityConstants, leftMotorFF , rightVelocityConstants, rightMotorFF,
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme,
         configuration = TalonFXConfiguration().apply(configure))
 
 /**
@@ -87,13 +76,8 @@ public inline fun talonFXDrivetrain(
 public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
     leftMotors: EncoderMotorControllerGroup<C>,
     rightMotors: EncoderMotorControllerGroup<C>,
-    invertMotors: Boolean = false, gearRatio: Double,
-    wheelDiameter: Length,
-    width: Distance,
-    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
-    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    constants: TankDriveConstants = TankDriveConstants.andymark(),
+    controlScheme: TankDriveControl = TankDriveControl(),
     configuration: C
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
@@ -101,30 +85,38 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
             leftMotors = leftMotors.apply { configure(configuration) },
             rightMotors = rightMotors.apply { configure(configuration) }
         ),
-        invertMotors = invertMotors,
-        gearRatio = gearRatio,
-        wheelDiameter = wheelDiameter,
-        width = width,
-        leftVelocityConstants, leftMotorFF, rightVelocityConstants, rightMotorFF
+        constants, controlScheme
     )
 
 
 
 public class EncoderDifferentialDrivetrain(
     private val io: DifferentialDriveIO,
-    invertMotors: Boolean = false,
-    private val gearRatio: Double = DEFAULT_GEAR_RATIO,
-    private val wheelDiameter: Length,
-    private val width: Distance,
-    leftVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    leftMotorFF: AngularMotorFF = AngularMotorFF.None,
-    rightVelocityConstants: PIDConstants = PIDConstants(0.0,0.0,0.0),
-    rightMotorFF: AngularMotorFF = AngularMotorFF.None,
+    private val constants: TankDriveConstants = TankDriveConstants.andymark(),
+    controlScheme: TankDriveControl = TankDriveControl(),
+    gyro: HeadingProvider? = null,
+    startingPose: UnitPose2d = UnitPose2d(),
+    vararg poseSuppliers: RobotPoseSupplier,
 ): SubsystemBase(), DifferentialDrivetrain, HeadingProvider{
-    init{
-        io.inverted = invertMotors
-    }
+
     internal val inputs = DifferentialDriveIO.Inputs()
+
+    // lazy initializer to prevent potentital NPE's and other problems
+    // associated with leaking "this"
+    /**
+     * The pose estimator of the differential drivetrain.
+     */
+    public val poseEstimator: DifferentialPoseMonitor = DifferentialPoseMonitor(
+        *poseSuppliers,
+        gyro = gyro, startingPose = startingPose
+    )
+
+    init{
+        io.inverted = constants.invertMotors
+    }
+
+
+
 
 
     override fun periodic(){
@@ -155,8 +147,8 @@ public class EncoderDifferentialDrivetrain(
     }
 
 
-    private val wheelRadius = wheelDiameter / 2
-    internal val wheelTravelPerMotorRadian = gearRatio * wheelRadius
+    private val wheelRadius = constants.wheelDiameter / 2
+    internal val wheelTravelPerMotorRadian = constants.gearRatio * wheelRadius
 
     /**
      * The total linear distance traveled from the zero point of the encoders.
@@ -201,7 +193,7 @@ public class EncoderDifferentialDrivetrain(
      */
     public override val heading: Angle
         get() = wheelTravelPerMotorRadian *
-                (inputs.rightAngularPosition - inputs.leftAngularPosition) / width
+                (inputs.rightAngularPosition - inputs.leftAngularPosition) / constants.width
 
 
     /**
@@ -210,28 +202,28 @@ public class EncoderDifferentialDrivetrain(
      * @see DifferentialDriveKinematics
      */
     public val kinematics: DifferentialDriveKinematics = DifferentialDriveKinematics(
-        width.inUnit(meters)
+        constants.width.inUnit(meters)
     )
 
     private val leftController = UnitSuperPIDController(
-        leftVelocityConstants,
+        controlScheme.leftVelocityConstants,
         {inputs.leftAngularVelocity},
         target = AngularVelocity(0.0),
         selfSustain = false,
-        feedforward = leftMotorFF
+        feedforward = controlScheme.leftMotorFF
     )
 
     private val rightController = UnitSuperPIDController(
-        rightVelocityConstants,
+        controlScheme.rightVelocityConstants,
         {inputs.rightAngularVelocity},
         target = AngularVelocity(0.0),
         selfSustain = false,
-        feedforward = rightMotorFF
+        feedforward = controlScheme.rightMotorFF
     )
 
     public fun velocityDrive(leftSpeed: Velocity, rightSpeed: Velocity){
-        leftController.target = leftSpeed / (gearRatio * wheelDiameter)
-        rightController.target = rightSpeed / (gearRatio * wheelDiameter)
+        leftController.target = leftSpeed / (constants.gearRatio * constants.wheelDiameter)
+        rightController.target = rightSpeed / (constants.gearRatio * constants.wheelDiameter)
         io.setVoltages(
             left = leftController.calculateOutput(),
             right = rightController.calculateOutput()

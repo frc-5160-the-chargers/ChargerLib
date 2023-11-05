@@ -22,10 +22,10 @@ import org.littletonrobotics.junction.Logger
 /**
  * A Helper class used to get the pose of an [EncoderDifferentialDrivetrain].
  *
- * Unlike [SwervePoseMonitor], it does not provide heading; use the drivetrain itself for heading-providing functions.
+ * This class should not be used directly, as it is bundled directly with the [EncoderDifferentialDrivetrain] class.
  */
+context(EncoderDifferentialDrivetrain)
 public class DifferentialPoseMonitor(
-    private val drivetrain: EncoderDifferentialDrivetrain,
     private val gyro: HeadingProvider? = null,
     private val poseSuppliers: List<RobotPoseSupplier> = listOf(),
     startingPose: UnitPose2d = UnitPose2d()
@@ -40,12 +40,10 @@ public class DifferentialPoseMonitor(
         )
 
     public constructor(
-        drivetrain: EncoderDifferentialDrivetrain,
         vararg poseSuppliers: RobotPoseSupplier,
         gyro: HeadingProvider? = null,
         startingPose: UnitPose2d = UnitPose2d()
     ): this(
-        drivetrain,
         gyro,
         poseSuppliers.toList(),
         startingPose
@@ -73,10 +71,10 @@ public class DifferentialPoseMonitor(
     private var previousDistanceR = Distance(0.0)
 
     override fun periodic(){
-        val distanceL = drivetrain.inputs.leftAngularPosition * drivetrain.wheelTravelPerMotorRadian
-        val distanceR = drivetrain.inputs.rightAngularPosition * drivetrain.wheelTravelPerMotorRadian
+        val distanceL = inputs.leftAngularPosition * wheelTravelPerMotorRadian
+        val distanceR = inputs.rightAngularPosition * wheelTravelPerMotorRadian
 
-        val twist = drivetrain.kinematics.toTwist2d(
+        val twist = kinematics.toTwist2d(
             (distanceL-previousDistanceL).inUnit(meters),
             (distanceR-previousDistanceR).inUnit(meters)
         )

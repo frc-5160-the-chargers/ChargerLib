@@ -1,5 +1,8 @@
 package frc.chargers.framework
 
+import com.batterystaple.kmeasure.quantities.Time
+import com.batterystaple.kmeasure.quantities.inUnit
+import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.Command
@@ -27,7 +30,7 @@ public open class ChargerRobot(
     private val getRobotContainer: () -> ChargerRobotContainer,
     private val gitData: GitData,
     private val config: RobotConfig
-): LoggedRobot(){
+): LoggedRobot(config.loopPeriod.inUnit(seconds)){
     public companion object{
         private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
 
@@ -37,10 +40,14 @@ public open class ChargerRobot(
             periodicRunnables.add(runnable)
         }
 
-
         public fun addToSimPeriodicLoop(runnable: () -> Unit){
             simPeriodicRunnables.add(runnable)
         }
+
+        public var LOOP_PERIOD: Time = 0.02.seconds
+            private set
+
+
     }
 
     private lateinit var robotContainer: ChargerRobotContainer
@@ -66,6 +73,8 @@ public open class ChargerRobot(
     override fun robotInit() {
 
         try{
+            LOOP_PERIOD = config.loopPeriod
+
             val logger = Logger.getInstance()
             setUseTiming(
                 RobotBase.isReal() || !config.isReplay

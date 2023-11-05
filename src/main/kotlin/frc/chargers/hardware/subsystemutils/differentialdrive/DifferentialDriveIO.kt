@@ -1,4 +1,4 @@
-package frc.chargers.hardware.subsystems.drivetrain
+package frc.chargers.hardware.subsystemutils.differentialdrive
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
@@ -7,10 +7,11 @@ import frc.chargers.advantagekitextensions.ChargerLoggableInputs
 import frc.chargers.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
 
+
 public class DifferentialDriveIOReal(
     private val leftMotors: NonConfigurableEncoderMotorControllerGroup,
     private val rightMotors: NonConfigurableEncoderMotorControllerGroup
-): DifferentialDriveIO{
+): DifferentialDriveIO {
 
     init {
         leftMotors.inverted = false
@@ -49,7 +50,7 @@ public class DifferentialDriveIOReal(
 public class DifferentialDriveIOSim(
     motors: DifferentialDrivetrainSim.KitbotMotor,
     private val loopPeriod: Time = 20.milli.seconds
-): DifferentialDriveIO{
+): DifferentialDriveIO {
     private val sim: DifferentialDrivetrainSim = DifferentialDrivetrainSim.createKitbotSim(
         motors,
         DifferentialDrivetrainSim.KitbotGearing.k10p71,

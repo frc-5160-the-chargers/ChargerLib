@@ -1,4 +1,4 @@
-package frc.chargers.hardware.swerve
+package frc.chargers.hardware.subsystemutils.swervedrive
 
 import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
 import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
@@ -16,7 +16,7 @@ public fun swerveCANcoders(
     bottomRight: ChargerCANcoder,
     useAbsoluteSensor: Boolean,
     configure: CANcoderConfiguration.() -> Unit = {}
-): SwerveEncoders{
+): SwerveEncoders {
     topLeft.configure(CANcoderConfiguration().apply(configure))
     topRight.configure(CANcoderConfiguration().apply(configure))
     bottomLeft.configure(CANcoderConfiguration().apply(configure))
@@ -54,7 +54,7 @@ public data class SwerveEncoders(
             bottomLeft: E,
             bottomRight: E,
             configuration: C? = null
-        ): SwerveEncoders where E: PositionEncoder, E: EncoderConfigurable<C> = 
+        ): SwerveEncoders where E: PositionEncoder, E: EncoderConfigurable<C> =
             SwerveEncoders(
                 topLeft.apply{
                     if(configuration != null){
