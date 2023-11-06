@@ -30,8 +30,11 @@ import org.littletonrobotics.junction.Logger
 /**
  * A Helper class used to get the pose of an [EncoderHolonomicDrivetrain],
  * with heading-supplying utilities.
+ *
+ * Most of the time, you will not need to instantiate this class directly;
+ * instead, call drivetrainInstance.poseEstimator to access the built-in pose estimator
+ * of the drivetrain.
  */
-
 context(EncoderHolonomicDrivetrain)
 public class SwervePoseMonitor(
     private val gyro: HeadingProvider? = null,

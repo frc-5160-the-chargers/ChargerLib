@@ -22,7 +22,9 @@ import org.littletonrobotics.junction.Logger
 /**
  * A Helper class used to get the pose of an [EncoderDifferentialDrivetrain].
  *
- * This class should not be used directly, as it is bundled directly with the [EncoderDifferentialDrivetrain] class.
+ * Most of the time, you will not need to instantiate this class directly;
+ * instead, call drivetrainInstance.poseEstimator to access the built-in pose estimator
+ * of the drivetrain.
  */
 context(EncoderDifferentialDrivetrain)
 public class DifferentialPoseMonitor(

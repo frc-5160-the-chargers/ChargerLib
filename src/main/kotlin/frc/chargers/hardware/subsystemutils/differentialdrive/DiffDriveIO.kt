@@ -6,12 +6,13 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import frc.chargers.advantagekitextensions.ChargerLoggableInputs
 import frc.chargers.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
+import frc.chargers.wpilibextensions.motorcontrol.voltage
 
 
-public class DifferentialDriveIOReal(
+public class DiffDriveIOReal(
     private val leftMotors: NonConfigurableEncoderMotorControllerGroup,
     private val rightMotors: NonConfigurableEncoderMotorControllerGroup
-): DifferentialDriveIO {
+): DiffDriveIO {
 
     init {
         leftMotors.inverted = false
@@ -24,13 +25,16 @@ public class DifferentialDriveIOReal(
         rightMotors.setVoltage(right)
     }
 
-    override fun updateInputs(inputs: DifferentialDriveIO.Inputs){
+    override fun updateInputs(inputs: DiffDriveIO.Inputs){
         inputs.apply{
             leftAngularPosition = leftMotors.encoder.angularPosition
             rightAngularPosition = rightMotors.encoder.angularPosition
 
             leftAngularVelocity = leftMotors.encoder.angularVelocity
             rightAngularVelocity = rightMotors.encoder.angularVelocity
+
+            leftVoltage = leftMotors.voltage
+            rightVoltage = rightMotors.voltage
         }
     }
 
@@ -47,10 +51,10 @@ public class DifferentialDriveIOReal(
         }
 }
 
-public class DifferentialDriveIOSim(
+public class DiffDriveIOSim(
     motors: DifferentialDrivetrainSim.KitbotMotor,
     private val loopPeriod: Time = 20.milli.seconds
-): DifferentialDriveIO {
+): DiffDriveIO {
     private val sim: DifferentialDrivetrainSim = DifferentialDrivetrainSim.createKitbotSim(
         motors,
         DifferentialDrivetrainSim.KitbotGearing.k10p71,
@@ -77,7 +81,7 @@ public class DifferentialDriveIOSim(
         )
     }
 
-    override fun updateInputs(inputs: DifferentialDriveIO.Inputs) {
+    override fun updateInputs(inputs: DiffDriveIO.Inputs) {
         sim.update(loopPeriod.inUnit(seconds))
         inputs.apply{
             leftAngularPosition =
@@ -88,6 +92,8 @@ public class DifferentialDriveIOSim(
                 sim.leftVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian
             rightAngularVelocity =
                 sim.rightVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian
+            leftVoltage = leftAppliedVoltage
+            rightVoltage = rightAppliedVoltage
         }
     }
 
@@ -96,7 +102,7 @@ public class DifferentialDriveIOSim(
 }
 
 
-public interface DifferentialDriveIO{
+public interface DiffDriveIO{
     public class Inputs: ChargerLoggableInputs(){
         public var leftAngularPosition: Angle by loggedQuantity(
             logUnit = degrees,

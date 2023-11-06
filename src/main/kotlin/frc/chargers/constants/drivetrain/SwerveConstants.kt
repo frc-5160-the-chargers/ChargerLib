@@ -4,10 +4,6 @@ import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.Length
 import com.batterystaple.kmeasure.quantities.Velocity
 import frc.chargers.constants.MK4i
-import frc.chargers.hardware.subsystems.drivetrain.DEFAULT_GEAR_RATIO
-import frc.chargers.hardware.subsystems.drivetrain.DEFAULT_MAX_MODULE_SPEED
-import frc.chargers.hardware.subsystemutils.swervedrive.module.DEFAULT_SWERVE_DRIVE_INERTIA
-import frc.chargers.hardware.subsystemutils.swervedrive.module.DEFAULT_SWERVE_TURN_INERTIA
 import frc.chargers.utils.math.units.Inertia
 
 public data class SwerveConstants(

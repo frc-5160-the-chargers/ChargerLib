@@ -11,7 +11,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.constants.drivetrain.TankDriveConstants
+import frc.chargers.constants.drivetrain.DiffDriveConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
@@ -20,24 +20,21 @@ import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.posemonitors.DifferentialPoseMonitor
-import frc.chargers.hardware.subsystemutils.differentialdrive.DifferentialDriveIO
-import frc.chargers.hardware.subsystemutils.differentialdrive.DifferentialDriveIOReal
-import frc.chargers.hardware.subsystemutils.differentialdrive.DifferentialDriveIOSim
-import frc.chargers.hardware.subsystemutils.differentialdrive.TankDriveControl
+import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIO
+import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOReal
+import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOSim
+import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveControl
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import org.littletonrobotics.junction.Logger
 
-@PublishedApi
-internal const val DEFAULT_GEAR_RATIO: Double = 1.0
-
 public fun simulatedDrivetrain(
     simMotors: DifferentialDrivetrainSim.KitbotMotor,
     loopPeriod: Time = 20.milli.seconds,
-    constants: TankDriveConstants = TankDriveConstants.andymark(),
-    controlScheme: TankDriveControl = TankDriveControl()
+    constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    controlScheme: DiffDriveControl = DiffDriveControl.None
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
-    DifferentialDriveIOSim(simMotors,loopPeriod),
+    DiffDriveIOSim(simMotors,loopPeriod),
     constants, controlScheme
 )
 
@@ -48,8 +45,8 @@ public fun simulatedDrivetrain(
 public inline fun sparkMaxDrivetrain(
     leftMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
     rightMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
-    constants: TankDriveConstants,
-    controlScheme: TankDriveControl,
+    constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    controlScheme: DiffDriveControl = DiffDriveControl.None,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme,
@@ -62,8 +59,8 @@ public inline fun sparkMaxDrivetrain(
 public inline fun talonFXDrivetrain(
     leftMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
     rightMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
-    constants: TankDriveConstants = TankDriveConstants.andymark(),
-    controlScheme: TankDriveControl = TankDriveControl(),
+    constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    controlScheme: DiffDriveControl = DiffDriveControl.None,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme,
@@ -76,12 +73,12 @@ public inline fun talonFXDrivetrain(
 public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
     leftMotors: EncoderMotorControllerGroup<C>,
     rightMotors: EncoderMotorControllerGroup<C>,
-    constants: TankDriveConstants = TankDriveConstants.andymark(),
-    controlScheme: TankDriveControl = TankDriveControl(),
+    constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    controlScheme: DiffDriveControl = DiffDriveControl.None,
     configuration: C
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
-        io = DifferentialDriveIOReal(
+        io = DiffDriveIOReal(
             leftMotors = leftMotors.apply { configure(configuration) },
             rightMotors = rightMotors.apply { configure(configuration) }
         ),
@@ -91,15 +88,15 @@ public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
 
 
 public class EncoderDifferentialDrivetrain(
-    private val io: DifferentialDriveIO,
-    private val constants: TankDriveConstants = TankDriveConstants.andymark(),
-    controlScheme: TankDriveControl = TankDriveControl(),
+    public val io: DiffDriveIO,
+    private val constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    controlScheme: DiffDriveControl = DiffDriveControl.None,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
 ): SubsystemBase(), DifferentialDrivetrain, HeadingProvider{
 
-    internal val inputs = DifferentialDriveIO.Inputs()
+    internal val inputs = DiffDriveIO.Inputs()
 
     // lazy initializer to prevent potentital NPE's and other problems
     // associated with leaking "this"

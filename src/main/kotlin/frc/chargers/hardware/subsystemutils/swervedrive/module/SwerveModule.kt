@@ -119,8 +119,6 @@ public class SwerveModule(
     // Note: turnSpeed will only be set if the control scheme includes second order kinematics functionality.
     public fun setDirection(direction: Angle, secondOrderTurnSpeed: AngularVelocity = AngularVelocity(0.0)){
 
-
-        println("controller output: " + turnController.calculateOutput())
         if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
             io.setTurnVoltage(0.0.volts)
             return

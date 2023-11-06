@@ -1,4 +1,8 @@
 package frc.chargers.utils.math
+
+import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.quantities.Quantity
+
 public fun Double.mapBetweenRanges(from: ClosedRange<Double>, to: ClosedRange<Double>): Double {
     require(this in from) { "Value must be within initial range." }
 
@@ -6,3 +10,14 @@ public fun Double.mapBetweenRanges(from: ClosedRange<Double>, to: ClosedRange<Do
     val distanceIntoToRange: Double = proportionIntoRange * (to.endInclusive - to.start)
     return to.start + distanceIntoToRange
 }
+
+
+public fun <D: AnyDimension> Quantity<D>.mapBetweenRanges(
+    from: ClosedRange<Quantity<D>>,
+    to: ClosedRange<Quantity<D>>
+): Quantity<D> = Quantity(
+    this.siValue.mapBetweenRanges(
+        from.start.siValue..from.endInclusive.siValue,
+        to.start.siValue..to.endInclusive.siValue
+    )
+)

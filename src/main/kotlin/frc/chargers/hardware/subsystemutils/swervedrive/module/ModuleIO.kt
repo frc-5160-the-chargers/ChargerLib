@@ -8,7 +8,9 @@ import frc.chargers.advantagekitextensions.ChargerLoggableInputs
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
-import frc.chargers.hardware.subsystems.drivetrain.DEFAULT_GEAR_RATIO
+import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
+import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_DRIVE_INERTIA
+import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_TURN_INERTIA
 import frc.chargers.utils.math.units.Inertia
 import frc.chargers.wpilibextensions.motorcontrol.voltage
 import frc.chargers.utils.math.units.times
@@ -44,13 +46,6 @@ public class ModuleIOReal(
     }
 
 }
-
-@PublishedApi
-internal val DEFAULT_SWERVE_TURN_INERTIA: Inertia = 0.025.ofUnit(kilo.grams * meters * meters)
-
-@PublishedApi
-internal val DEFAULT_SWERVE_DRIVE_INERTIA: Inertia = 0.004096955.ofUnit(kilo.grams * meters * meters)
-
 
 
 public class ModuleIOSim(
