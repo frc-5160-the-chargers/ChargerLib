@@ -169,3 +169,21 @@ public fun EncoderDifferentialDrivetrain.characterize(
             println("Time UNIT: SECONDS")
         }
     }
+
+
+
+
+context(CommandBuilder)
+public fun EncoderDifferentialDrivetrain.characterize(
+    forwards: Boolean = true, vararg requirements: Subsystem
+): Command = characterize(forwards,*requirements).also(commands::add)
+
+context(CommandBuilder)
+public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements: Subsystem): Command =
+    characterizeTurnMotors(*requirements).also(commands::add)
+
+context(CommandBuilder)
+public fun EncoderHolonomicDrivetrain.characterizeDriveMotors(
+    forwards: Boolean = true, vararg requirements: Subsystem
+): Command = characterizeDriveMotors(forwards,*requirements).also(commands::add)
+

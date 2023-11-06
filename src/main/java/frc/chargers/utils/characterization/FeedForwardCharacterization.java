@@ -1,5 +1,9 @@
 package frc.chargers.utils.characterization;
 
+// Copyright (c) 2023 FRC 6328
+// http://github.com/Mechanical-Advantage
+
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -8,6 +12,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Credits: 6328 repository: <a name = "6328 repository" href="https://github.com/Mechanical-Advantage/RobotCode2023/">(Repository Here)</a>
+ */
 public class FeedForwardCharacterization extends CommandBase {
     private static final double startDelaySecs = 2.0;
     private static final double rampRateVoltsPerSec = 0.05;
