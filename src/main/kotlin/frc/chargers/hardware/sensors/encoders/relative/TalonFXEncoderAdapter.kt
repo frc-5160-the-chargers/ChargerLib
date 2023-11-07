@@ -17,7 +17,7 @@ public class TalonFXEncoderAdapter(
 ): ResettableTimestampedEncoder {
 
     override fun setZero(newZero: Angle) {
-        motorController.setRotorPosition(newZero.inUnit(rotations))
+        motorController.setPosition(newZero.inUnit(rotations))
     }
 
 

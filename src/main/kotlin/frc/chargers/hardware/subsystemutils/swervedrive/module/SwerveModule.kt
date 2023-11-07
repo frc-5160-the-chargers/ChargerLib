@@ -39,7 +39,7 @@ public class SwerveModule(
 
     public fun updateAndProcessInputs() {
         io.updateInputs(inputs)
-        Logger.getInstance().processInputs(name,inputs)
+        Logger.processInputs(name,inputs)
         velocityController.calculateOutput()
         turnController.calculateOutput()
     }
@@ -131,7 +131,7 @@ public class SwerveModule(
                 io.setTurnVoltage(
                     turnController.calculateOutput() + controlScheme.turnFF.calculate(secondOrderTurnSpeed)
                 )
-                Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
+                Logger.recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
             }
 
             is SwerveControl.ProfiledPIDSecondOrder -> {
@@ -144,7 +144,7 @@ public class SwerveModule(
 
                 io.setTurnVoltage(turnController.calculateOutput())
 
-                Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
+                Logger.recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
             }
 
             else -> {

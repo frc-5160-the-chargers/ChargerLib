@@ -3,10 +3,9 @@ package frc.chargers.commands
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.wpilibj2.command.*
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior
 import frc.chargers.utils.MappableContext
 import frc.chargers.utils.a
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.Logger.recordOutput
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -229,7 +228,7 @@ public class CommandBuilder {
     private inner class DuringRunGetter<T : Any>(private val get: () -> T) : ReadOnlyProperty<Any?, T> {
         init {
             commands.add(
-                object : CommandBase() { // Add a new command that initializes this value in its initialize() function.
+                object : Command() { // Add a new command that initializes this value in its initialize() function.
                     override fun initialize() {
                         if (!::value.isInitialized) {
                             initializeValue()
@@ -260,7 +259,7 @@ public class CommandBuilder {
         val getValue: () -> T,
         val commandMap: Map<T,Command>,
         default: Command
-    ): CommandBase(){
+    ): Command(){
         var allRequirements: Array<Subsystem> = arrayOf()
         var runsWhenDisabled = true
 
@@ -324,7 +323,7 @@ internal fun Command.withLogInCommandGroup(commandGroupName: String): Command{
 
 
     fun logCommand(active: Boolean) = InstantCommand{
-        Logger.getInstance().recordOutput(
+        recordOutput(
             "/ActiveCommands/Subcommands Of: $commandGroupName/$name",active
         )
     }

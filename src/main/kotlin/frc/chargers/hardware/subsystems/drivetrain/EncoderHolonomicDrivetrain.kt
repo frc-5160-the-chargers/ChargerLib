@@ -25,7 +25,7 @@ import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.Logger.*
 
 
 /**
@@ -261,7 +261,7 @@ public class EncoderHolonomicDrivetrain(
             bottomLeftState = bottomLeft.getModuleState(wheelRadius),
             bottomRightState = bottomRight.getModuleState(wheelRadius)
         ).also{
-            Logger.getInstance().recordOutput("Drivetrain(Swerve)/CurrentModuleStates",*it.toArray())
+            recordOutput("Drivetrain(Swerve)/CurrentModuleStates",*it.toArray())
         }
         set(ms){
             ms.desaturate(constants.maxModuleSpeed)
@@ -287,7 +287,7 @@ public class EncoderHolonomicDrivetrain(
                 bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/constants.maxModuleSpeed).siValue, ms.bottomLeftAngle,secondOrderTurnSpeedBL)
                 bottomRight.setDirectionalPower((ms.bottomRightSpeed/constants.maxModuleSpeed).siValue, ms.bottomRightAngle,secondOrderTurnSpeedBR)
             }
-            Logger.getInstance().recordOutput("Drivetrain(Swerve)/DesiredModuleStates", ms.topLeftState,ms.topRightState,ms.bottomLeftState,ms.bottomRightState)
+            recordOutput("Drivetrain(Swerve)/DesiredModuleStates", ms.topLeftState,ms.topRightState,ms.bottomLeftState,ms.bottomRightState)
 
         }
 
@@ -308,17 +308,15 @@ public class EncoderHolonomicDrivetrain(
             bottomLeftAngle = bottomLeft.currentDirection,
             bottomRightAngle = bottomRight.currentDirection
         ).also{
-            Logger.getInstance().apply{
-                recordOutput("ModulePositions/topLeft/DistanceMeters", it.topLeftDistance.inUnit(meters))
-                recordOutput("ModulePositions/topRight/DistanceMeters", it.topRightDistance.inUnit(meters))
-                recordOutput("ModulePositions/bottomLeft/DistanceMeters", it.bottomLeftDistance.inUnit(meters))
-                recordOutput("ModulePositions/bottomRight/DistanceMeters", it.bottomRightDistance.inUnit(meters))
+            recordOutput("ModulePositions/topLeft/DistanceMeters", it.topLeftDistance.inUnit(meters))
+            recordOutput("ModulePositions/topRight/DistanceMeters", it.topRightDistance.inUnit(meters))
+            recordOutput("ModulePositions/bottomLeft/DistanceMeters", it.bottomLeftDistance.inUnit(meters))
+            recordOutput("ModulePositions/bottomRight/DistanceMeters", it.bottomRightDistance.inUnit(meters))
 
-                recordOutput("ModulePositions/topLeft/AngleDeg",it.topLeftAngle.inUnit(degrees))
-                recordOutput("ModulePositions/topRight/AngleDeg",it.topRightAngle.inUnit(degrees))
-                recordOutput("ModulePositions/bottomLeft/AngleDeg",it.bottomLeftAngle.inUnit(degrees))
-                recordOutput("ModulePositions/bottomRight/AngleDeg",it.bottomRightAngle.inUnit(degrees))
-            }
+            recordOutput("ModulePositions/topLeft/AngleDeg",it.topLeftAngle.inUnit(degrees))
+            recordOutput("ModulePositions/topRight/AngleDeg",it.topRightAngle.inUnit(degrees))
+            recordOutput("ModulePositions/bottomLeft/AngleDeg",it.bottomLeftAngle.inUnit(degrees))
+            recordOutput("ModulePositions/bottomRight/AngleDeg",it.bottomRightAngle.inUnit(degrees))
         }
 
 
@@ -550,9 +548,9 @@ public class EncoderHolonomicDrivetrain(
         bottomLeft.updateAndProcessInputs()
         bottomRight.updateAndProcessInputs()
 
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/CurrentModuleStates", *currentModuleStates.toArray())
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/DistanceTraveledMeters", distanceTraveled.inUnit(meters))
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/OverallVelocityMetersPerSec",velocity.inUnit(meters/seconds))
+        recordOutput("Drivetrain(Swerve)/CurrentModuleStates", *currentModuleStates.toArray())
+        recordOutput("Drivetrain(Swerve)/DistanceTraveledMeters", distanceTraveled.inUnit(meters))
+        recordOutput("Drivetrain(Swerve)/OverallVelocityMetersPerSec",velocity.inUnit(meters/seconds))
     }
 
 

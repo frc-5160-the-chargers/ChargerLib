@@ -11,7 +11,7 @@ import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
 import frc.chargers.hardware.sensors.ThreeAxisSpeedometer
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.Logger.processInputs
 
 /**
  * An IMU which has logging & replay capabilities from advantagekit.
@@ -159,14 +159,12 @@ public class LoggedIMU(
 
         // note: The gyroscope, speedometer and accelerometer all act as Inputs classes
         // in addition to holding public API values.
-        Logger.getInstance().apply{
-            processInputs(imuName,generalInputs)
-            processInputs("$imuName/Gyroscope",gyroscope)
+        processInputs(imuName,generalInputs)
+        processInputs("$imuName/Gyroscope",gyroscope)
 
 
-            processInputs("$imuName/Speedometer",speedometer)
-            processInputs("$imuName/Accelerometer",accelerometer)
-        }
+        processInputs("$imuName/Speedometer",speedometer)
+        processInputs("$imuName/Accelerometer",accelerometer)
 
     }
 

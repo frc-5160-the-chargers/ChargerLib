@@ -1,5 +1,6 @@
 package frc.chargers.utils
 
+/*
 import com.batterystaple.kmeasure.quantities.Acceleration
 import com.batterystaple.kmeasure.quantities.Velocity
 import com.pathplanner.lib.PathConstraints
@@ -83,3 +84,5 @@ public class PathPlannerAutoContext{
         context: CommandBuilder.() -> Unit
     ): Unit = onEvent(eventName, buildCommand(block = context))
 }
+
+ */

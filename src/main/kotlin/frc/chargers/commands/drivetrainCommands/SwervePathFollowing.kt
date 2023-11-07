@@ -1,5 +1,6 @@
 package frc.chargers.commands.drivetrainCommands
 
+/*
 import com.batterystaple.kmeasure.units.meters
 import com.pathplanner.lib.PathConstraints
 import com.pathplanner.lib.PathPlanner
@@ -157,3 +158,5 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     rotationConstants,
     eventsBlock
 )
+
+ */

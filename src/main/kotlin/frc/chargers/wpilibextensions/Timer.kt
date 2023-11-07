@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.Timer
 import org.littletonrobotics.junction.Logger
 
 public fun fpgaTimestamp(): Time = Timer.getFPGATimestamp().ofUnit(seconds)
-public fun fpgaTimestampReal(): Time = Logger.getInstance().realTimestamp.ofUnit(micro.seconds)
+public fun fpgaTimestampReal(): Time = Logger.getRealTimestamp().ofUnit(micro.seconds)
 public fun timeSinceMatchStart(): Time = Timer.getMatchTime().ofUnit(seconds)
 public fun delay(time: Time){
     Timer.delay(time.inUnit(seconds))

@@ -53,4 +53,8 @@ public fun UnitPose2d.applyFlip(fieldLength: Distance): UnitPose2d =
 
 
 private fun shouldFlip(): Boolean =
-    DriverStation.getAlliance() == DriverStation.Alliance.Red
+    try{
+        DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+    }catch(_: Exception){
+        false
+    }

@@ -41,7 +41,7 @@ public fun Command.repeatedlyFor(time: Time): Command =
 
 public fun Command.repeatedlyWhile(condition: () -> Boolean): Command = ParallelRaceGroup(
     repeatedly(),
-    object: CommandBase(){
+    object: Command(){
         override fun isFinished(): Boolean = condition()
     }
 )

@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.advantagekitextensions.*
 import org.littletonrobotics.junction.LogFileUtil
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.Logger.*
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 
@@ -75,60 +75,57 @@ public open class ChargerRobot(
         try{
             LOOP_PERIOD = config.loopPeriod
 
-            val logger = Logger.getInstance()
             setUseTiming(
                 RobotBase.isReal() || !config.isReplay
             )
 
-            logger.apply{
-                recordMetadata(
-                    "Robot", if (RobotBase.isReal()) "REAL" else if (config.isReplay) "REPLAY" else "SIM"
-                )
-                recordMetadata("ProjectName", gitData.projectName)
-                recordMetadata("BuildDate", gitData.buildDate)
-                recordMetadata("GitSHA", gitData.sha)
-                recordMetadata("GitBranch", gitData.branch)
-                when(gitData.dirty){
-                    0 -> recordMetadata("GitDirty", "All changes committed")
-                    1 -> recordMetadata("GitDirty", "Uncommitted changes")
-                    else -> recordMetadata("GitDirty", "Unknown")
-                }
-
-                recordMetadata("ChargerLibBuildDate", ChargerLibBuildConstants.BUILD_DATE)
-                recordMetadata("ChargerLibGitSHA", ChargerLibBuildConstants.GIT_SHA)
-                recordMetadata("ChargerLibGitBranch", ChargerLibBuildConstants.GIT_BRANCH)
-                when(ChargerLibBuildConstants.DIRTY){
-                    0 -> recordMetadata("ChargerLibGitDirty", "All changes committed")
-                    1 -> recordMetadata("ChargerLibGitDirty", "Uncommitted changes")
-                    else -> recordMetadata("ChargerLibGitDirty", "Unknown")
-                }
-
-                // real robot
-                if (RobotBase.isReal()){
-                    if (Files.exists(Path.of("media/sda1"))){
-                        addDataReceiver(WPILOGWriter("media/sda1"))
-                    }else if (Files.exists(Path.of("media/sda2"))){
-                        addDataReceiver(WPILOGWriter("media/sda2"))
-                    }else{
-                        noUsbSignalAlert.active = true
-                    }
-                    addDataReceiver(NTSafePublisher())
-                }else if (config.isReplay){
-                    // replay mode; sim
-                    val path = LogFileUtil.findReplayLog()
-                    setReplaySource(WPILOGReader(path))
-                    addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
-                }else{
-                    // sim mode
-                    logger.addDataReceiver(NTSafePublisher())
-                    // maybe add DriverStationSim? idk
-                }
-
-                config.extraLoggerConfig(this)
-
-                // no more configuration from this point on
-                start()
+            recordMetadata(
+                "Robot", if (RobotBase.isReal()) "REAL" else if (config.isReplay) "REPLAY" else "SIM"
+            )
+            recordMetadata("ProjectName", gitData.projectName)
+            recordMetadata("BuildDate", gitData.buildDate)
+            recordMetadata("GitSHA", gitData.sha)
+            recordMetadata("GitBranch", gitData.branch)
+            when(gitData.dirty){
+                0 -> recordMetadata("GitDirty", "All changes committed")
+                1 -> recordMetadata("GitDirty", "Uncommitted changes")
+                else -> recordMetadata("GitDirty", "Unknown")
             }
+
+            recordMetadata("ChargerLibBuildDate", ChargerLibBuildConstants.BUILD_DATE)
+            recordMetadata("ChargerLibGitSHA", ChargerLibBuildConstants.GIT_SHA)
+            recordMetadata("ChargerLibGitBranch", ChargerLibBuildConstants.GIT_BRANCH)
+            when(ChargerLibBuildConstants.DIRTY){
+                0 -> recordMetadata("ChargerLibGitDirty", "All changes committed")
+                1 -> recordMetadata("ChargerLibGitDirty", "Uncommitted changes")
+                else -> recordMetadata("ChargerLibGitDirty", "Unknown")
+            }
+
+            // real robot
+            if (RobotBase.isReal()){
+                if (Files.exists(Path.of("media/sda1"))){
+                    addDataReceiver(WPILOGWriter("media/sda1"))
+                }else if (Files.exists(Path.of("media/sda2"))){
+                    addDataReceiver(WPILOGWriter("media/sda2"))
+                }else{
+                    noUsbSignalAlert.active = true
+                }
+                addDataReceiver(NTSafePublisher())
+            }else if (config.isReplay){
+                // replay mode; sim
+                val path = LogFileUtil.findReplayLog()
+                setReplaySource(WPILOGReader(path))
+                addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
+            }else{
+                // sim mode
+                addDataReceiver(NTSafePublisher())
+                // maybe add DriverStationSim? idk
+            }
+
+            config.extraLoggerConfig()
+
+            // no more configuration from this point on
+            start()
 
             LiveWindow.disableAllTelemetry()
 
@@ -143,15 +140,15 @@ public open class ChargerRobot(
             // custom extension function in chargerlib
             CommandScheduler.getInstance().apply{
                 onCommandInitialize{
-                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", true)
+                    recordOutput("/ActiveCommands/${it.name}", true)
                 }
 
                 onCommandFinish {
-                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", false)
+                    recordOutput("/ActiveCommands/${it.name}", false)
                 }
 
-                onCommandInterrupt {
-                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", false)
+                onCommandInterrupt { it: Command ->
+                    recordOutput("/ActiveCommands/${it.name}", false)
                 }
             }
         }catch(e: Exception){
@@ -180,10 +177,8 @@ public open class ChargerRobot(
             // and running subsystem periodic() methods.  This must be called from the robot's periodic
             // block in order for anything in the Command-based framework to work.
             CommandScheduler.getInstance().run()
-            Logger.getInstance().apply{
-                recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
-                logReceiverQueueAlert.active = receiverQueueFault
-            }
+            recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
+            logReceiverQueueAlert.active = getReceiverQueueFault()
         }catch(e: Exception){
             config.onError(e)
             throw e

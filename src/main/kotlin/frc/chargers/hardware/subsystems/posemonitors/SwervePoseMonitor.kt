@@ -141,7 +141,7 @@ public class SwervePoseMonitor(
 
         updateInputs(calculatedHeading = currentEstimatedHeading)
 
-        Logger.getInstance().processInputs("Drivetrain(Swerve)/HeadingData",headingInputs)
+        Logger.processInputs("Drivetrain(Swerve)/HeadingData",headingInputs)
 
         if (gyro != null){
             twist.dtheta = headingInputs.gyroInputHeading.inUnit(radians)
@@ -173,7 +173,7 @@ public class SwervePoseMonitor(
 
 
         field.robotPose = poseEstimator.latestPose
-        Logger.getInstance().recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
+        Logger.recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
 
 
     }

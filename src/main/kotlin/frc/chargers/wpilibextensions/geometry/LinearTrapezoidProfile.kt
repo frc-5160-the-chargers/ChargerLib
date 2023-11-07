@@ -19,15 +19,12 @@ https://github.com/wpilibsuite/allwpilib/pull/5457
  * For instance, the constraints are measured with max angular acceleration and max angular velocity.
  */
 public class LinearTrapezoidProfile(
-    public val constraints: Constraints,
-    public val goalState: State,
-    public val initialState: State = State(Distance(0.0),Velocity(0.0))
+    public val constraints: Constraints
 ) {
 
     public companion object{
         public val None: LinearTrapezoidProfile = LinearTrapezoidProfile(
-            Constraints(Velocity(0.0), Acceleration(0.0)),
-            State(Distance(0.0), Velocity(0.0))
+            Constraints(Velocity(0.0), Acceleration(0.0))
         )
     }
 
@@ -63,9 +60,7 @@ public class LinearTrapezoidProfile(
     }
 
     public fun inUnit(distanceUnit: Distance, timeUnit: Time): TrapezoidProfile = TrapezoidProfile(
-        constraints.inUnit(distanceUnit,timeUnit),
-        goalState.inUnit(distanceUnit,timeUnit),
-        initialState.inUnit(distanceUnit,timeUnit)
+        constraints.inUnit(distanceUnit,timeUnit)
     )
 
 
@@ -73,12 +68,12 @@ public class LinearTrapezoidProfile(
 
     private var previousTime: Time = Time(0.0)
 
-    public fun calculate(deltaT: Time): State =
-        baseProfile.calculate(deltaT.inUnit(seconds)).ofUnit(meters,seconds)
+    public fun calculate(deltaT: Time, goalState: State, currentState: State): State =
+        baseProfile.calculate(deltaT.inUnit(seconds),goalState.inUnit(meters,seconds), currentState.inUnit(meters,seconds)).ofUnit(meters,seconds)
 
-    public fun calculateCurrentState(): State{
+    public fun calculateCurrentState(goalState: State, currentState: State): State{
         val currentTime = fpgaTimestamp()
-        return calculate(currentTime - previousTime).also{
+        return calculate(currentTime - previousTime, goalState, currentState).also{
             previousTime = currentTime
         }
     }

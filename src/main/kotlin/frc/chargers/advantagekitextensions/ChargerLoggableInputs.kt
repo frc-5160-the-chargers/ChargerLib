@@ -497,7 +497,7 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
         table?.apply{
             doubleLoggers.forEach{
                 it.setDoubleValue(
-                    getDouble(
+                    get(
                         it.logName,
                         it.getDoubleValue()
                     )
@@ -506,7 +506,7 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
             }
             boolLoggers.forEach{
                 it.setBoolValue(
-                    getBoolean(
+                    get(
                         it.logName,
                         it.getBoolValue()
                     )
@@ -514,13 +514,13 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
             }
 
             stringLoggers.forEach{
-                getString(it.logName,it.getStringValue())?.let{value: String ->
+                get(it.logName,it.getStringValue())?.let{value: String ->
                     it.setStringValue(value)
                 }
             }
 
             doubleListLoggers.forEach{
-                getDoubleArray(it.logName,it.getValue().toDoubleArray())?.let{value: DoubleArray ->
+                get(it.logName,it.getValue().toDoubleArray())?.let{value: DoubleArray ->
                     it.setValue(value.toList())
                 }
             }

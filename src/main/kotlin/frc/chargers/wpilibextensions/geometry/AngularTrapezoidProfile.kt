@@ -20,15 +20,12 @@ https://github.com/wpilibsuite/allwpilib/pull/5457
  *
  */
 public class AngularTrapezoidProfile(
-    public val constraints: Constraints,
-    public val goalState: State,
-    public val initialState: State = State(Angle(0.0),AngularVelocity(0.0))
+    public val constraints: Constraints
 ) {
 
     public companion object{
         public val None: AngularTrapezoidProfile = AngularTrapezoidProfile(
-            Constraints(AngularVelocity(0.0),AngularAcceleration(0.0)),
-            State(Angle(0.0),AngularVelocity(0.0))
+            Constraints(AngularVelocity(0.0),AngularAcceleration(0.0))
         )
     }
 
@@ -64,9 +61,7 @@ public class AngularTrapezoidProfile(
     }
 
     public fun inUnit(angleUnit: Angle, timeUnit: Time): TrapezoidProfile = TrapezoidProfile(
-        constraints.inUnit(angleUnit,timeUnit),
-        goalState.inUnit(angleUnit,timeUnit),
-        initialState.inUnit(angleUnit,timeUnit)
+        constraints.inUnit(angleUnit,timeUnit)
     )
 
 
@@ -74,12 +69,12 @@ public class AngularTrapezoidProfile(
 
     private var previousTime: Time = Time(0.0)
 
-    public fun calculate(deltaT: Time): State =
-        baseProfile.calculate(deltaT.inUnit(seconds)).ofUnit(radians,seconds)
+    public fun calculate(deltaT: Time, goalState: State, currentState: State): State =
+        baseProfile.calculate(deltaT.inUnit(seconds), goalState.inUnit(radians,seconds), currentState.inUnit(radians,seconds)).ofUnit(radians,seconds)
 
-    public fun calculateCurrentState(): State{
+    public fun calculateCurrentState(currentState: State, goalState: State): State{
         val currentTime = fpgaTimestamp()
-        return calculate(currentTime - previousTime).also{
+        return calculate(currentTime - previousTime, currentState, goalState).also{
             previousTime = currentTime
         }
     }

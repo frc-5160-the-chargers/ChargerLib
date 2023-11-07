@@ -19,6 +19,7 @@ import frc.chargers.utils.Measurement
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.StandardDeviation
+import kotlin.jvm.optionals.getOrNull
 
 
 /**
@@ -32,6 +33,7 @@ import frc.chargers.wpilibextensions.StandardDeviation
  *
  * You use "limelight.tx" instead.
  */
+
 public class Limelight(
     public val name: String = "limelight",
     public val lensHeight: Distance? = null,
@@ -64,7 +66,7 @@ public class Limelight(
             val limelightPose = when(allianceColor){
                 DriverStation.Alliance.Red -> botpose_wpired
                 DriverStation.Alliance.Blue -> botpose_wpiblue
-                DriverStation.Alliance.Invalid -> if(defaultDriverStationIfUnavailable == DriverStation.Alliance.Blue){
+                null -> if(defaultDriverStationIfUnavailable == DriverStation.Alliance.Blue){
                     botpose_wpiblue
                 }else{
                     botpose_wpired
@@ -85,7 +87,8 @@ public class Limelight(
     public val inUse: Boolean = false
 
     // gets the alliance color using wpilib's driverstation library!
-    private val allianceColor: DriverStation.Alliance = DriverStation.getAlliance()
+    private val allianceColor: DriverStation.Alliance? = DriverStation.getAlliance().getOrNull()
+
 
 
 

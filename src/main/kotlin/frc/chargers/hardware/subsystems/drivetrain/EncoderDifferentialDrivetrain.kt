@@ -118,7 +118,7 @@ public class EncoderDifferentialDrivetrain(
 
     override fun periodic(){
         io.updateInputs(inputs)
-        Logger.getInstance().processInputs("Drivetrain(Differential)",inputs)
+        Logger.processInputs("Drivetrain(Differential)",inputs)
         
         leftController.calculateOutput()
         rightController.calculateOutput()

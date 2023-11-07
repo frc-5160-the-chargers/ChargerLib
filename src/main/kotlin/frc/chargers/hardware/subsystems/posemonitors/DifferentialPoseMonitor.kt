@@ -114,7 +114,7 @@ public class DifferentialPoseMonitor(
 
 
         field.robotPose = poseEstimator.latestPose
-        Logger.getInstance().recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
+        Logger.recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
 
 
     }

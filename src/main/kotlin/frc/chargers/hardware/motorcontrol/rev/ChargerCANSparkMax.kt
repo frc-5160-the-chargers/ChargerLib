@@ -190,12 +190,13 @@ public open class ChargerCANSparkMax(
     ) {
         if (trapezoidProfile.constraints != constraints){
             trapezoidProfile = AngularTrapezoidProfile(
-                constraints,
-                AngularTrapezoidProfile.State(target,AngularVelocity(0.0)),
-                AngularTrapezoidProfile.State(encoder.angularPosition,AngularVelocity(0.0))
+                constraints
             )
         }
-        val currentState = trapezoidProfile.calculateCurrentState()
+        val currentState = trapezoidProfile.calculateCurrentState(
+            AngularTrapezoidProfile.State(target,encoder.angularVelocity),
+            AngularTrapezoidProfile.State(encoder.angularPosition,AngularVelocity(0.0))
+        )
         updateControllerConstants(pidConstants)
         if (absoluteEncoder != null){
             innerController.setReference((currentState.position + (encoder.angularPosition - absoluteEncoder.angularPosition)).siValue, ControlType.kPosition,0,feedforward.calculate(currentState.velocity).inUnit(volts))
