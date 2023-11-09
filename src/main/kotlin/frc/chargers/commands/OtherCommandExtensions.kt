@@ -25,6 +25,15 @@ public fun Command.withStartEndLog(): Command = buildCommand{
 
 
 /**
+ * Constructs a command with extra requirements.
+ */
+public fun Command.withExtraRequirements(vararg requirements: Subsystem): Command =
+    object: WrapperCommand(this){}.also{
+        it.addRequirements(*requirements)
+    }
+
+
+/**
  * A way to link up 2 commands in a more concise way.
  */
 public infix fun Command.then(other: Command): Command =

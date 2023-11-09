@@ -6,7 +6,7 @@ import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
 import com.ctre.phoenix.sensors.CANCoder
-import edu.wpi.first.wpilibj.RobotBase
+import frc.chargers.hardware.inputdevices.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
@@ -44,9 +44,7 @@ public open class ChargerTalonSRX(
 ) : WPI_TalonSRX(deviceNumber), EncoderMotorController, MotorConfigurable<TalonSRXConfiguration> {
 
     init{
-        if (RobotBase.isSimulation()){
-            error("Looks like you instantiated a motor IN SIM. Make sure to use a lazy initializer! ")
-        }
+        warnIfInSimulation("ChargerTalonSRX(ID = $deviceID)")
     }
 
     final override val encoder: Encoder

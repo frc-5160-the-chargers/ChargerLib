@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration as CTRECANcoderConfigurat
 import com.ctre.phoenix6.hardware.CANcoder as CTRECANcoder
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
+import frc.chargers.hardware.inputdevices.warnIfInSimulation
 import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
 import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
@@ -22,19 +23,20 @@ import frc.chargers.utils.Measurement
  * @see CTRECANcoder
  * @see CANcoderConfiguration
  */
-public class ChargerCANcoder(
+public class ChargerCANcoder @PublishedApi internal constructor(
     deviceID: Int,
-    canBus: String? = null
+    canBus: String = ""
 ): CTRECANcoder(deviceID, canBus), ResettableTimestampedEncoder, EncoderConfigurable<CANcoderConfiguration> {
 
     public var filterVelocity: Boolean = true
     public companion object{
         public inline operator fun invoke(
             deviceID: Int,
-            canBus: String? = null,
+            canBus: String = "",
             configure: CANcoderConfiguration.() -> Unit = {}
         ): ChargerCANcoder = ChargerCANcoder(deviceID,canBus).also{
             it.configure(CANcoderConfiguration().apply(configure))
+            warnIfInSimulation("ChargerCANcoder(ID = $deviceID)")
         }
     }
 
