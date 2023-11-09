@@ -9,9 +9,9 @@ import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.*
-import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.hardware.inputdevices.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
@@ -45,9 +45,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
     FeedbackMotorController, MotorConfigurable<TalonFXConfiguration> {
 
     init{
-        if (RobotBase.isSimulation()){
-            error("Looks like you instantiated a motor IN SIM. Make sure to use a lazy initializer! ")
-        }
+        warnIfInSimulation("ChargerTalonFX(ID = $deviceID)")
     }
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions

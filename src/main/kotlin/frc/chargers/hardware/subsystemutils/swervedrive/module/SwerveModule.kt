@@ -150,8 +150,6 @@ public class SwerveModule(
             else -> {
                 if (secondOrderTurnSpeed != AngularVelocity(0.0)){
                     println("WARNING: Second order turn speed is not being used. Something is wrong with the system.")
-                }else{
-                    println("First order control currently being utilized")
                 }
 
                 // if PID control is first order, simply take the output of the controller.
@@ -169,6 +167,9 @@ public class SwerveModule(
 
     public val currentVelocity: AngularVelocity
         get() = inputs.speed
+
+    public val currentTurningVelocity: AngularVelocity
+        get() = inputs.turnSpeed
 
     public fun setVelocity(velocity: AngularVelocity) {
         velocityController.target = velocity

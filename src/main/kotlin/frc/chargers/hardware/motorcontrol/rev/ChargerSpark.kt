@@ -1,7 +1,7 @@
 package frc.chargers.hardware.motorcontrol.rev
 
-import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.motorcontrol.Spark
+import frc.chargers.hardware.inputdevices.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 
@@ -19,9 +19,7 @@ public inline fun redlineSpark(channel: Int, configure: SparkConfiguration.() ->
  */
 public class ChargerSpark(channel: Int) : Spark(channel), MotorConfigurable<SparkConfiguration> {
     init{
-        if (RobotBase.isSimulation()){
-            error("Looks like you instantiated a motor IN SIM. Make sure to use a lazy initializer! ")
-        }
+        warnIfInSimulation("ChargerSpark(channel = $channel)")
     }
     override fun configure(configuration: SparkConfiguration) {
         configuration.inverted?.let(::setInverted)

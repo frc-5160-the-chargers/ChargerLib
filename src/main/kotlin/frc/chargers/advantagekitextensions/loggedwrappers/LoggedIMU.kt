@@ -14,6 +14,11 @@ import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
 import org.littletonrobotics.junction.Logger
 
 /**
+ * Adds logging to an [IMU].
+ */
+public fun IMU.withLogging(): IMU = LoggedIMU(this)
+
+/**
  * An IMU which has logging & replay capabilities from advantagekit.
  * 
  * Note: All the Inputs classes also act as implementations of the

@@ -21,6 +21,7 @@ public class FeedForwardCharacterizationData {
 
     public void print() {
         if (velocityData.isEmpty() || voltageData.isEmpty()) {
+            System.out.println("DATA IS EMPTY");
             return;
         }
 
