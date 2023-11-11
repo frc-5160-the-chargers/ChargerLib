@@ -1,5 +1,6 @@
 package frc.chargers.hardware.inputdevices
 
+import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.wpilibextensions.Alert
 
 /**
@@ -10,10 +11,12 @@ import frc.chargers.wpilibextensions.Alert
  * instead of vendor-specific simulation.
  */
 public fun warnIfInSimulation(deviceName: String){
-    val text = "WARNING: a device with name '$deviceName' was instantiated in SIM. " +
-            "\n So far, this device does NOT support simulation; accessing it will likely cause errors."
-    val alert = Alert.warning("DeviceAlerts", text)
+    if (RobotBase.isSimulation()){
+        val text = "WARNING: a device with name '$deviceName' was instantiated in SIM. " +
+                "\n So far, this device does NOT support simulation; accessing it will likely cause errors."
+        val alert = Alert.warning("DeviceAlerts", text)
 
-    alert.active = true
-    println(text)
+        alert.active = true
+        println(text)
+    }
 }
