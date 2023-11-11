@@ -15,9 +15,6 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.*
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.kinematics.rotationSpeed
-import frc.chargers.wpilibextensions.kinematics.xVelocity
-import frc.chargers.wpilibextensions.kinematics.yVelocity
 import kotlin.internal.LowPriorityInOverloadResolution
 
 /*
@@ -68,10 +65,8 @@ public fun EncoderHolonomicDrivetrain.followPath(
         PIDController(0.0,0.0,0.0).apply{
             constants = rotationConstants
         },
-        {speeds ->
-        velocityDrive(speeds.xVelocity,-speeds.yVelocity,speeds.rotationSpeed)
-        },
-        true,
+        {input -> velocityDrive(input, false)},
+        false,
         this@followPath
     )
 }
@@ -131,9 +126,9 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
         {poseEstimator.resetPose(it.ofUnit(meters))},  // Pose2d consumer, used to reset odometry at the beginning of auto
         translationConstants.asPathPlannerConstants(),  // PID constants to correct for translation error (used to create the X and Y PID controllers)
         rotationConstants.asPathPlannerConstants(),  // PID constants to correct for rotation error (used to create the rotation controller)
-        ::velocityDrive,  // chassis speeds consumer
+        {input -> velocityDrive(input, false)},
         MappableContext<String,Command>().apply(eventsBlock).map,
-        true,  // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true,
+        false,  // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true,
         this@runPathPlannerAuto // The drive subsystem. Used to properly set the requirements of path following commands
     )
 

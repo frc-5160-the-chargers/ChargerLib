@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
 
 public fun Double.mapBetweenRanges(from: ClosedRange<Double>, to: ClosedRange<Double>): Double {
-    require(this in from) { "Value must be within initial range." }
+    require(this in from) { "An error has occured: your value($this) is not within the starting range($from)." }
 
     val proportionIntoRange: Double = (this - from.start) / (from.endInclusive - from.start)
     val distanceIntoToRange: Double = proportionIntoRange * (to.endInclusive - to.start)

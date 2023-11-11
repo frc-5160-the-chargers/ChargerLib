@@ -52,7 +52,7 @@ public class SecondOrderSwerveKinematics {
      * @param robotHeading heading of the robot relative to the field
      * @return SecondOrderSwerveModuleState[] array of the speed direction and turn speed of the swerve modules
      */
-    public Output toSwerveModuleState(ChassisSpeeds desiredSpeed, Rotation2d robotHeading){
+    public Output toSwerveModuleState(ChassisSpeeds desiredSpeed, Rotation2d robotHeading, boolean fieldRelative){
         Matrix<N3, N1> firstOrderInputMatrix = new Matrix<>(N3(),N1());
         Matrix<N2, N3> firstOrderMatrix = new Matrix<>(N2(),N3());
         Matrix<N4, N1> secondOrderInputMatrix = new Matrix<>(N4(),N1());
@@ -76,9 +76,11 @@ public class SecondOrderSwerveKinematics {
 
         for (int i = 0; i < 4; i ++){
             Rotation2d moduleAngle = new Rotation2d(Math.atan2(moduleLocations[i].getY(), moduleLocations[i].getX())); //Angle that the module location vector makes with respect to the robot
-            Rotation2d moduleAngleFieldCentric = moduleAngle.plus(robotHeading); //Angle that the module location vector makes with respect to the field
-            double moduleX = moduleLocations[i].getNorm() * Math.cos(moduleAngleFieldCentric.getRadians());
-            double moduleY = moduleLocations[i].getNorm() * Math.sin(moduleAngleFieldCentric.getRadians());
+            if (fieldRelative){
+                moduleAngle = moduleAngle.plus(robotHeading);
+            }
+            double moduleX = moduleLocations[i].getNorm() * Math.cos(moduleAngle.getRadians());
+            double moduleY = moduleLocations[i].getNorm() * Math.sin(moduleAngle.getRadians());
             firstOrderMatrix.set(0,2,-moduleY); //-r_y
             firstOrderMatrix.set(1,2,moduleX); //r_x
 
@@ -99,7 +101,7 @@ public class SecondOrderSwerveKinematics {
 
             Matrix<N2,N1> secondOrderOutput = rotationMatrix.times(secondOrderMatrix.times(secondOrderInputMatrix));
 
-            swerveModuleStates[i] = new SwerveModuleState(moduleSpeed, new Rotation2d(moduleHeading).minus(robotHeading));
+            swerveModuleStates[i] = new SwerveModuleState(moduleSpeed, fieldRelative? new Rotation2d(moduleHeading).minus(robotHeading) : new Rotation2d(moduleHeading) );
             moduleTurnSpeeds[i] = secondOrderOutput.get(1,0) / moduleSpeed - desiredSpeed.omegaRadiansPerSecond;
         }
 

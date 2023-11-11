@@ -51,12 +51,12 @@ public class SuperSwerveDriveKinematics(
      * Credits: 5727/4481 second kinematics
      * @see SecondOrderSwerveKinematics
      */
-    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle): SecondOrderModuleStateGroup{
+    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle, fieldRelative: Boolean = true): SecondOrderModuleStateGroup{
         val standardizedHeading = if (heading < 0.degrees) heading + 360.degrees else heading
 
         val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,standardizedHeading.asRotation2d())
 
-        val output = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,standardizedHeading.asRotation2d())
+        val output = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,standardizedHeading.asRotation2d(), fieldRelative)
         val states = output.moduleStates
 
         // lolll.... 4481's second order kinematics is returning NaN for turn speeds...

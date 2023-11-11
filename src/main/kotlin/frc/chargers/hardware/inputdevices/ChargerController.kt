@@ -35,7 +35,7 @@ public open class ChargerController(
     public val defaultAxisThreshold: Double = 0.5
 ): CommandXboxController(port) {
 
-    protected fun TriggerValue.withDeadband(): Double =
+     public fun TriggerValue.withDeadband(): Double =
         if (abs(this) <= deadband) { 0.0 } else { this }
 
     public fun TriggerValue.mapTriggerValue(to: ClosedRange<Double>): Double =

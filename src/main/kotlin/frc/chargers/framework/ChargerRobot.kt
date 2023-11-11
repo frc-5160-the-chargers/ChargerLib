@@ -3,6 +3,7 @@ package frc.chargers.framework
 import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.units.seconds
+import com.pathplanner.lib.server.PathPlannerServer
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.Command
@@ -133,6 +134,8 @@ public open class ChargerRobot(
             LiveWindow.disableAllTelemetry()
 
             DashboardTuner.tuningMode = config.tuningMode
+
+            PathPlannerServer.startServer(5811)
 
             // inits robotContainer
             robotContainer = getRobotContainer()

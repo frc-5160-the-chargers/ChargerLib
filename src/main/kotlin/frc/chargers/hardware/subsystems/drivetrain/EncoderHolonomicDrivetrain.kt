@@ -411,29 +411,32 @@ public class EncoderHolonomicDrivetrain(
         powers: ChassisPowers,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
-        var speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
+        val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
 
-
-        // Avoids making the speeds field relative if second order kinematics is used,
-        // and the rotation speeds is non-zero.
-        // without this if statement check, second order kinematics becomes bugged
-        // and drives in a circle when driving while turning; this is a temporary fix for that.
-        if (fieldRelative && (speeds.rotationSpeed == AngularVelocity(0.0) || controlScheme !is SecondOrderControlScheme)){
-            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                speeds,
-                mostReliableHeading.asRotation2d()
-            )
-        }
         currentControlMode = ControlMode.OPEN_LOOP
 
+
+        /*
+        4481's second order swerve kinematics already applies field relative drive;
+        thus, fromFieldRelativeSpeeds is not called if second order kinematics is used.
+         */
         currentModuleStates = if (controlScheme is SecondOrderControlScheme){
             kinematics.toSecondOrderModuleStateGroup(
                 speeds.correctForDynamicsOptimized(),
-                mostReliableHeading
+                mostReliableHeading,
+                fieldRelative
             )
         }else{
-            kinematics.toFirstOrderModuleStateGroup(speeds.correctForDynamicsOptimized())
+            kinematics.toFirstOrderModuleStateGroup(
+                if(fieldRelative){
+                    ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
+                }else{
+                    speeds
+                }.correctForDynamicsOptimized()
+            )
         }
+
+        currentControlMode = ControlMode.CLOSED_LOOP
     }
 
 
@@ -485,26 +488,29 @@ public class EncoderHolonomicDrivetrain(
         speeds: ChassisSpeeds,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
-        var newSpeeds = speeds
-
-        // Avoids making the speeds field relative if second order kinematics is used,
-        // and the rotation speeds is non-zero.
-        // without this if statement check, second order kinematics becomes bugged
-        // and drives in a circle when driving while turning; this is a temporary fix for that.
-        if (fieldRelative && (newSpeeds.rotationSpeed == AngularVelocity(0.0) || controlScheme !is SecondOrderControlScheme)){
-            newSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                speeds,
-                mostReliableHeading.asRotation2d()
-            )
-        }
 
         currentControlMode = ControlMode.CLOSED_LOOP
 
+        /*
+        4481's second order swerve kinematics already applies field relative drive;
+        thus, fromFieldRelativeSpeeds is not called if second order kinematics is used.
+         */
         currentModuleStates = if(controlScheme is SecondOrderControlScheme){
-            kinematics.toSecondOrderModuleStateGroup(newSpeeds.correctForDynamicsOptimized(),mostReliableHeading)
+            kinematics.toSecondOrderModuleStateGroup(
+                speeds.correctForDynamicsOptimized(),
+                mostReliableHeading,
+                fieldRelative
+            )
         }else{
-            kinematics.toFirstOrderModuleStateGroup(newSpeeds.correctForDynamicsOptimized())
+            kinematics.toFirstOrderModuleStateGroup(
+                if(fieldRelative){
+                    ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
+                }else{
+                    speeds
+                }.correctForDynamicsOptimized()
+            )
         }
+
     }
 
 

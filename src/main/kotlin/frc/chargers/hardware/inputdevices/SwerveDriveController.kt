@@ -2,6 +2,7 @@ package frc.chargers.hardware.inputdevices
 
 import frc.chargers.wpilibextensions.kinematics.ChassisPowers
 import frc.chargers.wpilibextensions.ratelimit.ScalarRateLimiter
+import kotlin.math.abs
 
 /**
  * An extension of [ChargerController] that provides tools to assist with controlling a swerve drivetrain.
@@ -39,19 +40,21 @@ public class SwerveDriveController(
             SwerveDriveController(
                 port,
                 {
-                    driveRateLimiter?.calculate(leftY * driveMultiplier)
-                        ?: (leftY * driveMultiplier)
+                    driveRateLimiter?.calculate(leftY.withDeadband() * driveMultiplier)
+                        ?: (leftY.withDeadband() * driveMultiplier)
                 },
                 {
-                    driveRateLimiter?.calculate(leftX * driveMultiplier)
-                        ?: (leftX * driveMultiplier)
+                    driveRateLimiter?.calculate(leftX.withDeadband() * driveMultiplier)
+                        ?: (leftX.withDeadband() * driveMultiplier)
                 },
                 {
-                    rotationRateLimiter?.calculate(rightX * rotationMultiplier)
-                        ?: (rightX * rotationMultiplier)
+                    rotationRateLimiter?.calculate(rightX.withDeadband() * rotationMultiplier)
+                        ?: (rightX.withDeadband() * rotationMultiplier)
                 },
-                {rightTriggerAxis.mapTriggerValue(turboModeMultiplierRange)},
-                {1/leftTriggerAxis.mapTriggerValue(precisionModeDividerRange)},
+                {abs(rightTriggerAxis).mapTriggerValue(turboModeMultiplierRange)},
+                {
+                    1/abs(leftTriggerAxis).mapTriggerValue(precisionModeDividerRange)
+                },
                 deadband,
                 defaultAxisThreshold
             )
@@ -60,9 +63,9 @@ public class SwerveDriveController(
         get(){
             val multiplier = getTurboPower() * getPrecisionPower()
             return ChassisPowers(
-                getForwardsPower().withDeadband() * multiplier,
-                getStrafePower().withDeadband() * multiplier,
-                getRotationPower().withDeadband() * multiplier
+                getForwardsPower() * multiplier,
+                getStrafePower() * multiplier,
+                getRotationPower() * multiplier
             )
         }
 }

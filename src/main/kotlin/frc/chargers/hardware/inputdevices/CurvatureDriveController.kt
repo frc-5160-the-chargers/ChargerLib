@@ -2,6 +2,7 @@ package frc.chargers.hardware.inputdevices
 
 import frc.chargers.wpilibextensions.kinematics.ChassisPowers
 import frc.chargers.wpilibextensions.ratelimit.ScalarRateLimiter
+import kotlin.math.abs
 
 /**
  * A subclass of [ChargerController] which has the capacity to control a differential drivetrain.
@@ -39,15 +40,15 @@ public class CurvatureDriveController(
             CurvatureDriveController(
                 port,
                 {
-                    driveRateLimiter?.calculate(leftY * driveMultiplier)
-                        ?: (leftY * driveMultiplier)
+                    driveRateLimiter?.calculate(leftY.withDeadband() * driveMultiplier)
+                        ?: (leftY.withDeadband() * driveMultiplier)
                 },
                 {
-                    rotationRateLimiter?.calculate(rightX * rotationMultiplier)
-                        ?: (rightX * rotationMultiplier)
+                    rotationRateLimiter?.calculate(rightX.withDeadband() * rotationMultiplier)
+                        ?: (rightX.withDeadband() * rotationMultiplier)
                 },
-                {rightTriggerAxis.mapTriggerValue(turboModeMultiplierRange)},
-                {1/leftTriggerAxis.mapTriggerValue(precisionModeDividerRange)},
+                {abs(rightTriggerAxis).mapTriggerValue(turboModeMultiplierRange)},
+                {1/abs(leftTriggerAxis).mapTriggerValue(precisionModeDividerRange)},
                 deadband,
                 defaultAxisThreshold
             )
@@ -56,8 +57,8 @@ public class CurvatureDriveController(
         get(){
             val multiplier = getTurboPower() * getPrecisionPower()
             return ChassisPowers(
-                xPower = getForwardsPower().withDeadband() * multiplier,
-                rotationPower = getRotationPower().withDeadband() * multiplier
+                xPower = getForwardsPower() * multiplier,
+                rotationPower = getRotationPower() * multiplier
             )
         }
 }
