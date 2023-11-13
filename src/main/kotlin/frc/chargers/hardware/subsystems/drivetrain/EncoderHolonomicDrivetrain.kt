@@ -375,7 +375,7 @@ public class EncoderHolonomicDrivetrain(
      */
     private fun ChassisSpeeds.correctForDynamicsOptimized(): ChassisSpeeds{
         if (!isReal) return this
-        return correctForDynamics(ChargerRobot.LOOP_PERIOD)
+        return correctForDynamics(ChargerRobot.LOOP_PERIOD, if (controlScheme is SecondOrderControlScheme) 0.3 else 1.0)
     }
 
     private val mostReliableHeading: Angle get() = gyro?.heading ?: heading
@@ -411,6 +411,11 @@ public class EncoderHolonomicDrivetrain(
         powers: ChassisPowers,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
+        if (powers.xPower == 0.0 && powers.yPower == 0.0 && powers.rotationPower == 0.0){
+            stop()
+            return
+        }
+
         val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
 
         currentControlMode = ControlMode.OPEN_LOOP
@@ -488,6 +493,10 @@ public class EncoderHolonomicDrivetrain(
         speeds: ChassisSpeeds,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
+        if (speeds.xVelocity == Velocity(0.0) && speeds.yVelocity == Velocity(0.0) && speeds.rotationSpeed == AngularVelocity(0.0)){
+            stop()
+            return
+        }
 
         currentControlMode = ControlMode.CLOSED_LOOP
 

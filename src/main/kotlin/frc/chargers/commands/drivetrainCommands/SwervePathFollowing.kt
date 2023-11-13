@@ -66,7 +66,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
             constants = rotationConstants
         },
         {input -> velocityDrive(input, false)},
-        false,
+        true,
         this@followPath
     )
 }
@@ -111,7 +111,6 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     eventsBlock
 )
 context(CommandBuilder)
-@LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     trajectories: List<PathPlannerTrajectory>,
     translationConstants: PIDConstants,
