@@ -12,8 +12,9 @@ import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
 import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_DRIVE_INERTIA
 import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_TURN_INERTIA
 import frc.chargers.utils.math.units.Inertia
-import frc.chargers.wpilibextensions.motorcontrol.voltage
 import frc.chargers.utils.math.units.times
+import frc.chargers.wpilibextensions.motorcontrol.setVoltage
+import frc.chargers.wpilibextensions.motorcontrol.voltage
 
 
 public class ModuleIOReal(
@@ -24,24 +25,24 @@ public class ModuleIOReal(
     private val turnGearRatio: Double = DEFAULT_GEAR_RATIO
 ): ModuleIO {
     override fun setDriveVoltage(driveV: Voltage) {
-        // custom extension property
-        driveMotor.voltage = driveV
+        // custom extension function
+        driveMotor.setVoltage(driveV)
     }
 
     override fun setTurnVoltage(turnV: Voltage) {
-        // custom extension property
-        turnMotor.voltage = turnV
+        // custom extension function
+        turnMotor.setVoltage(turnV)
     }
 
     override fun updateInputs(inputs: ModuleIO.Inputs) {
         inputs.apply{
             direction = turnEncoder.angularPosition
-            turnSpeed = turnMotor.encoder.angularVelocity * turnGearRatio
+            turnSpeed = turnMotor.encoder.angularVelocity / turnGearRatio
             turnVoltage = turnMotor.voltage
 
-            speed = driveMotor.encoder.angularVelocity * driveGearRatio
+            speed = driveMotor.encoder.angularVelocity / driveGearRatio
             driveVoltage = driveMotor.voltage
-            distance = driveMotor.encoder.angularPosition * driveGearRatio
+            distance = driveMotor.encoder.angularPosition / driveGearRatio
         }
     }
 
@@ -57,10 +58,8 @@ public class ModuleIOSim(
     driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
 ): ModuleIO {
 
-    public var driveAppliedVoltage: Voltage = 0.0.volts
-        private set
-    public var turnAppliedVoltage: Voltage = 0.0.volts
-        private set
+    private var driveAppliedVoltage: Voltage = 0.0.volts
+    private var turnAppliedVoltage: Voltage = 0.0.volts
     private var moduleDirection = 0.0.degrees
 
 
@@ -70,7 +69,7 @@ public class ModuleIOSim(
             moduleDirection += 360.degrees
         }
 
-        while(moduleDirection > 360.degrees){
+        while(moduleDirection >= 360.degrees){
             moduleDirection -= 360.degrees
         }
     }

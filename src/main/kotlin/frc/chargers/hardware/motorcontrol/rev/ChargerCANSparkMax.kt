@@ -11,6 +11,7 @@ import com.revrobotics.SparkMaxAlternateEncoder
 import com.revrobotics.SparkMaxPIDController
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.inputdevices.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
@@ -91,6 +92,7 @@ public open class ChargerCANSparkMax(
     }
 
     override fun configure(configuration: SparkMaxConfiguration) {
+        restoreFactoryDefaults()
         configuration.idleMode?.let(::setIdleMode)
         configuration.inverted?.let(::setInverted)
         configuration.voltageCompensationNominalVoltage?.let { enableVoltageCompensation(it.inUnit(volts)) }
@@ -129,9 +131,12 @@ public open class ChargerCANSparkMax(
         }
 
         // apparently, these delays are nessecary for configuration to be set right
-        delay(200.milli.seconds)
-        burnFlash()
-        delay(200.milli.seconds)
+        if (ChargerRobot.shouldBurnSparkMax()){
+            delay(200.milli.seconds)
+            burnFlash()
+            delay(200.milli.seconds)
+        }
+
     }
 
 

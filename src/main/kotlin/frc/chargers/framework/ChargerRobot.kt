@@ -16,6 +16,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.chargers.builddata.ChargerLibBuildConstants
 import frc.chargers.constants.tuning.DashboardTuner
+import frc.chargers.utils.SparkMaxBurnManager
 import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.LoggedRobot
 import java.nio.file.Files
@@ -33,6 +34,15 @@ public open class ChargerRobot(
     private val config: RobotConfig
 ): LoggedRobot(config.loopPeriod.inUnit(seconds)){
     public companion object{
+        private lateinit var burnManager: SparkMaxBurnManager
+
+        public fun shouldBurnSparkMax(): Boolean = try{
+            burnManager.shouldBurn()
+        }catch(e: UninitializedPropertyAccessException){
+            RobotBase.isReal()
+        }
+
+
         private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
 
         private val simPeriodicRunnables: MutableList<() -> Unit> = mutableListOf()
@@ -48,6 +58,8 @@ public open class ChargerRobot(
         public var LOOP_PERIOD: Time = 0.02.seconds
             private set
 
+        private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
+        private val logReceiverQueueAlert = Alert.error(text = "Logging queue exceeded capacity, data will NOT be logged.")
 
     }
 
@@ -55,9 +67,6 @@ public open class ChargerRobot(
     private lateinit var autonomousCommand: Command
     private lateinit var testCommand: Command
 
-
-    private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
-    private val logReceiverQueueAlert = Alert.error(text = "Logging queue exceeded capacity, data will NOT be logged.")
 
 
     // Cancels a command; doing nothing if the command is not yet initialized.
@@ -72,8 +81,8 @@ public open class ChargerRobot(
      * initialization code.
      */
     override fun robotInit() {
-
         try{
+            burnManager = SparkMaxBurnManager(gitData.buildDate)
             LOOP_PERIOD = config.loopPeriod
 
             val logger = Logger.getInstance()
@@ -158,6 +167,7 @@ public open class ChargerRobot(
                 }
             }
         }catch(e: Exception){
+            println("Error has been caught in [robotInit].")
             config.onError(e)
             throw e
         }
@@ -188,6 +198,7 @@ public open class ChargerRobot(
                 logReceiverQueueAlert.active = receiverQueueFault
             }
         }catch(e: Exception){
+            println("Error has been caught in [robotPeriodic].")
             config.onError(e)
             throw e
         }
@@ -199,20 +210,20 @@ public open class ChargerRobot(
         try{
             robotContainer.disabledInit()
         }catch(e: Exception){
+            println("Error has been caught in [disabledInit].")
             config.onError(e)
             throw e
         }
-
-
     }
+
     override fun disabledPeriodic() {
         try{
             robotContainer.disabledPeriodic()
         }catch(e: Exception){
+            println("Error has been caught in [disabledPeriodic].")
             config.onError(e)
             throw e
         }
-
     }
 
     /** This autonomous runs the autonomous command selected by your RobotContainer class.  */
@@ -223,6 +234,7 @@ public open class ChargerRobot(
             autonomousCommand.schedule()
             robotContainer.autonomousInit()
         }catch(e: Exception){
+            println("Error has been caught in [autonomousInit].")
             config.onError(e)
             throw e
         }
@@ -234,11 +246,13 @@ public open class ChargerRobot(
         try{
             robotContainer.autonomousPeriodic()
         }catch(e: Exception){
+            println("Error has been caught in [autonomousPeriodic].")
             config.onError(e)
             throw e
         }
 
     }
+
     override fun teleopInit() {
         try{
             cancelCommand{autonomousCommand}
@@ -246,6 +260,7 @@ public open class ChargerRobot(
             
             robotContainer.teleopInit()
         }catch(e: Exception){
+            println("Error has been caught in [teleopInit].")
             config.onError(e)
             throw e
         }
@@ -256,10 +271,12 @@ public open class ChargerRobot(
         try{
             robotContainer.teleopPeriodic()
         }catch(e: Exception){
+            println("Error has been caught in [teleopPeriodic].")
             config.onError(e)
             throw e
         }
     }
+
     override fun testInit() {
         // Cancels all running commands at the start of test mode.
         try{
@@ -268,6 +285,7 @@ public open class ChargerRobot(
             robotContainer.testInit()
             testCommand.schedule()
         }catch(e: Exception){
+            println("Error has been caught in [testInit].")
             config.onError(e)
             throw e
         }
@@ -278,6 +296,7 @@ public open class ChargerRobot(
         try{
             robotContainer.testPeriodic()
         }catch(e: Exception){
+            println("Error has been caught in [testPeriodic].")
             config.onError(e)
             throw e
         }
@@ -288,6 +307,7 @@ public open class ChargerRobot(
         try{
             robotContainer.simulationInit()
         }catch(e: Exception){
+            println("Error has been caught in [simulationInit].")
             config.onError(e)
             throw e
         }
@@ -301,6 +321,7 @@ public open class ChargerRobot(
                 it()
             }
         }catch(e: Exception){
+            println("Error has been caught in [simulationPeriodic].")
             config.onError(e)
             throw e
         }

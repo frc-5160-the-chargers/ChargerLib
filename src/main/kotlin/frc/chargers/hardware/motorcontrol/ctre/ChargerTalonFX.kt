@@ -54,7 +54,12 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         TalonFXEncoderAdapter(this)
 
     final override fun configure(configuration: TalonFXConfiguration){
-        configurator.apply(configuration.toCTRETalonFXConfiguration())
+        var baseTalonFXConfig = CTRETalonFXConfiguration()
+        configurator.refresh(baseTalonFXConfig)
+        baseTalonFXConfig = baseTalonFXConfig.applyChanges(configuration)
+        configurator.apply(baseTalonFXConfig)
+
+
         configuration.apply{
             positionUpdateFrequency?.let{
                 position.setUpdateFrequency(it.inUnit(hertz))
@@ -180,6 +185,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
 
 
 
+
 /**
  * A data class representing all possible configuration parameters
  * of a ChargerTalonFX.
@@ -197,9 +203,6 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
  *
  * @see ChargerTalonFX
  */
-// blank config
-internal val bcfg = CTRETalonFXConfiguration()
-// Note to self: CustomParamConfigs might be able to be used by chargerlib, no idea how
 public data class TalonFXConfiguration(
     /*
     Important note: TalonFXConfiguration actually doesn't use null-by-default properties,
@@ -214,197 +217,174 @@ public data class TalonFXConfiguration(
 
 
     // audio configs
-    var beepOnBoot: Boolean = true,
+    var beepOnBoot: Boolean? = null,
 
     // closed loop general configs
 
     // Note: While this value is by default false in CTRE's configuration,
     // We want it to be true.
-    var closedLoopContinuousWrap: Boolean = false,
+    var closedLoopContinuousWrap: Boolean? = null,
 
     // Closed Loop Ramps Configs
-    var dutyCycleClosedLoopRampPeriod: Time = Time(0.0),
-    var torqueClosedLoopRampPeriod: Time = Time(0.0),
-    var voltageClosedLoopRampPeriod: Time = Time(0.0),
+    var dutyCycleClosedLoopRampPeriod: Time? = null,
+    var torqueClosedLoopRampPeriod: Time? = null,
+    var voltageClosedLoopRampPeriod: Time? = null,
 
     // Open loop ramp configs
-    var dutyCycleOpenLoopRampPeriod: Time = Time(0.0),
-    var torqueOpenLoopRampPeriod: Time = Time(0.0),
-    var voltageOpenLoopRampPeriod: Time = Time(0.0),
+    var dutyCycleOpenLoopRampPeriod: Time? = null,
+    var torqueOpenLoopRampPeriod: Time? = null,
+    var voltageOpenLoopRampPeriod: Time? = null,
 
     // Current Limit Configs
+    var statorCurrentLimitEnable: Boolean? = null,
+    var supplyCurrentLimitEnable: Boolean? = null,
     var statorCurrentLimit: Current? = null,
     var supplyCurrentLimit: Current? = null,
-    var supplyCurrentThreshold: Current = Current(0.0),
-    var supplyTimeThreshold: Time = Time(0.0),
+    var supplyCurrentThreshold: Current? = null,
+    var supplyTimeThreshold: Time? = null,
 
     // feedback configs
-    var feedbackRemoteSensorID: Int = 0,
-    var feedbackRotorOffset: Angle = Angle(0.0),
-    var feedbackSensorSource: FeedbackSensorSourceValue = bcfg.Feedback.FeedbackSensorSource,
-    var rotorToSensorRatio: Double = 1.0,
-    var sensorToMechanismRatio: Double = 1.0,
+    var feedbackRemoteSensorID: Int? = null,
+    var feedbackRotorOffset: Angle? = null,
+    var feedbackSensorSource: FeedbackSensorSourceValue? = null,
+    var rotorToSensorRatio: Double? = null,
+    var sensorToMechanismRatio: Double? = null,
 
     // Hardware Limit Switch Configs
-    var forwardLimitEnable: Boolean = false,
+    var forwardLimitEnable: Boolean? = null,
+    var forwardLimitAutosetPositionEnable: Boolean? = null,
     var forwardLimitAutosetPositionValue: Angle? = null,
-    var forwardLimitRemoteSensorID: Int = 0,
-    var forwardLimitSource: ForwardLimitSourceValue = bcfg.HardwareLimitSwitch.ForwardLimitSource,
-    var forwardLimitType: ForwardLimitTypeValue = bcfg.HardwareLimitSwitch.ForwardLimitType,
+    var forwardLimitRemoteSensorID: Int? = null,
+    var forwardLimitSource: ForwardLimitSourceValue? = null,
+    var forwardLimitType: ForwardLimitTypeValue? = null,
 
-    var reverseLimitEnable: Boolean = false,
+    var reverseLimitEnable: Boolean? = null,
+    var reverseLimitAutosetPositionEnable: Boolean? = null,
     var reverseLimitAutosetPositionValue: Angle? = null,
-    var reverseLimitRemoteSensorID: Int = 0,
-    var reverseLimitSource: ReverseLimitSourceValue = ReverseLimitSourceValue.LimitSwitchPin,
-    var reverseLimitType: ReverseLimitTypeValue = ReverseLimitTypeValue.NormallyOpen,
+    var reverseLimitRemoteSensorID: Int? = null,
+    var reverseLimitSource: ReverseLimitSourceValue? = null,
+    var reverseLimitType: ReverseLimitTypeValue? = null,
 
     // Motor Output Configs
 
-    var neutralMode: NeutralModeValue = NeutralModeValue.Brake,
-    var inverted: Boolean = false,
-    var dutyCycleNeutralDeadband: Double = 0.0,
-    var peakForwardDutyCycle: Double = 1.0,
-    var peakReverseDutyCycle: Double = -1.0,
+    var neutralMode: NeutralModeValue? = null,
+    var inverted: Boolean? = null,
+    var dutyCycleNeutralDeadband: Double? = null,
+    var peakForwardDutyCycle: Double? = null,
+    var peakReverseDutyCycle: Double? = null,
 
     // Software Limit Switch Configs
 
+    var forwardSoftLimitEnable: Boolean? = null,
+    var reverseSoftLimitEnable: Boolean? = null,
     var forwardSoftLimitThreshold: Angle? = null,
     var reverseSoftLimitThreshold: Angle? = null,
 
     // Torque Current Configs
-    var peakForwardTorqueCurrent: Current = 800.amps,
-    var peakReverseTorqueCurrent: Current = -800.amps,
-    var torqueNeutralDeadband: Current = Current(0.0),
+    var peakForwardTorqueCurrent: Current? = null,
+    var peakReverseTorqueCurrent: Current? = null,
+    var torqueNeutralDeadband: Current? = null,
 
     // Voltage Configs
 
-    var peakForwardVoltage: Voltage = 12.volts,
-    var peakReverseVoltage: Voltage = -12.volts,
-    var supplyVoltageTimeConstant: Time = Time(0.0),
+    var peakForwardVoltage: Voltage? = null,
+    var peakReverseVoltage: Voltage? = null,
+    var supplyVoltageTimeConstant: Time? = null,
 
     var positionUpdateFrequency: Frequency? = null,
     var velocityUpdateFrequency: Frequency? = null,
     var motorOutputUpdateFrequency: Frequency? = null,
     var currentUpdateFrequency: Frequency? = null
 
-): MotorConfiguration{
+): MotorConfiguration
 
-    public fun toCTRETalonFXConfiguration(): CTRETalonFXConfiguration{
-        val config = CTRETalonFXConfiguration()
-        config.Audio.BeepOnBoot = beepOnBoot
-
-        config.ClosedLoopGeneral.ContinuousWrap = closedLoopContinuousWrap
-
-        config.ClosedLoopRamps.apply{
-            DutyCycleClosedLoopRampPeriod = dutyCycleClosedLoopRampPeriod.inUnit(seconds)
-            TorqueClosedLoopRampPeriod = torqueClosedLoopRampPeriod.inUnit(seconds)
-            VoltageClosedLoopRampPeriod = voltageClosedLoopRampPeriod.inUnit(seconds)
-        }
-
-        config.CurrentLimits.apply{
-
-            if(statorCurrentLimit == null){
-                StatorCurrentLimitEnable = false
-            }else{
-                StatorCurrentLimitEnable = true
-                // In this specific scenario(as well as others),
-                // the "!!"(aka assert non-null call is perfectly safe.
-                StatorCurrentLimit = statorCurrentLimit!!.inUnit(amps)
-            }
-
-            if(supplyCurrentLimit == null){
-                SupplyCurrentLimitEnable = false
-            }else{
-                SupplyCurrentLimitEnable = true
-                SupplyCurrentLimit = supplyCurrentLimit!!.inUnit(amps)
-            }
-            SupplyCurrentThreshold = supplyCurrentThreshold.inUnit(amps)
-            SupplyTimeThreshold = supplyTimeThreshold.inUnit(seconds)
-        }
-
-        config.OpenLoopRamps.apply{
-            DutyCycleOpenLoopRampPeriod = dutyCycleOpenLoopRampPeriod.inUnit(seconds)
-            TorqueOpenLoopRampPeriod = torqueOpenLoopRampPeriod.inUnit(seconds)
-            VoltageOpenLoopRampPeriod = voltageOpenLoopRampPeriod.inUnit(seconds)
-        }
-
-        config.Feedback.apply{
-            FeedbackRemoteSensorID = feedbackRemoteSensorID
-            FeedbackRotorOffset = feedbackRotorOffset.inUnit(rotations)
-            FeedbackSensorSource = feedbackSensorSource
-            RotorToSensorRatio = rotorToSensorRatio
-            SensorToMechanismRatio = sensorToMechanismRatio
-        }
-
-        config.HardwareLimitSwitch.apply{
-            ForwardLimitEnable = forwardLimitEnable
-            if(forwardLimitAutosetPositionValue == null){
-                ForwardLimitAutosetPositionEnable = false
-            }else{
-                ForwardLimitAutosetPositionEnable = true
-                ForwardLimitAutosetPositionValue = forwardLimitAutosetPositionValue!!.inUnit(rotations)
-            }
-
-            ForwardLimitRemoteSensorID = forwardLimitRemoteSensorID
-            ForwardLimitSource = forwardLimitSource
-            ForwardLimitType = forwardLimitType
-
-
-            ReverseLimitEnable = reverseLimitEnable
-            if(reverseLimitAutosetPositionValue == null){
-                ReverseLimitAutosetPositionEnable = false
-            }else{
-                ReverseLimitAutosetPositionEnable = true
-                ReverseLimitAutosetPositionValue = reverseLimitAutosetPositionValue!!.inUnit(rotations)
-            }
-            ReverseLimitRemoteSensorID = reverseLimitRemoteSensorID
-            ReverseLimitSource = reverseLimitSource
-            ReverseLimitType = reverseLimitType
-        }
-
-
-        config.MotorOutput.apply{
-            Inverted = if(inverted){
-                InvertedValue.Clockwise_Positive
-            }else{
-                InvertedValue.CounterClockwise_Positive
-            }
-            NeutralMode = neutralMode
-            DutyCycleNeutralDeadband = dutyCycleNeutralDeadband
-            PeakForwardDutyCycle = peakForwardDutyCycle
-            PeakReverseDutyCycle = peakReverseDutyCycle
-        }
-
-        config.SoftwareLimitSwitch.apply{
-            if(forwardSoftLimitThreshold == null){
-                ForwardSoftLimitEnable = false
-            }else{
-                ForwardSoftLimitEnable = true
-                ForwardSoftLimitThreshold = forwardSoftLimitThreshold!!.inUnit(rotations)
-            }
-
-            if(reverseSoftLimitThreshold == null){
-                ReverseSoftLimitEnable = false
-            }else{
-                ReverseSoftLimitEnable = true
-                ReverseSoftLimitThreshold = reverseSoftLimitThreshold!!.inUnit(rotations)
-            }
-        }
-
-        config.TorqueCurrent.apply{
-            PeakForwardTorqueCurrent = peakForwardTorqueCurrent.inUnit(amps)
-            PeakReverseTorqueCurrent = peakReverseTorqueCurrent.inUnit(amps)
-            TorqueNeutralDeadband = torqueNeutralDeadband.inUnit(amps)
-        }
-        config.Voltage.apply{
-            PeakForwardVoltage = peakForwardVoltage.inUnit(volts)
-            PeakReverseVoltage = peakReverseVoltage.inUnit(volts)
-            SupplyVoltageTimeConstant = supplyVoltageTimeConstant.inUnit(seconds)
-        }
-
-        return config
+public fun CTRETalonFXConfiguration.applyChanges(chargerConfig: TalonFXConfiguration): CTRETalonFXConfiguration{
+    chargerConfig.beepOnBoot?.let{
+        Audio.BeepOnBoot = it
     }
+
+    chargerConfig.closedLoopContinuousWrap?.let{
+        ClosedLoopGeneral.ContinuousWrap = it
+    }
+
+    CurrentLimits.apply{
+        chargerConfig.statorCurrentLimitEnable?.let{ StatorCurrentLimitEnable = it }
+        chargerConfig.statorCurrentLimit?.let{ StatorCurrentLimit = it.inUnit(amps) }
+        chargerConfig.supplyCurrentLimit?.let{ SupplyCurrentLimit = it.inUnit(amps) }
+        chargerConfig.supplyCurrentLimitEnable?.let{ SupplyCurrentLimitEnable = it }
+        chargerConfig.supplyCurrentThreshold?.let{ SupplyCurrentThreshold = it.inUnit(amps) }
+        chargerConfig.supplyTimeThreshold?.let{ SupplyTimeThreshold = it.inUnit(seconds) }
+    }
+
+    ClosedLoopRamps.apply{
+        chargerConfig.dutyCycleClosedLoopRampPeriod?.let{ DutyCycleClosedLoopRampPeriod = it.inUnit(seconds) }
+        chargerConfig.torqueClosedLoopRampPeriod?.let{ TorqueClosedLoopRampPeriod = it.inUnit(seconds) }
+        chargerConfig.voltageClosedLoopRampPeriod?.let{ VoltageClosedLoopRampPeriod = it.inUnit(seconds) }
+    }
+    OpenLoopRamps.apply{
+        chargerConfig.dutyCycleOpenLoopRampPeriod?.let{ DutyCycleOpenLoopRampPeriod = it.inUnit(seconds) }
+        chargerConfig.torqueOpenLoopRampPeriod?.let{ TorqueOpenLoopRampPeriod = it.inUnit(seconds) }
+        chargerConfig.voltageOpenLoopRampPeriod?.let{ VoltageOpenLoopRampPeriod = it.inUnit(seconds) }
+    }
+
+    Feedback.apply{
+        chargerConfig.feedbackRemoteSensorID?.let{ FeedbackRemoteSensorID = it }
+        chargerConfig.feedbackRotorOffset?.let{ FeedbackRotorOffset = it.inUnit(rotations) }
+        chargerConfig.feedbackSensorSource?.let{ FeedbackSensorSource = it }
+        chargerConfig.rotorToSensorRatio?.let{ RotorToSensorRatio = it }
+        chargerConfig.sensorToMechanismRatio?.let{ SensorToMechanismRatio = it }
+    }
+    
+    HardwareLimitSwitch.apply{
+        chargerConfig.forwardLimitEnable?.let{ ForwardLimitEnable = it }
+        chargerConfig.forwardLimitAutosetPositionEnable?.let{ ForwardLimitAutosetPositionEnable = it }
+        chargerConfig.forwardLimitAutosetPositionValue?.let{ ForwardLimitAutosetPositionValue = it.inUnit(rotations) }
+        chargerConfig.forwardLimitRemoteSensorID?.let{ForwardLimitRemoteSensorID = it}
+        chargerConfig.forwardLimitSource?.let{ ForwardLimitSource = it }
+        chargerConfig.forwardLimitType?.let{ ForwardLimitType = it }
+
+
+        chargerConfig.reverseLimitEnable?.let{ ReverseLimitEnable = it }
+        chargerConfig.reverseLimitAutosetPositionEnable?.let{ ReverseLimitAutosetPositionEnable = it }
+        chargerConfig.reverseLimitAutosetPositionValue?.let{ ReverseLimitAutosetPositionValue = it.inUnit(rotations) }
+        chargerConfig.reverseLimitRemoteSensorID?.let{ReverseLimitRemoteSensorID = it}
+        chargerConfig.reverseLimitSource?.let{ ReverseLimitSource = it }
+        chargerConfig.reverseLimitType?.let{ ReverseLimitType = it }
+    }
+
+    MotorOutput.apply{
+        chargerConfig.inverted?.let{ Inverted = if (it) InvertedValue.Clockwise_Positive else InvertedValue.CounterClockwise_Positive }
+        chargerConfig.neutralMode?.let{ NeutralMode = it }
+        chargerConfig.dutyCycleNeutralDeadband?.let{ DutyCycleNeutralDeadband = it}
+        chargerConfig.peakForwardDutyCycle?.let{PeakForwardDutyCycle = it}
+        chargerConfig.peakReverseDutyCycle?.let{ PeakReverseDutyCycle = it }
+    }
+
+    SoftwareLimitSwitch.apply{
+        chargerConfig.forwardSoftLimitEnable?.let{ ForwardSoftLimitEnable = it }
+        chargerConfig.forwardSoftLimitThreshold?.let{ ForwardSoftLimitThreshold = it.inUnit(rotations) }
+        chargerConfig.reverseSoftLimitEnable?.let{ ReverseSoftLimitEnable = it }
+        chargerConfig.reverseSoftLimitThreshold?.let{ ReverseSoftLimitThreshold = it.inUnit(rotations) }
+    }
+
+    TorqueCurrent.apply{
+        chargerConfig.peakForwardTorqueCurrent?.let{ PeakForwardTorqueCurrent = it.inUnit(amps) }
+        chargerConfig.peakReverseTorqueCurrent?.let{ PeakReverseTorqueCurrent = it.inUnit(amps) }
+        chargerConfig.torqueNeutralDeadband?.let{ TorqueNeutralDeadband = it.inUnit(amps) }
+    }
+
+    Voltage.apply{
+        chargerConfig.peakForwardVoltage?.let{ PeakForwardVoltage = it.inUnit(volts) }
+        chargerConfig.peakReverseVoltage?.let{ PeakReverseVoltage = it.inUnit(volts) }
+        chargerConfig.supplyVoltageTimeConstant?.let{ SupplyVoltageTimeConstant = it.inUnit(seconds) }
+    }
+
+
+
+
+    return this
 }
+
 
 
 public var Slot0Configs.pidConstants: PIDConstants
