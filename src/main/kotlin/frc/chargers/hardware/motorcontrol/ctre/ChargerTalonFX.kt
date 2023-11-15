@@ -22,13 +22,27 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguratio
 
 
 
-// private const val TALON_FX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
-
-public inline fun falcon(canId: Int, canBus: String? = null, configure: TalonFXConfiguration.() -> Unit = {}): ChargerTalonFX =
+/**
+ * Creates an instance of a falcon motor, controlled by a TalonFX motor controller.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup,
+ * before configuration. This setting can be changed by setting factoryDefault = false.
+ */
+public inline fun falcon(
+    canId: Int,
+    canBus: String? = null,
+    factoryDefault: Boolean = true,
+    configure: TalonFXConfiguration.() -> Unit = {}
+): ChargerTalonFX =
     when {
         canBus != null -> ChargerTalonFX(canId, canBus)
         else -> ChargerTalonFX(canId)
     }.apply {
+        // factory defaults configs on startup,
+        if (factoryDefault){
+            configurator.apply(CTRETalonFXConfiguration())
+        }
+        // then configures the motor using a context function(configure).
         configure(TalonFXConfiguration().apply(configure))
     }
 
@@ -80,6 +94,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
                 statorCurrent.setUpdateFrequency(it.inUnit(hertz))
             }
         }
+        println("TalonFX has been configured.")
 
     }
 
@@ -192,28 +207,16 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
  *
  * Identical to CTRE's TalonFXConfiguration for Phoenix v6, except for a couple of changes:
  *
- * 1. All configs with an "Enable" counterpart now use kotlin's nullable types.
- *    For example, instead of having to set [StatorCurrentLimitEnable] to false,
- *    you just set [statorCurrentLimit] to null instead.
+ * 1. This configuration is designed to "apply" changes onto the existing configuration instead of overriding them.
+ *    Thus, a configuration with the value null actually means a configuration that is not modified
+ *    compared to the current one.
  *
- * 2. Configurations are no longer grouped into sub-configurations,
- *    as it isn't really necessary anymore with lambda-based configuration.
  *
- * 3. PID / Motion magic configuration is removed, and replaced with FeedbackMotorController functionality
+ * 2. PID / Motion magic configuration is removed, and replaced with FeedbackMotorController functionality.
  *
  * @see ChargerTalonFX
  */
 public data class TalonFXConfiguration(
-    /*
-    Important note: TalonFXConfiguration actually doesn't use null-by-default properties,
-    like SparkMaxConfiguration and TalonSRXConfiguration.
-
-    This is because the way CTRE motor controllers are configured, through phoenix v6,
-    is through another TalonFXConfiguration object.
-    Since changing the values of properties within an object is negligible performance-wise,
-    nullable types can be used for the various "enable" properties within the TalonFXConfiguration instead.
-
-     */
 
 
     // audio configs

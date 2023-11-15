@@ -34,30 +34,34 @@ public open class ChargerRobot(
     private val config: RobotConfig
 ): LoggedRobot(config.loopPeriod.inUnit(seconds)){
     public companion object{
-        private lateinit var burnManager: SparkMaxBurnManager
-
+        /**
+         * Determines if a SparkMax should burn it's flash or not.
+         */
         public fun shouldBurnSparkMax(): Boolean = try{
             burnManager.shouldBurn()
         }catch(e: UninitializedPropertyAccessException){
             RobotBase.isReal()
         }
 
-
-        private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
-
-        private val simPeriodicRunnables: MutableList<() -> Unit> = mutableListOf()
-
+        /**
+         * Adds a specific lambda to the robot's periodic loop.
+         *
+         * All functions added this way will run before the command scheduler runs.
+         */
         public fun addToPeriodicLoop(runnable: () -> Unit){
             periodicRunnables.add(runnable)
         }
 
-        public fun addToSimPeriodicLoop(runnable: () -> Unit){
-            simPeriodicRunnables.add(runnable)
-        }
-
+        /**
+         * The loop period of the current robot.
+         */
         public var LOOP_PERIOD: Time = 0.02.seconds
             private set
 
+
+
+        private lateinit var burnManager: SparkMaxBurnManager
+        private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
         private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
         private val logReceiverQueueAlert = Alert.error(text = "Logging queue exceeded capacity, data will NOT be logged.")
 
@@ -76,6 +80,7 @@ public open class ChargerRobot(
             command.cancel()
         }catch(_: UninitializedPropertyAccessException){}
     }
+
     /**
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
@@ -152,7 +157,7 @@ public open class ChargerRobot(
 
             robotContainer.robotInit()
 
-            // custom extension function in chargerlib
+
             CommandScheduler.getInstance().apply{
                 onCommandInitialize{
                     Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", true)
@@ -317,9 +322,6 @@ public open class ChargerRobot(
     override fun simulationPeriodic() {
         try{
             robotContainer.simulationPeriodic()
-            simPeriodicRunnables.forEach{
-                it()
-            }
         }catch(e: Exception){
             println("Error has been caught in [simulationPeriodic].")
             config.onError(e)

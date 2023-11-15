@@ -27,15 +27,24 @@ public class ModuleIOReal(
     override fun setDriveVoltage(driveV: Voltage) {
         // custom extension function
         driveMotor.setVoltage(driveV)
+        if (driveMotor.voltage - driveV > 2.volts){
+            println("turn motor voltage is kinda sus rn")
+        }
     }
 
     override fun setTurnVoltage(turnV: Voltage) {
         // custom extension function
         turnMotor.setVoltage(turnV)
+        if (turnMotor.voltage - turnV > 2.volts){
+            println("turn motor voltage is kinda sus rn")
+        }
     }
 
     override fun updateInputs(inputs: ModuleIO.Inputs) {
         inputs.apply{
+
+
+
             direction = turnEncoder.angularPosition
             turnSpeed = turnMotor.encoder.angularVelocity / turnGearRatio
             turnVoltage = turnMotor.voltage
@@ -69,7 +78,7 @@ public class ModuleIOSim(
             moduleDirection += 360.degrees
         }
 
-        while(moduleDirection >= 360.degrees){
+        while(moduleDirection >= 359.99.degrees){
             moduleDirection -= 360.degrees
         }
     }

@@ -25,18 +25,41 @@ import kotlin.math.roundToInt
 /**
  * A convenience function to create a [ChargerCANSparkMax]
  * specifically to drive a Neo motor.
+ *
+ * By default, this function will create a [ChargerCANSparkMax], factory default it, then configure it;
+ * If you do not want to factory default the motor, set factoryDefault = false.
  */
-public inline fun neoSparkMax(canBusId: Int, alternateEncoderConfiguration: AlternateEncoderConfiguration? = null, configure: SparkMaxConfiguration.() -> Unit = {}): ChargerCANSparkMax =
+public inline fun neoSparkMax(
+    canBusId: Int,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
+    factoryDefault: Boolean = false,
+    configure: SparkMaxConfiguration.() -> Unit = {}
+): ChargerCANSparkMax =
     ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushless, alternateEncoderConfiguration)
-        .also { it.configure(SparkMaxConfiguration().apply(configure)) }
+        .also {
+            if (factoryDefault){
+                it.restoreFactoryDefaults()
+            }
+            it.configure(SparkMaxConfiguration().apply(configure))
+        }
 
 /**
  * A convenience function to create a [ChargerCANSparkMax]
  * specifically to drive a brushed motor, such as a CIM.
  */
-public inline fun brushedSparkMax(canBusId: Int, alternateEncoderConfiguration: AlternateEncoderConfiguration? = null, configure: SparkMaxConfiguration.() -> Unit = {}): ChargerCANSparkMax =
+public inline fun brushedSparkMax(
+    canBusId: Int,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
+    factoryDefault: Boolean = false,
+    configure: SparkMaxConfiguration.() -> Unit = {}
+): ChargerCANSparkMax =
     ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushed, alternateEncoderConfiguration)
-        .also { it.configure(SparkMaxConfiguration().apply(configure)) }
+        .also {
+            if (factoryDefault) {
+                it.restoreFactoryDefaults()
+            }
+            it.configure(SparkMaxConfiguration().apply(configure))
+        }
 
 /**
  * Represents a Spark Max motor controller.
@@ -92,7 +115,6 @@ public open class ChargerCANSparkMax(
     }
 
     override fun configure(configuration: SparkMaxConfiguration) {
-        restoreFactoryDefaults()
         configuration.idleMode?.let(::setIdleMode)
         configuration.inverted?.let(::setInverted)
         configuration.voltageCompensationNominalVoltage?.let { enableVoltageCompensation(it.inUnit(volts)) }
@@ -136,6 +158,8 @@ public open class ChargerCANSparkMax(
             burnFlash()
             delay(200.milli.seconds)
         }
+
+        println("SparkMax has been configured.")
 
     }
 
