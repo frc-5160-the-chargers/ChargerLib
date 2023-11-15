@@ -14,7 +14,6 @@ import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_TURN_INERTIA
 import frc.chargers.utils.math.units.Inertia
 import frc.chargers.utils.math.units.times
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
-import frc.chargers.wpilibextensions.motorcontrol.voltage
 
 
 public class ModuleIOReal(
@@ -24,20 +23,18 @@ public class ModuleIOReal(
     private val driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     private val turnGearRatio: Double = DEFAULT_GEAR_RATIO
 ): ModuleIO {
+    private var driveAppliedVolts = 0.0.volts
+    private var turnAppliedVolts = 0.0.volts
     override fun setDriveVoltage(driveV: Voltage) {
         // custom extension function
         driveMotor.setVoltage(driveV)
-        if (driveMotor.voltage - driveV > 2.volts){
-            println("turn motor voltage is kinda sus rn")
-        }
+        driveAppliedVolts = driveV
     }
 
     override fun setTurnVoltage(turnV: Voltage) {
         // custom extension function
         turnMotor.setVoltage(turnV)
-        if (turnMotor.voltage - turnV > 2.volts){
-            println("turn motor voltage is kinda sus rn")
-        }
+        turnAppliedVolts = turnV
     }
 
     override fun updateInputs(inputs: ModuleIO.Inputs) {
@@ -47,10 +44,10 @@ public class ModuleIOReal(
 
             direction = turnEncoder.angularPosition
             turnSpeed = turnMotor.encoder.angularVelocity / turnGearRatio
-            turnVoltage = turnMotor.voltage
+            turnVoltage = turnAppliedVolts
 
             speed = driveMotor.encoder.angularVelocity / driveGearRatio
-            driveVoltage = driveMotor.voltage
+            driveVoltage = driveAppliedVolts
             distance = driveMotor.encoder.angularPosition / driveGearRatio
         }
     }

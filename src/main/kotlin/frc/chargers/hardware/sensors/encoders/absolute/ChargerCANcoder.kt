@@ -32,8 +32,12 @@ public class ChargerCANcoder(
         public inline operator fun invoke(
             deviceID: Int,
             canBus: String = "",
+            factoryDefault: Boolean = true,
             configure: CANcoderConfiguration.() -> Unit = {}
         ): ChargerCANcoder = ChargerCANcoder(deviceID,canBus).also{
+            if (factoryDefault){
+                it.configurator.apply(CTRECANcoderConfiguration())
+            }
             it.configure(CANcoderConfiguration().apply(configure))
             warnIfInSimulation("ChargerCANcoder(ID = $deviceID)")
         }
