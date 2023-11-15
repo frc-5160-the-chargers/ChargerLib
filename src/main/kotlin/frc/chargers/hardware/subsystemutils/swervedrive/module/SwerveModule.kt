@@ -119,15 +119,13 @@ public class SwerveModule(
     // Note: turnSpeed will only be set if the control scheme includes second order kinematics functionality.
     public fun setDirection(direction: Angle, secondOrderTurnSpeed: AngularVelocity = AngularVelocity(0.0)){
 
-        if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
-            io.setTurnVoltage(0.0.volts)
-            return
-        }
-
-
         when (controlScheme) {
             is SwerveControl.PIDSecondOrder -> {
                 turnController.target = direction.standardize()
+                if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
+                    io.setTurnVoltage(0.0.volts)
+                    return
+                }
                 io.setTurnVoltage(
                     turnController.calculateOutput() + controlScheme.turnFF.calculate(secondOrderTurnSpeed)
                 )
@@ -141,6 +139,10 @@ public class SwerveModule(
                     direction.standardize(),
                     secondOrderTurnSpeed
                 )
+                if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
+                    io.setTurnVoltage(0.0.volts)
+                    return
+                }
 
                 io.setTurnVoltage(turnController.calculateOutput())
 
@@ -154,6 +156,10 @@ public class SwerveModule(
 
                 // if PID control is first order, simply take the output of the controller.
                 turnController.target = direction.standardize()
+                if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
+                    io.setTurnVoltage(0.0.volts)
+                    return
+                }
                 io.setTurnVoltage(turnController.calculateOutput())
             }
         }
