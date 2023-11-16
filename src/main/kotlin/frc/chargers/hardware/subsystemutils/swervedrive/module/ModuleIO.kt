@@ -11,6 +11,7 @@ import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
 import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_DRIVE_INERTIA
 import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_TURN_INERTIA
+import frc.chargers.framework.ConsoleLogger
 import frc.chargers.utils.math.units.Inertia
 import frc.chargers.utils.math.units.times
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
@@ -26,6 +27,7 @@ public class ModuleIOReal(
     private var driveAppliedVolts = 0.0.volts
     private var turnAppliedVolts = 0.0.volts
     override fun setDriveVoltage(driveV: Voltage) {
+        ConsoleLogger.write("Drive voltage set.")
         // custom extension function
         driveMotor.setVoltage(driveV)
         driveAppliedVolts = driveV
@@ -33,6 +35,7 @@ public class ModuleIOReal(
 
     override fun setTurnVoltage(turnV: Voltage) {
         // custom extension function
+        ConsoleLogger.write("Turn voltage set.")
         turnMotor.setVoltage(turnV)
         turnAppliedVolts = turnV
     }
@@ -116,6 +119,7 @@ public class ModuleIOSim(
 
 
     override fun setDriveVoltage(driveV: Voltage) {
+        ConsoleLogger.write("Drive voltage set.")
         driveAppliedVoltage = driveV.coerceIn(-12.volts..12.volts)
         driveMotorSim.setInputVoltage(
             driveAppliedVoltage.inUnit(volts)
@@ -123,6 +127,7 @@ public class ModuleIOSim(
     }
 
     override fun setTurnVoltage(turnV: Voltage) {
+        ConsoleLogger.write("Turn voltage set.")
         turnAppliedVoltage = turnV.coerceIn(-12.volts..12.volts)
         turnMotorSim.setInputVoltage(
             turnAppliedVoltage.inUnit(volts)

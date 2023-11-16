@@ -234,7 +234,7 @@ public class SwerveModule(
         }else{
             io.setDriveVoltage(0.0.volts)
         }
-        io.setTurnVoltage(0.0.volts)
+        setDirection(inputs.direction)
     }
 
 

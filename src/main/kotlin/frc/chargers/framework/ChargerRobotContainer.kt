@@ -13,7 +13,7 @@ public abstract class ChargerRobotContainer {
     public abstract val autonomousCommand: Command
 
     // instantCommand is used over DoNothing in case the test command isn't canceled for some reason
-    public val testCommand: Command get() = InstantCommand{}
+    public open val testCommand: Command get() = InstantCommand{}
 
     /*
     Here are functions that replicate functionality of the Robot class.

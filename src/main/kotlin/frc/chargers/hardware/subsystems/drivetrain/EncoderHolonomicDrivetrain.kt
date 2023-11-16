@@ -26,6 +26,7 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
 import org.littletonrobotics.junction.Logger
+import kotlin.math.abs
 
 
 /**
@@ -353,7 +354,6 @@ public class EncoderHolonomicDrivetrain(
      * then calculating the output using the kinematics object.
      */
     public val maxRotationalVelocity: AngularVelocity = abs(kinematics.toChassisSpeeds(
-
         ModuleStateGroup(
             topLeftSpeed = constants.maxModuleSpeed,
             topRightSpeed = -constants.maxModuleSpeed,
@@ -378,11 +378,10 @@ public class EncoderHolonomicDrivetrain(
         return correctForDynamics(ChargerRobot.LOOP_PERIOD, if (controlScheme is SecondOrderControlScheme) 0.3 else 1.0)
     }
 
-    private val mostReliableHeading: Angle get() = gyro?.heading ?: heading
+    private val mostReliableHeading: Angle get() = gyro?.heading ?: this.heading
 
-    /*
-    Below are the open-loop drive functions.
-     */
+    /* Below are the open-loop drive functions.
+    */
 
     /**
      * A generic drive function; mainly used if driving at a specific velocity is not required, or during teleop.
@@ -411,10 +410,11 @@ public class EncoderHolonomicDrivetrain(
         powers: ChassisPowers,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
-        if (powers.xPower == 0.0 && powers.yPower == 0.0 && powers.rotationPower == 0.0){
+        if (abs(powers.xPower) <= 0.01 && abs(powers.yPower) <= 0.01 && abs(powers.rotationPower) <= 0.01){
             stop()
             return
         }
+
 
         val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
 
@@ -452,17 +452,7 @@ public class EncoderHolonomicDrivetrain(
 
 
 
-    /*
-    Here are the closed-loop drive functions.
-
-    In order to perform field-oriented drive, the context of a HeadingProvider must be given, I.E:
-
-    with(navX as HeadingProvider){
-        drivetrain.velocityDrive(ChassisSpeeds(0.1,0.0,0.0))
-    }
-
-    If no context is given, the drivetrain will be robot-oriented instead.
-     */
+    /* Here are the closed-loop drive functions. */
 
 
     /**
@@ -493,7 +483,7 @@ public class EncoderHolonomicDrivetrain(
         speeds: ChassisSpeeds,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
-        if (speeds.xVelocity == Velocity(0.0) && speeds.yVelocity == Velocity(0.0) && speeds.rotationSpeed == AngularVelocity(0.0)){
+        if (abs(speeds.xVelocity) <= Velocity(0.01) && abs(speeds.yVelocity) <= Velocity(0.01) && abs(speeds.rotationSpeed) <= AngularVelocity(0.01)){
             stop()
             return
         }

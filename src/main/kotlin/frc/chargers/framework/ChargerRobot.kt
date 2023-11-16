@@ -89,6 +89,8 @@ public open class ChargerRobot(
         try{
             burnManager = SparkMaxBurnManager(gitData.buildDate)
             LOOP_PERIOD = config.loopPeriod
+            // inits the ConsoleLogger
+            ConsoleLogger
 
             val logger = Logger.getInstance()
             setUseTiming(
