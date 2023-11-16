@@ -425,13 +425,13 @@ public class EncoderHolonomicDrivetrain(
         fieldRelative: Boolean = !isReal || gyro != null
     ){
 
-        /*
+
         if (powers.xPower == 0.0 && powers.yPower == 0.0 && powers.rotationPower == 0.0){
             stop()
             return
         }
 
-         */
+
 
 
         val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
