@@ -4,9 +4,9 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.controller.ProfiledPIDController
-import frc.chargers.commands.RunCommand
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.LinearMotorFF
+import frc.chargers.framework.ChargerRobot
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 
 
@@ -33,9 +33,7 @@ public class LinearProfiledPIDController(
 
     init{
         if(selfSustain){
-            RunCommand{
-                calculateOutput()
-            }.schedule()
+            ChargerRobot.addToPeriodicLoop(::calculateOutput)
         }
     }
 

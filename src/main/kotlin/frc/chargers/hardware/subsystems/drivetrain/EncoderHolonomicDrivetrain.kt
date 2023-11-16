@@ -8,7 +8,6 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.constants.drivetrain.SwerveConstants
-import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.gyroscopes.ZeroableHeadingProvider
@@ -386,8 +385,11 @@ public class EncoderHolonomicDrivetrain(
     Only corrects for dynamics if the robot is real; it is unoptimized in simulation.
      */
     private fun ChassisSpeeds.correctForDynamicsOptimized(): ChassisSpeeds{
+        /*
         if (!isReal) return this
         return correctForDynamics(ChargerRobot.LOOP_PERIOD, if (controlScheme is SecondOrderControlScheme) 0.3 else 1.0)
+         */
+        return this
     }
 
     private val mostReliableHeading: Angle get() = gyro?.heading ?: this.heading
@@ -422,6 +424,14 @@ public class EncoderHolonomicDrivetrain(
         powers: ChassisPowers,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
+
+        /*
+        if (powers.xPower == 0.0 && powers.yPower == 0.0 && powers.rotationPower == 0.0){
+            stop()
+            return
+        }
+
+         */
 
 
         val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)

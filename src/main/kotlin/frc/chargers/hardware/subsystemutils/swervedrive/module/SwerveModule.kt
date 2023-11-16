@@ -124,11 +124,11 @@ public class SwerveModule(
                 turnController.target = direction.standardize()
                 if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
                     io.setTurnVoltage(0.0.volts)
-                    return
+                }else{
+                    io.setTurnVoltage(
+                        turnController.calculateOutput() + controlScheme.turnFF.calculate(secondOrderTurnSpeed)
+                    )
                 }
-                io.setTurnVoltage(
-                    turnController.calculateOutput() + controlScheme.turnFF.calculate(secondOrderTurnSpeed)
-                )
                 Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
             }
 
@@ -141,10 +141,11 @@ public class SwerveModule(
                 )
                 if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
                     io.setTurnVoltage(0.0.volts)
-                    return
+                }else{
+                    io.setTurnVoltage(turnController.calculateOutput())
                 }
 
-                io.setTurnVoltage(turnController.calculateOutput())
+
 
                 Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
             }
@@ -158,9 +159,10 @@ public class SwerveModule(
                 turnController.target = direction.standardize()
                 if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
                     io.setTurnVoltage(0.0.volts)
-                    return
+                }else{
+                    io.setTurnVoltage(turnController.calculateOutput())
                 }
-                io.setTurnVoltage(turnController.calculateOutput())
+
             }
         }
 

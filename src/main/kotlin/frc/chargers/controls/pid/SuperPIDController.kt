@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.PIDController
 import frc.chargers.commands.RunCommand
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.Feedforward
+import frc.chargers.framework.ChargerRobot
 
 /**
  * Wraps WPILib's [PIDController], adding various improvements.
@@ -69,9 +70,7 @@ public class SuperPIDController(
 
     init{
         if(selfSustain){
-            RunCommand{
-                calculateOutput()
-            }.schedule()
+            ChargerRobot.addToPeriodicLoop(::calculateOutput)
         }
     }
 

@@ -4,9 +4,9 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.controller.ProfiledPIDController
-import frc.chargers.commands.RunCommand
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.framework.ChargerRobot
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
 
@@ -34,9 +34,7 @@ public class AngularProfiledPIDController(
 
     init{
         if(selfSustain){
-            RunCommand{
-                calculateOutput()
-            }.schedule()
+            ChargerRobot.addToPeriodicLoop(::calculateOutput)
         }
     }
 

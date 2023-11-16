@@ -29,6 +29,10 @@ public class ModuleIOReal(
     override fun setDriveVoltage(driveV: Voltage) {
         ConsoleLogger.write("Drive voltage set.")
         // custom extension function
+        if (driveV.siValue.isNaN() || driveV.siValue.isInfinite() ){
+            driveMotor.setVoltage(0.0.volts)
+            return
+        }
         driveMotor.setVoltage(driveV)
         driveAppliedVolts = driveV
     }
@@ -36,15 +40,16 @@ public class ModuleIOReal(
     override fun setTurnVoltage(turnV: Voltage) {
         // custom extension function
         ConsoleLogger.write("Turn voltage set.")
+        if (turnV.siValue.isNaN() || turnV.siValue.isInfinite() ){
+            turnMotor.setVoltage(0.0.volts)
+            return
+        }
         turnMotor.setVoltage(turnV)
         turnAppliedVolts = turnV
     }
 
     override fun updateInputs(inputs: ModuleIO.Inputs) {
         inputs.apply{
-
-
-
             direction = turnEncoder.angularPosition
             turnSpeed = turnMotor.encoder.angularVelocity / turnGearRatio
             turnVoltage = turnAppliedVolts

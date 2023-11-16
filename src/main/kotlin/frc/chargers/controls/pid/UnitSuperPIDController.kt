@@ -3,11 +3,9 @@ package frc.chargers.controls.pid
 import com.batterystaple.kmeasure.dimensions.*
 import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.math.controller.PIDController
-import frc.chargers.commands.RunCommand
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.Feedforward
-
-
+import frc.chargers.framework.ChargerRobot
 
 
 /**
@@ -65,9 +63,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
 
     init{
         if(selfSustain){
-            RunCommand{
-                calculateOutput()
-            }.schedule()
+            ChargerRobot.addToPeriodicLoop(::calculateOutput)
         }
     }
 
