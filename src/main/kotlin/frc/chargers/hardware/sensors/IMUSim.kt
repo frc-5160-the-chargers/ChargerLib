@@ -20,15 +20,19 @@ public class IMUSim(
     private val headingProviderImpl: HeadingProvider = HeadingProvider { Angle(0.0) },
     private val getChassisSpeeds: () -> ChassisSpeeds = { ChassisSpeeds(0.0,0.0,0.0) }
 ): IMU{
-    override fun reset() {
 
+    private var angleOffset = Angle(0.0)
+    override fun reset() {}
+
+    override fun zeroHeading(){
+        angleOffset = headingProviderImpl.heading
     }
 
     override val imuName: String = "Sim IMU"
     override val isConnected: Boolean = false
     override val altitude: Distance? = null
     override val gyroscope: ThreeAxisGyroscope = object: ThreeAxisGyroscope {
-        override val yaw: Angle get() = headingProviderImpl.heading
+        override val yaw: Angle get() = headingProviderImpl.heading - angleOffset
         override val pitch: Angle = Angle(0.0)
         override val roll: Angle = Angle(0.0)
 
@@ -49,6 +53,6 @@ public class IMUSim(
             get() = getChassisSpeeds().yVelocity
         override val zVelocity: Velocity = Velocity(0.0)
     }
-    override val heading: Angle get() = headingProviderImpl.heading
+    override val heading: Angle get() = headingProviderImpl.heading - angleOffset
 
 }

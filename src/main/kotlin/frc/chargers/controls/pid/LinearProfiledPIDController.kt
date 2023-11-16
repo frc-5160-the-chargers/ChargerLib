@@ -10,7 +10,10 @@ import frc.chargers.controls.feedforward.LinearMotorFF
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
 
 
-
+/**
+ * Creates a PID controller, coupled with motion profiling, which accepts a linear input.
+ * Wraps WPILib's [ProfiledPIDController], adding builtin units and feedforward support.
+ */
 public class LinearProfiledPIDController(
     pidConstants: PIDConstants,
     private val getInput: () -> Distance,
@@ -36,6 +39,12 @@ public class LinearProfiledPIDController(
         }
     }
 
+    public fun errorIfNotInContinuousInput(value: Distance){
+        if (continuousInputRange != null && value !in continuousInputRange){
+            error("getInput is not returning values within the continuous input range.")
+        }
+    }
+
 
     private val pidController = ProfiledPIDController(0.0, 0.0, 0.0,constraints.inUnit(meters,seconds))
         .apply {
@@ -54,6 +63,7 @@ public class LinearProfiledPIDController(
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
     public override fun calculateOutput(): Voltage {
+        errorIfNotInContinuousInput(getInput())
         val output = Voltage(pidController.calculate(getInput().inUnit(meters))) +
                 feedforward.calculate(pidController.setpoint.velocity.ofUnit(meters/seconds))
         return ensureInOutputRange(output)

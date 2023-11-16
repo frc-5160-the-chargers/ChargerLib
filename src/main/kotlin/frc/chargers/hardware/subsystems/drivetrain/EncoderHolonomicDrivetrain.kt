@@ -11,6 +11,7 @@ import frc.chargers.constants.drivetrain.SwerveConstants
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.gyroscopes.ZeroableHeadingProvider
 import frc.chargers.hardware.subsystems.posemonitors.SwervePoseMonitor
 import frc.chargers.hardware.subsystemutils.swervedrive.module.ModuleIOReal
 import frc.chargers.hardware.subsystemutils.swervedrive.module.ModuleIOSim
@@ -26,7 +27,6 @@ import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
 import org.littletonrobotics.junction.Logger
-import kotlin.math.abs
 
 
 /**
@@ -159,7 +159,16 @@ public class EncoderHolonomicDrivetrain(
     private val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
-): SubsystemBase(), HeadingProvider{
+): SubsystemBase(), ZeroableHeadingProvider{
+
+    init{
+        Thread{
+            Thread.sleep(1000)
+            if (gyro is ZeroableHeadingProvider){
+                gyro.zeroHeading()
+            }
+        }.start()
+    }
 
 
     /**
@@ -171,12 +180,15 @@ public class EncoderHolonomicDrivetrain(
     )
 
 
+    private var angleOffset = Angle(0.0)
     /**
      * Heading of the robot; from 0-360 degrees.
      */
-    override val heading: Angle get() = poseEstimator.heading
+    override val heading: Angle get() = poseEstimator.heading - angleOffset
 
-
+    override fun zeroHeading(){
+        angleOffset = heading
+    }
 
 
 
@@ -410,10 +422,6 @@ public class EncoderHolonomicDrivetrain(
         powers: ChassisPowers,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
-        if (abs(powers.xPower) <= 0.01 && abs(powers.yPower) <= 0.01 && abs(powers.rotationPower) <= 0.01){
-            stop()
-            return
-        }
 
 
         val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
@@ -483,10 +491,6 @@ public class EncoderHolonomicDrivetrain(
         speeds: ChassisSpeeds,
         fieldRelative: Boolean = !isReal || gyro != null
     ){
-        if (abs(speeds.xVelocity) <= Velocity(0.01) && abs(speeds.yVelocity) <= Velocity(0.01) && abs(speeds.rotationSpeed) <= AngularVelocity(0.01)){
-            stop()
-            return
-        }
 
         currentControlMode = ControlMode.CLOSED_LOOP
 

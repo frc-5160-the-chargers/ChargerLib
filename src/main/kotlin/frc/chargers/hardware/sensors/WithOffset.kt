@@ -1,6 +1,7 @@
 package frc.chargers.hardware.sensors
 
 import com.batterystaple.kmeasure.quantities.Angle
+import com.batterystaple.kmeasure.quantities.Time
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
@@ -16,9 +17,6 @@ public fun Encoder.withOffset(zeroOffset: Angle): Encoder = object: Encoder by t
         get() = this@withOffset.angularPosition - zeroOffset
 }
 
-public fun HeadingProvider.withOffset(zeroOffset: Angle): HeadingProvider = object: HeadingProvider {
-    override val heading: Angle
-        get() = this@withOffset.heading - zeroOffset
-}
+public fun HeadingProvider.withOffset(zeroOffset: Angle): HeadingProvider = HeadingProvider{heading - zeroOffset}
 
 

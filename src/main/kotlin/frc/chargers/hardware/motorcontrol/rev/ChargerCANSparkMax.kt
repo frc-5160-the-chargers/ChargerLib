@@ -153,11 +153,9 @@ public open class ChargerCANSparkMax(
         }
 
         // apparently, these delays are nessecary for configuration to be set right
-        if (ChargerRobot.shouldBurnSparkMax()){
-            delay(200.milli.seconds)
-            burnFlash()
-            delay(200.milli.seconds)
-        }
+        delay(200.milli.seconds)
+        burnFlash()
+        delay(200.milli.seconds)
 
         println("SparkMax has been configured.")
 

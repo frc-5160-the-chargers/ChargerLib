@@ -152,6 +152,11 @@ public class LoggedIMU(
     override val accelerometer: AccelerometerInputs = AccelerometerInputs()
     override val speedometer: SpeedometerInputs = SpeedometerInputs()
 
+
+    override fun zeroHeading(){
+        imu.zeroHeading()
+    }
+
     override fun reset() {
         imu.reset()
     }

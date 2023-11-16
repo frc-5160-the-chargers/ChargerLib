@@ -10,6 +10,11 @@ import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 /**
  * A Helper class that hold parameters needed to control an
  * [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
+ *
+ * @see SwerveControl.PIDFirstOrder
+ * @see SwerveControl.PIDSecondOrder
+ * @see SwerveControl.ProfiledPIDFirstOrder
+ * @see SwerveControl.ProfiledPIDSecondOrder
  */
 public sealed class SwerveControl(
     public val turnPIDConstants: PIDConstants,
@@ -19,10 +24,8 @@ public sealed class SwerveControl(
     public val staticVoltageStall: Boolean = false
 ) {
 
-
-
     /**
-     * Holds constants for pure PID control + first order kinematics/module state output for an
+     * Holds constants for pure PID control + first order kinematics for an
      * [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
      */
     public class PIDFirstOrder(
@@ -34,10 +37,10 @@ public sealed class SwerveControl(
     ): SwerveControl(turnPIDConstants, turnPrecision, drivePIDConstants, driveFF, staticVoltageStall)
 
     /**
-     * Holds constants for pure PID control + second order kinematics/module state output for an
+     * Holds constants for pure PID control + second order kinematics for an
      * [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
      *
-     * Here, a feedforward is nessecary to process the ModuleTurnSpeeds output of the second kinematics.
+     * Here, a feedforward is necessary to process the ModuleTurnSpeeds output of the second kinematics.
      */
     public class PIDSecondOrder(
         turnPIDConstants: PIDConstants,
@@ -51,7 +54,7 @@ public sealed class SwerveControl(
 
 
     /**
-     * Holds constants for Profiled PID control + first order kinematics/module state output for an
+     * Holds constants for Profiled PID control + first order kinematics for an
      * [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
      */
     public class ProfiledPIDFirstOrder(
@@ -66,7 +69,7 @@ public sealed class SwerveControl(
         ProfiledPIDControlScheme
 
     /**
-     * Holds constants for Profiled PID control + second order kinematics/module state output for an
+     * Holds constants for Profiled PID control + second order kinematics for an
      * [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
      */
     public class ProfiledPIDSecondOrder(
@@ -84,14 +87,14 @@ public sealed class SwerveControl(
 
 
 /**
- * Represents a generic object that holds a feedforward nessecary for processing ModuleTurnSpeeds.
+ * Represents a generic object that holds a feedforward necessary for processing ModuleTurnSpeeds.
  */
 public interface SecondOrderControlScheme{
     public val turnFF: AngularMotorFF
 }
 
 /**
- * Represents a generic object that holds the Trapezoidal constraints nessecary for Profiled PID control.
+ * Represents a generic object that holds the Trapezoidal constraints necessary for Profiled PID control.
  */
 public interface ProfiledPIDControlScheme{
     public val turnConstraints: AngularTrapezoidProfile.Constraints

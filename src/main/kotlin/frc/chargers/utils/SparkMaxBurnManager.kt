@@ -1,4 +1,7 @@
 package frc.chargers.utils
+// Copyright (c) 2023 FRC 6328
+// http://github.com/Mechanical-Advantage
+
 
 import edu.wpi.first.wpilibj.RobotBase
 import java.io.File

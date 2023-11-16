@@ -14,6 +14,10 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
         reset()
     }
 
+    override fun zeroHeading(){
+        ahrs.zeroYaw()
+    }
+
     override fun reset() {
         ahrs.reset()
     }

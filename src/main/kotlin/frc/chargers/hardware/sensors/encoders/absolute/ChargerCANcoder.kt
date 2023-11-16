@@ -27,7 +27,7 @@ public class ChargerCANcoder(
     canBus: String = ""
 ): CTRECANcoder(deviceID, canBus), ResettableTimestampedEncoder, EncoderConfigurable<CANcoderConfiguration> {
 
-    public var filterVelocity: Boolean = true
+    private var filterVelocity: Boolean = true
     public companion object{
         public inline operator fun invoke(
             deviceID: Int,
@@ -36,7 +36,7 @@ public class ChargerCANcoder(
             configure: CANcoderConfiguration.() -> Unit = {}
         ): ChargerCANcoder = ChargerCANcoder(deviceID,canBus).also{
             if (factoryDefault){
-                it.configurator.apply(CTRECANcoderConfiguration())
+                it.configurator.apply(CTRECANcoderConfiguration(),0.02)
             }
             it.configure(CANcoderConfiguration().apply(configure))
             warnIfInSimulation("ChargerCANcoder(ID = $deviceID)")
@@ -49,7 +49,6 @@ public class ChargerCANcoder(
         override val timestampedAngularPosition: Measurement<Angle>
             get(){
                 val statusSignal = absolutePosition
-                //println(statusSignal.value.ofUnit(degrees))
                 return Measurement(
                     value = statusSignal.value.ofUnit(rotations),
                     timestamp = statusSignal.timestamp.time.ofUnit(seconds),
@@ -78,6 +77,8 @@ public class ChargerCANcoder(
         }
 
         configuration.filterVelocity?.let{ filterVelocity = it }
+
+        println("CANcoder has been configured.")
 
     }
 

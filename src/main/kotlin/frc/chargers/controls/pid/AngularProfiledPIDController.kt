@@ -11,6 +11,10 @@ import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
 
 
+/**
+ * Creates a PID controller, coupled with motion profiling, which accepts an angular input.
+ * Wraps WPILib's [ProfiledPIDController], adding builtin units and feedforward support.
+ */
 public class AngularProfiledPIDController(
     pidConstants: PIDConstants,
     private val getInput: () -> Angle,
@@ -36,6 +40,12 @@ public class AngularProfiledPIDController(
         }
     }
 
+    public fun errorIfNotInContinuousInput(value: Angle){
+        if (continuousInputRange != null && value !in continuousInputRange){
+            error("getInput is not returning values within the continuous input range.")
+        }
+    }
+
 
     private val pidController = ProfiledPIDController(0.0, 0.0, 0.0,constraints.inUnit(radians,seconds))
         .apply {
@@ -54,6 +64,7 @@ public class AngularProfiledPIDController(
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
     public override fun calculateOutput(): Voltage {
+        errorIfNotInContinuousInput(getInput())
         val output = Voltage(pidController.calculate(getInput().inUnit(radians))) +
                 feedforward.calculate(pidController.setpoint.velocity.ofUnit(radians/seconds))
         return ensureInOutputRange(output)

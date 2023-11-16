@@ -45,6 +45,8 @@ public class SecondOrderSwerveKinematics {
         moduleLocations[3] = backRightLocation;
     }
 
+    private final SwerveModuleState[] swerveModuleStates = {new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState()};
+
     /**
      * Convert chassis speed to states of individual modules using second order kinematics
      *
@@ -53,6 +55,14 @@ public class SecondOrderSwerveKinematics {
      * @return SecondOrderSwerveModuleState[] array of the speed direction and turn speed of the swerve modules
      */
     public Output toSwerveModuleState(ChassisSpeeds desiredSpeed, Rotation2d robotHeading, boolean fieldRelative){
+        if (desiredSpeed.vxMetersPerSecond == 0.0 && desiredSpeed.vyMetersPerSecond == 0.0 && desiredSpeed.omegaRadiansPerSecond == 0.0){
+            for (int i = 0; i < swerveModuleStates.length; i++){
+                swerveModuleStates[i] = new SwerveModuleState(0.0,swerveModuleStates[i].angle);
+            }
+            return new Output(swerveModuleStates, new double[]{0.0, 0.0, 0.0, 0.0} );
+        }
+
+
         Matrix<N3, N1> firstOrderInputMatrix = new Matrix<>(N3(),N1());
         Matrix<N2, N3> firstOrderMatrix = new Matrix<>(N2(),N3());
         Matrix<N4, N1> secondOrderInputMatrix = new Matrix<>(N4(),N1());
@@ -71,7 +81,6 @@ public class SecondOrderSwerveKinematics {
         secondOrderMatrix.set(0,0,1);
         secondOrderMatrix.set(1,1,1);
 
-        SwerveModuleState[] swerveModuleStates = new SwerveModuleState[4];
         double[] moduleTurnSpeeds = new double[4];
 
         for (int i = 0; i < 4; i ++){

@@ -36,32 +36,30 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     public val getFFOutput: UnitSuperPIDController<I,O>.() -> Quantity<O> = {Quantity(0.0)}
 ) : FeedbackController<Quantity<I>, Quantity<O>> {
 
-    public companion object{
 
-        /**
-         * Fake Constructor of [UnitSuperPIDController]
-         * where the input of the feedforward and the input of the PID controller.
-         *
-         */
-        public operator fun <I: AnyDimension, O: AnyDimension> invoke(
-            pidConstants: PIDConstants,
-            getInput: () -> Quantity<I>,
-            outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
-            continuousInputRange: ClosedRange<Quantity<I>>? = null,
-            integralRange: ClosedRange<Quantity<O>> = outputRange,
-            target: Quantity<I>,
-            selfSustain: Boolean = false,
-            feedforward: Feedforward<Quantity<I>,Quantity<O>>
-        ): UnitSuperPIDController<I,O> = UnitSuperPIDController(
-            pidConstants,
-            getInput,
-            outputRange,
-            continuousInputRange,
-            integralRange,
-            target,
-            selfSustain
-        ) { feedforward.calculate(this.target) }
-    }
+    /**
+     * Creates a [UnitSuperPIDController]
+     * that uses the [Feedforward] interface.
+     */
+    public constructor(
+        pidConstants: PIDConstants,
+        getInput: () -> Quantity<I>,
+        outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
+        continuousInputRange: ClosedRange<Quantity<I>>? = null,
+        integralRange: ClosedRange<Quantity<O>> = outputRange,
+        target: Quantity<I>,
+        selfSustain: Boolean = false,
+        feedforward: Feedforward<Quantity<I>,Quantity<O>>
+    ): this(
+        pidConstants,
+        getInput,
+        outputRange,
+        continuousInputRange,
+        integralRange,
+        target,
+        selfSustain,
+        { feedforward.calculate(this.target) }
+    )
 
 
 
@@ -87,10 +85,17 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
             }
         }
 
+    public fun errorIfNotInContinuousInput(value: Quantity<I>){
+        if (continuousInputRange != null && value !in continuousInputRange){
+            error("getInput is not returning values within the continuous input range.")
+        }
+    }
+
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
     public override fun calculateOutput(): Quantity<O> {
+        errorIfNotInContinuousInput(getInput())
         val output = Quantity<O>(pidController.calculate(getInput().siValue)) + getFFOutput()
         return ensureInOutputRange(output)
     }
