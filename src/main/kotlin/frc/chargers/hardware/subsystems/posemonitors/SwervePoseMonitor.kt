@@ -17,8 +17,8 @@ import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.Measurement
-import frc.chargers.utils.PoseEstimator
-import frc.chargers.utils.PoseEstimator.TimestampedVisionUpdate
+import frc.chargers.external.utils.PoseEstimator
+import frc.chargers.external.utils.PoseEstimator.TimestampedVisionUpdate
 import frc.chargers.utils.math.units.rem
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp

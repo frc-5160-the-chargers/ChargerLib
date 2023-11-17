@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import frc.chargers.external.utils.HeadingCorrector
+import frc.chargers.external.utils.SecondOrderSwerveKinematics
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveDriveKinematics
@@ -23,10 +25,10 @@ internal class SecondOrderSwerveKinematicsTest {
     @Test
     fun `to swerve module state`() {
         val secondKinematics = SecondOrderSwerveKinematics(
-            Translation2d(0.5,0.5),
-            Translation2d(-0.5,0.5),
-            Translation2d(0.5,-0.5),
-            Translation2d(-0.5,-0.5)
+            Translation2d(0.5, 0.5),
+            Translation2d(-0.5, 0.5),
+            Translation2d(0.5, -0.5),
+            Translation2d(-0.5, -0.5)
         )
         val firstKinematics = SwerveDriveKinematics(
             Translation2d(0.5,0.5),
@@ -62,10 +64,10 @@ internal class SecondOrderSwerveKinematicsTest {
             UnitTranslation2d(-0.5.meters,-0.5.meters)
         )
         val secondKinematics = SecondOrderSwerveKinematics(
-            Translation2d(0.5,0.5),
-            Translation2d(-0.5,0.5),
-            Translation2d(0.5,-0.5),
-            Translation2d(-0.5,-0.5)
+            Translation2d(0.5, 0.5),
+            Translation2d(-0.5, 0.5),
+            Translation2d(0.5, -0.5),
+            Translation2d(-0.5, -0.5)
         )
 
         val headingCorrector = HeadingCorrector()

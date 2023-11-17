@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Subsystem
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
-import frc.chargers.utils.characterization.FeedForwardCharacterization
-import frc.chargers.utils.characterization.FeedForwardCharacterizationData
+import frc.chargers.external.utils.characterization.FeedForwardCharacterization
+import frc.chargers.external.utils.characterization.FeedForwardCharacterizationData
 import kotlin.internal.LowPriorityInOverloadResolution
 
 public fun characterizeFFAngular(
@@ -18,7 +18,8 @@ public fun characterizeFFAngular(
     getVelocity: () -> AngularVelocity,
     vararg requirements: Subsystem
 ): FeedForwardCharacterization = object: FeedForwardCharacterization(
-    forwards, FeedForwardCharacterizationData(name), { inputVolts -> setVoltage(inputVolts.ofUnit(volts))},
+    forwards,
+    FeedForwardCharacterizationData(name), { inputVolts -> setVoltage(inputVolts.ofUnit(volts))},
     {getVelocity().siValue},
     *requirements
 ){
@@ -43,7 +44,8 @@ public fun characterizeFFLinear(
     getVelocity: () -> Velocity,
     vararg requirements: Subsystem
 ): FeedForwardCharacterization = object: FeedForwardCharacterization(
-    forwards, FeedForwardCharacterizationData(name), { inputVolts -> setVoltage(inputVolts.ofUnit(volts))},
+    forwards,
+    FeedForwardCharacterizationData(name), { inputVolts -> setVoltage(inputVolts.ofUnit(volts))},
     {getVelocity().siValue},
     *requirements
 ){

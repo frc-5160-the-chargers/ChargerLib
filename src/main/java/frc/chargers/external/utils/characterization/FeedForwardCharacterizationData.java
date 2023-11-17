@@ -1,4 +1,4 @@
-package frc.chargers.utils.characterization;
+package frc.chargers.external.utils.characterization;
 
 import java.util.LinkedList;
 import java.util.List;
