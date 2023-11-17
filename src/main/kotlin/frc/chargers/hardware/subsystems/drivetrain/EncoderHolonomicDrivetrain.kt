@@ -29,7 +29,9 @@ import org.littletonrobotics.junction.Logger
 
 
 /**
- * A convenience function used to create an [EncoderHolonomicDrivetrain], with [ModuleIOSim] as the Module IO.
+ * A convenience function used to create an [EncoderHolonomicDrivetrain], with [ModuleIOSim] as the Module IO.t
+ *
+ * In other words, it creates an EncoderHolonomicDrivetrain that can be used in simulation.
  */
 public fun simEncoderHolonomicDrivetrain(
     turnGearbox: DCMotor,
@@ -71,6 +73,8 @@ public fun simEncoderHolonomicDrivetrain(
 /**
  * A Convenience function for creating an [EncoderHolonomicDrivetrain] with [ModuleIOReal] as the swerve module IO.
  *
+ * In other words, it creates a swerve drivetrain that can be used on the real robot.
+ *
  * It uses the [SwerveMotors] and [SwerveEncoders] classes
  * instead of defining individual swerve modules.
  *
@@ -84,8 +88,18 @@ public fun realEncoderHolonomicDrivetrain(
     constants: SwerveConstants,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
+    invertTurnMotors: Boolean = true,
     vararg poseSuppliers: RobotPoseSupplier,
 ): EncoderHolonomicDrivetrain {
+    if (invertTurnMotors){
+        turnMotors.apply{
+            topLeft.inverted = true
+            topRight.inverted = true
+            bottomLeft.inverted = true
+            bottomRight.inverted = true
+        }
+    }
+
     val topLeft = SwerveModule(
         "Drivetrain(Swerve)/TopLeftSwerveModule",
         ModuleIOReal(
@@ -190,6 +204,28 @@ public class EncoderHolonomicDrivetrain(
     }
 
 
+    /*
+    Summary of Kinematics usage:
+
+    the EncoderHolonomicDrivetrain has 4 different control modes,
+    represented using the SwerveControl class.
+
+    These control modes control the drivetrain in slightly different ways.
+
+    1. PIDFirstOrder uses basic PID control for swerve angle targeting,
+    in addition to basic(first order) kinematics.
+    The kinematics converts x speed, y speed, and rotation speed into target angles and speeds for each swerve module.
+
+    2. PIDSecondOrder uses basic PID control and second order kinematics.
+    Second order kinematics is similar to first order, except that it does some extra computation
+    to reduce drift of the robot when driving while turning.
+
+    3. ProfiledPIDFirstOrder uses Profiled PID control instead of regular PID control. Still in development right now.
+
+    4. ProfiledPIDSecondOrder uses profiled PID control and second order kinematics.
+
+     */
+
 
     /**
      * The kinematics class for the drivetrain.
@@ -264,7 +300,7 @@ public class EncoderHolonomicDrivetrain(
      * A getter/setter variable that can either fetch the current speeds
      * of each swerve module,
      * or can set the desired speeds of each swerve module.
-     * It is reccomended that the [swerveDrive] and [velocityDrive] functions are used instead.
+     * It is recommended that the [swerveDrive] and [velocityDrive] functions are used instead.
      */
     public var currentModuleStates: ModuleStateGroup
         get() = ModuleStateGroup(
@@ -307,7 +343,7 @@ public class EncoderHolonomicDrivetrain(
     /**
      * Gets the current module positions of each swerve module.
      * Returns a [ModulePositionGroup] object,
-     * a wrapper around 4 [SwerveModulePosition] objects with kmeasure support.
+     * a wrapper around 4 [SwerveModulePosition] objects with units support.
      */
     public val currentModulePositions: ModulePositionGroup
         get() = ModulePositionGroup(
@@ -426,16 +462,18 @@ public class EncoderHolonomicDrivetrain(
     ){
 
 
+        /*
         if (powers.xPower == 0.0 && powers.yPower == 0.0 && powers.rotationPower == 0.0){
             stop()
             return
         }
 
+         */
+
 
 
 
         val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
-
         currentControlMode = ControlMode.OPEN_LOOP
 
 
@@ -461,11 +499,6 @@ public class EncoderHolonomicDrivetrain(
 
         currentControlMode = ControlMode.CLOSED_LOOP
     }
-
-
-
-
-
 
 
 
@@ -525,15 +558,6 @@ public class EncoderHolonomicDrivetrain(
         }
 
     }
-
-
-
-
-
-
-
-
-
 
 
     /**

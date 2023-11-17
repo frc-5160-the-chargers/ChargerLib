@@ -40,7 +40,7 @@ public inline fun falcon(
     }.apply {
         // factory defaults configs on startup,
         if (factoryDefault){
-            configurator.apply(CTRETalonFXConfiguration())
+            configurator.apply(CTRETalonFXConfiguration(),0.050)
         }
         // then configures the motor using a context function(configure).
         configure(TalonFXConfiguration().apply(configure))
@@ -68,10 +68,10 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         TalonFXEncoderAdapter(this)
 
     final override fun configure(configuration: TalonFXConfiguration){
-        var baseTalonFXConfig = CTRETalonFXConfiguration()
+        val baseTalonFXConfig = CTRETalonFXConfiguration()
         configurator.refresh(baseTalonFXConfig)
-        baseTalonFXConfig = baseTalonFXConfig.applyChanges(configuration)
-        configurator.apply(baseTalonFXConfig)
+        baseTalonFXConfig.applyChanges(configuration)
+        configurator.apply(baseTalonFXConfig,0.050)
 
 
         configuration.apply{

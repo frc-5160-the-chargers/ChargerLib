@@ -11,7 +11,6 @@ import com.revrobotics.SparkMaxAlternateEncoder
 import com.revrobotics.SparkMaxPIDController
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.inputdevices.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
@@ -32,13 +31,14 @@ import kotlin.math.roundToInt
 public inline fun neoSparkMax(
     canBusId: Int,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
-    factoryDefault: Boolean = false,
+    factoryDefault: Boolean = true,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): ChargerCANSparkMax =
     ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushless, alternateEncoderConfiguration)
         .also {
             if (factoryDefault){
                 it.restoreFactoryDefaults()
+                println("SparkMax has been factory defaulted.")
             }
             it.configure(SparkMaxConfiguration().apply(configure))
         }
@@ -50,13 +50,14 @@ public inline fun neoSparkMax(
 public inline fun brushedSparkMax(
     canBusId: Int,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
-    factoryDefault: Boolean = false,
+    factoryDefault: Boolean = true,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): ChargerCANSparkMax =
     ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushed, alternateEncoderConfiguration)
         .also {
             if (factoryDefault) {
                 it.restoreFactoryDefaults()
+                println("SparkMax has been factory defaulted.")
             }
             it.configure(SparkMaxConfiguration().apply(configure))
         }
@@ -152,7 +153,7 @@ public open class ChargerCANSparkMax(
             setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
         }
 
-        // apparently, these delays are nessecary for configuration to be set right
+
         delay(200.milli.seconds)
         burnFlash()
         delay(200.milli.seconds)

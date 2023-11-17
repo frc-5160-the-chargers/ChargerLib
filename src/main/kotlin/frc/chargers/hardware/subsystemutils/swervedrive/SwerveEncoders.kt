@@ -1,10 +1,12 @@
 package frc.chargers.hardware.subsystemutils.swervedrive
 
+import com.batterystaple.kmeasure.quantities.Angle
 import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
 import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.absolute.CANcoderConfiguration
 import frc.chargers.hardware.sensors.encoders.absolute.ChargerCANcoder
+import frc.chargers.hardware.sensors.withOffset
 
 /**
  * Constructs an instance of [SwerveEncoders] with CTRE CANcoders.
@@ -47,6 +49,20 @@ public data class SwerveEncoders(
     val bottomLeft: PositionEncoder,
     val bottomRight: PositionEncoder
 ){
+
+    public fun withOffsets(
+        topLeftZero: Angle,
+        topRightZero: Angle,
+        bottomLeftZero: Angle,
+        bottomRightZero: Angle
+    ): SwerveEncoders = SwerveEncoders(
+        topLeft = topLeft.withOffset(topLeftZero),
+        topRight = topRight.withOffset(topRightZero),
+        bottomLeft = bottomLeft.withOffset(bottomLeftZero),
+        bottomRight = bottomRight.withOffset(bottomRightZero),
+    )
+
+
     public companion object{
         public operator fun <E, C: EncoderConfiguration> invoke(
             topLeft: E,

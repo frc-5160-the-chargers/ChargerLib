@@ -37,6 +37,7 @@ public class ChargerCANcoder(
         ): ChargerCANcoder = ChargerCANcoder(deviceID,canBus).also{
             if (factoryDefault){
                 it.configurator.apply(CTRECANcoderConfiguration(),0.02)
+                println("CANcoder has been factory defaulted.")
             }
             it.configure(CANcoderConfiguration().apply(configure))
             warnIfInSimulation("ChargerCANcoder(ID = $deviceID)")
@@ -64,7 +65,9 @@ public class ChargerCANcoder(
         val baseConfig = CTRECANcoderConfiguration()
         configurator.refresh(baseConfig)
 
-        configurator.apply(baseConfig.applyChanges(configuration))
+        baseConfig.applyChanges(configuration)
+        configurator.apply(baseConfig,0.050)
+
 
         configuration.positionUpdateFrequency?.let{
             position.setUpdateFrequency(it.inUnit(hertz))

@@ -166,6 +166,11 @@ public class SwerveModule(
             }
         }
 
+        Logger.getInstance().apply{
+            recordOutput("Drivetrain(Swerve)/$name/controllerErrorRad", turnController.error.inUnit(radians))
+            recordOutput("Drivetrain(Swerve)/$name/controllerOutputVolts", turnController.calculateOutput().inUnit(volts))
+        }
+
 
     }
 

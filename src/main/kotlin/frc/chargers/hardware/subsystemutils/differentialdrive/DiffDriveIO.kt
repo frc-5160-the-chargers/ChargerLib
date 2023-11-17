@@ -17,7 +17,6 @@ public class DiffDriveIOReal(
     init {
         leftMotors.inverted = false
         rightMotors.inverted = true
-
     }
     override fun setVoltages(left: Voltage, right: Voltage) {
         // uses custom extension functions; see wpilibextensions

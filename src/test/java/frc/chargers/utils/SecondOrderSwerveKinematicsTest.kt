@@ -39,7 +39,8 @@ internal class SecondOrderSwerveKinematicsTest {
         )
         val secondModuleStates = secondKinematics.toSwerveModuleState(
             ChassisSpeeds(0.0,0.0,1.0),
-            Rotation2d()
+            Rotation2d(),
+            false
         )
 
         for (i in 0..<4){
@@ -75,7 +76,8 @@ internal class SecondOrderSwerveKinematicsTest {
 
         val baseModuleStates = secondKinematics.toSwerveModuleState(
             headingCorrector.correctHeading(speeds,angle.asRotation2d()),
-            angle.asRotation2d()
+            angle.asRotation2d(),
+            false
         )
 
         for (i in 0..<4){
