@@ -19,7 +19,7 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.Measurement
 import frc.chargers.external.utils.PoseEstimator
 import frc.chargers.external.utils.PoseEstimator.TimestampedVisionUpdate
-import frc.chargers.utils.math.units.rem
+import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
@@ -78,7 +78,7 @@ public class SwervePoseMonitor(
     private fun updateInputs(calculatedHeading: Angle){
         headingInputs.apply{
             gyroUsed = gyro != null
-            gyroInputHeading = gyro?.heading ?: Angle(0.0)
+            gyroInputHeading = (gyro?.heading ?: Angle(0.0)).inputModulus(0.0.degrees..360.degrees)
             this.calculatedHeading = calculatedHeading
         }
     }
@@ -137,7 +137,7 @@ public class SwervePoseMonitor(
 
 
         val currentEstimatedHeading =
-            (headingInputs.calculatedHeading + twist.dtheta.ofUnit(radians)) % 360.degrees
+            (headingInputs.calculatedHeading + twist.dtheta.ofUnit(radians)).inputModulus(0.0.degrees..360.degrees)
 
         updateInputs(calculatedHeading = currentEstimatedHeading)
 

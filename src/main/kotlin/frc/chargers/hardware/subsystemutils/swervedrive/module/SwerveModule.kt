@@ -13,7 +13,7 @@ import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.subsystemutils.swervedrive.ProfiledPIDControlScheme
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.utils.Precision
-import frc.chargers.utils.math.units.rem
+import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import org.littletonrobotics.junction.Logger
@@ -31,11 +31,7 @@ public class SwerveModule(
     /**
      * A function that standardizes all angles within the 0 to 360 degree range.
      */
-    private fun Angle.standardize(): Angle = if (this < Angle(0.0)){
-        (this % 360.degrees) + 360.degrees
-    }else{
-        this % 360.degrees
-    }
+    private fun Angle.standardize(): Angle = inputModulus(0.0.degrees..360.degrees)
 
     public fun updateAndProcessInputs() {
         io.updateInputs(inputs)

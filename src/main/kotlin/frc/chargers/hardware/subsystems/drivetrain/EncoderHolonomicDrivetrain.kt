@@ -20,6 +20,7 @@ import frc.chargers.hardware.subsystemutils.swervedrive.SwerveEncoders
 import frc.chargers.hardware.subsystemutils.swervedrive.SecondOrderControlScheme
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.utils.a
+import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.geometry.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
@@ -428,7 +429,11 @@ public class EncoderHolonomicDrivetrain(
         return this
     }
 
-    private val mostReliableHeading: Angle get() = gyro?.heading ?: this.heading
+
+
+
+    private val mostReliableHeading: Angle
+        get() = (gyro?.heading ?: this.heading).inputModulus(0.0.degrees..360.degrees)
 
     /* Below are the open-loop drive functions.
     */
