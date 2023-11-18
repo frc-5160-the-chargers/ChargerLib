@@ -10,7 +10,7 @@ import com.batterystaple.kmeasure.units.meters
 
 import edu.wpi.first.networktables.NetworkTable
 import edu.wpi.first.networktables.NetworkTableInstance
-import frc.chargers.external.utils.LimelightHelpers
+import frc.chargerlibexternal.utils.LimelightHelpers
 
 import kotlin.math.tan
 import edu.wpi.first.wpilibj.DriverStation

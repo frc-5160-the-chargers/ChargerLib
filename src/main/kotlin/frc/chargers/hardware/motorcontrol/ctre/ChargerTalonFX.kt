@@ -57,7 +57,7 @@ public inline fun falcon(
     configure: TalonFXConfiguration.() -> Unit
 ): ChargerTalonFX =
     falcon(canId,canBus,factoryDefault).apply {
-        // configures the motor by "applying" a a context function(configure)
+        // configures the motor by "applying" a context function(configure)
         // onto a configuration object, then configuring using that config object.
         configure(TalonFXConfiguration().apply(configure))
     }
@@ -226,7 +226,8 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
  *
  * 1. This configuration is designed to "apply" changes onto the existing configuration instead of overriding them.
  *    Thus, a configuration with the value null actually means a configuration that is not modified
- *    compared to the current one.
+ *    compared to the current one. Since motors are factory-defaulted upon initialization using convenience functions,
+ *    it is not nessecary to have overriding configuration.
  *
  *
  * 2. PID / Motion magic configuration is removed, and replaced with FeedbackMotorController functionality.
@@ -398,9 +399,6 @@ public fun CTRETalonFXConfiguration.applyChanges(chargerConfig: TalonFXConfigura
         chargerConfig.peakReverseVoltage?.let{ PeakReverseVoltage = it.inUnit(volts) }
         chargerConfig.supplyVoltageTimeConstant?.let{ SupplyVoltageTimeConstant = it.inUnit(seconds) }
     }
-
-
-
 
     return this
 }

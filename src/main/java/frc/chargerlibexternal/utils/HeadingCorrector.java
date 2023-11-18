@@ -1,4 +1,4 @@
-package frc.chargers.external.utils;
+package frc.chargerlibexternal.utils;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
