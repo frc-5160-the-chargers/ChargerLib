@@ -24,7 +24,7 @@ public class SwerveDriveController(
          *
          * left Y goes straight, left X goes sideways, right X rotates,
          *
-         * leftTriggerAxis triggers turbo mode, rightTriggerAxis triggers precision mode.
+         * leftTriggerAxis triggers turbo mode, and rightTriggerAxis triggers precision mode.
          */
         public fun fromDefaultBindings(
             port: Int,
@@ -34,30 +34,46 @@ public class SwerveDriveController(
             precisionModeDividerRange: ClosedRange<Double> = 1.0..1.0,
             deadband: Double = 0.0,
             defaultAxisThreshold: Double = 0.5,
-            driveRateLimiter: ScalarRateLimiter? = null,
+            scaleDeadband: Boolean = false,
+            forwardRateLimiter: ScalarRateLimiter? = null,
+            strafeRateLimiter: ScalarRateLimiter? = null,
             rotationRateLimiter: ScalarRateLimiter? = null
-        ): SwerveDriveController =
-            SwerveDriveController(
-                port,
-                {
-                    driveRateLimiter?.calculate(leftY.withDeadband() * driveMultiplier)
-                        ?: (leftY.withDeadband() * driveMultiplier)
-                },
-                {
-                    driveRateLimiter?.calculate(leftX.withDeadband() * driveMultiplier)
-                        ?: (leftX.withDeadband() * driveMultiplier)
-                },
-                {
-                    rotationRateLimiter?.calculate(rightX.withDeadband() * rotationMultiplier)
-                        ?: (rightX.withDeadband() * rotationMultiplier)
-                },
-                {abs(rightTriggerAxis).mapTriggerValue(turboModeMultiplierRange)},
-                {
-                    1/abs(leftTriggerAxis).mapTriggerValue(precisionModeDividerRange)
-                },
-                deadband,
-                defaultAxisThreshold
-            )
+        ): SwerveDriveController = SwerveDriveController(
+            port,
+            getForwardsPower = {
+                val input = if (scaleDeadband) {
+                    leftY.withScaledDeadband() * driveMultiplier
+                } else {
+                    leftY.withDeadband() * driveMultiplier
+                }
+                // return value
+                forwardRateLimiter?.calculate(input) ?: input
+            },
+            getStrafePower = {
+                val input = if (scaleDeadband) {
+                    leftX.withScaledDeadband() * driveMultiplier
+                } else {
+                    leftX.withDeadband() * driveMultiplier
+                }
+                // return value
+                strafeRateLimiter?.calculate(input) ?: input
+            },
+            getRotationPower = {
+                val input = if (scaleDeadband) {
+                    rightX.withScaledDeadband() * rotationMultiplier
+                } else {
+                    rightX.withDeadband() * rotationMultiplier
+                }
+                // return value
+                rotationRateLimiter?.calculate(input) ?: input
+            },
+            getTurboPower = {abs(rightTriggerAxis).mapTriggerValue(turboModeMultiplierRange)},
+            getPrecisionPower = {
+                1/abs(leftTriggerAxis).mapTriggerValue(precisionModeDividerRange)
+            },
+            deadband,
+            defaultAxisThreshold
+        )
     }
     public val swerveOutput: ChassisPowers
         get(){

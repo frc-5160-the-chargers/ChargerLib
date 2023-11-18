@@ -11,7 +11,7 @@ import com.revrobotics.SparkMaxAlternateEncoder
 import com.revrobotics.SparkMaxPIDController
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.hardware.inputdevices.warnIfInSimulation
+import frc.chargers.utils.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
@@ -25,33 +25,34 @@ import kotlin.math.roundToInt
  * A convenience function to create a [ChargerCANSparkMax]
  * specifically to drive a Neo motor.
  *
- * By default, this function will create a [ChargerCANSparkMax], factory default it, then configure it;
- * If you do not want to factory default the motor, set factoryDefault = false.
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup.
+ * This setting can be changed by setting factoryDefault = false.
  */
-public inline fun neoSparkMax(
+public fun neoSparkMax(
     canBusId: Int,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
     factoryDefault: Boolean = true,
-    configure: SparkMaxConfiguration.() -> Unit = {}
 ): ChargerCANSparkMax =
     ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushless, alternateEncoderConfiguration)
         .also {
-            if (factoryDefault){
+            if (factoryDefault) {
                 it.restoreFactoryDefaults()
                 println("SparkMax has been factory defaulted.")
             }
-            it.configure(SparkMaxConfiguration().apply(configure))
         }
+
 
 /**
  * A convenience function to create a [ChargerCANSparkMax]
  * specifically to drive a brushed motor, such as a CIM.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup.
+ * This setting can be changed by setting factoryDefault = false.
  */
-public inline fun brushedSparkMax(
+public fun brushedSparkMax(
     canBusId: Int,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
     factoryDefault: Boolean = true,
-    configure: SparkMaxConfiguration.() -> Unit = {}
 ): ChargerCANSparkMax =
     ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushed, alternateEncoderConfiguration)
         .also {
@@ -59,6 +60,49 @@ public inline fun brushedSparkMax(
                 it.restoreFactoryDefaults()
                 println("SparkMax has been factory defaulted.")
             }
+        }
+
+
+
+/**
+ * A convenience function to create a [ChargerCANSparkMax]
+ * specifically to drive a Neo motor.
+ *
+ * This motor supports inline configuration using the [configure] lambda function,
+ * which has the context of a [SparkMaxConfiguration] object.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup,
+ * before configuration. This setting can be changed by setting factoryDefault = false.
+ */
+public inline fun neoSparkMax(
+    canBusId: Int,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
+    factoryDefault: Boolean = true,
+    configure: SparkMaxConfiguration.() -> Unit
+): ChargerCANSparkMax =
+    neoSparkMax(canBusId, alternateEncoderConfiguration, factoryDefault)
+        .also {
+            it.configure(SparkMaxConfiguration().apply(configure))
+        }
+
+/**
+ * A convenience function to create a [ChargerCANSparkMax]
+ * specifically to drive a brushed motor, such as a CIM.
+ *
+ * This motor supports inline configuration using the [configure] lambda function,
+ * which has the context of a [SparkMaxConfiguration] object.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup,
+ * before configuration. This setting can be changed by setting factoryDefault = false.
+ */
+public inline fun brushedSparkMax(
+    canBusId: Int,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
+    factoryDefault: Boolean = true,
+    configure: SparkMaxConfiguration.() -> Unit
+): ChargerCANSparkMax =
+    brushedSparkMax(canBusId, alternateEncoderConfiguration, factoryDefault)
+        .also {
             it.configure(SparkMaxConfiguration().apply(configure))
         }
 

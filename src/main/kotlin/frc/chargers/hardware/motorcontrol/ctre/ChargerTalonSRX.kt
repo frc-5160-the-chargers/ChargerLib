@@ -6,7 +6,7 @@ import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
 import com.ctre.phoenix.sensors.CANCoder
-import frc.chargers.hardware.inputdevices.warnIfInSimulation
+import frc.chargers.utils.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
@@ -22,24 +22,42 @@ public typealias SlotIndex = Int
 public typealias CustomParameterIndex = Int
 public typealias CustomParameterValue = Int
 
+/**
+ * Represents a TalonSRX powering a redline/ CIM motor.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup.
+ * This setting can be changed by setting factoryDefault = false.
+ */
+public fun redlineSRX(
+    deviceNumber: Int,
+    encoderTicksPerRotation: Int = 1024,
+    factoryDefault: Boolean = true
+): ChargerTalonSRX = ChargerTalonSRX(deviceNumber, encoderTicksPerRotation).also {
+    if (factoryDefault) {
+        it.configFactoryDefault()
+        println("TalonSRX has been factory defaulted.")
+    }
+}
+
 
 /**
  * Represents a TalonSRX powering a redline/ CIM motor.
+ *
+ * This function supports inline configuration using the configure lambda function,
+ * which has the context of a [TalonSRXConfiguration].
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup,
+ * before configuration. This setting can be changed by setting factoryDefault = false.
  */
 public inline fun redlineSRX(
     deviceNumber: Int,
     encoderTicksPerRotation: Int = 1024,
     factoryDefault: Boolean = true,
     configure: TalonSRXConfiguration.() -> Unit
-): ChargerTalonSRX = ChargerTalonSRX(
-    deviceNumber,
-    encoderTicksPerRotation
-).also{
-    if (factoryDefault){
-        it.configFactoryDefault()
+): ChargerTalonSRX =
+    redlineSRX(deviceNumber,encoderTicksPerRotation, factoryDefault).also{
+        it.configure(TalonSRXConfiguration().apply(configure))
     }
-    it.configure(TalonSRXConfiguration().apply(configure))
-}
 
 /**
  * Represents a TalonSRX motor controller.

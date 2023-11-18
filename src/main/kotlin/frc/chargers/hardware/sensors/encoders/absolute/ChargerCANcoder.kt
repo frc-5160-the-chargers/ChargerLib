@@ -8,7 +8,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration as CTRECANcoderConfigurat
 import com.ctre.phoenix6.hardware.CANcoder as CTRECANcoder
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
-import frc.chargers.hardware.inputdevices.warnIfInSimulation
+import frc.chargers.utils.warnIfInSimulation
 import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
 import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
 import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
@@ -23,24 +23,28 @@ import frc.chargers.utils.Measurement
  * @see CANcoderConfiguration
  */
 public class ChargerCANcoder(
-    deviceID: Int,
-    canBus: String = ""
-): CTRECANcoder(deviceID, canBus), ResettableTimestampedEncoder, EncoderConfigurable<CANcoderConfiguration> {
+    deviceId: Int,
+    canBus: String = "",
+    factoryDefault: Boolean = true
+): CTRECANcoder(deviceId, canBus), ResettableTimestampedEncoder, EncoderConfigurable<CANcoderConfiguration> {
 
-    private var filterVelocity: Boolean = true
+    init{
+        if (factoryDefault){
+            configurator.apply(CTRECANcoderConfiguration(),0.02)
+            println("CANcoder has been factory defaulted.")
+        }
+        warnIfInSimulation("ChargerCANcoder(ID = $deviceId)")
+    }
+
+
     public companion object{
         public inline operator fun invoke(
-            deviceID: Int,
+            deviceId: Int,
             canBus: String = "",
             factoryDefault: Boolean = true,
-            configure: CANcoderConfiguration.() -> Unit = {}
-        ): ChargerCANcoder = ChargerCANcoder(deviceID,canBus).also{
-            if (factoryDefault){
-                it.configurator.apply(CTRECANcoderConfiguration(),0.02)
-                println("CANcoder has been factory defaulted.")
-            }
+            configure: CANcoderConfiguration.() -> Unit
+        ): ChargerCANcoder = ChargerCANcoder(deviceId,canBus,factoryDefault).also{
             it.configure(CANcoderConfiguration().apply(configure))
-            warnIfInSimulation("ChargerCANcoder(ID = $deviceID)")
         }
     }
 
@@ -85,6 +89,7 @@ public class ChargerCANcoder(
 
     }
 
+    private var filterVelocity: Boolean = true
     override fun setZero(newZero: Angle){
         setPosition(newZero.inUnit(rotations))
     }

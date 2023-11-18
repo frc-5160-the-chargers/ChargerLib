@@ -3,6 +3,7 @@ package frc.chargers.hardware.inputdevices
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.units.degrees
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.event.EventLoop
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -35,8 +36,13 @@ public open class ChargerController(
     public val defaultAxisThreshold: Double = 0.5
 ): CommandXboxController(port) {
 
-     public fun TriggerValue.withDeadband(): Double =
+    public fun TriggerValue.withDeadband(): Double =
         if (abs(this) <= deadband) { 0.0 } else { this }
+
+    public fun TriggerValue.withScaledDeadband(): Double =
+        MathUtil.applyDeadband(this,deadband)
+
+
 
     public fun TriggerValue.mapTriggerValue(to: ClosedRange<Double>): Double =
         mapBetweenRanges(0.0..1.0, to)

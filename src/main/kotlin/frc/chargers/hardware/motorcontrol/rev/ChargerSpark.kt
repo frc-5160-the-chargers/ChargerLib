@@ -1,7 +1,7 @@
 package frc.chargers.hardware.motorcontrol.rev
 
 import edu.wpi.first.wpilibj.motorcontrol.Spark
-import frc.chargers.hardware.inputdevices.warnIfInSimulation
+import frc.chargers.utils.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
 

@@ -1,4 +1,4 @@
-package frc.chargers.hardware.inputdevices
+package frc.chargers.utils
 
 import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.wpilibextensions.Alert

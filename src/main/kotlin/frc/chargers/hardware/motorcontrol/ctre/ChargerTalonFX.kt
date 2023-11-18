@@ -11,7 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.*
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.hardware.inputdevices.warnIfInSimulation
+import frc.chargers.utils.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.motorcontrol.MotorConfigurable
 import frc.chargers.hardware.motorcontrol.MotorConfiguration
@@ -21,9 +21,31 @@ import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
 
+/**
+ * Creates an instance of a falcon motor, controlled by a TalonFX motor controller.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup.
+ * This setting can be changed by setting factoryDefault = false.
+ */
+public fun falcon(
+    canId: Int,
+    canBus: String? = null,
+    factoryDefault: Boolean = true
+): ChargerTalonFX = when {
+    canBus != null -> ChargerTalonFX(canId, canBus)
+    else -> ChargerTalonFX(canId)
+}.apply {
+    // factory defaults configs on startup is factoryDefault = true
+    if (factoryDefault) {
+        configurator.apply(CTRETalonFXConfiguration(), 0.02)
+    }
+}
+
 
 /**
  * Creates an instance of a falcon motor, controlled by a TalonFX motor controller.
+ * This function supports inline configuration using the configure lambda function,
+ * which has the context of a [TalonFXConfiguration].
  *
  * You do not need to manually factory default this motor, as it is factory defaulted on startup,
  * before configuration. This setting can be changed by setting factoryDefault = false.
@@ -32,19 +54,14 @@ public inline fun falcon(
     canId: Int,
     canBus: String? = null,
     factoryDefault: Boolean = true,
-    configure: TalonFXConfiguration.() -> Unit = {}
+    configure: TalonFXConfiguration.() -> Unit
 ): ChargerTalonFX =
-    when {
-        canBus != null -> ChargerTalonFX(canId, canBus)
-        else -> ChargerTalonFX(canId)
-    }.apply {
-        // factory defaults configs on startup,
-        if (factoryDefault){
-            configurator.apply(CTRETalonFXConfiguration(),0.050)
-        }
-        // then configures the motor using a context function(configure).
+    falcon(canId,canBus,factoryDefault).apply {
+        // configures the motor by "applying" a a context function(configure)
+        // onto a configuration object, then configuring using that config object.
         configure(TalonFXConfiguration().apply(configure))
     }
+
 
 /**
  * Represents a TalonFX motor controller.
