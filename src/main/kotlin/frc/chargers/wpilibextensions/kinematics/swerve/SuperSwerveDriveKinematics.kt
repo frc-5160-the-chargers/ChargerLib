@@ -1,7 +1,6 @@
 package frc.chargers.wpilibextensions.kinematics.swerve
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
@@ -52,11 +51,10 @@ public class SuperSwerveDriveKinematics(
      * @see SecondOrderSwerveKinematics
      */
     public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle, fieldRelative: Boolean = true): SecondOrderModuleStateGroup{
-        val standardizedHeading = if (heading < 0.degrees) heading + 360.degrees else heading
 
-        val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,standardizedHeading.asRotation2d())
+        val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,heading.asRotation2d())
 
-        val output = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,standardizedHeading.asRotation2d(), fieldRelative)
+        val output = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,heading.asRotation2d(), fieldRelative)
         val states = output.moduleStates
 
         // lolll.... 4481's second order kinematics is returning NaN for turn speeds...

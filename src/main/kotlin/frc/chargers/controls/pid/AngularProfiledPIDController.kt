@@ -80,7 +80,6 @@ public class AngularProfiledPIDController(
         get() = Quantity(pidController.goal.position)
         set(target) {
             if (target.siValue != pidController.goal.position) {
-                pidController.reset(getInput().inUnit(radians))
                 pidController.goal = AngularTrapezoidProfile.State(target,AngularVelocity(0.0)).inUnit(radians,seconds)
             }
         }
@@ -92,7 +91,6 @@ public class AngularProfiledPIDController(
         get() = pidController.goal.ofUnit(radians,seconds)
         set(target){
             if (target != pidController.goal.ofUnit(radians,seconds)){
-                pidController.reset(getInput().inUnit(radians))
                 pidController.goal = target.inUnit(radians,seconds)
             }
         }
@@ -107,7 +105,6 @@ public class AngularProfiledPIDController(
         get() = pidController.constants
         set(pidConstants) {
             if (pidConstants != pidController.constants) {
-                pidController.reset(getInput().inUnit(radians))
                 pidController.constants = pidConstants
             }
         }

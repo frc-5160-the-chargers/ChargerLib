@@ -31,7 +31,7 @@ public class SwerveModule(
     /**
      * A function that standardizes all angles within the 0 to 360 degree range.
      */
-    private fun Angle.standardize(): Angle = inputModulus(0.0.degrees..360.degrees)
+    private fun Angle.standardize(): Angle = this.inputModulus(0.0.degrees..360.degrees)
 
     public fun updateAndProcessInputs() {
         io.updateInputs(inputs)
@@ -119,13 +119,14 @@ public class SwerveModule(
             is SwerveControl.PIDSecondOrder -> {
                 turnController.target = direction.standardize()
                 if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
-                    io.setTurnVoltage(0.0.volts)
+                    io.setTurnVoltage(controlScheme.turnFF.calculate(secondOrderTurnSpeed))
                 }else{
                     io.setTurnVoltage(
                         turnController.calculateOutput() + controlScheme.turnFF.calculate(secondOrderTurnSpeed)
                     )
                 }
                 Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
+                Logger.getInstance().recordOutput("$name/SecondOrderTurnVoltageVolts", controlScheme.turnFF.calculate(secondOrderTurnSpeed).inUnit(volts))
             }
 
             is SwerveControl.ProfiledPIDSecondOrder -> {
@@ -136,14 +137,13 @@ public class SwerveModule(
                     secondOrderTurnSpeed
                 )
                 if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
-                    io.setTurnVoltage(0.0.volts)
+                    io.setTurnVoltage(controlScheme.turnFF.calculate(secondOrderTurnSpeed))
                 }else{
                     io.setTurnVoltage(turnController.calculateOutput())
                 }
 
-
-
                 Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
+                Logger.getInstance().recordOutput("$name/SecondOrderTurnVoltageVolts", controlScheme.turnFF.calculate(secondOrderTurnSpeed).inUnit(volts))
             }
 
             else -> {

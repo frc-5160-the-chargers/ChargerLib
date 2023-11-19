@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior
 import frc.chargers.utils.MappableContext
 import frc.chargers.utils.a
 import org.littletonrobotics.junction.Logger
+import kotlin.internal.LowPriorityInOverloadResolution
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -69,6 +70,7 @@ public class CommandBuilder {
     /**
      * Runs the function block when the [buildCommand] is finished.
      */
+    @LowPriorityInOverloadResolution
     public inline fun onEnd(crossinline run: () -> Unit){
         endBehavior = { run() }
     }

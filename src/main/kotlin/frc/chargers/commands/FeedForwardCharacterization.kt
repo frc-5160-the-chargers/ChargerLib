@@ -9,7 +9,6 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargerlibexternal.utils.characterization.FeedForwardCharacterization
 import frc.chargerlibexternal.utils.characterization.FeedForwardCharacterizationData
-import kotlin.internal.LowPriorityInOverloadResolution
 
 public fun characterizeFFAngular(
     name: String,
@@ -109,7 +108,7 @@ public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements
             +characterizeFFAngular(
                 "TOP LEFT turn motor data",
                 true,
-                {topLeft.io.setTurnVoltage(it)},
+                {topLeft.io.setTurnVoltage(it); println(it)},
                 {topLeft.currentTurningVelocity}
             )
 
@@ -136,6 +135,27 @@ public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements
         }
     }.withExtraRequirements(this@characterizeTurnMotors, *requirements)
 
+
+public fun EncoderHolonomicDrivetrain.driveTurnMotors(): Command = buildCommand{
+    runParallelUntilAllFinish{
+        loopForever{
+            topLeft.io.setTurnVoltage(2.0.volts)
+        }
+
+        loopForever{
+            topRight.io.setTurnVoltage(2.0.volts)
+        }
+
+        loopForever{
+            bottomLeft.io.setTurnVoltage(2.0.volts)
+        }
+
+        loopForever{
+            bottomRight.io.setTurnVoltage(2.0.volts)
+        }
+
+    }
+}
 
 
 public fun EncoderDifferentialDrivetrain.characterize(
@@ -167,7 +187,7 @@ public fun EncoderDifferentialDrivetrain.characterize(
     }
 
 
-
+/*
 
 context(CommandBuilder)
 @LowPriorityInOverloadResolution
@@ -186,3 +206,5 @@ public fun EncoderHolonomicDrivetrain.characterizeDriveMotors(
     forwards: Boolean = true, vararg requirements: Subsystem
 ): Command = characterizeDriveMotors(forwards,*requirements).also(commands::add)
 
+
+ */

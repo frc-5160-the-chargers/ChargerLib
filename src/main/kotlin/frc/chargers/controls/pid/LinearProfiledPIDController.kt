@@ -7,7 +7,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.LinearMotorFF
 import frc.chargers.framework.ChargerRobot
+import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.ofUnit
 
 
 /**
@@ -79,8 +81,18 @@ public class LinearProfiledPIDController(
         get() = Quantity(pidController.goal.position)
         set(target) {
             if (target.siValue != pidController.goal.position) {
-                pidController.reset(getInput().inUnit(meters))
                 pidController.goal = LinearTrapezoidProfile.State(target,Velocity(0.0)).inUnit(meters,seconds)
+            }
+        }
+
+    /**
+     * An alternative to the target variable; sets the profiled PID controller to a specific [AngularTrapezoidProfile.State].
+     */
+    public var targetState: LinearTrapezoidProfile.State
+        get() = pidController.goal.ofUnit(meters,seconds)
+        set(target){
+            if (target != pidController.goal.ofUnit(meters,seconds)){
+                pidController.goal = target.inUnit(meters,seconds)
             }
         }
 
@@ -93,7 +105,6 @@ public class LinearProfiledPIDController(
         get() = pidController.constants
         set(pidConstants) {
             if (pidConstants != pidController.constants) {
-                pidController.reset(getInput().inUnit(meters))
                 pidController.constants = pidConstants
             }
         }
