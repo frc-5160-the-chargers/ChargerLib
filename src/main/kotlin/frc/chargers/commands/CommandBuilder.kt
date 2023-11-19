@@ -24,17 +24,21 @@ public inline fun buildCommand(
     name: String = "Generic BuildCommand",
     logIndividualCommands: Boolean = false,
     block: CommandBuilder.() -> Unit
-): Command =
-    if(logIndividualCommands){
+): Command{
+    val builder = CommandBuilder().apply(block)
+
+    return if(logIndividualCommands){
         loggedSequentialCommandGroup(
             name,
-            *CommandBuilder().apply(block).commands.toTypedArray()
+            *builder.commands.toTypedArray()
         )
     }else{
         SequentialCommandGroup(
-            *CommandBuilder().apply(block).commands.toTypedArray()
+            *builder.commands.toTypedArray()
         ).withName(name)
-    }
+    }.finallyDo(builder.endBehavior)
+}
+
 
 
 @DslMarker
@@ -45,12 +49,28 @@ public class CommandBuilder {
     @PublishedApi
     internal var commands: LinkedHashSet<Command> = linkedSetOf() // LinkedHashSet keeps commands in order, but also ensures they're not added multiple times
 
+    public var endBehavior: (Boolean) -> Unit = {}
+    
     /**
      * Adds a single command to be run until its completion.
      */
     public operator fun <C : Command> C.unaryPlus(): C{
         commands.add(this)
         return this
+    }
+
+    /**
+     * Runs the function block when the [buildCommand] is finished.
+     */
+    public fun onEnd(run: (Boolean) -> Unit){
+        endBehavior = run
+    }
+
+    /**
+     * Runs the function block when the [buildCommand] is finished.
+     */
+    public inline fun onEnd(crossinline run: () -> Unit){
+        endBehavior = { run() }
     }
 
     /**
