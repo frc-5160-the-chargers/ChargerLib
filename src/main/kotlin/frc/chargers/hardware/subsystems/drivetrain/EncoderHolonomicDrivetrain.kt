@@ -8,7 +8,6 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.constants.drivetrain.SwerveConstants
-import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.gyroscopes.ZeroableHeadingProvider
@@ -420,6 +419,9 @@ public class EncoderHolonomicDrivetrain(
 
 
 
+    // used for open-loop drive; second kinematics
+    private var previousChassisPowers = ChassisPowers()
+    private var previousHeading = 0.0.degrees
 
 
     private val mostReliableHeading: Angle
@@ -466,28 +468,27 @@ public class EncoderHolonomicDrivetrain(
         Note: the multipliers here are relatively arbitrary; they are simply what has worked best for us.
         In addition, second order kinematics in open-loop control over-corrects
          */
-        currentModuleStates = if (controlScheme is SecondOrderControlScheme){
-
-            kinematics.toSecondOrderModuleStateGroup(
-                if ( powers.rotationPower - powers.yPower >= 0.0 || powers.rotationPower - powers.xPower >= 0.0 ){
-                    speeds.correctForDynamics(multiplier = 0.4)
-                }else{
-                    speeds
-                },
+        if (controlScheme is SecondOrderControlScheme){
+            currentModuleStates = kinematics.toSecondOrderModuleStateGroup(
+                speeds,
                 mostReliableHeading,
                 fieldRelative
             )
         }else{
-            kinematics.toFirstOrderModuleStateGroup(
+
+            // sets module states using the ModuleStateGroup class
+            currentModuleStates = kinematics.toFirstOrderModuleStateGroup(
                 if(fieldRelative){
                     ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
                 }else{
                     speeds
-                }.correctForDynamics(multiplier = 3.0)
+                }.correctForDynamics(driftRate = if (RobotBase.isReal()) 2.2 else 1.8)
             )
         }
 
         currentControlMode = ControlMode.CLOSED_LOOP
+        previousChassisPowers = powers
+        previousHeading = mostReliableHeading
     }
 
 
@@ -543,7 +544,7 @@ public class EncoderHolonomicDrivetrain(
                     ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
                 }else{
                     speeds
-                }.correctForDynamics(multiplier = 3.0)
+                }.correctForDynamics(driftRate = if (RobotBase.isReal()) 1.3 else 1.0)
             )
         }
 

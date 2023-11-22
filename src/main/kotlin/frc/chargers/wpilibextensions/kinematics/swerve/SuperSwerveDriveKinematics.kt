@@ -94,6 +94,24 @@ public class SuperSwerveDriveKinematics(
             stateGroup.bottomRightState
         )
 
+    /**
+     * Extracts the turn speeds out of an existing [ModuleStateGroup], with a target rotation speed.
+     */
+    public fun extractTurnSpeeds(stateGroup: ModuleStateGroup, rotationSpeed: AngularVelocity): List<AngularVelocity>{
+        val output = secondKinematics.extractTurnSpeeds(
+            arrayOf(stateGroup.topLeftState, stateGroup.topRightState, stateGroup.bottomLeftState, stateGroup.bottomRightState),
+            rotationSpeed.inUnit(radians/seconds)
+        )
+
+        return output.map{
+            if (it.isNaN()){
+                AngularVelocity(0.0)
+            }else{
+                it.ofUnit(radians/seconds)
+            }
+        }
+    }
+
 
 
 

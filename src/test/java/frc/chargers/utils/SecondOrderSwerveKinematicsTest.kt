@@ -15,6 +15,7 @@ import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveDriveKinematic
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.math.abs
 
 internal class SecondOrderSwerveKinematicsTest {
 
@@ -90,6 +91,70 @@ internal class SecondOrderSwerveKinematicsTest {
         assertEquals(combinedModuleStates.topRightTurnSpeed.siValue, baseModuleStates.turnSpeeds[1])
         assertEquals(combinedModuleStates.bottomLeftTurnSpeed.siValue, baseModuleStates.turnSpeeds[2])
         assertEquals(combinedModuleStates.bottomRightTurnSpeed.siValue, baseModuleStates.turnSpeeds[3])
+
+    }
+
+    private infix fun Double.epsilonEquals(other: Double) = abs(this - other) < 1E-9
+
+    @Test
+    fun `module states to chassis speeds then back to module states`(){
+        val kinematics = SwerveDriveKinematics(
+            Translation2d(0.5,0.5),
+            Translation2d(-0.5,0.5),
+            Translation2d(0.5,-0.5),
+            Translation2d(-0.5,-0.5)
+        )
+
+        val initialSpeeds = ChassisSpeeds(0.5,0.0,0.5)
+        val states = kinematics.toSwerveModuleStates(initialSpeeds)
+        val speeds = kinematics.toChassisSpeeds(*states)
+
+        assertEquals(initialSpeeds.vxMetersPerSecond epsilonEquals speeds.vxMetersPerSecond, true)
+        assertEquals(initialSpeeds.vyMetersPerSecond epsilonEquals  speeds.vyMetersPerSecond, true)
+        assertEquals(initialSpeeds.omegaRadiansPerSecond epsilonEquals speeds.omegaRadiansPerSecond, true)
+    }
+
+    @Test
+    fun `second kinematics turn speed extraction`(){
+        val kinematics = SuperSwerveDriveKinematics(
+            UnitTranslation2d(0.5.meters,0.5.meters),
+            UnitTranslation2d(-0.5.meters,0.5.meters),
+            UnitTranslation2d(0.5.meters,-0.5.meters),
+            UnitTranslation2d(-0.5.meters,-0.5.meters)
+        )
+        val secondKinematics = SecondOrderSwerveKinematics(
+            Translation2d(0.5,0.5),
+            Translation2d(-0.5,0.5),
+            Translation2d(0.5,-0.5),
+            Translation2d(-0.5,-0.5)
+        )
+
+        val speeds = ChassisSpeeds(1.5,0.0,0.5)
+        val secondOrderOutput = kinematics.toSecondOrderModuleStateGroup(
+            speeds,
+            0.0.degrees,
+            fieldRelative = false
+        )
+
+        val firstOrderArray = kinematics.toSwerveModuleStates(
+            speeds
+        )
+
+        val testTurnSpeeds = secondKinematics.extractTurnSpeeds(
+            firstOrderArray,
+            speeds.omegaRadiansPerSecond
+        ).toList()
+
+        val initialTurnSpeeds = listOf(
+            secondOrderOutput.topLeftTurnSpeed.siValue,
+            secondOrderOutput.topRightTurnSpeed.siValue,
+            secondOrderOutput.bottomLeftTurnSpeed.siValue,
+            secondOrderOutput.bottomRightTurnSpeed.siValue
+        )
+
+        for (i in 0..<4){
+            assertEquals(testTurnSpeeds[i] epsilonEquals initialTurnSpeeds[i], true)
+        }
 
     }
 

@@ -116,4 +116,39 @@ public class SecondOrderSwerveKinematics {
 
         return new Output(swerveModuleStates, moduleTurnSpeeds);
     }
+
+    public double[] extractTurnSpeeds(SwerveModuleState[] input, double targetRotationSpeed){
+        Matrix<N4, N1> secondOrderInputMatrix = new Matrix<>(N4(),N1());
+        Matrix<N2, N4> secondOrderMatrix = new Matrix<>(N2(),N4());
+        Matrix<N2, N2> rotationMatrix = new Matrix<>(N2(),N2());
+
+        double[] moduleTurnSpeeds = new double[4];
+
+        secondOrderInputMatrix.set(2,0,Math.pow(targetRotationSpeed, 2));
+
+        for (int i = 0; i < 4; i++){
+            Rotation2d moduleAngle = new Rotation2d(Math.atan2(moduleLocations[i].getY(), moduleLocations[i].getX())); //Angle that the module location vector makes with respect to the robot
+            double moduleX = moduleLocations[i].getNorm() * Math.cos(moduleAngle.getRadians());
+            double moduleY = moduleLocations[i].getNorm() * Math.sin(moduleAngle.getRadians());
+
+            double moduleHeading = input[i].angle.getRadians();
+            double moduleSpeed = input[i].speedMetersPerSecond;
+
+            secondOrderMatrix.set(0,2,-moduleX);
+            secondOrderMatrix.set(0,3,-moduleY);
+            secondOrderMatrix.set(1,2,-moduleY);
+            secondOrderMatrix.set(1,3,moduleX);
+
+            rotationMatrix.set(0,0,Math.cos(moduleHeading));
+            rotationMatrix.set(0,1,Math.sin(moduleHeading));
+            rotationMatrix.set(1,0,-Math.sin(moduleHeading));
+            rotationMatrix.set(1,1,Math.cos(moduleHeading));
+
+            Matrix<N2,N1> secondOrderOutput = rotationMatrix.times(secondOrderMatrix.times(secondOrderInputMatrix));
+
+            moduleTurnSpeeds[i] = secondOrderOutput.get(1,0) / moduleSpeed - targetRotationSpeed;
+        }
+
+        return moduleTurnSpeeds;
+    }
 }
