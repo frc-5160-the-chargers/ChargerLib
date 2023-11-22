@@ -40,9 +40,7 @@ class AngularProfiledPIDControllerTest {
         println(wpiOutput)
         println(chargerOutput)
 
-        assertEquals(
-            wpiOutput,chargerOutput
-        )
+        assertEquals(wpiOutput,chargerOutput)
 
     }
 

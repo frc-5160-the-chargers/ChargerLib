@@ -4,40 +4,22 @@ import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
 
 /**
- * Example of use of Precision:
- *
- * when(precision) {
- *         Precision.AllowOvershoot -> {
- *             println("precision allows overshoot.")
- *         }
- *         is Precision.Within -> {
- *             println("Precision is within " + precision.allowableError)
- *         }
- *     }
- *
- * Note that Precision takes advantage of kotlin's smart casting
- * to cast the Precision to Precision.Within in the When statement
+ * A class that holds data about the Precision of a certain mechanism, or generic item
  */
-
-
 public sealed class Precision<out D : AnyDimension> {
     public data object AllowOvershoot : Precision<Nothing>()
     public class Within<D : AnyDimension>(public val allowableError: ClosedRange<Quantity<D>>) : Precision<D>() {
         public constructor(margin: Quantity<D>) : this(-margin..margin)
-
     }
 }
 
-public inline fun <D: AnyDimension> Precision<D>.processValue(
-    whenValueExists: (Precision.Within<D>) -> Unit,
-    whenAllowOvershoot: () -> Unit
-){
-    if (this is Precision.Within<D>){
-        whenValueExists(this)
+public fun <D: AnyDimension> Quantity<D>.within(precision: Precision<D>): Boolean =
+    if (precision is Precision.Within){
+        this in precision.allowableError
     }else{
-        whenAllowOvershoot()
+        false
     }
-}
+
 
 
 

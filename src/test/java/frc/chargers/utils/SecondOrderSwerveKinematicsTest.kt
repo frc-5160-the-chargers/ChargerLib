@@ -12,7 +12,7 @@ import frc.chargerlibexternal.utils.SecondOrderSwerveKinematics
 import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveDriveKinematics
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -46,7 +46,7 @@ internal class SecondOrderSwerveKinematicsTest {
         )
 
         for (i in 0..<4){
-            Assertions.assertEquals(firstModuleStates[i], secondModuleStates.moduleStates[i])
+            assertEquals(firstModuleStates[i], secondModuleStates.moduleStates[i])
         }
 
 
@@ -73,19 +73,65 @@ internal class SecondOrderSwerveKinematicsTest {
         val headingCorrector = HeadingCorrector()
 
         val combinedModuleStates = combinedKinematics.toSecondOrderModuleStateGroup(
-            speeds, angle
-        ).toArray()
+            speeds, angle, fieldRelative = true
+        )
 
         val baseModuleStates = secondKinematics.toSwerveModuleState(
             headingCorrector.correctHeading(speeds,angle.asRotation2d()),
             angle.asRotation2d(),
+            /*fieldRelative = */ true
+        )
+
+        for (i in 0..<4){
+            assertEquals(combinedModuleStates.toArray()[i], baseModuleStates.moduleStates[i])
+        }
+
+        assertEquals(combinedModuleStates.topLeftTurnSpeed.siValue, baseModuleStates.turnSpeeds[0])
+        assertEquals(combinedModuleStates.topRightTurnSpeed.siValue, baseModuleStates.turnSpeeds[1])
+        assertEquals(combinedModuleStates.bottomLeftTurnSpeed.siValue, baseModuleStates.turnSpeeds[2])
+        assertEquals(combinedModuleStates.bottomRightTurnSpeed.siValue, baseModuleStates.turnSpeeds[3])
+
+    }
+
+
+
+    /*
+    @Test
+    fun `FRC 95 kinematics should be equivalent to 4481 second kinematics`(){
+        val frc95kinematics = BetterSwerveKinematics(
+            Translation2d(0.5,0.5),
+            Translation2d(-0.5,0.5),
+            Translation2d(0.5,-0.5),
+            Translation2d(-0.5,-0.5)
+        )
+
+        val frc4481kinematics = SecondOrderSwerveKinematics(
+            Translation2d(0.5, 0.5),
+            Translation2d(-0.5, 0.5),
+            Translation2d(0.5, -0.5),
+            Translation2d(-0.5, -0.5)
+        )
+
+        val frc95StateOutput: Array<BetterSwerveModuleState> = frc95kinematics.toSwerveModuleStates(
+            ChassisSpeeds(0.5,0.0,0.5)
+        )
+
+        val frc4481Output: SecondOrderSwerveKinematics.Output = frc4481kinematics.toSwerveModuleState(
+            ChassisSpeeds(0.5,0.0,0.5),
+            Rotation2d(0.0),
             false
         )
 
         for (i in 0..<4){
-            Assertions.assertEquals(combinedModuleStates[i], baseModuleStates.moduleStates[i])
+            assertEquals(frc95StateOutput[i].speedMetersPerSecond - frc4481Output.moduleStates[i].speedMetersPerSecond < 1E-9, true)
+            assertEquals(frc95StateOutput[i].angle.radians - frc4481Output.moduleStates[i].angle.radians < 1E-9, true)
+            assertEquals(frc95StateOutput[i].omegaRadPerSecond - frc4481Output.turnSpeeds[i] < 1E-9, true)
         }
 
+
+
     }
+
+     */
 
 }

@@ -418,14 +418,6 @@ public class EncoderHolonomicDrivetrain(
 
 
 
-    /*
-    Only corrects for dynamics if the robot is real; it is unoptimized in simulation.
-     */
-    private fun ChassisSpeeds.correctForDynamicsOptimized(): ChassisSpeeds{
-        val multiplier =
-            if (RobotBase.isSimulation() || controlScheme is SecondOrderControlScheme) 0.5 else 1.0
-        return correctForDynamics(ChargerRobot.LOOP_PERIOD, multiplier)
-    }
 
 
 
@@ -470,10 +462,18 @@ public class EncoderHolonomicDrivetrain(
         /*
         4481's second order swerve kinematics already applies field relative drive;
         thus, fromFieldRelativeSpeeds is not called if second order kinematics is used.
+
+        Note: the multipliers here are relatively arbitrary; they are simply what has worked best for us.
+        In addition, second order kinematics in open-loop control over-corrects
          */
         currentModuleStates = if (controlScheme is SecondOrderControlScheme){
+
             kinematics.toSecondOrderModuleStateGroup(
-                speeds.correctForDynamicsOptimized(),
+                if ( powers.rotationPower - powers.yPower >= 0.0 || powers.rotationPower - powers.xPower >= 0.0 ){
+                    speeds.correctForDynamics(multiplier = 0.4)
+                }else{
+                    speeds
+                },
                 mostReliableHeading,
                 fieldRelative
             )
@@ -483,7 +483,7 @@ public class EncoderHolonomicDrivetrain(
                     ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
                 }else{
                     speeds
-                }.correctForDynamicsOptimized()
+                }.correctForDynamics(multiplier = 3.0)
             )
         }
 
@@ -533,7 +533,7 @@ public class EncoderHolonomicDrivetrain(
          */
         currentModuleStates = if(controlScheme is SecondOrderControlScheme){
             kinematics.toSecondOrderModuleStateGroup(
-                speeds.correctForDynamicsOptimized(),
+                speeds,
                 mostReliableHeading,
                 fieldRelative
             )
@@ -543,7 +543,7 @@ public class EncoderHolonomicDrivetrain(
                     ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
                 }else{
                     speeds
-                }.correctForDynamicsOptimized()
+                }.correctForDynamics(multiplier = 3.0)
             )
         }
 

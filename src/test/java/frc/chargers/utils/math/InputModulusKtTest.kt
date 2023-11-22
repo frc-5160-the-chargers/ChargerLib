@@ -18,14 +18,14 @@ class InputModulusKtTest {
     }
 
     fun basicStandardize(input: Double): Double = if (input < 0){
-        (input % 360.0) + 0.0
+        (input % 360.0) + 360.0
     }else{
         input % 360.0
     }
 
     @Test
     fun inputModulus() {
-        val inputs = a[90.0,70.0,20.0,30.0,180.0,270.0]
+        val inputs = a[90.0,70.0,20.0,30.0,180.0,270.0,-90.0, -45.0, -30.0]
 
         for (testcase in inputs){
             assertEquals(
@@ -37,7 +37,7 @@ class InputModulusKtTest {
 
     @Test
     fun inputModulusWithUnits() {
-        val inputs = a[90.0,70.0,20.0,30.0,180.0,270.0]
+        val inputs = a[90.0,70.0,20.0,30.0,180.0,270.0, -50.0, -60.0, -120.0, -190.0]
         for (testcase in inputs){
             val testingInput = testcase.degrees.inputModulus(0.degrees..360.degrees).inUnit(degrees)
             val actualInput = basicStandardize(testcase)

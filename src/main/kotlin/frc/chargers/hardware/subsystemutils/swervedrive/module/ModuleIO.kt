@@ -154,6 +154,10 @@ public interface ModuleIO{
         public var speed: AngularVelocity by loggedQuantity(logUnit = degrees/seconds, logName = "speedDegreesPerSec")
         public var driveVoltage: Voltage by loggedQuantity(logUnit = volts, logName = "driveVoltageVolts")
         public var distance: Angle by loggedQuantity(logUnit = degrees, logName = "distanceDegrees")
+
+        public var secondOrderKinematicsUtilized: Boolean by loggedBoolean()
+        public var secondOrderTurnSpeed: AngularVelocity by loggedQuantity(logUnit = degrees/seconds, logName = "secondOrderTurnSpeedDegPerSec")
+        public var secondOrderTurnVoltage: Voltage by loggedQuantity(logUnit = volts, logName = "secondOrderTurnVoltageVolts")
     }
 
     public fun setDriveVoltage(driveV: Voltage)

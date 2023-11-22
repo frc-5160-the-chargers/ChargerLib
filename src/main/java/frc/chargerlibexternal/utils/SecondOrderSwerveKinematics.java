@@ -57,7 +57,7 @@ public class SecondOrderSwerveKinematics {
     public Output toSwerveModuleState(ChassisSpeeds desiredSpeed, Rotation2d robotHeading, boolean fieldRelative){
         if (desiredSpeed.vxMetersPerSecond == 0.0 && desiredSpeed.vyMetersPerSecond == 0.0 && desiredSpeed.omegaRadiansPerSecond == 0.0){
             for (int i = 0; i < swerveModuleStates.length; i++){
-                swerveModuleStates[i] = new SwerveModuleState(0.0,swerveModuleStates[i].angle);
+                swerveModuleStates[i].speedMetersPerSecond = 0.0;
             }
             return new Output(swerveModuleStates, new double[]{0.0, 0.0, 0.0, 0.0} );
         }

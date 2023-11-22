@@ -11,9 +11,10 @@ import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.subsystemutils.swervedrive.ProfiledPIDControlScheme
+import frc.chargers.hardware.subsystemutils.swervedrive.SecondOrderControlScheme
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
-import frc.chargers.utils.Precision
 import frc.chargers.utils.math.inputModulus
+import frc.chargers.utils.within
 import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.asRotation2d
 import org.littletonrobotics.junction.Logger
@@ -26,7 +27,11 @@ public class SwerveModule(
 
     private val tuner = DashboardTuner()
 
-    private val inputs: ModuleIO.Inputs = ModuleIO.Inputs()
+    private val inputs: ModuleIO.Inputs = ModuleIO.Inputs().apply{
+        // this input is not continuously updated nor used for anything else;
+        // thus, it is only updated once.
+        secondOrderKinematicsUtilized = controlScheme is SecondOrderControlScheme
+    }
 
     /**
      * A function that standardizes all angles within the 0 to 360 degree range.
@@ -34,8 +39,15 @@ public class SwerveModule(
     private fun Angle.standardize(): Angle = this.inputModulus(0.0.degrees..360.degrees)
 
     public fun updateAndProcessInputs() {
+        // updates the data from the variables
         io.updateInputs(inputs)
+        // the Inputs class implements the LoggableInputs interface,
+        // with toLog and fromLog functions, implemented by the user.
+        // toLog pushes variable data to the logger,
+        // while fromLog is used in replay, and overrides user data based off of logs.
+        // this function simply calls toLog and fromLog when nessecary on the data every loop.
         Logger.getInstance().processInputs(name,inputs)
+        // periodically refreshes controllers to make sure they don't break.
         velocityController.calculateOutput()
         turnController.calculateOutput()
     }
@@ -116,19 +128,26 @@ public class SwerveModule(
     public fun setDirection(direction: Angle, secondOrderTurnSpeed: AngularVelocity = AngularVelocity(0.0)){
 
         when (controlScheme) {
+            // called when the control scheme uses BASIC PID control with second order kinematics
             is SwerveControl.PIDSecondOrder -> {
                 turnController.target = direction.standardize()
-                if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
-                    io.setTurnVoltage(controlScheme.turnFF.calculate(secondOrderTurnSpeed))
+
+                val extraTurnVoltage = controlScheme.turnFF.calculate(secondOrderTurnSpeed)
+                // the "within" method is an extension function of Quantity<D: AnyDimension>
+                if( (turnController.error).within(controlScheme.turnPrecision) ){
+                    io.setTurnVoltage(extraTurnVoltage)
                 }else{
-                    io.setTurnVoltage(
-                        turnController.calculateOutput() + controlScheme.turnFF.calculate(secondOrderTurnSpeed)
-                    )
+                    io.setTurnVoltage(turnController.calculateOutput() + extraTurnVoltage)
                 }
-                Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
-                Logger.getInstance().recordOutput("$name/SecondOrderTurnVoltageVolts", controlScheme.turnFF.calculate(secondOrderTurnSpeed).inUnit(volts))
+
+                // these properties of the inputs class are not used anywhere; just extra useful log data
+                // (they are automatically pushed to the logger via AdvantageKit's processInputs function,
+                // found in the updateAndProcessInputs function of this class).
+                inputs.secondOrderTurnVoltage = extraTurnVoltage
+                inputs.secondOrderTurnSpeed = secondOrderTurnSpeed
             }
 
+            // called when the control scheme uses a PROFILED pid controller + second order kinematics
             is SwerveControl.ProfiledPIDSecondOrder -> {
                 // cast is 100% safe; turnController can only become an AngularProfiledPIDcontroller
                 // if the control scheme is profiled.
@@ -136,16 +155,24 @@ public class SwerveModule(
                     direction.standardize(),
                     secondOrderTurnSpeed
                 )
-                if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
-                    io.setTurnVoltage(controlScheme.turnFF.calculate(secondOrderTurnSpeed))
+
+                val extraTurnVoltage = controlScheme.turnFF.calculate(secondOrderTurnSpeed)
+                if( (turnController.error).within(controlScheme.turnPrecision) ){
+                    io.setTurnVoltage(extraTurnVoltage)
                 }else{
+                    // the turn speed is the TARGET STATE of the profiled PID controller;
+                    // thus, no extra turn voltage is added.
                     io.setTurnVoltage(turnController.calculateOutput())
                 }
 
-                Logger.getInstance().recordOutput("$name/SecondOrderTurnSpeedRadPerSec", secondOrderTurnSpeed.inUnit(radians/seconds))
-                Logger.getInstance().recordOutput("$name/SecondOrderTurnVoltageVolts", controlScheme.turnFF.calculate(secondOrderTurnSpeed).inUnit(volts))
+                // these properties of the inputs class are not used anywhere; just extra useful log data
+                // (they are automatically pushed to the logger via AdvantageKit's processInputs function,
+                // found in the updateAndProcessInputs function of this class).
+                inputs.secondOrderTurnVoltage = extraTurnVoltage
+                inputs.secondOrderTurnSpeed = secondOrderTurnSpeed
             }
 
+            // called when the control scheme uses first order kinematics.
             else -> {
                 if (secondOrderTurnSpeed != AngularVelocity(0.0)){
                     println("WARNING: Second order turn speed is not being used. Something is wrong with the system.")
@@ -153,7 +180,7 @@ public class SwerveModule(
 
                 // if PID control is first order, simply take the output of the controller.
                 turnController.target = direction.standardize()
-                if(controlScheme.turnPrecision is Precision.Within && turnController.error in controlScheme.turnPrecision.allowableError){
+                if( (turnController.error).within(controlScheme.turnPrecision) ){
                     io.setTurnVoltage(0.0.volts)
                 }else{
                     io.setTurnVoltage(turnController.calculateOutput())
@@ -205,12 +232,11 @@ public class SwerveModule(
     public fun setDirectionalVelocity(
         angularVelocity:AngularVelocity,
         direction:Angle,
-        secondOrderTurnSpeed: AngularVelocity
+        secondOrderTurnSpeed: AngularVelocity = AngularVelocity(0.0)
     ){
         if (angleDeltaBetween(direction,inputs.direction) > 90.0.degrees){
             setDirection(direction + 180.degrees,secondOrderTurnSpeed)
             setVelocity(-angularVelocity * cos(turnController.error))
-
         }else{
             setDirection(direction,secondOrderTurnSpeed)
             setVelocity(angularVelocity * cos(turnController.error))
