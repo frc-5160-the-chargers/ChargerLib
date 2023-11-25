@@ -95,7 +95,7 @@ public fun TrapezoidProfile.State.ofUnit(distanceUnit: Distance, timeUnit: Time)
     )
 
 /**
- * Converts WPILib's [TrapezoidProfile.Constraints] into a [LinearTrapezoidProfile.LinearMotionConstraints].
+ * Converts WPILib's [TrapezoidProfile.Constraints] into a [LinearMotionConstraints].
  */
 public fun TrapezoidProfile.Constraints.ofUnit(distanceUnit: Distance, timeUnit: Time): LinearMotionConstraints =
     LinearMotionConstraints(
