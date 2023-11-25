@@ -78,7 +78,7 @@ public fun TrapezoidProfile.State.ofUnit(angleUnit: Angle, timeUnit: Time): Angu
     )
 
 /**
- * Converts WPILib's [TrapezoidProfile.Constraints] into an [AngularTrapezoidProfile.AngularMotionConstraints].
+ * Converts WPILib's [TrapezoidProfile.Constraints] into an [AngularMotionConstraints].
  */
 public fun TrapezoidProfile.Constraints.ofUnit(angleUnit: Angle, timeUnit: Time): AngularMotionConstraints =
     AngularMotionConstraints(

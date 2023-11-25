@@ -3,7 +3,6 @@ package frc.chargers.wpilibextensions.geometry.twodimensional
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.units.meters
-import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Transform2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.rotation.asAngle

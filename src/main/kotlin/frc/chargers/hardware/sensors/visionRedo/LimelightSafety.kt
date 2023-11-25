@@ -1,7 +1,6 @@
 package frc.chargers.hardware.sensors.visionRedo
 
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 
 public fun requireLimelight(limelightName: String = "limelight"){

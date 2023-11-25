@@ -5,7 +5,6 @@ import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.interpolation.Interpolatable
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.geometry.rotation.asAngle
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 
 /**

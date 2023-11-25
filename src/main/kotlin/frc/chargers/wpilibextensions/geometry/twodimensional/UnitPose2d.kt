@@ -3,11 +3,9 @@ package frc.chargers.wpilibextensions.geometry.twodimensional
 import com.batterystaple.kmeasure.dimensions.DistanceDimension
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
-import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
 import frc.chargers.utils.math.units.KmeasureUnit
-import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.rotation.asAngle
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d

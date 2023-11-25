@@ -6,7 +6,6 @@ import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.constants.drivetrain.SwerveConstants
 import frc.chargers.hardware.sensors.RobotPoseSupplier
@@ -162,7 +161,7 @@ public fun realEncoderHolonomicDrivetrain(
  * An implementation of Swerve drive, with encoders, to be used in future robot code.
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
  *
- * This class implements the DifferentialDrive interface for basic utility use
+ * This class implements the DifferentialDrivetrain interface for basic utility use
  * and interop with existing DifferentialDrive extension functions.
  *
  * Note: TrackWidth is the horizontal length of the robot, while wheelBase is the vertical length of the robot.

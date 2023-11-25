@@ -1,7 +1,6 @@
 package frc.chargers.commands.drivetrainCommands
 
 import com.batterystaple.kmeasure.units.meters
-import com.pathplanner.lib.PathConstraints
 import com.pathplanner.lib.PathPlanner
 import com.pathplanner.lib.PathPlannerTrajectory
 import com.pathplanner.lib.auto.SwerveAutoBuilder
@@ -14,7 +13,6 @@ import frc.chargers.controls.pid.constants
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.*
 import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
-import frc.chargers.wpilibextensions.geometry.motion.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import kotlin.internal.LowPriorityInOverloadResolution
 
@@ -78,7 +76,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
  *
  * IMPORTANT: use PathPlannerServer.
  *
- * Utilizes a [trajectoryName] and [LinearTrapezoidProfile.LinearMotionConstraints] instead of a [PathPlannerTrajectory].
+ * Utilizes a [trajectoryName] and [LinearMotionConstraints] instead of a [PathPlannerTrajectory].
  */
 context(CommandBuilder)
 @LowPriorityInOverloadResolution
