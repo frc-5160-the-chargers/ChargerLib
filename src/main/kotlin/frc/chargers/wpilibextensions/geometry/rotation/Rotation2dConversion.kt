@@ -1,4 +1,4 @@
-package frc.chargers.wpilibextensions.geometry
+package frc.chargers.wpilibextensions.geometry.rotation
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.inUnit

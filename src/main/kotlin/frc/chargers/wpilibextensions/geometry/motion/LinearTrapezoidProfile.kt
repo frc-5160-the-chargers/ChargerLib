@@ -1,10 +1,11 @@
-package frc.chargers.wpilibextensions.geometry
+package frc.chargers.wpilibextensions.geometry.motion
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import frc.chargers.wpilibextensions.fpgaTimestamp
+import frc.chargers.wpilibextensions.geometry.ofUnit
 
 /*
 NOTE TO SELF:
@@ -19,31 +20,15 @@ https://github.com/wpilibsuite/allwpilib/pull/5457
  * For instance, the constraints are measured with max angular acceleration and max angular velocity.
  */
 public class LinearTrapezoidProfile(
-    public val constraints: Constraints,
+    public val constraints: LinearMotionConstraints,
     public val goalState: State,
     public val initialState: State = State(Distance(0.0),Velocity(0.0))
 ) {
 
     public companion object{
         public val None: LinearTrapezoidProfile = LinearTrapezoidProfile(
-            Constraints(Velocity(0.0), Acceleration(0.0)),
+            LinearMotionConstraints(Velocity(0.0), Acceleration(0.0)),
             State(Distance(0.0), Velocity(0.0))
-        )
-    }
-
-    /**
-     * Represents the constraints of a Trapezoid Profile, with the respective [maxVelocity] and [maxAcceleration].
-     *
-     * @see TrapezoidProfile.Constraints
-     */
-    public data class Constraints(
-        val maxVelocity: Velocity,
-        val maxAcceleration: Acceleration
-    ){
-        public fun inUnit(distanceUnit: Distance, timeUnit: Time): TrapezoidProfile.Constraints =
-            TrapezoidProfile.Constraints(
-            maxVelocity.inUnit(distanceUnit/timeUnit),
-            maxAcceleration.inUnit(distanceUnit/timeUnit/timeUnit)
         )
     }
 
@@ -76,7 +61,7 @@ public class LinearTrapezoidProfile(
     public fun calculate(deltaT: Time): State =
         baseProfile.calculate(deltaT.inUnit(seconds)).ofUnit(meters,seconds)
 
-    public fun calculateCurrentState(): State{
+    public fun calculateCurrentState(): State {
         val currentTime = fpgaTimestamp()
         return calculate(currentTime - previousTime).also{
             previousTime = currentTime

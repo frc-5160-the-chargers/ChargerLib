@@ -7,8 +7,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.LinearMotorFF
 import frc.chargers.framework.ChargerRobot
-import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
-import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
+import frc.chargers.wpilibextensions.geometry.motion.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
 
 
@@ -23,7 +24,7 @@ public class LinearProfiledPIDController(
     public val continuousInputRange: ClosedRange<Distance>? = null,
     public val integralRange: ClosedRange<Voltage> = outputRange,
     target: Distance,
-    constraints: LinearTrapezoidProfile.Constraints,
+    constraints: LinearMotionConstraints,
     private val feedforward: LinearMotorFF = LinearMotorFF.None,
     /**
      * Determines if the [UnitSuperPIDController] should call calculateOutput()

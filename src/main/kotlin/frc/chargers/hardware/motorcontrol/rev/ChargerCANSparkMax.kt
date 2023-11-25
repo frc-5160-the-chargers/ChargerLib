@@ -18,7 +18,8 @@ import frc.chargers.hardware.motorcontrol.MotorConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
 import frc.chargers.wpilibextensions.delay
-import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
+import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import kotlin.math.roundToInt
 
 /**
@@ -255,7 +256,7 @@ public open class ChargerCANSparkMax(
         target: Angle,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
-        constraints: AngularTrapezoidProfile.Constraints,
+        constraints: AngularMotionConstraints,
         absoluteEncoder: PositionEncoder?
     ) {
         if (trapezoidProfile.constraints != constraints){

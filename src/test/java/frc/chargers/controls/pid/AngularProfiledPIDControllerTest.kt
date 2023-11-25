@@ -10,7 +10,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.AngularMotorFF
-import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
@@ -30,7 +30,7 @@ class AngularProfiledPIDControllerTest {
             target = Angle(target),
             outputRange = (-12).volts..12.volts,
             continuousInputRange = Angle(0.0)..Angle(2 * PI),
-            constraints = AngularTrapezoidProfile.Constraints(AngularVelocity(3.0), AngularAcceleration(1.0)),
+            constraints = AngularMotionConstraints(AngularVelocity(3.0), AngularAcceleration(1.0)),
             feedforward = AngularMotorFF.None
         ) as FeedbackController<Angle,Voltage>
 

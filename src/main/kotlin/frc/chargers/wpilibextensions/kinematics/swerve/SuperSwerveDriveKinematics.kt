@@ -8,8 +8,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import frc.chargerlibexternal.utils.HeadingCorrector
 import frc.chargerlibexternal.utils.SecondOrderSwerveKinematics
-import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
-import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
+import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 
 
 /**

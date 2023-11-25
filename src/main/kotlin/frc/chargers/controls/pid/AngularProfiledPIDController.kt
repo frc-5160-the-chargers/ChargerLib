@@ -7,7 +7,8 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.framework.ChargerRobot
-import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
+import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
 
 
@@ -22,7 +23,7 @@ public class AngularProfiledPIDController(
     public val continuousInputRange: ClosedRange<Angle>? = null,
     public val integralRange: ClosedRange<Voltage> = outputRange,
     target: Angle,
-    constraints: AngularTrapezoidProfile.Constraints,
+    constraints: AngularMotionConstraints,
     private val feedforward: AngularMotorFF = AngularMotorFF.None,
     /**
      * Determines if the [UnitSuperPIDController] should call calculateOutput()

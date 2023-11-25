@@ -6,6 +6,7 @@ import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.constants.drivetrain.SwerveConstants
 import frc.chargers.hardware.sensors.RobotPoseSupplier
@@ -21,9 +22,9 @@ import frc.chargers.hardware.subsystemutils.swervedrive.SecondOrderControlScheme
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.utils.a
 import frc.chargers.utils.math.inputModulus
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
-import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
-import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
+import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
 import org.littletonrobotics.junction.Logger
@@ -94,10 +95,10 @@ public fun realEncoderHolonomicDrivetrain(
 ): EncoderHolonomicDrivetrain {
     if (invertTurnMotors){
         turnMotors.apply{
-            topLeft.inverted = true
-            topRight.inverted = true
-            bottomLeft.inverted = true
-            bottomRight.inverted = true
+            topLeft.inverted = !topLeft.inverted
+            topRight.inverted = !topLeft.inverted
+            bottomLeft.inverted = !topLeft.inverted
+            bottomRight.inverted = !topLeft.inverted
         }
     }
 
@@ -161,6 +162,9 @@ public fun realEncoderHolonomicDrivetrain(
  * An implementation of Swerve drive, with encoders, to be used in future robot code.
  * Swerve drive is called four-wheel holonomic drive outside of FRC, hence the name.
  *
+ * This class implements the DifferentialDrive interface for basic utility use
+ * and interop with existing DifferentialDrive extension functions.
+ *
  * Note: TrackWidth is the horizontal length of the robot, while wheelBase is the vertical length of the robot.
  */
 public class EncoderHolonomicDrivetrain(
@@ -173,7 +177,7 @@ public class EncoderHolonomicDrivetrain(
     private val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
-): SubsystemBase(), ZeroableHeadingProvider{
+): SubsystemBase(), ZeroableHeadingProvider, DifferentialDrivetrain{
 
     init{
         Thread{
@@ -418,7 +422,6 @@ public class EncoderHolonomicDrivetrain(
 
 
 
-
     // used for open-loop drive; second kinematics
     private var previousChassisPowers = ChassisPowers()
     private var previousHeading = 0.0.degrees
@@ -470,7 +473,7 @@ public class EncoderHolonomicDrivetrain(
          */
         if (controlScheme is SecondOrderControlScheme){
             currentModuleStates = kinematics.toSecondOrderModuleStateGroup(
-                speeds,
+                speeds.correctForDynamics(),
                 mostReliableHeading,
                 fieldRelative
             )
@@ -482,7 +485,7 @@ public class EncoderHolonomicDrivetrain(
                     ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
                 }else{
                     speeds
-                }.correctForDynamics(driftRate = if (RobotBase.isReal()) 2.2 else 1.8)
+                }.correctForDynamics(driftRate = 1.8)
             )
         }
 
@@ -550,11 +553,18 @@ public class EncoderHolonomicDrivetrain(
 
     }
 
+    override fun tankDrive(leftPower: Double, rightPower: Double) {
+        topLeft.setDirectionalPower(leftPower,0.0.degrees)
+        bottomLeft.setDirectionalPower(leftPower,0.0.degrees)
+        topRight.setDirectionalPower(rightPower,0.0.degrees)
+        bottomRight.setDirectionalPower(rightPower,0.0.degrees)
+    }
+
 
     /**
      * Stops the drivetrain.
      */
-    public fun stop(){
+    override fun stop(){
         topLeft.halt()
         topRight.halt()
         bottomLeft.halt()

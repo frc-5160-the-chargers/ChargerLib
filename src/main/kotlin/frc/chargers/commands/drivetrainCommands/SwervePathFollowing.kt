@@ -13,7 +13,8 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.constants
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.*
-import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
+import frc.chargers.wpilibextensions.geometry.motion.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import kotlin.internal.LowPriorityInOverloadResolution
 
@@ -30,7 +31,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
     trajectoryName: String,
     isFirstPath: Boolean = false
 ): Command = followPath(
-    PathPlanner.loadPath(trajectoryName, constraints),
+    PathPlanner.loadPath(trajectoryName, constraints.toPathConstraints()),
     translationConstants,rotationConstants,isFirstPath
 )
 /**
@@ -77,7 +78,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
  *
  * IMPORTANT: use PathPlannerServer.
  *
- * Utilizes a [trajectoryName] and [LinearTrapezoidProfile.Constraints] instead of a [PathPlannerTrajectory].
+ * Utilizes a [trajectoryName] and [LinearTrapezoidProfile.LinearMotionConstraints] instead of a [PathPlannerTrajectory].
  */
 context(CommandBuilder)
 @LowPriorityInOverloadResolution
@@ -85,12 +86,12 @@ public fun EncoderHolonomicDrivetrain.followPath(
     trajectoryName: String,
     translationConstants: PIDConstants,
     rotationConstants: PIDConstants,
-    pathConstraints: PathConstraints,
+    pathConstraints: LinearMotionConstraints,
     isFirstPath: Boolean = false,
 ): Command = followPath(
     PathPlanner.loadPath(
         trajectoryName,
-        pathConstraints
+        pathConstraints.toPathConstraints()
     ),
     translationConstants,
     rotationConstants,
@@ -140,12 +141,12 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     pathGroupName: String,
     translationConstants: PIDConstants,
     rotationConstants: PIDConstants,
-    vararg allPathConstraints: PathConstraints,
+    vararg allPathConstraints: LinearMotionConstraints,
     eventsBlock: MappableContext<String,Command>.() -> Unit
 ): Command = runPathPlannerAuto(
     PathPlanner.loadPathGroup(
         pathGroupName,
-        listOf(*allPathConstraints)
+        allPathConstraints.map{it.toPathConstraints()}
     ),
     translationConstants,
     rotationConstants,

@@ -1,5 +1,5 @@
-package frc.chargers.wpilibextensions.geometry
-/*
+package frc.chargers.wpilibextensions.geometry.rotation
+
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.quantities.ofUnit
@@ -10,6 +10,10 @@ import edu.wpi.first.math.geometry.Rotation3d
 /**
  * Since [Rotation3d] is not unit-agnostic(its roll+pitch+yaw constructor requires radians as the unit),
  * there is no UnitRotation3d class.
+ */
+
+/**
+ * Constructs a [Rotation3d] using the kmeasure [Angle] unit for roll, pitch and yaw.
  */
 public fun Rotation3d(roll: Angle, pitch: Angle, yaw: Angle): Rotation3d = Rotation3d(
     roll.inUnit(radians),
@@ -25,5 +29,5 @@ public val Rotation3d.zAngle: Angle
     get() = z.ofUnit(radians)
 
 public fun Rotation3d.as2dAngle(): Angle = toRotation2d().asAngle()
- */
+
 

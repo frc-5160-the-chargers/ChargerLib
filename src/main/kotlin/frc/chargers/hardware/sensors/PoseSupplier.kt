@@ -2,7 +2,7 @@ package frc.chargers.hardware.sensors
 
 import com.batterystaple.kmeasure.quantities.Distance
 import frc.chargers.utils.Measurement
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.StandardDeviation
 
 /**

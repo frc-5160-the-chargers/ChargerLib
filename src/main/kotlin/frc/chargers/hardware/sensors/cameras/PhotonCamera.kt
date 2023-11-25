@@ -15,7 +15,7 @@ import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.geometry.Translation3d
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.utils.Measurement
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.StandardDeviation
 import org.photonvision.PhotonCamera

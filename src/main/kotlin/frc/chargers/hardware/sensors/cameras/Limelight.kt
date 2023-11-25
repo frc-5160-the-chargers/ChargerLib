@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.utils.Measurement
 import frc.chargers.wpilibextensions.fpgaTimestamp
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.StandardDeviation
 
 

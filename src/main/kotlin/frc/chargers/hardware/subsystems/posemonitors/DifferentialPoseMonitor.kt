@@ -15,7 +15,7 @@ import frc.chargers.utils.Measurement
 import frc.chargerlibexternal.utils.PoseEstimator
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import org.littletonrobotics.junction.Logger
 

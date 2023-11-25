@@ -22,7 +22,7 @@ import frc.chargerlibexternal.utils.PoseEstimator.TimestampedVisionUpdate
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.kinematics.swerve.ModulePositionGroup
 import org.littletonrobotics.junction.Logger
@@ -40,7 +40,7 @@ public class SwervePoseMonitor(
     private val gyro: HeadingProvider? = null,
     private val poseSuppliers: List<RobotPoseSupplier>,
     startingPose: UnitPose2d = UnitPose2d()
-): SubsystemBase(), RobotPoseSupplier, HeadingProvider{
+): SubsystemBase(), RobotPoseSupplier{
 
     public constructor(
         vararg poseSuppliers: RobotPoseSupplier,
@@ -62,7 +62,7 @@ public class SwervePoseMonitor(
             fpgaTimestamp(),
             true
         )
-    override val heading: Angle
+    public val heading: Angle
         get() = headingInputs.calculatedHeading
 
 

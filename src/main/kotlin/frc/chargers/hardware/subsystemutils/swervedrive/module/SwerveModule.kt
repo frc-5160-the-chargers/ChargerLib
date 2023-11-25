@@ -15,8 +15,8 @@ import frc.chargers.hardware.subsystemutils.swervedrive.SecondOrderControlScheme
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.utils.within
-import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
-import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import org.littletonrobotics.junction.Logger
 
 public class SwerveModule(

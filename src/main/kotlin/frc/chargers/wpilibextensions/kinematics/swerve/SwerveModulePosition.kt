@@ -6,8 +6,8 @@ import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.kinematics.SwerveModulePosition
-import frc.chargers.wpilibextensions.geometry.asAngle
-import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargers.wpilibextensions.geometry.rotation.asAngle
+import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 
 public fun SwerveModulePosition(
     distance: Distance,

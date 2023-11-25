@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.dimensions.AngleDimension
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.utils.Precision
-import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
 
 
 /**
@@ -60,7 +60,7 @@ public sealed class SwerveControl(
     public class ProfiledPIDFirstOrder(
         turnPIDConstants: PIDConstants,
         turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
-        override val turnConstraints: AngularTrapezoidProfile.Constraints,
+        override val turnConstraints: AngularMotionConstraints,
         override val turnFF: AngularMotorFF = AngularMotorFF.None,
         drivePIDConstants: PIDConstants,
         driveFF: AngularMotorFF,
@@ -75,7 +75,7 @@ public sealed class SwerveControl(
     public class ProfiledPIDSecondOrder(
         turnPIDConstants: PIDConstants,
         turnPrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
-        override val turnConstraints: AngularTrapezoidProfile.Constraints,
+        override val turnConstraints: AngularMotionConstraints,
         override val turnFF: AngularMotorFF,
         drivePIDConstants: PIDConstants,
         driveFF: AngularMotorFF,
@@ -97,7 +97,7 @@ public interface SecondOrderControlScheme{
  * Represents a generic object that holds the Trapezoidal constraints necessary for Profiled PID control.
  */
 public interface ProfiledPIDControlScheme{
-    public val turnConstraints: AngularTrapezoidProfile.Constraints
+    public val turnConstraints: AngularMotionConstraints
     public val turnFF: AngularMotorFF
         get() = AngularMotorFF.None
 }

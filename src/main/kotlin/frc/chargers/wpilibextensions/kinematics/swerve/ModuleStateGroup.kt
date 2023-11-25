@@ -5,7 +5,7 @@ import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.utils.a
-import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 
 
 /**
