@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.PIDController
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.framework.ChargerRobot
+import frc.chargers.utils.math.inputModulus
 
 
 /**
@@ -60,6 +61,8 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     )
 
 
+    private fun Quantity<I>.standardize(): Quantity<I> =
+        if (continuousInputRange == null) this else this.inputModulus(continuousInputRange)
 
     init{
         if(selfSustain){
@@ -90,16 +93,11 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
-    public override fun calculateOutput(): Quantity<O> {
-        errorIfNotInContinuousInput(getInput())
-        val output = Quantity<O>(pidController.calculate(getInput().siValue)) + getFFOutput()
-        return ensureInOutputRange(output)
-    }
-
-
-    private fun ensureInOutputRange(output: Quantity<O>): Quantity<O> {
+    override fun calculateOutput(): Quantity<O> {
+        val output = Quantity<O>(pidController.calculate(getInput().standardize().siValue)) + getFFOutput()
         return output.coerceIn(outputRange)
     }
+
 
     /**
      * The target is the value the PID controller is attempting to achieve.

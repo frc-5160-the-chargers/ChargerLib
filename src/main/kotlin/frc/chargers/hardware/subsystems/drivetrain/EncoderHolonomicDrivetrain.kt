@@ -27,7 +27,6 @@ import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
 import org.littletonrobotics.junction.Logger
-import kotlin.math.abs
 
 
 /**
@@ -422,10 +421,6 @@ public class EncoderHolonomicDrivetrain(
 
 
 
-    // used for open-loop drive; second kinematics
-    private var previousChassisPowers = ChassisPowers()
-    private var previousHeading = 0.0.degrees
-
 
     private val mostReliableHeading: Angle
         get() = (gyro?.heading ?: this.heading).inputModulus(0.0.degrees..360.degrees)
@@ -490,8 +485,6 @@ public class EncoderHolonomicDrivetrain(
         }
 
         currentControlMode = ControlMode.CLOSED_LOOP
-        previousChassisPowers = powers
-        previousHeading = mostReliableHeading
     }
 
 

@@ -37,7 +37,7 @@ public inline fun buildCommand(
         SequentialCommandGroup(
             *builder.commands.toTypedArray()
         ).withName(name)
-    }.finallyDo(builder.endBehavior)
+    }.finallyDo(builder.endBehavior).withExtraRequirements(*builder.requirements.toTypedArray())
 }
 
 
@@ -47,8 +47,9 @@ public annotation class CommandBuilderMarker
 
 @CommandBuilderMarker
 public class CommandBuilder {
-    @PublishedApi
-    internal var commands: LinkedHashSet<Command> = linkedSetOf() // LinkedHashSet keeps commands in order, but also ensures they're not added multiple times
+    public var commands: LinkedHashSet<Command> = linkedSetOf() // LinkedHashSet keeps commands in order, but also ensures they're not added multiple times
+
+    public val requirements: MutableList<Subsystem> = mutableListOf()
 
     public var endBehavior: (Boolean) -> Unit = {}
     
@@ -58,6 +59,11 @@ public class CommandBuilder {
     public operator fun <C : Command> C.unaryPlus(): C{
         commands.add(this)
         return this
+    }
+
+
+    public fun addRequirements(vararg requirements: Subsystem){
+        this.requirements.addAll(requirements)
     }
 
     /**

@@ -7,6 +7,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.LinearMotorFF
 import frc.chargers.framework.ChargerRobot
+import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
 import frc.chargers.wpilibextensions.geometry.motion.LinearTrapezoidProfile
@@ -40,11 +41,9 @@ public class LinearProfiledPIDController(
         }
     }
 
-    public fun errorIfNotInContinuousInput(value: Distance){
-        if (continuousInputRange != null && value !in continuousInputRange){
-            error("getInput is not returning values within the continuous input range.")
-        }
-    }
+
+    private fun Distance.standardize(): Distance =
+        if (continuousInputRange == null) this else this.inputModulus(continuousInputRange)
 
 
     private val pidController = ProfiledPIDController(0.0, 0.0, 0.0,constraints.inUnit(meters,seconds))
@@ -63,17 +62,12 @@ public class LinearProfiledPIDController(
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
-    public override fun calculateOutput(): Voltage {
-        errorIfNotInContinuousInput(getInput())
-        val output = Voltage(pidController.calculate(getInput().inUnit(meters))) +
+    override fun calculateOutput(): Voltage {
+        val output = Voltage(pidController.calculate(getInput().standardize().inUnit(meters))) +
                 feedforward.calculate(pidController.setpoint.velocity.ofUnit(meters/seconds))
-        return ensureInOutputRange(output)
-    }
-
-
-    private fun ensureInOutputRange(output: Voltage): Voltage {
         return output.coerceIn(outputRange)
     }
+
 
     /**
      * The target is the value the PID controller is attempting to achieve.

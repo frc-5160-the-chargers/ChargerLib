@@ -1,10 +1,10 @@
 package frc.chargers.controls.pid
 
 import edu.wpi.first.math.controller.PIDController
-import frc.chargers.commands.RunCommand
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.framework.ChargerRobot
+import frc.chargers.utils.math.inputModulus
 
 /**
  * Wraps WPILib's [PIDController], adding various improvements.
@@ -35,11 +35,8 @@ public class SuperPIDController(
     public val getFFOutput: SuperPIDController.() -> Double = {0.0}
 ): FeedbackController<Double, Double> {
 
-    public fun errorIfNotInContinuousInput(value: Double){
-        if (continuousInputRange != null && value !in continuousInputRange){
-            error("getInput is not returning values within the continuous input range.")
-        }
-    }
+    private fun Double.standardize(): Double =
+        if (continuousInputRange == null) this else this.inputModulus(continuousInputRange)
 
 
     /**
@@ -92,16 +89,11 @@ public class SuperPIDController(
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
-    public override fun calculateOutput(): Double {
-        errorIfNotInContinuousInput(getInput())
-        val output = pidController.calculate(getInput()) + getFFOutput()
-        return ensureInOutputRange(output)
-    }
-
-
-    private fun ensureInOutputRange(output: Double): Double {
+    override fun calculateOutput(): Double {
+        val output = pidController.calculate(getInput().standardize()) + getFFOutput()
         return output.coerceIn(outputRange)
     }
+
 
     /**
      * The target is the value the PID controller is attempting to achieve.

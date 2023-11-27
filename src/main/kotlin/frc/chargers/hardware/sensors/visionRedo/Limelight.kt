@@ -4,8 +4,10 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj2.command.CommandBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargerlibexternal.utils.LimelightHelpers.*
+import frc.chargers.utils.RequirementManager
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
 
@@ -16,7 +18,31 @@ public class Limelight(
     public val lensHeight: Distance,
     public val mountAngle: Angle,
     public val defaultDriverStationIfUnavailable: DriverStation.Alliance = DriverStation.Alliance.Blue
-): SubsystemBase(){
+){
+
+    /*
+    public companion object{
+        private val all_req_managers = mutableListOf<RequirementManager>()
+        public fun requireIndefinetly(llName: String = "limelight"){
+            if (llName !in all_req_managers.map{it.name}){
+                val manager = RequirementManager(llName)
+                all_req_managers.add(manager)
+                manager.requireIndefinetly()
+            }
+        }
+
+        context(CommandBase)
+        public fun requirePermanently(llName: String = "limelight"){
+
+        }
+
+
+
+
+
+    }
+
+     */
 
 
 
