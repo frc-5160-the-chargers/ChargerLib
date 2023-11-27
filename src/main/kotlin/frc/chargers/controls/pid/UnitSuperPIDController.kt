@@ -12,7 +12,7 @@ import frc.chargers.utils.math.inputModulus
 /**
  * Wraps WPILib's [PIDController], adding various improvements, including unit support.
  * Essentially, this controller converts the input into its SI value before calculating PID,
- * then converts the output into SI Value form.
+ * then converts the output int o SI Value form.
  *
  * @see SuperPIDController for an explanation of other added features.
  */

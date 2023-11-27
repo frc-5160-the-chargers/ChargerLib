@@ -94,10 +94,10 @@ public fun realEncoderHolonomicDrivetrain(
 ): EncoderHolonomicDrivetrain {
     if (invertTurnMotors){
         turnMotors.apply{
-            topLeft.inverted = !topLeft.inverted
-            topRight.inverted = !topLeft.inverted
-            bottomLeft.inverted = !topLeft.inverted
-            bottomRight.inverted = !topLeft.inverted
+            topLeft.inverted = true
+            topRight.inverted = true
+            bottomLeft.inverted = true
+            bottomRight.inverted = true
         }
     }
 
