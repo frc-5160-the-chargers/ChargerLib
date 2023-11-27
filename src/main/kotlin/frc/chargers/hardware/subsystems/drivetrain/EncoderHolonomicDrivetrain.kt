@@ -27,6 +27,7 @@ import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
 import org.littletonrobotics.junction.Logger
+import kotlin.math.abs
 
 
 /**
@@ -484,7 +485,7 @@ public class EncoderHolonomicDrivetrain(
                     ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
                 }else{
                     speeds
-                }.correctForDynamics(driftRate = 1.8)
+                }.correctForDynamics(driftRate = 1.6)
             )
         }
 

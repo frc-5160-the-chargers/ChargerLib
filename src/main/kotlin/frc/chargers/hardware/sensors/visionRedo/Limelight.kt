@@ -12,7 +12,7 @@ import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
 
 
 public class Limelight(
-    public val name: String = "limelight",
+    @JvmField public val name: String = "limelight",
     public val lensHeight: Distance,
     public val mountAngle: Angle,
     public val defaultDriverStationIfUnavailable: DriverStation.Alliance = DriverStation.Alliance.Blue
