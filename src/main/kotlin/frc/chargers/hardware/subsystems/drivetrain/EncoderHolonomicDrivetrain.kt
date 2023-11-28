@@ -94,12 +94,19 @@ public fun realEncoderHolonomicDrivetrain(
 ): EncoderHolonomicDrivetrain {
     if (invertTurnMotors){
         turnMotors.apply{
-            topLeft.inverted = true
-            topRight.inverted = true
-            bottomLeft.inverted = true
-            bottomRight.inverted = true
+            println(topLeft.inverted)
+            println(topRight.inverted)
+            println(bottomLeft.inverted)
+            println(bottomRight.inverted)
+            topLeft.inverted = !topLeft.inverted
+            topRight.inverted = !topRight.inverted
+            bottomLeft.inverted = !bottomLeft.inverted
+            bottomRight.inverted = !bottomRight.inverted
         }
     }
+
+
+
 
     val topLeft = SwerveModule(
         "Drivetrain(Swerve)/TopLeftSwerveModule",

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class UnitSuperPIDControllerTest{
+internal class UnitSuperPIDControllerTest{
 
     @BeforeEach
     fun setup(){
@@ -17,7 +17,7 @@ class UnitSuperPIDControllerTest{
     }
 
     @Test
-    fun `calculate output vs wpilib pid controller`(){
+    fun `calculateOutput should be equivalent to WPILib PID controller`(){
         val getInput = {180.degrees}
         val target = 0.degrees
         val wpilibController = PIDController(0.2,0.0,0.0)
@@ -27,7 +27,7 @@ class UnitSuperPIDControllerTest{
         val chargerPIDcontroller = UnitSuperPIDController<AngleDimension,ScalarDimension>(
             PIDConstants(0.2,0.0,0.0),
             getInput,
-            target = 0.degrees,
+            target = target,
             continuousInputRange = 0.0.degrees..360.degrees
         )
 

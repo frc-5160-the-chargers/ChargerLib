@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import kotlin.math.PI
 
-class AngularProfiledPIDControllerTest {
+internal class AngularProfiledPIDControllerTest {
 
     @Test
-    fun calculateOutput() {
+    fun `calculateOutput should be equivalent to WPILib PID controller`() {
         fun getInput() = PI / 2
         val target = 0.0
         val wpiController = ProfiledPIDController(3.0,0.0,0.0, TrapezoidProfile.Constraints(3.0,1.0))

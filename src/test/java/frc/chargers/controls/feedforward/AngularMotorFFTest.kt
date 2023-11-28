@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 
-class AngularMotorFFTest {
+internal class AngularMotorFFTest {
 
     @BeforeEach
     fun setUp() {

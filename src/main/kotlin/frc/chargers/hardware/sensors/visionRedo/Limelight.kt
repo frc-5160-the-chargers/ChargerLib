@@ -4,7 +4,11 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.chargerlibexternal.utils.LimelightHelpers.*
+import frc.chargers.commands.CommandBuilder
+import frc.chargers.utils.RequirementManager
+import frc.chargers.wpilibextensions.Alert
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
 
@@ -17,29 +21,64 @@ public class Limelight(
     public val defaultDriverStationIfUnavailable: DriverStation.Alliance = DriverStation.Alliance.Blue
 ){
 
-    /*
-    public companion object{
-        private val all_req_managers = mutableListOf<RequirementManager>()
-        public fun requireIndefinetly(llName: String = "limelight"){
-            if (llName !in all_req_managers.map{it.name}){
-                val manager = RequirementManager(llName)
-                all_req_managers.add(manager)
-                manager.requireIndefinetly()
-            }
+    init{
+        if (name !in allReqManagers.map{it.name}){
+            allReqManagers.add(RequirementManager(name))
+        }else{
+            error("This limelight shares a name with another limelight.")
         }
-
-        context(CommandBase)
-        public fun requirePermanently(llName: String = "limelight"){
-
-        }
-
-
-
-
 
     }
 
-     */
+
+
+    public companion object{
+        private val allReqManagers = mutableListOf<RequirementManager>()
+        private val limelightRequiredButNotInstantiatedAlert =
+            Alert.warning(text = "A limelight was required; however, the respective object was never instantiated. ")
+        public fun requireIndefinitely(llName: String = "limelight"){
+            for (reqManager in allReqManagers){
+                if (reqManager.name == llName){
+                    reqManager.requireIndefinetly()
+                    return
+                }
+            }
+            limelightRequiredButNotInstantiatedAlert.active = true
+        }
+
+        context(CommandBase)
+        public fun requireTemporarily(llName: String = "limelight"){
+            for (reqManager in allReqManagers){
+                if (reqManager.name == llName){
+                    reqManager.requireTemporarily()
+                    return
+                }
+            }
+            limelightRequiredButNotInstantiatedAlert.active = true
+        }
+
+        context(CommandBuilder)
+        public fun requireTemporarily(llName: String = "limelight"){
+            for (reqManager in allReqManagers){
+                if (reqManager.name == llName){
+                    reqManager.requireTemporarily()
+                    return
+                }
+            }
+            limelightRequiredButNotInstantiatedAlert.active = true
+        }
+
+        public fun removeIndefiniteRequirement(llName: String = "limelight"){
+            for (reqManager in allReqManagers){
+                if (reqManager.name == llName){
+                    reqManager.removeRequirement()
+                    return
+                }
+            }
+            limelightRequiredButNotInstantiatedAlert.active = true
+        }
+
+    }
 
 
 

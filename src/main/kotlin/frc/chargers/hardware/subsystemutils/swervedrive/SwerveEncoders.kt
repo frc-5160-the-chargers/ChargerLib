@@ -7,6 +7,7 @@ import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.absolute.CANcoderConfiguration
 import frc.chargers.hardware.sensors.encoders.absolute.ChargerCANcoder
 import frc.chargers.hardware.sensors.withOffset
+import kotlin.internal.LowPriorityInOverloadResolution
 
 /**
  * Constructs an instance of [SwerveEncoders] with CTRE CANcoders.
@@ -42,6 +43,37 @@ public fun swerveCANcoders(
 
 }
 
+@LowPriorityInOverloadResolution
+public fun <E, C: EncoderConfiguration> SwerveEncoders(
+    topLeft: E,
+    topRight: E,
+    bottomLeft: E,
+    bottomRight: E,
+    configuration: C? = null
+): SwerveEncoders where E: PositionEncoder, E: EncoderConfigurable<C> =
+    SwerveEncoders(
+        topLeft.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        topRight.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        bottomLeft.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        bottomRight.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        }
+    )
+
 
 public data class SwerveEncoders(
     val topLeft: PositionEncoder,
@@ -62,36 +94,4 @@ public data class SwerveEncoders(
         bottomRight = bottomRight.withOffset(bottomRightZero),
     )
 
-
-    public companion object{
-        public operator fun <E, C: EncoderConfiguration> invoke(
-            topLeft: E,
-            topRight: E,
-            bottomLeft: E,
-            bottomRight: E,
-            configuration: C? = null
-        ): SwerveEncoders where E: PositionEncoder, E: EncoderConfigurable<C> =
-            SwerveEncoders(
-                topLeft.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                topRight.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                bottomLeft.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                bottomRight.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                }
-        )
-    }
 }

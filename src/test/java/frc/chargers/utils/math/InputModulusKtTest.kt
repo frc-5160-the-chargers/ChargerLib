@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import kotlin.math.abs
 
-class InputModulusKtTest {
+internal class InputModulusKtTest {
 
     @BeforeEach
     fun setUp() {
         assert(HAL.initialize(500,0))
     }
 
-    fun basicStandardize(input: Double): Double = if (input < 0){
+    private fun basicStandardize(input: Double): Double = if (input < 0){
         (input % 360.0) + 360.0
     }else{
         input % 360.0

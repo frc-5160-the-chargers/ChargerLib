@@ -8,6 +8,7 @@ import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.ChargerCANSparkMax
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
+import kotlin.internal.LowPriorityInOverloadResolution
 
 /**
  * Constructs an instance of [SwerveMotors] with Spark Max motor controllers.
@@ -35,6 +36,37 @@ public fun talonFXSwerveMotors(
     topLeft, topRight, bottomLeft, bottomRight,TalonFXConfiguration().apply(configure)
 )
 
+@LowPriorityInOverloadResolution
+public fun <M, C: MotorConfiguration> SwerveMotors(
+    topLeft: M,
+    topRight: M,
+    bottomLeft: M,
+    bottomRight: M,
+    configuration: C? = null
+): SwerveMotors where M: EncoderMotorController, M: MotorConfigurable<C> =
+    SwerveMotors(
+        topLeft = topLeft.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        topRight.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        bottomLeft.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        bottomRight.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        }
+    )
+
 
 
 /**
@@ -46,40 +78,4 @@ public open class SwerveMotors(
     public open val topRight: EncoderMotorController,
     public open val bottomLeft: EncoderMotorController,
     public open val bottomRight: EncoderMotorController
-){
-    /**
-     * This companion object stores an [invoke] function, which creates a [SwerveMotors] instance
-     * where all the motors are configured on initialization.
-     */
-    public companion object{
-        public operator fun <M, C: MotorConfiguration> invoke(
-            topLeft: M,
-            topRight: M,
-            bottomLeft: M,
-            bottomRight: M,
-            configuration: C? = null
-        ): SwerveMotors where M: EncoderMotorController, M: MotorConfigurable<C> =
-            SwerveMotors(
-                topLeft.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                topRight.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                bottomLeft.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                bottomRight.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                }
-            )
-    }
-}
+)

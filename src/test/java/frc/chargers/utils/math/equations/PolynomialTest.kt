@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import kotlin.math.pow
 
-class PolynomialTest {
+internal class PolynomialTest {
 
     @BeforeEach
     fun setUp() {
@@ -15,7 +15,7 @@ class PolynomialTest {
     }
 
     @Test
-    fun invoke() {
+    fun `polynomial output check`() {
         val input = 5.0
         val allCoefficients: List<List<Double>> = listOf(
             listOf(1.0,2.0,3.0),
