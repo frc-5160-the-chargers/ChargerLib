@@ -1,4 +1,4 @@
-package frc.chargers.hardware.sensors.gyroscopes
+package frc.chargers.hardware.sensors.imu.gyroscopes
 
 import com.batterystaple.kmeasure.quantities.Angle
 

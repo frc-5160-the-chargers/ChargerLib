@@ -11,10 +11,9 @@ import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.*
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.utils.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonFXEncoderAdapter
 import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
@@ -73,7 +72,7 @@ public inline fun falcon(
  * @see TalonFXConfiguration
  */
 public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : TalonFX(deviceNumber, canBus),
-    FeedbackMotorController, MotorConfigurable<TalonFXConfiguration> {
+    FeedbackMotorController, HardwareConfigurable<TalonFXConfiguration> {
 
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
@@ -314,7 +313,7 @@ public data class TalonFXConfiguration(
     var motorOutputUpdateFrequency: Frequency? = null,
     var currentUpdateFrequency: Frequency? = null
 
-): MotorConfiguration
+): HardwareConfiguration
 
 public fun CTRETalonFXConfiguration.applyChanges(chargerConfig: TalonFXConfiguration): CTRETalonFXConfiguration{
     chargerConfig.beepOnBoot?.let{

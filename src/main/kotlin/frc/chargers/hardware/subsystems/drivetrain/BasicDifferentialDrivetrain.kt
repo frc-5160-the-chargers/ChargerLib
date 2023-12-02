@@ -4,8 +4,8 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.TalonSRXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.SparkConfiguration
 
@@ -37,12 +37,12 @@ public inline fun talonSRXDrivetrain(
  * A convenience function to create a [BasicDifferentialDrivetrain]
  * allowing its motors to all be configured.
  */
-public fun <C : MotorConfiguration, M> BasicDifferentialDrivetrain(
+public fun <C : HardwareConfiguration, M> BasicDifferentialDrivetrain(
     leftMotors: M,
     rightMotors: M,     
     invertMotors: Boolean = false,
     configuration: C
-): BasicDifferentialDrivetrain where M : MotorControllerGroup, M : MotorConfigurable<C> =
+): BasicDifferentialDrivetrain where M : MotorControllerGroup, M : HardwareConfigurable<C> =
     BasicDifferentialDrivetrain(
         leftMotors = leftMotors.apply { configure(configuration) },
         rightMotors = rightMotors.apply { configure(configuration) },

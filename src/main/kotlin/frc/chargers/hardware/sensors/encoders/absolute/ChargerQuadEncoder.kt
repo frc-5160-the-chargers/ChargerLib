@@ -7,15 +7,15 @@ import edu.wpi.first.hal.SimDevice
 import edu.wpi.first.wpilibj.CounterBase.EncodingType
 import edu.wpi.first.wpilibj.DigitalSource
 import frc.chargers.hardware.sensors.encoders.Encoder
-import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
-import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import edu.wpi.first.wpilibj.Encoder as QuadratureEncoder
 
 /**
  * An adapter from the WPILib Encoder class to the ChargerLib Encoder interface.
  */
 public class ChargerQuadEncoder:
-    QuadratureEncoder, Encoder, EncoderConfigurable<QuadEncoderConfiguration> {
+    QuadratureEncoder, Encoder, HardwareConfigurable<QuadEncoderConfiguration> {
 
     override val angularPosition: Angle
         get() = get() * anglePerPulse
@@ -135,4 +135,4 @@ public data class QuadEncoderConfiguration(
     var samplesPerAverage: Int? = null,
     var simDevice: SimDevice? = null,
     var reverseDirection: Boolean? = null
-): EncoderConfiguration
+): HardwareConfiguration

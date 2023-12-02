@@ -12,10 +12,9 @@ import com.revrobotics.SparkMaxPIDController
 import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.utils.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
 import frc.chargers.wpilibextensions.delay
@@ -121,7 +120,7 @@ public open class ChargerCANSparkMax(
     deviceId: Int,
     type: MotorType,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
-) : CANSparkMax(deviceId, type), FeedbackMotorController, MotorConfigurable<SparkMaxConfiguration> {
+) : CANSparkMax(deviceId, type), FeedbackMotorController, HardwareConfigurable<SparkMaxConfiguration> {
 
 
     private inner class EncoderConfiguration(
@@ -308,7 +307,7 @@ public data class SparkMaxConfiguration(
     var feedbackOutputRange: ClosedRange<Double>? = null,
     var positionPIDWrappingEnabled: Boolean? = null,
     var positionPIDWrappingInputRange: ClosedRange<Double>? = null,
-) : MotorConfiguration
+) : HardwareConfiguration
 
 public data class AlternateEncoderConfiguration(val countsPerRev: Int, val encoderType: SparkMaxAlternateEncoder.Type? = null) {
     public companion object {

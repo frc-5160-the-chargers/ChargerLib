@@ -1,8 +1,8 @@
 package frc.chargers.hardware.subsystemutils.swervedrive
 
 import com.batterystaple.kmeasure.quantities.Angle
-import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
-import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.absolute.CANcoderConfiguration
 import frc.chargers.hardware.sensors.encoders.absolute.ChargerCANcoder
@@ -44,13 +44,13 @@ public fun swerveCANcoders(
 }
 
 @LowPriorityInOverloadResolution
-public fun <E, C: EncoderConfiguration> SwerveEncoders(
+public fun <E, C: HardwareConfiguration> SwerveEncoders(
     topLeft: E,
     topRight: E,
     bottomLeft: E,
     bottomRight: E,
     configuration: C? = null
-): SwerveEncoders where E: PositionEncoder, E: EncoderConfigurable<C> =
+): SwerveEncoders where E: PositionEncoder, E: HardwareConfigurable<C> =
     SwerveEncoders(
         topLeft.apply{
             if(configuration != null){

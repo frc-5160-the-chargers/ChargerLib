@@ -6,10 +6,9 @@ import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
 import com.ctre.phoenix.sensors.CANCoder
-import frc.chargers.utils.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonSRXEncoderAdapter
 import kotlin.math.roundToInt
@@ -72,7 +71,7 @@ public inline fun redlineSRX(
 public open class ChargerTalonSRX(
     deviceNumber: Int,
     protected val encoderTicksPerRotation: Int
-) : WPI_TalonSRX(deviceNumber), EncoderMotorController, MotorConfigurable<TalonSRXConfiguration> {
+) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<TalonSRXConfiguration> {
 
 
     final override val encoder: Encoder
@@ -194,7 +193,7 @@ public data class TalonSRXConfiguration(
     public var reverseSoftLimitEnable: Boolean? = null,
 
     val customParameters: MutableMap<CustomParameterIndex, CustomParameterValue> = mutableMapOf()
-): MotorConfiguration
+): HardwareConfiguration
 
 public sealed interface RemoteFeedbackFilterDevice
 public data class CANCoderRemoteFeedbackFilterDevice(val canCoder: CANCoder, val remoteOrdinal: Int) :

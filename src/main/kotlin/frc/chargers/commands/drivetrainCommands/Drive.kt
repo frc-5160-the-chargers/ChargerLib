@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CodeBlockContext
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.constants.TurnPIDConstants
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.controls.pid.PIDConstants

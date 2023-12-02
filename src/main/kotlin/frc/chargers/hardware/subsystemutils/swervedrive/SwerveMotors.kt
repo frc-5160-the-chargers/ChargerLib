@@ -1,8 +1,8 @@
 package frc.chargers.hardware.subsystemutils.swervedrive
 
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.ChargerCANSparkMax
@@ -37,13 +37,13 @@ public fun talonFXSwerveMotors(
 )
 
 @LowPriorityInOverloadResolution
-public fun <M, C: MotorConfiguration> SwerveMotors(
+public fun <M, C: HardwareConfiguration> SwerveMotors(
     topLeft: M,
     topRight: M,
     bottomLeft: M,
     bottomRight: M,
     configuration: C? = null
-): SwerveMotors where M: EncoderMotorController, M: MotorConfigurable<C> =
+): SwerveMotors where M: EncoderMotorController, M: HardwareConfigurable<C> =
     SwerveMotors(
         topLeft = topLeft.apply{
             if(configuration != null){

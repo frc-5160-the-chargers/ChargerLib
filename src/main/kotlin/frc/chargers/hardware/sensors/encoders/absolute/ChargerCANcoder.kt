@@ -8,9 +8,8 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration as CTRECANcoderConfigurat
 import com.ctre.phoenix6.hardware.CANcoder as CTRECANcoder
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
-import frc.chargers.utils.warnIfInSimulation
-import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
-import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
 import frc.chargers.utils.Measurement
@@ -26,7 +25,7 @@ public class ChargerCANcoder(
     deviceId: Int,
     canBus: String = "",
     factoryDefault: Boolean = true
-): CTRECANcoder(deviceId, canBus), ResettableTimestampedEncoder, EncoderConfigurable<CANcoderConfiguration> {
+): CTRECANcoder(deviceId, canBus), ResettableTimestampedEncoder, HardwareConfigurable<CANcoderConfiguration> {
 
     init{
         if (factoryDefault){
@@ -49,7 +48,7 @@ public class ChargerCANcoder(
 
     public val absolute: TimestampedEncoder = AbsoluteEncoderAdaptor()
 
-    private inner class AbsoluteEncoderAdaptor: TimestampedEncoder by this, EncoderConfigurable<CANcoderConfiguration> by this{
+    private inner class AbsoluteEncoderAdaptor: TimestampedEncoder by this, HardwareConfigurable<CANcoderConfiguration> by this{
         override val timestampedAngularPosition: Measurement<Angle>
             get(){
                 val statusSignal = absolutePosition
@@ -120,7 +119,7 @@ public data class CANcoderConfiguration(
 
     var positionUpdateFrequency: Frequency? = null,
     var velocityUpdateFrequency: Frequency? = null
-): EncoderConfiguration
+): HardwareConfiguration
 
 public fun CTRECANcoderConfiguration.applyChanges(chargerConfig: CANcoderConfiguration): CTRECANcoderConfiguration{
     chargerConfig.futureProofConfigs?.let{

@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Time
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 
 public fun PositionEncoder.withOffset(zeroOffset: Angle): PositionEncoder = object: PositionEncoder {
     override val angularPosition: Angle

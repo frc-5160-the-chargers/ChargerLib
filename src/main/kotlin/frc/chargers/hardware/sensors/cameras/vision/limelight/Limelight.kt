@@ -1,4 +1,4 @@
-package frc.chargers.hardware.sensors.visionRedo
+package frc.chargers.hardware.sensors.cameras.vision.limelight
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
@@ -7,6 +7,10 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.chargerlibexternal.utils.LimelightHelpers.*
 import frc.chargers.commands.CommandBuilder
+import frc.chargers.hardware.sensors.cameras.vision.Classifier
+import frc.chargers.hardware.sensors.cameras.vision.VisionData
+import frc.chargers.hardware.sensors.cameras.vision.VisionPipeline
+import frc.chargers.hardware.sensors.cameras.vision.VisionResult
 import frc.chargers.utils.RequirementManager
 import frc.chargers.wpilibextensions.Alert
 import frc.chargers.wpilibextensions.geometry.ofUnit
@@ -97,7 +101,7 @@ public class Limelight(
 
 
 
-    public inner class ApriltagPipeline(override val id: Int): Pipeline, VisionPipeline<VisionResult.Apriltag>{
+    public inner class ApriltagPipeline(override val id: Int): Pipeline, VisionPipeline<VisionResult.Apriltag> {
 
         init{
             if (id < 0 || id > 9){
@@ -228,7 +232,7 @@ public class Limelight(
         override val mountAngle: Angle = this@Limelight.mountAngle
     }
 
-    public open inner class MLClassifierPipeline(final override val id: Int): Classifier<Int?>, Pipeline{
+    public open inner class MLClassifierPipeline(final override val id: Int): Classifier<Int?>, Pipeline {
         init{
             if (id < 0 || id > 9){
                 error("Your pipeline's ID is out of range.")

@@ -1,4 +1,4 @@
-package frc.chargers.hardware.sensors.gyroscopes
+package frc.chargers.hardware.sensors.imu.gyroscopes
 
 import com.batterystaple.kmeasure.quantities.Angle
 
@@ -27,7 +27,7 @@ public interface HeadingProvider {
          * val headingProvider = HeadingProvider{ Angle(0.0) }
          */
         public inline operator fun invoke(crossinline getHeading: () -> Angle): HeadingProvider =
-            object: HeadingProvider{
+            object: HeadingProvider {
                 override val heading: Angle get() = getHeading()
             }
 

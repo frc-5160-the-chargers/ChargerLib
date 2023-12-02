@@ -10,7 +10,7 @@ import frc.chargers.wpilibextensions.Alert
  *
  * This class should be used with classes that aren't subsystems,
  * but need to enforce safety within their use in commands and other subsystems.
- * One of the examples of this is the [frc.chargers.hardware.sensors.visionRedo.Limelight] class.
+ * One of the examples of this is the [frc.chargers.hardware.sensors.cameras.vision.limelight] class.
  */
 public class RequirementManager(public val name: String) {
     public fun requireIndefinetly(){

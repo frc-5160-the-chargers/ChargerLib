@@ -1,4 +1,4 @@
-package frc.chargers.hardware.sensors.visionRedo
+package frc.chargers.hardware.sensors.cameras.vision
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
@@ -36,7 +36,7 @@ public fun advantageKitApriltagPipeline(
 internal class LoggedApriltagVisionPipeline(
     name: String,
     private val pipeline: VisionPipeline<VisionResult.Apriltag>
-): VisionPipeline<VisionResult.Apriltag>{
+): VisionPipeline<VisionResult.Apriltag> {
 
     private val inputs = Inputs()
 
@@ -126,21 +126,21 @@ internal class LoggedApriltagVisionPipeline(
         override fun fromLog(table: LogTable) {
             table.apply{
                 val bestTargetInput = VisionResult.Apriltag(
-                    getDouble("BestTarget/tx",0.0),
-                    getDouble("BestTarget/ty",0.0),
-                    getDouble("BestTarget/areaPercent",0.0),
-                    getInteger("BestTarget/id",0).toInt(),
+                    getDouble("BestTarget/tx", 0.0),
+                    getDouble("BestTarget/ty", 0.0),
+                    getDouble("BestTarget/areaPercent", 0.0),
+                    getInteger("BestTarget/id", 0).toInt(),
                     UnitTransform3d(
                         Transform3d(
                             Translation3d(
-                                getDouble("BestTarget/TransformFromCamera/x",0.0),
-                                getDouble("BestTarget/TransformFromCamera/y",0.0),
-                                getDouble("BestTarget/TransformFromCamera/z",0.0),
+                                getDouble("BestTarget/TransformFromCamera/x", 0.0),
+                                getDouble("BestTarget/TransformFromCamera/y", 0.0),
+                                getDouble("BestTarget/TransformFromCamera/z", 0.0),
                             ),
                             Rotation3d(
-                                getDouble("BestTarget/TransformFromCamera/roll",0.0),
-                                getDouble("BestTarget/TransformFromCamera/pitch",0.0),
-                                getDouble("BestTarget/TransformFromCamera/yaw",0.0),
+                                getDouble("BestTarget/TransformFromCamera/roll", 0.0),
+                                getDouble("BestTarget/TransformFromCamera/pitch", 0.0),
+                                getDouble("BestTarget/TransformFromCamera/yaw", 0.0),
                             )
                         )
                     )

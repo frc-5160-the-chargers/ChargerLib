@@ -14,11 +14,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.constants.drivetrain.DiffDriveConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.sensors.RobotPoseSupplier
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.posemonitors.DifferentialPoseMonitor
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIO
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOReal
@@ -70,7 +70,7 @@ public inline fun talonFXDrivetrain(
  * A convenience function to create an [EncoderDifferentialDrivetrain]
  * allowing its motors to all be configured.
  */
-public fun <C : MotorConfiguration> EncoderDifferentialDrivetrain(
+public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
     leftMotors: EncoderMotorControllerGroup<C>,
     rightMotors: EncoderMotorControllerGroup<C>,
     constants: DiffDriveConstants = DiffDriveConstants.andymark(),
@@ -94,7 +94,7 @@ public class EncoderDifferentialDrivetrain(
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
-): SubsystemBase(), DifferentialDrivetrain, HeadingProvider{
+): SubsystemBase(), DifferentialDrivetrain, HeadingProvider {
 
     internal val inputs = DiffDriveIO.Inputs()
 

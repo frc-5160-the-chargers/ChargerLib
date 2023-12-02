@@ -1,10 +1,12 @@
-package frc.chargers.hardware.sensors
+package frc.chargers.hardware.sensors.imu
 
 import com.batterystaple.kmeasure.quantities.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import frc.chargers.framework.ChargerRobot
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
-import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
+import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
+import frc.chargers.hardware.sensors.ThreeAxisSpeedometer
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.wpilibextensions.kinematics.xVelocity
 import frc.chargers.wpilibextensions.kinematics.yVelocity
 
@@ -14,7 +16,7 @@ import frc.chargers.wpilibextensions.kinematics.yVelocity
  * Contains headingProviderImpl and getChassisSpeeds in order to use simulated readings from the drivetrain
  * as a stand-in for values.
  */
-public class IMUSim: IMU{
+public class IMUSim: IMU {
 
     public companion object{
         private var headingProviderImpl: HeadingProvider = HeadingProvider { Angle(0.0) }
@@ -47,7 +49,7 @@ public class IMUSim: IMU{
     override val compass: HeadingProvider = object: HeadingProvider {
         override val heading: Angle get() = Angle(0.0)
     }
-    override val accelerometer: ThreeAxisAccelerometer = object: ThreeAxisAccelerometer{
+    override val accelerometer: ThreeAxisAccelerometer = object: ThreeAxisAccelerometer {
         override val xAcceleration: Acceleration
             get(){
                 val speeds = getChassisSpeeds()
@@ -65,7 +67,7 @@ public class IMUSim: IMU{
 
         override val zAcceleration: Acceleration = Acceleration(0.0)
     }
-    override val speedometer: ThreeAxisSpeedometer = object: ThreeAxisSpeedometer{
+    override val speedometer: ThreeAxisSpeedometer = object: ThreeAxisSpeedometer {
         override val xVelocity: Velocity get() = getChassisSpeeds().xVelocity
         override val yVelocity: Velocity get() = getChassisSpeeds().yVelocity
         override val zVelocity: Velocity = Velocity(0.0)

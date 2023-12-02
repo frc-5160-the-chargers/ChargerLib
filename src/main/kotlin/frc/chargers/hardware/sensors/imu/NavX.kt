@@ -1,12 +1,14 @@
-package frc.chargers.hardware.sensors
+package frc.chargers.hardware.sensors.imu
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import com.kauailabs.navx.frc.AHRS
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
-import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
+import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
+import frc.chargers.hardware.sensors.ThreeAxisSpeedometer
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.utils.math.units.g
 
 public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
@@ -57,7 +59,7 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
                                                                     // whereas we want counterclockwise to be positive
     }
 
-    public inner class Accelerometer internal constructor(): ThreeAxisAccelerometer{
+    public inner class Accelerometer internal constructor(): ThreeAxisAccelerometer {
         override val xAcceleration: Acceleration
             get() = ahrs.worldLinearAccelX.toDouble().ofUnit(g)
         override val yAcceleration: Acceleration
@@ -66,7 +68,7 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
             get() = ahrs.worldLinearAccelZ.toDouble().ofUnit(g)
     }
 
-    public inner class Speedometer internal constructor(): ThreeAxisSpeedometer{
+    public inner class Speedometer internal constructor(): ThreeAxisSpeedometer {
         override val xVelocity: Velocity
             get() = ahrs.velocityX.toDouble().ofUnit(meters / seconds)
         override val yVelocity: Velocity

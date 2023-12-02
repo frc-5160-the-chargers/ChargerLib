@@ -1,19 +1,16 @@
-package frc.chargers.advantagekitextensions.loggedwrappers
+package frc.chargers.hardware.sensors.imu
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
-import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.advantagekitextensions.ChargerLoggableInputs
-import frc.chargers.hardware.sensors.IMU
-import frc.chargers.hardware.sensors.IMUSim
 import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
 import frc.chargers.hardware.sensors.ThreeAxisSpeedometer
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
-import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import org.littletonrobotics.junction.Logger
 
 /**
@@ -43,7 +40,7 @@ private class LoggedIMU(
     override val heading: Angle get() = generalInputs.fusedHeading
     override val isConnected: Boolean get() = generalInputs.isConnected
     override val altitude: Distance? get() = generalInputs.altitude
-    override val compass: HeadingProvider = object: HeadingProvider{
+    override val compass: HeadingProvider = object: HeadingProvider {
         override val heading: Angle get() = generalInputs.compassHeading
     }
     override val gyroscope: GyroscopeInputs = GyroscopeInputs()
@@ -87,7 +84,7 @@ private class LoggedIMU(
     }
 
     
-    public inner class GyroscopeInputs: ChargerLoggableInputs(), ThreeAxisGyroscope{
+    public inner class GyroscopeInputs: ChargerLoggableInputs(), ThreeAxisGyroscope {
         override var yaw: Angle by loggedQuantity(
             logUnit = degrees,
             logName = "yawDeg"
@@ -114,7 +111,7 @@ private class LoggedIMU(
         }
     }
 
-    public inner class AccelerometerInputs: ChargerLoggableInputs(), ThreeAxisAccelerometer{
+    public inner class AccelerometerInputs: ChargerLoggableInputs(), ThreeAxisAccelerometer {
         override var xAcceleration: Acceleration by loggedQuantity(
             logUnit = meters/seconds/seconds,
             logName = "xAccel(MetersPerSecSquared)"
@@ -137,7 +134,7 @@ private class LoggedIMU(
         }
     }
 
-    public inner class SpeedometerInputs: ChargerLoggableInputs(), ThreeAxisSpeedometer{
+    public inner class SpeedometerInputs: ChargerLoggableInputs(), ThreeAxisSpeedometer {
         override var xVelocity: Velocity by loggedQuantity(
             logUnit = meters/seconds,
             logName = "xVelocity(MetersPerSec)"

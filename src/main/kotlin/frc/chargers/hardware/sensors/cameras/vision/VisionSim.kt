@@ -1,4 +1,4 @@
-package frc.chargers.hardware.sensors.visionRedo
+package frc.chargers.hardware.sensors.cameras.vision
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
@@ -8,7 +8,6 @@ import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.apriltag.AprilTagFieldLayout
-import edu.wpi.first.math.geometry.Pose3d
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.utils.Measurement
@@ -129,7 +128,7 @@ public class MLCamSim(
     cameraResWidth: Int,
     cameraResHeight: Int,
     vararg targets: Target
-): VisionPipeline<VisionResult.ML>{
+): VisionPipeline<VisionResult.ML> {
     public data class Target(
         val pose: UnitPose3d,
         val width: Distance,

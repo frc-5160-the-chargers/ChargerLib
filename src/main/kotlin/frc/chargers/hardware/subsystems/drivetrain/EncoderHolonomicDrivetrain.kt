@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.constants.drivetrain.SwerveConstants
 import frc.chargers.hardware.sensors.RobotPoseSupplier
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
-import frc.chargers.hardware.sensors.gyroscopes.ZeroableHeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
 import frc.chargers.hardware.subsystems.posemonitors.SwervePoseMonitor
 import frc.chargers.hardware.subsystemutils.swervedrive.module.ModuleIOReal
 import frc.chargers.hardware.subsystemutils.swervedrive.module.ModuleIOSim
