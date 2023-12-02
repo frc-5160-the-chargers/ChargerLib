@@ -74,9 +74,6 @@ public open class ChargerTalonSRX(
     protected val encoderTicksPerRotation: Int
 ) : WPI_TalonSRX(deviceNumber), EncoderMotorController, MotorConfigurable<TalonSRXConfiguration> {
 
-    init{
-        warnIfInSimulation("ChargerTalonSRX(ID = $deviceID)")
-    }
 
     final override val encoder: Encoder
         get() = TalonSRXEncoderAdapter(

@@ -8,8 +8,13 @@ import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.apriltag.AprilTagFieldLayout
+import edu.wpi.first.math.geometry.Pose3d
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.sensors.RobotPoseSupplier
+import frc.chargers.utils.Measurement
+import frc.chargers.utils.NullableMeasurement
+import frc.chargers.wpilibextensions.StandardDeviation
+import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.rotation.zAngle
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
@@ -21,21 +26,21 @@ import org.photonvision.SimVisionTarget
 import org.photonvision.targeting.PhotonTrackedTarget
 
 
-private var simCamCounter = 1
 
 public class ApriltagCamSim (
+    camName: String,
     private val robotPoseSupplier: RobotPoseSupplier,
-    robotToCam: UnitTransform3d,
+    private val robotToCam: UnitTransform3d,
     fov: Angle,
     ledRange: Distance,
     minTargetArea: Double,
     cameraResWidth: Int,
     cameraResHeight: Int,
-    fieldMap: AprilTagFieldLayout
+    private val fieldMap: AprilTagFieldLayout
 ): VisionPipeline<VisionResult.Apriltag> {
-    private val camera = PhotonCamera("SIM_VISION_CAMERA_$simCamCounter(DO NOT USE IN REAL ROBOT)" )
+    private val camera = PhotonCamera(camName)
     private val simSystem = SimVisionSystem(
-        "SIM_VISION_CAMERA_$simCamCounter(DO NOT USE IN REAL ROBOT)",
+        camName,
         fov.inUnit(degrees),
         robotToCam.inUnit(meters),
         ledRange.inUnit(meters),
@@ -51,7 +56,6 @@ public class ApriltagCamSim (
             simSystem.processFrame(pose.inUnit(meters))
             previousRobotPose = pose
         }
-        simCamCounter++
     }
 
     override val visionData: VisionData<VisionResult.Apriltag>?
@@ -80,11 +84,43 @@ public class ApriltagCamSim (
             id = target.fiducialId,
             targetTransformFromCam = UnitTransform3d(target.bestCameraToTarget)
         )
+
+
+    public inner class PoseEstimator(
+        strategy: PoseStrategy = PoseStrategy.MULTI_TAG_PNP,
+    ): RobotPoseSupplier, PhotonPoseEstimator(
+        fieldMap,
+        strategy,
+        this.camera,
+        robotToCam.inUnit(meters)
+    ){
+
+        init{
+            setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY)
+        }
+
+
+        override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
+        override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
+            get(){
+                val signal = update()
+                return if (signal.isEmpty){
+                    NullableMeasurement(null, fpgaTimestamp())
+                }else{
+                    val data = signal.get()
+                    Measurement(
+                        UnitPose2d(data.estimatedPose.toPose2d()),
+                        data.timestampSeconds.ofUnit(seconds)
+                    )
+                }
+            }
+    }
 }
 
 
 
 public class MLCamSim(
+    camName: String,
     private val robotPoseSupplier: RobotPoseSupplier,
     robotToCam: UnitTransform3d,
     fov: Angle,
@@ -110,9 +146,9 @@ public class MLCamSim(
 
 
 
-    private val camera = PhotonCamera("SIM_VISION_CAMERA_$simCamCounter(DO NOT USE IN REAL ROBOT)")
+    private val camera = PhotonCamera(camName)
     private val simSystem = SimVisionSystem(
-        "SIM_VISION_CAMERA_$simCamCounter(DO NOT USE IN REAL ROBOT)",
+        camName,
         fov.inUnit(degrees),
         robotToCam.inUnit(meters),
         ledRange.inUnit(meters),
@@ -130,7 +166,6 @@ public class MLCamSim(
             simSystem.processFrame(pose.inUnit(meters))
             previousRobotPose = pose
         }
-        simCamCounter++
     }
 
     override val visionData: VisionData<VisionResult.ML>?

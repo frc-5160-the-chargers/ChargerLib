@@ -38,7 +38,7 @@ import org.littletonrobotics.junction.inputs.LoggableInputs
 context(EncoderHolonomicDrivetrain)
 public class SwervePoseMonitor(
     private val gyro: HeadingProvider? = null,
-    private val poseSuppliers: List<RobotPoseSupplier>,
+    poseSuppliers: List<RobotPoseSupplier>,
     startingPose: UnitPose2d = UnitPose2d()
 ): SubsystemBase(), RobotPoseSupplier{
 
@@ -55,19 +55,31 @@ public class SwervePoseMonitor(
         startingPose
     )
 
+    public val field: Field2d = Field2d().also{
+        SmartDashboard.putData("Field",it)
+    }
+
     override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
+
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.latestPose.ofUnit(meters),
             fpgaTimestamp()
         )
+
     override val robotPose: UnitPose2d get() = robotPoseMeasurement.value
-    public val heading: Angle
-        get() = headingInputs.calculatedHeading
+
+    public val heading: Angle get() = headingInputs.calculatedHeading
+
     public fun resetPose(pose: UnitPose2d){
         poseEstimator.resetPose(pose.inUnit(meters))
         headingInputs.calculatedHeading = pose.rotation
     }
+
+    public fun addPoseSuppliers(vararg suppliers: RobotPoseSupplier){
+        this.poseSuppliers.addAll(suppliers)
+    }
+
 
 
 
@@ -78,6 +90,8 @@ public class SwervePoseMonitor(
 
     /* Private functions/data */
 
+    private val poseSuppliers = poseSuppliers.toMutableList()
+
 
     /**
      * These are the Inputs classes of the pose monitor,
@@ -85,10 +99,9 @@ public class SwervePoseMonitor(
      */
     private val headingInputs = HeadingInputs()
     private val poseSupplierInputs = PoseSupplierInputs()
+
+
     private val previousDistances = Array(4){Distance(0.0)}
-    private val field: Field2d = Field2d().also{
-        SmartDashboard.putData("Field",it)
-    }
     private val poseEstimator: PoseEstimator = PoseEstimator(VecBuilder.fill(0.003, 0.003, 0.00001),).also{
         it.resetPose(startingPose.inUnit(meters))
     }
@@ -195,7 +208,7 @@ public class SwervePoseMonitor(
      */
     private inner class PoseSupplierInputs: LoggableInputs{
         var poseMeasurements = poseSuppliers.map{it.robotPoseMeasurement}
-        val stdDevs: List<StandardDeviation> = poseSuppliers.map{it.poseStandardDeviation}
+        val stdDevs: List<StandardDeviation> get() = poseSuppliers.map{it.poseStandardDeviation}
 
         private fun LogTable.sendPose(key: String, pose: UnitPose2d?){
             put("$key/PoseIsValid", pose != null)

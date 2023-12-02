@@ -33,7 +33,6 @@ public class ChargerCANcoder(
             configurator.apply(CTRECANcoderConfiguration(),0.02)
             println("CANcoder has been factory defaulted.")
         }
-        warnIfInSimulation("ChargerCANcoder(ID = $deviceId)")
     }
 
 

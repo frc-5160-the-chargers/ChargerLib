@@ -22,9 +22,6 @@ public inline fun redlineSpark(channel: Int, configure: SparkConfiguration.() ->
  * of this library.
  */
 public class ChargerSpark(channel: Int) : Spark(channel), MotorConfigurable<SparkConfiguration> {
-    init{
-        warnIfInSimulation("ChargerSpark(channel = $channel)")
-    }
     override fun configure(configuration: SparkConfiguration) {
         configuration.inverted?.let(::setInverted)
         println("Spark has been configured.")

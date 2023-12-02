@@ -32,6 +32,121 @@ import org.littletonrobotics.junction.Logger
 
 
 /**
+ * A convenience function used to create an [EncoderHolonomicDrivetrain],
+ * that automatically constructs real/sim versions depending on [RobotBase.isReal].
+ */
+public fun EncoderHolonomicDrivetrain(
+    turnMotors: SwerveMotors,
+    turnEncoders: SwerveEncoders,
+    driveMotors: SwerveMotors,
+    turnGearbox: DCMotor,
+    driveGearbox: DCMotor,
+    controlScheme: SwerveControl,
+    constants: SwerveConstants,
+    gyro: HeadingProvider? = null,
+    startingPose: UnitPose2d = UnitPose2d(),
+    invertTurnMotors: Boolean = true,
+    realPoseSuppliers: List<RobotPoseSupplier> = listOf(),
+    simPoseSuppliers: List<RobotPoseSupplier> = listOf()
+): EncoderHolonomicDrivetrain{
+    if (RobotBase.isSimulation()){
+        return EncoderHolonomicDrivetrain(
+            topLeft = SwerveModule(
+                "Drivetrain(Swerve)/TopLeftSwerveModule",
+                ModuleIOSim(
+                    turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
+                ), controlScheme
+            ),
+            topRight = SwerveModule(
+                "Drivetrain(Swerve)/TopRightSwerveModule",
+                ModuleIOSim(
+                    turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
+                ), controlScheme
+            ),
+            bottomLeft = SwerveModule(
+                "Drivetrain(Swerve)/BottomLeftSwerveModule",
+                ModuleIOSim(
+                    turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
+                ), controlScheme
+            ),
+            bottomRight = SwerveModule(
+                "Drivetrain(Swerve)/BottomRightSwerveModule",
+                ModuleIOSim(
+                    turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
+                ), controlScheme
+            ),
+            controlScheme, constants, gyro, startingPose, *simPoseSuppliers.toTypedArray()
+        )
+    }else{
+        if (invertTurnMotors){
+            turnMotors.apply{
+                println(topLeft.inverted)
+                println(topRight.inverted)
+                println(bottomLeft.inverted)
+                println(bottomRight.inverted)
+                topLeft.inverted = !topLeft.inverted
+                topRight.inverted = !topRight.inverted
+                bottomLeft.inverted = !bottomLeft.inverted
+                bottomRight.inverted = !bottomRight.inverted
+            }
+        }
+
+
+
+
+        val topLeft = SwerveModule(
+            "Drivetrain(Swerve)/TopLeftSwerveModule",
+            ModuleIOReal(
+                turnMotor = turnMotors.topLeft,
+                turnEncoder = turnEncoders.topLeft,
+                driveMotor = driveMotors.topLeft,
+                constants.driveGearRatio, constants.turnGearRatio
+            ),
+            controlScheme
+        )
+
+        val topRight = SwerveModule(
+            "Drivetrain(Swerve)/TopRightSwerveModule",
+            ModuleIOReal(
+                turnMotor = turnMotors.topRight,
+                turnEncoder = turnEncoders.topRight,
+                driveMotor = driveMotors.topRight,
+                constants.driveGearRatio, constants.turnGearRatio
+            ),
+            controlScheme
+        )
+
+        val bottomLeft = SwerveModule(
+            "Drivetrain(Swerve)/BottomLeftSwerveModule",
+            ModuleIOReal(
+                turnMotor = turnMotors.bottomLeft,
+                turnEncoder = turnEncoders.bottomLeft,
+                driveMotor = driveMotors.bottomLeft,
+                constants.driveGearRatio,constants.turnGearRatio
+            ),
+            controlScheme
+        )
+
+        val bottomRight = SwerveModule(
+            "Drivetrain(Swerve)/BottomRightSwerveModule",
+            ModuleIOReal(
+                turnMotor = turnMotors.bottomRight,
+                turnEncoder = turnEncoders.bottomRight,
+                driveMotor = driveMotors.bottomRight,
+                constants.driveGearRatio, constants.turnGearRatio
+            ),
+            controlScheme
+        )
+
+        return EncoderHolonomicDrivetrain(
+            topLeft, topRight, bottomLeft, bottomRight,
+            controlScheme, constants, gyro, startingPose, *realPoseSuppliers.toTypedArray()
+        )
+    }
+}
+
+
+/**
  * A convenience function used to create an [EncoderHolonomicDrivetrain], with [ModuleIOSim] as the Module IO.t
  *
  * In other words, it creates an EncoderHolonomicDrivetrain that can be used in simulation.

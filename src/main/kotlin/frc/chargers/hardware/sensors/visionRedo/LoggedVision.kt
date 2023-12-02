@@ -91,6 +91,34 @@ internal class LoggedApriltagVisionPipeline(
                     put("OtherTargets/TransformFromCamera/pitch", it.otherTargets.map{target -> target.targetTransformFromCam.rotation.yAngle.inUnit(radians)}.toDoubleArray())
                     put("OtherTargets/TransformFromCamera/roll", it.otherTargets.map{target -> target.targetTransformFromCam.rotation.zAngle.inUnit(radians)}.toDoubleArray())
                 }
+
+                if (data == null){
+                    put("timestampSecs", 0.0)
+
+                    put("BestTarget/tx", 0.0)
+                    put("BestTarget/ty", 0.0)
+                    put("BestTarget/areaPercent", 0.0)
+                    put("BestTarget/id", 0)
+
+                    put("BestTarget/TransformFromCamera/x",0.0)
+                    put("BestTarget/TransformFromCamera/y",0.0)
+                    put("BestTarget/TransformFromCamera/z", 0.0)
+                    put("BestTarget/TransformFromCamera/yaw", 0.0)
+                    put("BestTarget/TransformFromCamera/pitch", 0.0)
+                    put("BestTarget/TransformFromCamera/roll", 0.0)
+
+                    put("OtherTargets/tx", doubleArrayOf())
+                    put("OtherTargets/ty", doubleArrayOf())
+                    put("OtherTargets/areaPercent", doubleArrayOf())
+                    put("OtherTargets/id", doubleArrayOf())
+
+                    put("OtherTargets/TransformFromCamera/x", doubleArrayOf())
+                    put("OtherTargets/TransformFromCamera/y", doubleArrayOf())
+                    put("OtherTargets/TransformFromCamera/z", doubleArrayOf())
+                    put("OtherTargets/TransformFromCamera/yaw", doubleArrayOf())
+                    put("OtherTargets/TransformFromCamera/pitch", doubleArrayOf())
+                    put("OtherTargets/TransformFromCamera/roll", doubleArrayOf())
+                }
             }
 
         }

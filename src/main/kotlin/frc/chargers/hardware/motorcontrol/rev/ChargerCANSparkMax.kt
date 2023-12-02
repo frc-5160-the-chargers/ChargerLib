@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
 import com.revrobotics.SparkMaxAlternateEncoder
 import com.revrobotics.SparkMaxPIDController
+import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.utils.warnIfInSimulation
@@ -122,9 +123,6 @@ public open class ChargerCANSparkMax(
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
 ) : CANSparkMax(deviceId, type), FeedbackMotorController, MotorConfigurable<SparkMaxConfiguration> {
 
-    init{
-        warnIfInSimulation("ChargerCANSparkMax(ID = $deviceId)")
-    }
 
     private inner class EncoderConfiguration(
         var averageDepth: Int? = null,
@@ -199,9 +197,10 @@ public open class ChargerCANSparkMax(
         }
 
 
-        delay(200.milli.seconds)
+
+        if (RobotBase.isReal()) delay(200.milli.seconds)
         burnFlash()
-        delay(200.milli.seconds)
+        if (RobotBase.isReal()) delay(200.milli.seconds)
 
         println("SparkMax has been configured.")
 

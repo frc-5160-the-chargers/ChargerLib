@@ -75,9 +75,6 @@ public inline fun falcon(
 public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : TalonFX(deviceNumber, canBus),
     FeedbackMotorController, MotorConfigurable<TalonFXConfiguration> {
 
-    init{
-        warnIfInSimulation("ChargerTalonFX(ID = $deviceID)")
-    }
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
     // and does not pass around the reference to this class.
