@@ -73,7 +73,7 @@ public open class DashboardTuner(
     }
 
     init{
-        ChargerRobot.addToPeriodicLoop{
+        ChargerRobot.runPeriodically{
             if (tuningMode){
                 val updateStatus: List<Boolean> = allTunables.map{
                     it.needsUpdate()

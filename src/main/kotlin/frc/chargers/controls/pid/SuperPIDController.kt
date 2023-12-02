@@ -67,7 +67,7 @@ public class SuperPIDController(
 
     init{
         if(selfSustain){
-            ChargerRobot.addToPeriodicLoop(::calculateOutput)
+            ChargerRobot.runPeriodically(::calculateOutput)
         }
     }
 

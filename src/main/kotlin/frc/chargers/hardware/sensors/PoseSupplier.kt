@@ -2,6 +2,7 @@ package frc.chargers.hardware.sensors
 
 import com.batterystaple.kmeasure.quantities.Distance
 import frc.chargers.utils.Measurement
+import frc.chargers.utils.NullableMeasurement
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.StandardDeviation
 
@@ -15,10 +16,10 @@ public interface RobotPoseSupplier {
 
     public val poseStandardDeviation: StandardDeviation
 
-    public val robotPoseMeasurement: Measurement<UnitPose2d>
+    public val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
 
-    public val robotPose: UnitPose2d
-        get() = robotPoseMeasurement.value
+    public val robotPose: UnitPose2d?
+        get() = robotPoseMeasurement.nullableValue
 
 }
 
@@ -44,8 +45,7 @@ public interface CameraPoseSupplier {
                     val initialPose = initial.value
                     return Measurement(
                         UnitPose2d(initialPose.x-xOffset, initialPose.y-yOffset, initialPose.rotation),
-                        initial.latency,
-                        initial.isValid
+                        initial.latency
                     )
                 }
 

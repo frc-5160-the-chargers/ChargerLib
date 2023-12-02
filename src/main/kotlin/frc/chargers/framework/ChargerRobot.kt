@@ -48,9 +48,19 @@ public open class ChargerRobot(
          *
          * All functions added this way will run before the command scheduler runs.
          */
-        public fun addToPeriodicLoop(runnable: () -> Unit){
+        public fun runPeriodically(runnable: () -> Unit){
             periodicRunnables.add(runnable)
         }
+
+        /**
+         * Adds a specific lambda to the robot's periodic loop, which runs after the robot's periodic loop ends.
+         */
+        public fun runPeriodicallyWithLowPriority(runnable: () -> Unit){
+            lowPriorityPeriodicRunnables.add(runnable)
+        }
+
+
+
 
         /**
          * The loop period of the current robot.
@@ -62,6 +72,7 @@ public open class ChargerRobot(
 
         private lateinit var burnManager: SparkMaxBurnManager
         private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
+        private val lowPriorityPeriodicRunnables: MutableList<() -> Unit> = mutableListOf()
         private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
         private val logReceiverQueueAlert = Alert.error(text = "Logging queue exceeded capacity, data will NOT be logged.")
 
@@ -203,6 +214,9 @@ public open class ChargerRobot(
             Logger.getInstance().apply{
                 recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
                 logReceiverQueueAlert.active = receiverQueueFault
+            }
+            lowPriorityPeriodicRunnables.forEach{
+                it()
             }
         }catch(e: Exception){
             println("Error has been caught in [robotPeriodic].")

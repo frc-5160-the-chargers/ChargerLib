@@ -13,19 +13,25 @@ import kotlin.math.sqrt
  *
  * In a multi-pipeline vision system, this interface should represent 1 pipeline.
  */
-public interface VisionSystem<T: VisionTarget> {
+public interface VisionPipeline<R: VisionResult> {
 
     /**
-     * Fetches the full vision data of the [VisionSystem]; These are all from the exact same timestamp.
+     * resets the camera that the [VisionPipeline] belongs to in order to return proper results.
      */
-    public val visionData: VisionData<T>?
+    public fun reset(){}
+
 
     /**
-     * Fetches the current best target of the [VisionSystem].
+     * Fetches the full vision data of the [VisionPipeline]; These are all from the exact same timestamp.
+     */
+    public val visionData: VisionData<R>?
+
+    /**
+     * Fetches the current best target of the [VisionPipeline].
      *
      * The values fetched here are not nessecarily from the exact same timestamp.
      */
-    public val bestTarget: T?
+    public val bestTarget: R?
         get() = visionData?.bestTarget
 
 
@@ -55,25 +61,25 @@ public interface VisionSystem<T: VisionTarget> {
 
 }
 
-public data class VisionData<out T: VisionTarget>(
+public data class VisionData<out R: VisionResult>(
     val timestamp: Time,
-    val bestTarget: T,
-    val otherTargets: List<T>
+    val bestTarget: R,
+    val otherTargets: List<R>
 ){
     public constructor(
         timestamp: Time,
-        bestTarget: T,
-        vararg otherTargets: T
+        bestTarget: R,
+        vararg otherTargets: R
     ): this(timestamp, bestTarget, listOf(*otherTargets))
 
-    public val allTargets: List<T> = otherTargets + listOf(bestTarget)
+    public val allTargets: List<R> = otherTargets + listOf(bestTarget)
 
 
 
 }
 
 
-public sealed class VisionTarget(
+public sealed class VisionResult(
     public val tx: Double,
     public val ty: Double,
     public val areaPercent: Double
@@ -83,7 +89,7 @@ public sealed class VisionTarget(
         tx: Double,
         ty: Double,
         areaPercent: Double
-    ): VisionTarget(tx,ty,areaPercent)
+    ): VisionResult(tx,ty,areaPercent)
 
 
     public class Apriltag(
@@ -92,13 +98,13 @@ public sealed class VisionTarget(
         areaPercent: Double,
         public val id: Int,
         public val targetTransformFromCam: UnitTransform3d
-    ): VisionTarget(tx,ty,areaPercent)
+    ): VisionResult(tx,ty,areaPercent)
 
     public class ML(
         tx: Double,
         ty: Double,
         areaPercent: Double,
-        public val identifier: Any
-    ): VisionTarget(tx,ty,areaPercent)
+        public val id: Int
+    ): VisionResult(tx,ty,areaPercent)
 
 }

@@ -21,6 +21,8 @@ import frc.chargers.hardware.subsystemutils.swervedrive.SecondOrderControlScheme
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.utils.a
 import frc.chargers.utils.math.inputModulus
+import frc.chargers.utils.math.units.pow
+import frc.chargers.utils.math.units.sqrt
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
@@ -281,7 +283,6 @@ public class EncoderHolonomicDrivetrain(
     private val wheelRadius = constants.wheelDiameter / 2.0
     private val moduleArray = a[topLeft,topRight,bottomLeft,bottomRight]
     private fun averageEncoderPosition() = moduleArray.map{it.wheelPosition}.average()
-    private fun averageEncoderVelocity() = moduleArray.map{it.currentVelocity}.average()
     
     private val distanceOffset: Distance = averageEncoderPosition() * wheelRadius
 
@@ -296,9 +297,17 @@ public class EncoderHolonomicDrivetrain(
     /**
      * The current overall velocity of the robot.
      */
-    public val velocity: Velocity get() = averageEncoderVelocity() * wheelRadius
+    public val velocity: Velocity get(){
+        val speeds = currentSpeeds
+        return sqrt(speeds.xVelocity.pow(2.0) + speeds.yVelocity.pow(2.0))
+    }
 
 
+    /**
+     * The current speeds of the robot.
+     */
+    public val currentSpeeds: ChassisSpeeds
+        get() = kinematics.toChassisSpeeds(currentModuleStates)
 
 
 

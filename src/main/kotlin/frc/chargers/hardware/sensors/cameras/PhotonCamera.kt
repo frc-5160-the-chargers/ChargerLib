@@ -1,6 +1,6 @@
 package frc.chargers.hardware.sensors.cameras
 
-
+/*
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.inUnit
@@ -78,25 +78,24 @@ public class OdometryPhotonCamera(
     pitch: Angle,
     yaw: Angle
 ): BasicPhotonCamera(name,zTranslation,pitch), RobotPoseSupplier{
-    public val poseEstimator: PhotonPoseEstimator = PhotonPoseEstimator(fieldLayout,
+    private val poseEstimator: PhotonPoseEstimator = PhotonPoseEstimator(fieldLayout,
         PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP,
         this,
         Transform3d(
             Translation3d(xTranslation.inUnit(meters), yTranslation.inUnit(meters),zTranslation.inUnit(meters)),
             Rotation3d(roll.inUnit(radians), pitch.inUnit(radians), yaw.inUnit(radians))
         )
-    )
-
-
-    init{
-        poseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY)
+    ).also{
+        it.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY)
     }
+
 
     override val poseStandardDeviation: StandardDeviation
         get() = StandardDeviation.Default
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() {
             val m = poseEstimator.update()
+            m.get()
             return Measurement(
                 m.get().estimatedPose.toPose2d().ofUnit(meters),
                 m.get().timestampSeconds.ofUnit(seconds),
@@ -106,6 +105,5 @@ public class OdometryPhotonCamera(
 
 }
 
-/*
 
-    */
+ */

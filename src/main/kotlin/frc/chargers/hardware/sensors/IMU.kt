@@ -19,7 +19,6 @@ public interface IMU: ZeroableHeadingProvider {
     public fun reset()
     public val isConnected: Boolean
     public val altitude: Distance?
-    public val imuName: String get() = "Generic IMU"
 
     public val gyroscope: ThreeAxisGyroscope
     public val compass: HeadingProvider

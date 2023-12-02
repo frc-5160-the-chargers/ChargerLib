@@ -192,7 +192,7 @@ public abstract class ChargerLoggableInputs: LoggableInputs {
     protected fun <D: AnyDimension> loggedNullableQuantity(
         logUnit: KmeasureUnit<D> = KmeasureUnit(1.0),
         logName: String? = null,
-        defaultValue: Quantity<D> = Quantity(0.0)
+        defaultValue: Quantity<D>? = null
     ): LoggableInput<Quantity<D>?> =
         PropertyDelegateProvider { _, variable ->
             val defaultLogName = logName ?: (variable.name + if(logUnit.siValue == 1.0) "(SI value)" else "" )

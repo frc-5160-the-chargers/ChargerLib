@@ -4,9 +4,12 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.advantagekitextensions.ChargerLoggableInputs
 import frc.chargers.hardware.sensors.IMU
+import frc.chargers.hardware.sensors.IMUSim
 import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
 import frc.chargers.hardware.sensors.ThreeAxisSpeedometer
 import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
@@ -14,9 +17,16 @@ import frc.chargers.hardware.sensors.gyroscopes.ThreeAxisGyroscope
 import org.littletonrobotics.junction.Logger
 
 /**
- * Adds logging to an [IMU].
+ * A wrapped [IMU] that provides sim and logging capabilities.
  */
-public fun IMU.withLogging(): IMU = LoggedIMU(this)
+public fun advantageKitIMU(
+    name: String,
+    realImpl: IMU,
+    simImpl: IMU
+): IMU = LoggedIMU(
+    name,
+    if (RobotBase.isSimulation()) simImpl else realImpl
+)
 
 /**
  * An IMU which has logging & replay capabilities from advantagekit.
@@ -25,9 +35,29 @@ public fun IMU.withLogging(): IMU = LoggedIMU(this)
  * [ThreeAxisGyroscope], [ThreeAxisAccelerometer] and [ThreeAxisSpeedometer] interfaces,
  * to reduce boilerplate code.
  */
-public class LoggedIMU(
+private class LoggedIMU(
+    private val imuName: String,
     private val imu: IMU
 ): IMU, SubsystemBase() {
+
+    override val heading: Angle get() = generalInputs.fusedHeading
+    override val isConnected: Boolean get() = generalInputs.isConnected
+    override val altitude: Distance? get() = generalInputs.altitude
+    override val compass: HeadingProvider = object: HeadingProvider{
+        override val heading: Angle get() = generalInputs.compassHeading
+    }
+    override val gyroscope: GyroscopeInputs = GyroscopeInputs()
+    override val accelerometer: AccelerometerInputs = AccelerometerInputs()
+    override val speedometer: SpeedometerInputs = SpeedometerInputs()
+    override fun zeroHeading(){ imu.zeroHeading() }
+    override fun reset() { imu.reset() }
+
+
+
+
+
+
+
 
 
     private val generalInputs = GeneralInputs()
@@ -52,23 +82,8 @@ public class LoggedIMU(
             fusedHeading = imu.heading
             compassHeading = imu.compass.heading
             altitude = imu.altitude
-            baseIMUName = imu.imuName
+            baseIMUName = imuName
         }
-    }
-
-
-    override val heading: Angle get() = generalInputs.fusedHeading
-    override val isConnected: Boolean get() = generalInputs.isConnected
-    override val altitude: Distance? get() = generalInputs.altitude
-
-
-    // getter cannot be used here; will cause accidental override kotlin error
-    // with the getName() function of SubsystemBase()
-    override val imuName: String
-        get() = generalInputs.baseIMUName
-
-    override val compass: HeadingProvider = object: HeadingProvider{
-        override val heading: Angle get() = generalInputs.compassHeading
     }
 
     
@@ -144,22 +159,7 @@ public class LoggedIMU(
             zVelocity = imu.speedometer.zVelocity
         }
     }
-    
-    
 
-
-    override val gyroscope: GyroscopeInputs = GyroscopeInputs()
-    override val accelerometer: AccelerometerInputs = AccelerometerInputs()
-    override val speedometer: SpeedometerInputs = SpeedometerInputs()
-
-
-    override fun zeroHeading(){
-        imu.zeroHeading()
-    }
-
-    override fun reset() {
-        imu.reset()
-    }
 
     override fun periodic(){
         gyroscope.update()
@@ -172,15 +172,8 @@ public class LoggedIMU(
         Logger.getInstance().apply{
             processInputs(imuName,generalInputs)
             processInputs("$imuName/Gyroscope",gyroscope)
-
-
             processInputs("$imuName/Speedometer",speedometer)
             processInputs("$imuName/Accelerometer",accelerometer)
         }
-
     }
-
-
-
-
 }

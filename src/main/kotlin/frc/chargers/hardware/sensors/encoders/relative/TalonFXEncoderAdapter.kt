@@ -26,8 +26,7 @@ public class TalonFXEncoderAdapter(
             val statusSignal = motorController.rotorPosition
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations),
-                timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = statusSignal.timestamp.isValid
+                timestamp = statusSignal.timestamp.time.ofUnit(seconds)
             )
         }
     override val timestampedAngularVelocity: Measurement<AngularVelocity>
@@ -35,8 +34,7 @@ public class TalonFXEncoderAdapter(
             val statusSignal = motorController.rotorVelocity
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations / seconds),
-                timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = statusSignal.timestamp.isValid
+                timestamp = statusSignal.timestamp.time.ofUnit(seconds)
             )
         }
 

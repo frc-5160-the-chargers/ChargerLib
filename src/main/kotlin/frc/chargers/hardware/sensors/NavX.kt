@@ -31,9 +31,6 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
 
     public val firmwareVersion: String get() = ahrs.firmwareVersion
 
-    override val imuName: String
-        get() = "NavX: Version $firmwareVersion"
-
     override val isConnected: Boolean
         get() = ahrs.isConnected
 

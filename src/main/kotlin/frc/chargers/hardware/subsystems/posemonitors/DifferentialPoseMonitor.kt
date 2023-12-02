@@ -37,10 +37,9 @@ public class DifferentialPoseMonitor(
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.latestPose.ofUnit(meters),
-            fpgaTimestamp(),
-            true
+            fpgaTimestamp()
         )
-
+    override val robotPose: UnitPose2d get() = robotPoseMeasurement.value
     public constructor(
         vararg poseSuppliers: RobotPoseSupplier,
         gyro: HeadingProvider? = null,
@@ -94,7 +93,7 @@ public class DifferentialPoseMonitor(
         poseSuppliers.forEach{
             val measurement = it.robotPoseMeasurement
 
-            if (measurement.isValid){
+            if (measurement.nullableValue != null){
                 val stdDevVector = when(val deviation = it.poseStandardDeviation){
                     is StandardDeviation.Of -> deviation.getVector()
 
@@ -104,7 +103,7 @@ public class DifferentialPoseMonitor(
                 visionUpdates.add(
                     PoseEstimator.TimestampedVisionUpdate(
                         measurement.timestamp.inUnit(seconds),
-                        measurement.value.inUnit(meters),
+                        measurement.nullableValue.inUnit(meters),
                         stdDevVector
                     )
                 )

@@ -66,7 +66,7 @@ public class UnitSuperPIDController<I : AnyDimension, O : AnyDimension>(
 
     init{
         if(selfSustain){
-            ChargerRobot.addToPeriodicLoop(::calculateOutput)
+            ChargerRobot.runPeriodically(::calculateOutput)
         }
     }
 

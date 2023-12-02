@@ -96,7 +96,8 @@ public class Limelight(
 
 
 
-    public inner class ApriltagPipeline(override val id: Int): Pipeline, VisionSystem<VisionTarget.Apriltag>{
+
+    public inner class ApriltagPipeline(override val id: Int): Pipeline, VisionPipeline<VisionResult.Apriltag>{
 
         init{
             if (id < 0 || id > 9){
@@ -113,10 +114,16 @@ public class Limelight(
             allPipelines.add(this as Pipeline)
         }
 
-        override val bestTarget: VisionTarget.Apriltag?
+        override fun reset(){
+            setPipelineIndex(name,id)
+        }
+
+
+
+        override val bestTarget: VisionResult.Apriltag?
             get(){
                 return if (getTV(name) && getCurrentPipelineIndex(name).toInt() == id){
-                    VisionTarget.Apriltag(
+                    VisionResult.Apriltag(
                         tx = getTX(name),
                         ty = getTY(name),
                         areaPercent = getTA(name),
@@ -125,29 +132,15 @@ public class Limelight(
                         targetTransformFromCam = getTargetPose3d_CameraSpace(name).ofUnit(meters) - UnitPose3d()
                     )
                 }else{
-                    setPipelineIndex(name,id)
                     null
                 }
             }
 
-        private fun Array<LimelightTarget_Fiducial>.toVisionTargets(): MutableList<VisionTarget.Apriltag> =
-            this.map{
-                VisionTarget.Apriltag(
-                    tx = it.tx,
-                    ty = it.ty,
-                    areaPercent = it.ta,
-                    id = it.fiducialID.toInt(),
-                    // converts it to a UnitTransform3d.
-                    targetTransformFromCam = it.targetPose_CameraSpace.ofUnit(meters) - UnitPose3d()
-                )
-            }.toMutableList()
-
-        override val visionData: VisionData<VisionTarget.Apriltag>?
+        override val visionData: VisionData<VisionResult.Apriltag>?
             get(){
                 val completeData = getLatestResults(name).targetingResults
                 if (!completeData.valid || getCurrentPipelineIndex(name).toInt() != id) {
                     println("pipeline is not correct; resetting pipeline of limelight")
-                    setPipelineIndex(name,id)
                     return null
                 }
 
@@ -165,37 +158,51 @@ public class Limelight(
         override val lensHeight: Distance = this@Limelight.lensHeight
         override val mountAngle: Angle = this@Limelight.mountAngle
 
+
+        private fun Array<LimelightTarget_Fiducial>.toVisionTargets(): MutableList<VisionResult.Apriltag> =
+            this.map{
+                VisionResult.Apriltag(
+                    tx = it.tx,
+                    ty = it.ty,
+                    areaPercent = it.ta,
+                    id = it.fiducialID.toInt(),
+                    // converts it to a UnitTransform3d.
+                    targetTransformFromCam = it.targetPose_CameraSpace.ofUnit(meters) - UnitPose3d()
+                )
+            }.toMutableList()
     }
 
-    public inner class MLDetectorPipeline(id: Int): Pipeline, VisionSystem<VisionTarget.ML>, MLClassifierPipeline(id){
+    public inner class MLDetectorPipeline(id: Int): Pipeline, VisionPipeline<VisionResult.ML>, MLClassifierPipeline(id){
 
+        override fun reset(){
+            setPipelineIndex(name,id)
+        }
 
-        override val bestTarget: VisionTarget.ML?
+        override val bestTarget: VisionResult.ML?
             get(){
                 return if (getTV(name) && getCurrentPipelineIndex(name).toInt() == id){
-                    VisionTarget.ML(
+                    VisionResult.ML(
                         tx = getTX(name),
                         ty = getTY(name),
                         areaPercent = getTA(name),
-                        identifier = getNeuralClassID(name)
+                        id = getNeuralClassID(name).toInt()
                     )
                 }else{
-                    setPipelineIndex(name,id)
                     null
                 }
             }
 
-        private fun Array<LimelightTarget_Detector>.toVisionTargets(): MutableList<VisionTarget.ML> =
+        private fun Array<LimelightTarget_Detector>.toVisionTargets(): MutableList<VisionResult.ML> =
             this.map{
-                VisionTarget.ML(
+                VisionResult.ML(
                     tx = it.tx,
                     ty = it.ty,
                     areaPercent = it.ta,
-                    identifier = it.classID
+                    id = it.classID.toInt()
                 )
             }.toMutableList()
 
-        override val visionData: VisionData<VisionTarget.ML>?
+        override val visionData: VisionData<VisionResult.ML>?
             get(){
 
 
@@ -235,7 +242,9 @@ public class Limelight(
 
             // safe; id is initialized before being added.
             allPipelines.add(this as Pipeline)
+            setPipelineIndex(name,id)
         }
+
 
         override val itemType: Int?
             get(){

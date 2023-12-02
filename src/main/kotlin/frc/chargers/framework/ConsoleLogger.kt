@@ -10,7 +10,7 @@ public object ConsoleLogger {
     private var totalLoops: Int = 0
 
     init{
-        ChargerRobot.addToPeriodicLoop { totalLoops++ }
+        ChargerRobot.runPeriodically { totalLoops++ }
     }
 
 

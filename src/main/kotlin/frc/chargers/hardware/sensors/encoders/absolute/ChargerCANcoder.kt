@@ -56,8 +56,7 @@ public class ChargerCANcoder(
                 val statusSignal = absolutePosition
                 return Measurement(
                     value = statusSignal.value.ofUnit(rotations),
-                    timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                    isValid = statusSignal.timestamp.isValid
+                    timestamp = statusSignal.timestamp.time.ofUnit(seconds)
                 )
             }
 
@@ -98,8 +97,7 @@ public class ChargerCANcoder(
             val statusSignal = position
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations),
-                timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = statusSignal.timestamp.isValid
+                timestamp = statusSignal.timestamp.time.ofUnit(seconds)
             )
         }
 
@@ -109,7 +107,6 @@ public class ChargerCANcoder(
             return Measurement(
                 value = statusSignal.value.ofUnit(rotations / seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-                isValid = statusSignal.timestamp.isValid
             )
         }
 }

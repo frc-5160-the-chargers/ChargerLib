@@ -37,7 +37,7 @@ public class LinearProfiledPIDController(
 
     init{
         if(selfSustain){
-            ChargerRobot.addToPeriodicLoop(::calculateOutput)
+            ChargerRobot.runPeriodically(::calculateOutput)
         }
     }
 
