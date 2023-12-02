@@ -175,7 +175,7 @@ public class EncoderDifferentialDrivetrain(
      *
      * This value is calculated using the encoders, not a gyroscope or accelerometer,
      * so note that it may become inaccurate if the wheels slip. If available, consider
-     * using a [frc.chargers.hardware.sensors.NavX] or similar device to calculate heading instead.
+     * using a [frc.chargers.hardware.sensors.imu.NavX] or similar device to calculate heading instead.
      *
      * This value by itself is not particularly meaningful as it may be fairly large,
      * positive or negative, based on previous rotations of the motors, including

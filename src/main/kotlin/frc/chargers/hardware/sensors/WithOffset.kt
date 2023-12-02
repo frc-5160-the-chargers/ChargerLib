@@ -1,7 +1,6 @@
 package frc.chargers.hardware.sensors
 
 import com.batterystaple.kmeasure.quantities.Angle
-import com.batterystaple.kmeasure.quantities.Time
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider

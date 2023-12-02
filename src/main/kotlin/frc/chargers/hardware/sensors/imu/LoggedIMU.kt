@@ -84,7 +84,7 @@ private class LoggedIMU(
     }
 
     
-    public inner class GyroscopeInputs: ChargerLoggableInputs(), ThreeAxisGyroscope {
+    inner class GyroscopeInputs: ChargerLoggableInputs(), ThreeAxisGyroscope {
         override var yaw: Angle by loggedQuantity(
             logUnit = degrees,
             logName = "yawDeg"
@@ -111,7 +111,7 @@ private class LoggedIMU(
         }
     }
 
-    public inner class AccelerometerInputs: ChargerLoggableInputs(), ThreeAxisAccelerometer {
+    inner class AccelerometerInputs: ChargerLoggableInputs(), ThreeAxisAccelerometer {
         override var xAcceleration: Acceleration by loggedQuantity(
             logUnit = meters/seconds/seconds,
             logName = "xAccel(MetersPerSecSquared)"
@@ -134,7 +134,7 @@ private class LoggedIMU(
         }
     }
 
-    public inner class SpeedometerInputs: ChargerLoggableInputs(), ThreeAxisSpeedometer {
+    inner class SpeedometerInputs: ChargerLoggableInputs(), ThreeAxisSpeedometer {
         override var xVelocity: Velocity by loggedQuantity(
             logUnit = meters/seconds,
             logName = "xVelocity(MetersPerSec)"
