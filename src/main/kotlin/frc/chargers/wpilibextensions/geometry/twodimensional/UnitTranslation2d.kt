@@ -4,8 +4,10 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.interpolation.Interpolatable
+import frc.chargers.advantagekitextensions.AdvantageKitLoggable
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
+import org.littletonrobotics.junction.LogTable
 
 /**
  * A wrapper for WPILib's [Translation2d], adding in Unit support.
@@ -13,7 +15,7 @@ import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 @JvmInline
 public value class UnitTranslation2d(
     public val siValue: Translation2d = Translation2d()
-): Interpolatable<UnitTranslation2d> {
+): Interpolatable<UnitTranslation2d>, AdvantageKitLoggable<UnitTranslation2d> {
 
     public constructor(x: Distance, y: Distance): this(Translation2d(x.siValue,y.siValue))
 
@@ -61,6 +63,17 @@ public value class UnitTranslation2d(
     override fun interpolate(other: UnitTranslation2d, t: Double): UnitTranslation2d = siValue.interpolate(other.inUnit(meters),t).ofUnit(meters)
 
     public fun rotateBy(other: Angle): UnitTranslation2d = siValue.rotateBy(other.asRotation2d()).ofUnit(meters)
+    override fun pushToLog(table: LogTable, category: String) {
+        table.apply{
+            put("$category/xMeters",x.inUnit(meters))
+            put("$category/yMeters",y.inUnit(meters))
+        }
+    }
+
+    override fun getFromLog(table: LogTable, category: String): UnitTranslation2d = UnitTranslation2d(
+        table.getDouble("$category/xMeters",0.0).ofUnit(meters),
+        table.getDouble("$category/yMeters",0.0).ofUnit(meters)
+    )
 
 
 }

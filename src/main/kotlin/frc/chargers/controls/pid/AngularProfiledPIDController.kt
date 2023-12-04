@@ -36,7 +36,7 @@ public class AngularProfiledPIDController(
 
     init{
         if(selfSustain){
-            ChargerRobot.runPeriodically(::calculateOutput)
+            ChargerRobot.runPeriodically(runnable = ::calculateOutput)
         }
     }
 

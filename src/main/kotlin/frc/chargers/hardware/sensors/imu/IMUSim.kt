@@ -10,13 +10,17 @@ import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.wpilibextensions.kinematics.xVelocity
 import frc.chargers.wpilibextensions.kinematics.yVelocity
 
-/**
- * Represents a Sim IMU, with dummy values for most outputs.
- *
- * Contains headingProviderImpl and getChassisSpeeds in order to use simulated readings from the drivetrain
- * as a stand-in for values.
- */
 public class IMUSim: IMU {
+
+    /**
+     * The specified LogTabs below are in fact LoggableInputsProvider's,
+     * which automatically handle AdvantageKit logging and replay support(and work essentially as getters).
+     * @see [frc.chargers.advantagekitextensions.LoggableInputsProvider]
+     */
+
+    private var previousXVelocity = Velocity(0.0)
+    private var previousYVelocity = Velocity(0.0)
+    private var angleOffset = Angle(0.0)
 
     public companion object{
         private var headingProviderImpl: HeadingProvider = HeadingProvider { Angle(0.0) }
@@ -29,49 +33,46 @@ public class IMUSim: IMU {
         }
     }
 
-
-    private var previousChassisSpeeds = ChassisSpeeds()
-    private var angleOffset = Angle(0.0)
     override fun reset() {}
+    override fun zeroHeading(){ angleOffset = headingProviderImpl.heading }
 
-    override fun zeroHeading(){
-        angleOffset = headingProviderImpl.heading
-    }
 
-    override val isConnected: Boolean = false
-    override val altitude: Distance? = null
+    override val isConnected: Boolean by IMU_INPUTS.boolean{false}
+    override val altitude: Distance? by IMU_INPUTS.nullableQuantity{null}
+    override val heading: Angle by IMU_INPUTS.quantity{headingProviderImpl.heading - angleOffset}
+
     override val gyroscope: ThreeAxisGyroscope = object: ThreeAxisGyroscope {
-        override val yaw: Angle get() = -(headingProviderImpl.heading - angleOffset)
-        override val pitch: Angle = Angle(0.0)
-        override val roll: Angle = Angle(0.0)
-
+        override val yaw: Angle by GYRO_INPUTS.quantity{ -(headingProviderImpl.heading - angleOffset) }
+        override val pitch: Angle by GYRO_INPUTS.quantity{ Angle(0.0) }
+        override val roll: Angle by GYRO_INPUTS.quantity{ Angle(0.0) }
     }
+
     override val compass: HeadingProvider = object: HeadingProvider {
-        override val heading: Angle get() = Angle(0.0)
+        override val heading: Angle by COMPASS_INPUTS.quantity{ Angle(0.0) }
     }
-    override val accelerometer: ThreeAxisAccelerometer = object: ThreeAxisAccelerometer {
-        override val xAcceleration: Acceleration
-            get(){
-                val speeds = getChassisSpeeds()
-                val speedDelta = speeds.xVelocity - previousChassisSpeeds.xVelocity
-                previousChassisSpeeds = speeds
-                return speedDelta / ChargerRobot.LOOP_PERIOD
-            }
-        override val yAcceleration: Acceleration
-            get(){
-                val speeds = getChassisSpeeds()
-                val speedDelta = speeds.yVelocity - previousChassisSpeeds.yVelocity
-                previousChassisSpeeds = speeds
-                return speedDelta / ChargerRobot.LOOP_PERIOD
-            }
 
-        override val zAcceleration: Acceleration = Acceleration(0.0)
+    override val accelerometer: ThreeAxisAccelerometer = object: ThreeAxisAccelerometer {
+        override val xAcceleration: Acceleration by ACCELEROMETER_INPUTS.quantity{
+            val speeds: ChassisSpeeds = getChassisSpeeds()
+            val speedDelta = abs(speeds.xVelocity) - abs(previousXVelocity)
+            previousXVelocity = speeds.xVelocity
+            // return value
+            speedDelta / ChargerRobot.LOOP_PERIOD
+        }
+        override val yAcceleration: Acceleration by ACCELEROMETER_INPUTS.quantity{
+            val speeds = getChassisSpeeds()
+            val speedDelta = abs(speeds.yVelocity) - abs(previousYVelocity)
+            previousYVelocity = speeds.yVelocity
+            // return value
+            speedDelta / ChargerRobot.LOOP_PERIOD
+        }
+        override val zAcceleration: Acceleration by ACCELEROMETER_INPUTS.quantity{Acceleration(0.0)}
     }
+
     override val speedometer: ThreeAxisSpeedometer = object: ThreeAxisSpeedometer {
-        override val xVelocity: Velocity get() = getChassisSpeeds().xVelocity
-        override val yVelocity: Velocity get() = getChassisSpeeds().yVelocity
-        override val zVelocity: Velocity = Velocity(0.0)
+        override val xVelocity: Velocity by SPEEDOMETER_INPUTS.quantity{getChassisSpeeds().xVelocity}
+        override val yVelocity: Velocity by SPEEDOMETER_INPUTS.quantity{getChassisSpeeds().yVelocity}
+        override val zVelocity: Velocity by SPEEDOMETER_INPUTS.quantity{Velocity(0.0)}
     }
-    override val heading: Angle get() = headingProviderImpl.heading - angleOffset
 
 }

@@ -19,6 +19,7 @@ import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.utils.SparkMaxBurnManager
 import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.LoggedRobot
+import org.littletonrobotics.junction.networktables.NT4Publisher
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -48,15 +49,24 @@ public open class ChargerRobot(
          *
          * All functions added this way will run before the command scheduler runs.
          */
-        public fun runPeriodically(runnable: () -> Unit){
-            periodicRunnables.add(runnable)
+        public fun runPeriodically(addToFront: Boolean = false, runnable: () -> Unit){
+            if (addToFront){
+                periodicRunnables.add(0,runnable)
+            }else{
+                periodicRunnables.add(runnable)
+            }
+
         }
 
         /**
          * Adds a specific lambda to the robot's periodic loop, which runs after the robot's periodic loop ends.
          */
-        public fun runPeriodicallyWithLowPriority(runnable: () -> Unit){
-            lowPriorityPeriodicRunnables.add(runnable)
+        public fun runPeriodicallyWithLowPriority(addToFront: Boolean = false, runnable: () -> Unit){
+            if (addToFront){
+                lowPriorityPeriodicRunnables.add(0,runnable)
+            }else{
+                lowPriorityPeriodicRunnables.add(runnable)
+            }
         }
 
 
@@ -140,7 +150,12 @@ public open class ChargerRobot(
                     }else{
                         noUsbSignalAlert.active = true
                     }
-                    addDataReceiver(NTSafePublisher())
+
+                    if (config.logToNTWhenFMSAttached){
+                        addDataReceiver(NT4Publisher())
+                    }else{
+                        addDataReceiver(NTSafePublisher())
+                    }
                 }else if (config.isReplay){
                     // replay mode; sim
                     val path = LogFileUtil.findReplayLog()
@@ -148,7 +163,11 @@ public open class ChargerRobot(
                     addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
                 }else{
                     // sim mode
-                    logger.addDataReceiver(NTSafePublisher())
+                    if (config.logToNTWhenFMSAttached){
+                        addDataReceiver(NT4Publisher())
+                    }else{
+                        addDataReceiver(NTSafePublisher())
+                    }
                     // maybe add DriverStationSim? idk
                 }
 

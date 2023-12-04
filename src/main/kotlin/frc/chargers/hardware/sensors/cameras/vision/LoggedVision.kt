@@ -25,9 +25,9 @@ import org.littletonrobotics.junction.inputs.LoggableInputs
  */
 public fun advantageKitApriltagPipeline(
     logName: String,
-    realImpl: VisionPipeline<VisionResult.Apriltag>,
-    simImpl: VisionPipeline<VisionResult.Apriltag>
-): VisionPipeline<VisionResult.Apriltag> =
+    realImpl: VisionPipeline<VisionResult.AprilTag>,
+    simImpl: VisionPipeline<VisionResult.AprilTag>
+): VisionPipeline<VisionResult.AprilTag> =
     LoggedApriltagVisionPipeline(
         logName,
         if(RobotBase.isSimulation()) simImpl else realImpl
@@ -35,8 +35,8 @@ public fun advantageKitApriltagPipeline(
 
 internal class LoggedApriltagVisionPipeline(
     name: String,
-    private val pipeline: VisionPipeline<VisionResult.Apriltag>
-): VisionPipeline<VisionResult.Apriltag> {
+    private val pipeline: VisionPipeline<VisionResult.AprilTag>
+): VisionPipeline<VisionResult.AprilTag> {
 
     private val inputs = Inputs()
 
@@ -48,7 +48,7 @@ internal class LoggedApriltagVisionPipeline(
     }
 
 
-    override val visionData: VisionData<VisionResult.Apriltag>?
+    override val visionData: NonLoggableVisionData<VisionResult.AprilTag>?
         get() = inputs.data
     override val lensHeight: Distance
         get() = pipeline.lensHeight
@@ -58,7 +58,7 @@ internal class LoggedApriltagVisionPipeline(
     private inner class Inputs: LoggableInputs {
 
 
-        var data: VisionData<VisionResult.Apriltag>? = pipeline.visionData
+        var data: NonLoggableVisionData<VisionResult.AprilTag>? = pipeline.visionData
 
         override fun toLog(table: LogTable) {
             table.apply{
@@ -125,7 +125,7 @@ internal class LoggedApriltagVisionPipeline(
 
         override fun fromLog(table: LogTable) {
             table.apply{
-                val bestTargetInput = VisionResult.Apriltag(
+                val bestTargetInput = VisionResult.AprilTag(
                     getDouble("BestTarget/tx", 0.0),
                     getDouble("BestTarget/ty", 0.0),
                     getDouble("BestTarget/areaPercent", 0.0),
@@ -165,10 +165,10 @@ internal class LoggedApriltagVisionPipeline(
 
                 require(allTXValues.size == allTYValues.size && allAreaValues.size == allIDs.size){"The sizes of the array values logged do not match."}
 
-                val otherTags: MutableList<VisionResult.Apriltag> = mutableListOf()
+                val otherTags: MutableList<VisionResult.AprilTag> = mutableListOf()
                 for (i in allTXValues.indices){
                     otherTags.add(
-                        VisionResult.Apriltag(
+                        VisionResult.AprilTag(
                             allTXValues[i],
                             allTYValues[i],
                             allAreaValues[i],
@@ -192,7 +192,7 @@ internal class LoggedApriltagVisionPipeline(
                     )
                 }
 
-                data = VisionData(
+                data = NonLoggableVisionData(
                     getDouble("timestampSecs",0.0).ofUnit(seconds),
                     bestTargetInput,
                     otherTags

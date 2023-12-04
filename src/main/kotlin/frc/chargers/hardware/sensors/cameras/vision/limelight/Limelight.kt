@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.chargerlibexternal.utils.LimelightHelpers.*
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.hardware.sensors.cameras.vision.Classifier
-import frc.chargers.hardware.sensors.cameras.vision.VisionData
+import frc.chargers.hardware.sensors.cameras.vision.NonLoggableVisionData
 import frc.chargers.hardware.sensors.cameras.vision.VisionPipeline
 import frc.chargers.hardware.sensors.cameras.vision.VisionResult
 import frc.chargers.utils.RequirementManager
@@ -101,7 +101,7 @@ public class Limelight(
 
 
 
-    public inner class ApriltagPipeline(override val id: Int): Pipeline, VisionPipeline<VisionResult.Apriltag> {
+    public inner class ApriltagPipeline(override val id: Int): Pipeline, VisionPipeline<VisionResult.AprilTag> {
 
         init{
             if (id < 0 || id > 9){
@@ -123,24 +123,7 @@ public class Limelight(
         }
 
 
-
-        override val bestTarget: VisionResult.Apriltag?
-            get(){
-                return if (getTV(name) && getCurrentPipelineIndex(name).toInt() == id){
-                    VisionResult.Apriltag(
-                        tx = getTX(name),
-                        ty = getTY(name),
-                        areaPercent = getTA(name),
-                        id = getFiducialID(name).toInt(),
-                        // converts it to a UnitTransform3d.
-                        targetTransformFromCam = getTargetPose3d_CameraSpace(name).ofUnit(meters) - UnitPose3d()
-                    )
-                }else{
-                    null
-                }
-            }
-
-        override val visionData: VisionData<VisionResult.Apriltag>?
+        override val visionData: NonLoggableVisionData<VisionResult.AprilTag>?
             get(){
                 val completeData = getLatestResults(name).targetingResults
                 if (!completeData.valid || getCurrentPipelineIndex(name).toInt() != id) {
@@ -152,7 +135,7 @@ public class Limelight(
                 val bestTarget = allTargets[0]
                 allTargets.removeAt(0)
 
-                return VisionData(
+                return NonLoggableVisionData(
                     completeData.timestamp_RIOFPGA_capture.ofUnit(seconds),
                     bestTarget, allTargets
                 )
@@ -163,9 +146,9 @@ public class Limelight(
         override val mountAngle: Angle = this@Limelight.mountAngle
 
 
-        private fun Array<LimelightTarget_Fiducial>.toVisionTargets(): MutableList<VisionResult.Apriltag> =
+        private fun Array<LimelightTarget_Fiducial>.toVisionTargets(): MutableList<VisionResult.AprilTag> =
             this.map{
-                VisionResult.Apriltag(
+                VisionResult.AprilTag(
                     tx = it.tx,
                     ty = it.ty,
                     areaPercent = it.ta,
@@ -182,20 +165,6 @@ public class Limelight(
             setPipelineIndex(name,id)
         }
 
-        override val bestTarget: VisionResult.ML?
-            get(){
-                return if (getTV(name) && getCurrentPipelineIndex(name).toInt() == id){
-                    VisionResult.ML(
-                        tx = getTX(name),
-                        ty = getTY(name),
-                        areaPercent = getTA(name),
-                        id = getNeuralClassID(name).toInt()
-                    )
-                }else{
-                    null
-                }
-            }
-
         private fun Array<LimelightTarget_Detector>.toVisionTargets(): MutableList<VisionResult.ML> =
             this.map{
                 VisionResult.ML(
@@ -206,7 +175,7 @@ public class Limelight(
                 )
             }.toMutableList()
 
-        override val visionData: VisionData<VisionResult.ML>?
+        override val visionData: NonLoggableVisionData<VisionResult.ML>?
             get(){
 
 
@@ -221,7 +190,7 @@ public class Limelight(
                 val bestTarget = allTargets[0]
                 allTargets.removeAt(0)
 
-                return VisionData(
+                return NonLoggableVisionData(
                     completeData.timestamp_RIOFPGA_capture.ofUnit(seconds),
                     bestTarget, allTargets
                 )

@@ -23,7 +23,7 @@ public interface VisionPipeline<R: VisionResult> {
     /**
      * Fetches the full vision data of the [VisionPipeline]; These are all from the exact same timestamp.
      */
-    public val visionData: VisionData<R>?
+    public val visionData: NonLoggableVisionData<R>?
 
     /**
      * Fetches the current best target of the [VisionPipeline].

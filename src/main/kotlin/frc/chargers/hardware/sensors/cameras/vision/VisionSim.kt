@@ -36,7 +36,7 @@ public class ApriltagCamSim (
     cameraResWidth: Int,
     cameraResHeight: Int,
     private val fieldMap: AprilTagFieldLayout
-): VisionPipeline<VisionResult.Apriltag> {
+): VisionPipeline<VisionResult.AprilTag> {
     private val camera = PhotonCamera(camName)
     private val simSystem = SimVisionSystem(
         camName,
@@ -57,7 +57,7 @@ public class ApriltagCamSim (
         }
     }
 
-    override val visionData: VisionData<VisionResult.Apriltag>?
+    override val visionData: NonLoggableVisionData<VisionResult.AprilTag>?
         get(){
             val data = camera.latestResult
             if (!data.hasTargets()) return null
@@ -66,7 +66,7 @@ public class ApriltagCamSim (
             val otherTargets = data.getTargets()
             otherTargets.remove(bestTarget)
 
-            return VisionData(
+            return NonLoggableVisionData(
                 data.timestampSeconds.ofUnit(seconds),
                 toVisionTarget(bestTarget),
                 otherTargets.map{toVisionTarget(it)}
@@ -76,7 +76,7 @@ public class ApriltagCamSim (
     override val mountAngle: Angle = robotToCam.rotation.zAngle
 
     private fun toVisionTarget(target: PhotonTrackedTarget) =
-        VisionResult.Apriltag(
+        VisionResult.AprilTag(
             tx = target.yaw,
             ty = target.pitch,
             areaPercent = target.area,
@@ -167,7 +167,7 @@ public class MLCamSim(
         }
     }
 
-    override val visionData: VisionData<VisionResult.ML>?
+    override val visionData: NonLoggableVisionData<VisionResult.ML>?
         get(){
             val data = camera.latestResult
             if (!data.hasTargets()) return null
@@ -176,7 +176,7 @@ public class MLCamSim(
             val otherTargets = data.getTargets()
             otherTargets.remove(bestTarget)
 
-            return VisionData(
+            return NonLoggableVisionData(
                 data.timestampSeconds.ofUnit(seconds),
                 toVisionTarget(bestTarget),
                 otherTargets.map{toVisionTarget(it)}

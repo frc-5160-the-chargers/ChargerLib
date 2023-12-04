@@ -9,5 +9,6 @@ public data class RobotConfig(
     val isReplay: Boolean,
     val extraLoggerConfig: (Logger) -> Unit = {},
     val onError: (Throwable) -> Unit = {},
-    val loopPeriod: Time = 0.02.seconds
+    val loopPeriod: Time = 0.02.seconds,
+    val logToNTWhenFMSAttached: Boolean = true
 )
