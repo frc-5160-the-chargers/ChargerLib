@@ -599,21 +599,17 @@ public class EncoderHolonomicDrivetrain(
         Note: the multipliers here are relatively arbitrary; they are simply what has worked best for us.
         In addition, second order kinematics in open-loop control over-corrects
          */
-        if (controlScheme is SecondOrderControlScheme){
-            currentModuleStates = kinematics.toSecondOrderModuleStateGroup(
-                speeds.correctForDynamics(),
+        currentModuleStates = if (controlScheme is SecondOrderControlScheme){
+            kinematics.toSecondOrderModuleStateGroup(
+                speeds,
                 mostReliableHeading,
                 fieldRelative
             )
         }else{
-
-            // sets module states using the ModuleStateGroup class
-            currentModuleStates = kinematics.toFirstOrderModuleStateGroup(
-                if(fieldRelative){
-                    ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
-                }else{
-                    speeds
-                }.correctForDynamics(driftRate = 1.6)
+            kinematics.toFirstOrderModuleStateGroup(
+                speeds,
+                mostReliableHeading,
+                fieldRelative
             )
         }
 

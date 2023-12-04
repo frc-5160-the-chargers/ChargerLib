@@ -2,12 +2,10 @@ package frc.chargers.hardware.sensors.cameras.vision.photonvision
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
-import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.apriltag.AprilTagFieldLayout
-import edu.wpi.first.apriltag.AprilTagFields
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.cameras.vision.*
@@ -56,16 +54,15 @@ public class ApriltagPhotonCam(
         override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
         override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
             by logNamespace.timestampedNullableValue(
-                logNullRepr = NullableMeasurement(UnitPose2d(), Time(0.0))
+                nullReprWhenLogged = UnitPose2d()
             ){
                 val signal = update()
                 if (signal.isEmpty){
                     NullableMeasurement(null, fpgaTimestamp())
                 }else{
-                    val data = signal.get()
                     Measurement(
-                        UnitPose2d(data.estimatedPose.toPose2d()),
-                        data.timestampSeconds.ofUnit(seconds)
+                        UnitPose2d(signal.get().estimatedPose.toPose2d()),
+                        signal.get().timestampSeconds.ofUnit(seconds)
                     )
                 }
             }
@@ -73,7 +70,7 @@ public class ApriltagPhotonCam(
 
 
     override val visionData: VisionData<VisionResult.AprilTag>? by logNamespace.genericNullableValue(
-        loggedNullRepr = emptyAprilTagVisionData()
+        nullReprWhenLogged = emptyAprilTagVisionData()
     ){
         val data = latestResult
 

@@ -79,16 +79,19 @@ public class LoggableInputsProvider(
 
     public fun <T: AdvantageKitLoggable<T>> genericValue(getValue: () -> T): ReadOnlyLoggableInput<T> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericValue(variable.name,getValue)}
-    public fun <T: AdvantageKitLoggable<T>> genericNullableValue(loggedNullRepr: T, getValue: () -> T?): ReadOnlyLoggableInput<T?> =
-        PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,loggedNullRepr, getValue)}
+    public fun <T: AdvantageKitLoggable<T>> genericNullableValue(nullReprWhenLogged: T, getValue: () -> T?): ReadOnlyLoggableInput<T?> =
+        PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,nullReprWhenLogged, getValue)}
     public fun <D: AnyDimension> timestampedQuantity(getValue: () -> Measurement<Quantity<D>>): ReadOnlyLoggableInput<Measurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityMeasurement(variable.name, getValue)}
     public fun <D: AnyDimension> timestampedNullableQuantity(getValue: () -> NullableMeasurement<Quantity<D>>): ReadOnlyLoggableInput<NullableMeasurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantityMeasurement(variable.name, getValue)}
+
+
     public fun <T: AdvantageKitLoggable<T>> timestampedValue(getValue: () -> Measurement<T>): ReadOnlyLoggableInput<Measurement<T>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedMeasurement(variable.name, getValue)}
-    public fun <T: AdvantageKitLoggable<T>> timestampedNullableValue(logNullRepr: T, getValue: () -> NullableMeasurement<T>): ReadOnlyLoggableInput<NullableMeasurement<T>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableMeasurement(variable.name, logNullRepr, getValue)}
+
+    public fun <T: AdvantageKitLoggable<T>> timestampedNullableValue(nullReprWhenLogged: T, getValue: () -> NullableMeasurement<T>): ReadOnlyLoggableInput<NullableMeasurement<T>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableMeasurement(variable.name, nullReprWhenLogged, getValue)}
 
 
 

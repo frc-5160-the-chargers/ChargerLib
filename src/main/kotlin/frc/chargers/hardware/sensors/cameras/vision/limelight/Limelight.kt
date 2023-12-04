@@ -6,16 +6,17 @@ import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.chargerlibexternal.utils.LimelightHelpers.*
+import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.commands.CommandBuilder
-import frc.chargers.hardware.sensors.cameras.vision.Classifier
-import frc.chargers.hardware.sensors.cameras.vision.NonLoggableVisionData
-import frc.chargers.hardware.sensors.cameras.vision.VisionPipeline
-import frc.chargers.hardware.sensors.cameras.vision.VisionResult
+import frc.chargers.hardware.sensors.RobotPoseSupplier
+import frc.chargers.hardware.sensors.cameras.vision.*
+import frc.chargers.utils.NullableMeasurement
 import frc.chargers.utils.RequirementManager
 import frc.chargers.wpilibextensions.Alert
+import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
-
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 
 
 public class Limelight(
@@ -100,9 +101,10 @@ public class Limelight(
 
 
 
-
-    public inner class ApriltagPipeline(override val id: Int): Pipeline, VisionPipeline<VisionResult.AprilTag> {
-
+    public open inner class ApriltagPipeline(
+        public val logNamespace: LoggableInputsProvider,
+        final override val id: Int
+    ): Pipeline, VisionPipeline<VisionResult.AprilTag> {
         init{
             if (id < 0 || id > 9){
                 error("Your pipeline's ID is out of range.")
@@ -123,22 +125,26 @@ public class Limelight(
         }
 
 
-        override val visionData: NonLoggableVisionData<VisionResult.AprilTag>?
-            get(){
+        override val visionData: VisionData<VisionResult.AprilTag>?
+            by logNamespace.genericNullableValue(
+                nullReprWhenLogged = emptyAprilTagVisionData()
+            ){
                 val completeData = getLatestResults(name).targetingResults
-                if (!completeData.valid || getCurrentPipelineIndex(name).toInt() != id) {
-                    println("pipeline is not correct; resetting pipeline of limelight")
-                    return null
-                }
 
                 val allTargets = completeData.targets_Fiducials.toVisionTargets()
                 val bestTarget = allTargets[0]
                 allTargets.removeAt(0)
 
-                return NonLoggableVisionData(
-                    completeData.timestamp_RIOFPGA_capture.ofUnit(seconds),
-                    bestTarget, allTargets
-                )
+                // return value
+                if (!completeData.valid || getCurrentPipelineIndex(name).toInt() != id) {
+                    println("pipeline is not correct; resetting pipeline of limelight")
+                    null
+                }else{
+                    VisionData(
+                        completeData.timestamp_RIOFPGA_capture.ofUnit(seconds),
+                        bestTarget, allTargets
+                    )
+                }
             }
 
 
@@ -159,7 +165,7 @@ public class Limelight(
             }.toMutableList()
     }
 
-    public inner class MLDetectorPipeline(id: Int): Pipeline, VisionPipeline<VisionResult.ML>, MLClassifierPipeline(id){
+    public inner class MLDetectorPipeline(logNamespace: LoggableInputsProvider, id: Int): Pipeline, VisionPipeline<VisionResult.ML>, MLClassifierPipeline(logNamespace, id){
 
         override fun reset(){
             setPipelineIndex(name,id)
@@ -175,25 +181,26 @@ public class Limelight(
                 )
             }.toMutableList()
 
-        override val visionData: NonLoggableVisionData<VisionResult.ML>?
-            get(){
-
-
+        override val visionData: VisionData<VisionResult.ML>?
+            by logNamespace.genericNullableValue(
+                nullReprWhenLogged = emptyMLVisionData()
+            ){
                 val completeData = getLatestResults(name).targetingResults
-                if (!completeData.valid || getCurrentPipelineIndex(name).toInt() != id) {
-                    println("pipeline is not correct; resetting pipeline of limelight")
-                    setPipelineIndex(name,id)
-                    return null
-                }
+
 
                 val allTargets = completeData.targets_Detector.toVisionTargets()
                 val bestTarget = allTargets[0]
                 allTargets.removeAt(0)
 
-                return NonLoggableVisionData(
-                    completeData.timestamp_RIOFPGA_capture.ofUnit(seconds),
-                    bestTarget, allTargets
-                )
+                if (!completeData.valid || getCurrentPipelineIndex(name).toInt() != id) {
+                    println("pipeline is not correct; resetting pipeline of limelight")
+                    null
+                }else{
+                    VisionData(
+                        completeData.timestamp_RIOFPGA_capture.ofUnit(seconds),
+                        bestTarget, allTargets
+                    )
+                }
             }
 
 
@@ -201,7 +208,10 @@ public class Limelight(
         override val mountAngle: Angle = this@Limelight.mountAngle
     }
 
-    public open inner class MLClassifierPipeline(final override val id: Int): Classifier<Int?>, Pipeline {
+    public open inner class MLClassifierPipeline(
+        public val logNamespace: LoggableInputsProvider,
+        final override val id: Int
+    ): Classifier<Int?>, Pipeline {
         init{
             if (id < 0 || id > 9){
                 error("Your pipeline's ID is out of range.")
@@ -220,14 +230,13 @@ public class Limelight(
 
 
         override val itemType: Int?
-            get(){
-                return if (getCurrentPipelineIndex(name).toInt() == id && getTV(name)){
+            by logNamespace.nullableInt{
+                if (getCurrentPipelineIndex(name).toInt() == id && getTV(name)){
                     getNeuralClassID(name).toInt()
                 }else{
                     setPipelineIndex(name,id)
                     null
                 }
-
             }
 
     }

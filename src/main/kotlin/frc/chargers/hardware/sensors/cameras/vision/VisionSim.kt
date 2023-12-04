@@ -8,6 +8,7 @@ import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.apriltag.AprilTagFieldLayout
+import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.utils.Measurement
@@ -27,7 +28,7 @@ import org.photonvision.targeting.PhotonTrackedTarget
 
 
 public class ApriltagCamSim (
-    camName: String,
+    logNamespace: LoggableInputsProvider,
     private val robotPoseSupplier: RobotPoseSupplier,
     private val robotToCam: UnitTransform3d,
     fov: Angle,
@@ -37,9 +38,9 @@ public class ApriltagCamSim (
     cameraResHeight: Int,
     private val fieldMap: AprilTagFieldLayout
 ): VisionPipeline<VisionResult.AprilTag> {
-    private val camera = PhotonCamera(camName)
+    private val camera = PhotonCamera(logNamespace.logGroup)
     private val simSystem = SimVisionSystem(
-        camName,
+        logNamespace.logGroup,
         fov.inUnit(degrees),
         robotToCam.inUnit(meters),
         ledRange.inUnit(meters),
@@ -57,16 +58,17 @@ public class ApriltagCamSim (
         }
     }
 
-    override val visionData: NonLoggableVisionData<VisionResult.AprilTag>?
-        get(){
+    override val visionData: VisionData<VisionResult.AprilTag>?
+        by logNamespace.genericNullableValue(
+            nullReprWhenLogged = emptyAprilTagVisionData()
+        ){
             val data = camera.latestResult
-            if (!data.hasTargets()) return null
-
             val bestTarget = data.bestTarget
             val otherTargets = data.getTargets()
             otherTargets.remove(bestTarget)
-
-            return NonLoggableVisionData(
+            // return value
+            if (!data.hasTargets()) null
+            else VisionData(
                 data.timestampSeconds.ofUnit(seconds),
                 toVisionTarget(bestTarget),
                 otherTargets.map{toVisionTarget(it)}
@@ -86,6 +88,7 @@ public class ApriltagCamSim (
 
 
     public inner class PoseEstimator(
+        logNamespace: LoggableInputsProvider,
         strategy: PoseStrategy = PoseStrategy.MULTI_TAG_PNP,
     ): RobotPoseSupplier, PhotonPoseEstimator(
         fieldMap,
@@ -101,9 +104,11 @@ public class ApriltagCamSim (
 
         override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
         override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
-            get(){
+            by logNamespace.timestampedNullableValue(
+                nullReprWhenLogged = UnitPose2d()
+            ){
                 val signal = update()
-                return if (signal.isEmpty){
+                if (signal.isEmpty){
                     NullableMeasurement(null, fpgaTimestamp())
                 }else{
                     val data = signal.get()
@@ -119,7 +124,7 @@ public class ApriltagCamSim (
 
 
 public class MLCamSim(
-    camName: String,
+    logNamespace: LoggableInputsProvider,
     private val robotPoseSupplier: RobotPoseSupplier,
     robotToCam: UnitTransform3d,
     fov: Angle,
@@ -145,9 +150,9 @@ public class MLCamSim(
 
 
 
-    private val camera = PhotonCamera(camName)
+    private val camera = PhotonCamera(logNamespace.logGroup)
     private val simSystem = SimVisionSystem(
-        camName,
+        logNamespace.logGroup,
         fov.inUnit(degrees),
         robotToCam.inUnit(meters),
         ledRange.inUnit(meters),
@@ -167,16 +172,19 @@ public class MLCamSim(
         }
     }
 
-    override val visionData: NonLoggableVisionData<VisionResult.ML>?
-        get(){
+    override val visionData: VisionData<VisionResult.ML>?
+        by logNamespace.genericNullableValue(
+            nullReprWhenLogged = emptyMLVisionData()
+        ){
             val data = camera.latestResult
-            if (!data.hasTargets()) return null
+
 
             val bestTarget = data.bestTarget
             val otherTargets = data.getTargets()
             otherTargets.remove(bestTarget)
 
-            return NonLoggableVisionData(
+            if (!data.hasTargets()) null
+            else VisionData(
                 data.timestampSeconds.ofUnit(seconds),
                 toVisionTarget(bestTarget),
                 otherTargets.map{toVisionTarget(it)}

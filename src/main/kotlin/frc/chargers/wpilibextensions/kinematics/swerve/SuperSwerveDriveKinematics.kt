@@ -10,6 +10,7 @@ import frc.chargerlibexternal.utils.HeadingCorrector
 import frc.chargerlibexternal.utils.SecondOrderSwerveKinematics
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
+import frc.chargers.wpilibextensions.kinematics.correctForDynamics
 
 
 /**
@@ -50,7 +51,7 @@ public class SuperSwerveDriveKinematics(
      * Credits: 5727/4481 second kinematics
      * @see SecondOrderSwerveKinematics
      */
-    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle, fieldRelative: Boolean = true): SecondOrderModuleStateGroup{
+    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle , fieldRelative: Boolean = true): SecondOrderModuleStateGroup{
 
         val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,heading.asRotation2d())
 
@@ -76,8 +77,15 @@ public class SuperSwerveDriveKinematics(
         )
     }
 
-    public fun toFirstOrderModuleStateGroup(speeds: ChassisSpeeds): ModuleStateGroup{
-        val arr = toSwerveModuleStates(speeds)
+    public fun toFirstOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle = Angle(0.0), fieldRelative: Boolean = true): ModuleStateGroup{
+        var newSpeeds = if(fieldRelative){
+            ChassisSpeeds.fromFieldRelativeSpeeds(speeds, heading.asRotation2d())
+        }else{
+            speeds
+        }
+        newSpeeds = newSpeeds.correctForDynamics(driftRate = 1.6)
+        newSpeeds = headingCorrector.correctHeading(newSpeeds,heading.asRotation2d())
+        val arr = toSwerveModuleStates(newSpeeds)
         return ModuleStateGroup(
             topLeftState = arr[0],
             topRightState = arr[1],
