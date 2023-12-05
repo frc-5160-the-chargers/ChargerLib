@@ -4,7 +4,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 
-
+/**
+ * Credits: 4481 repository
+ */
 
 public class HeadingCorrector {
 

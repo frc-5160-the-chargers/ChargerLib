@@ -22,7 +22,7 @@ public interface HeadingProvider {
         /**
          * Inline syntax to create a generic [HeadingProvider].
          *
-         * Syntax:
+         * I.E:
          * ```
          * val headingProvider = HeadingProvider{ Angle(0.0) }
          */

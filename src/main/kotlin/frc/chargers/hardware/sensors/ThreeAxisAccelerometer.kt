@@ -11,12 +11,18 @@ public interface ThreeAxisAccelerometer {
     public val zAcceleration: Acceleration
 
 
-    /**
-     * A [ThreeAxisAccelerometer] with static values for x, y, and z accelerations; these default to 0.
-     */
-    public class Static(
-        override val xAcceleration: Acceleration = Acceleration(0.0),
-        override val yAcceleration: Acceleration = Acceleration(0.0),
-        override val zAcceleration: Acceleration = Acceleration(0.0)
-    ): ThreeAxisAccelerometer
+    public companion object{
+        /**
+         * Inline syntax to create a generic [ThreeAxisAccelerometer].
+         */
+        public inline operator fun invoke(
+            crossinline getXAccel: () -> Acceleration,
+            crossinline getYAccel: () -> Acceleration,
+            crossinline getZAccel: () -> Acceleration
+        ): ThreeAxisAccelerometer = object: ThreeAxisAccelerometer{
+            override val xAcceleration: Acceleration get() = getXAccel()
+            override val yAcceleration: Acceleration get() = getYAccel()
+            override val zAcceleration: Acceleration get() = getZAccel()
+        }
+    }
 }

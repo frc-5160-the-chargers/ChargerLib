@@ -15,6 +15,9 @@ import static edu.wpi.first.math.Nat.N2;
 import static edu.wpi.first.math.Nat.N3;
 import static edu.wpi.first.math.Nat.N4;
 
+/**
+ * Credits: 4481 repository
+ */
 
 public class SecondOrderSwerveKinematics {
 

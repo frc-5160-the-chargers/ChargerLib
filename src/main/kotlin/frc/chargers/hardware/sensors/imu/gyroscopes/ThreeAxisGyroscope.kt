@@ -11,15 +11,20 @@ public interface ThreeAxisGyroscope: HeadingProvider {
     public val pitch: Angle
     public val roll: Angle
 
-    override val heading: Angle
-        get() = yaw
+    override val heading: Angle get() = yaw
 
-    /**
-     * A [ThreeAxisGyroscope] that has static values for yaw, pitch and roll. These default to 0.
-     */
-    public class Static(
-        override val yaw: Angle = Angle(0.0),
-        override val pitch: Angle = Angle(0.0),
-        override val roll: Angle = Angle(0.0)
-    ): ThreeAxisGyroscope
+    public companion object{
+        /**
+         * Inline syntax to create a generic [ThreeAxisGyroscope].
+         */
+        public inline operator fun invoke(
+            crossinline getYaw: () -> Angle,
+            crossinline getPitch: () -> Angle,
+            crossinline getRoll: () -> Angle
+        ): ThreeAxisGyroscope = object: ThreeAxisGyroscope{
+            override val yaw: Angle get() = getYaw()
+            override val pitch: Angle get() = getPitch()
+            override val roll: Angle get() = getRoll()
+        }
+    }
 }
