@@ -27,8 +27,7 @@ public inline fun buildCommand(
     block: CommandBuilder.() -> Unit
 ): Command{
     val builder = CommandBuilder().apply(block)
-
-    return if(logIndividualCommands){
+    var command: Command = if(logIndividualCommands){
         loggedSequentialCommandGroup(
             name,
             *builder.commands.toTypedArray()
@@ -37,7 +36,12 @@ public inline fun buildCommand(
         SequentialCommandGroup(
             *builder.commands.toTypedArray()
         ).withName(name)
-    }.finallyDo(builder.endBehavior).withExtraRequirements(*builder.requirements.toTypedArray())
+    }.finallyDo(builder.endBehavior)
+
+    if (builder.requirements.size > 0){
+        command = command.withExtraRequirements(*builder.requirements.toTypedArray())
+    }
+    return command
 }
 
 
@@ -120,6 +124,22 @@ public class CommandBuilder {
             },
             default
         ).also(commands::add)
+
+
+    /**
+     * Runs a specific command out of many options when the correct index is passed in.
+     */
+    public fun runDependingOnIndex(
+        indexSupplier: () -> Int,
+        vararg commands: Command
+    ): Command{
+        var index = 0
+        return CustomSelectCommand(
+            indexSupplier,
+            commandMap = commands.associateBy { index.also{index++} },
+            default = InstantCommand{throw IndexOutOfBoundsException("The command index of your command is out of range.")}
+        ).also(this.commands::add)
+    }
 
 
     /**

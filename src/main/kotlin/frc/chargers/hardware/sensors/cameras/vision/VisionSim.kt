@@ -28,7 +28,7 @@ import org.photonvision.targeting.PhotonTrackedTarget
 
 
 public class ApriltagCamSim (
-    logNamespace: LoggableInputsProvider,
+    inputs: LoggableInputsProvider,
     private val robotPoseSupplier: RobotPoseSupplier,
     private val robotToCam: UnitTransform3d,
     fov: Angle,
@@ -38,9 +38,9 @@ public class ApriltagCamSim (
     cameraResHeight: Int,
     private val fieldMap: AprilTagFieldLayout
 ): VisionPipeline<VisionResult.AprilTag> {
-    private val camera = PhotonCamera(logNamespace.logGroup)
+    private val camera = PhotonCamera(inputs.logNamespace)
     private val simSystem = SimVisionSystem(
-        logNamespace.logGroup,
+        inputs.logNamespace,
         fov.inUnit(degrees),
         robotToCam.inUnit(meters),
         ledRange.inUnit(meters),
@@ -59,7 +59,7 @@ public class ApriltagCamSim (
     }
 
     override val visionData: VisionData<VisionResult.AprilTag>?
-        by logNamespace.genericNullableValue(
+        by inputs.nullableValue(
             nullReprWhenLogged = emptyAprilTagVisionData()
         ){
             val data = camera.latestResult
@@ -104,7 +104,7 @@ public class ApriltagCamSim (
 
         override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
         override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
-            by logNamespace.timestampedNullableValue(
+            by logNamespace.nullableValueMeasurement(
                 nullReprWhenLogged = UnitPose2d()
             ){
                 val signal = update()
@@ -150,9 +150,9 @@ public class MLCamSim(
 
 
 
-    private val camera = PhotonCamera(logNamespace.logGroup)
+    private val camera = PhotonCamera(logNamespace.logNamespace)
     private val simSystem = SimVisionSystem(
-        logNamespace.logGroup,
+        logNamespace.logNamespace,
         fov.inUnit(degrees),
         robotToCam.inUnit(meters),
         ledRange.inUnit(meters),
@@ -173,7 +173,7 @@ public class MLCamSim(
     }
 
     override val visionData: VisionData<VisionResult.ML>?
-        by logNamespace.genericNullableValue(
+        by logNamespace.nullableValue(
             nullReprWhenLogged = emptyMLVisionData()
         ){
             val data = camera.latestResult

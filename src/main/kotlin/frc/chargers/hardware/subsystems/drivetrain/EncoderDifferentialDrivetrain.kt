@@ -32,7 +32,7 @@ public fun simulatedDrivetrain(
     constants: DiffDriveConstants = DiffDriveConstants.andymark(),
     controlScheme: DiffDriveControl = DiffDriveControl.None
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
-    DiffDriveIOSim(logTab = LoggableInputsProvider(logGroup = "Drivetrain(Differential)"),simMotors),
+    DiffDriveIOSim(logTab = LoggableInputsProvider(logNamespace = "Drivetrain(Differential)"),simMotors),
     constants, controlScheme
 )
 
@@ -77,7 +77,7 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
         io = DiffDriveIOReal(
-            logTab = LoggableInputsProvider(logGroup = "Drivetrain(Differential)"),
+            logTab = LoggableInputsProvider(logNamespace = "Drivetrain(Differential)"),
             leftMotors = leftMotors.apply { configure(configuration) },
             rightMotors = rightMotors.apply { configure(configuration) }
         ),

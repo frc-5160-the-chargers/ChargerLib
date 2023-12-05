@@ -29,7 +29,7 @@ public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, Read
 
 
 public class LoggableInputsProvider(
-    public val logGroup: String
+    public val logNamespace: String
 ){
     public fun int(getValue: () -> Int): ReadOnlyLoggableInput<Int> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedInt(variable.name, getValue) }
@@ -65,20 +65,20 @@ public class LoggableInputsProvider(
         PropertyDelegateProvider{ _, variable -> AutoLoggedStringList(variable.name, getValue) }
 
 
-    public fun <T: AdvantageKitLoggable<T>> genericValue(getValue: () -> T): ReadOnlyLoggableInput<T> =
+    public fun <T: AdvantageKitLoggable<T>> value(getValue: () -> T): ReadOnlyLoggableInput<T> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericValue(variable.name,getValue)}
-    public fun <T: AdvantageKitLoggable<T>> genericNullableValue(nullReprWhenLogged: T, getValue: () -> T?): ReadOnlyLoggableInput<T?> =
+    public fun <T: AdvantageKitLoggable<T>> nullableValue(nullReprWhenLogged: T, getValue: () -> T?): ReadOnlyLoggableInput<T?> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,nullReprWhenLogged, getValue)}
-    public fun <D: AnyDimension> timestampedQuantity(getValue: () -> Measurement<Quantity<D>>): ReadOnlyLoggableInput<Measurement<Quantity<D>>> =
+    public fun <D: AnyDimension> quantityMeasurement(getValue: () -> Measurement<Quantity<D>>): ReadOnlyLoggableInput<Measurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityMeasurement(variable.name, getValue)}
-    public fun <D: AnyDimension> timestampedNullableQuantity(getValue: () -> NullableMeasurement<Quantity<D>>): ReadOnlyLoggableInput<NullableMeasurement<Quantity<D>>> =
+    public fun <D: AnyDimension> nullableQuantityMeasurement(getValue: () -> NullableMeasurement<Quantity<D>>): ReadOnlyLoggableInput<NullableMeasurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantityMeasurement(variable.name, getValue)}
     
     
-    public fun <T: AdvantageKitLoggable<T>> timestampedValue(getValue: () -> Measurement<T>): ReadOnlyLoggableInput<Measurement<T>> =
+    public fun <T: AdvantageKitLoggable<T>> valueMeasurement(getValue: () -> Measurement<T>): ReadOnlyLoggableInput<Measurement<T>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedMeasurement(variable.name, getValue)}
     
-    public fun <T: AdvantageKitLoggable<T>> timestampedNullableValue(nullReprWhenLogged: T, getValue: () -> NullableMeasurement<T>): ReadOnlyLoggableInput<NullableMeasurement<T>> =
+    public fun <T: AdvantageKitLoggable<T>> nullableValueMeasurement(nullReprWhenLogged: T, getValue: () -> NullableMeasurement<T>): ReadOnlyLoggableInput<NullableMeasurement<T>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableMeasurement(variable.name, nullReprWhenLogged, getValue)}
 
 
@@ -143,43 +143,43 @@ public class LoggableInputsProvider(
         PropertyDelegateProvider{ _, variable -> AutoLoggedStringList(variable.name, getValue, setValue) }
 
     
-    public fun <T: AdvantageKitLoggable<T>> genericValue(
+    public fun <T: AdvantageKitLoggable<T>> value(
         getValue: () -> T, 
         setValue: (T) -> Unit
     ): ReadWriteLoggableInput<T> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValue(variable.name,getValue,setValue)}
 
-    
-    public fun <T: AdvantageKitLoggable<T>> genericNullableValue(
+
+    public fun <T: AdvantageKitLoggable<T>> nullableValue(
         nullReprWhenLogged: T, 
         getValue: () -> T?, 
         setValue: (T?) -> Unit
     ): ReadWriteLoggableInput<T?> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,nullReprWhenLogged, getValue, setValue)}
 
-    
-    public fun <D: AnyDimension> timestampedQuantity(
+
+    public fun <D: AnyDimension> quantityMeasurement(
         getValue: () -> Measurement<Quantity<D>>, 
         setValue: (Measurement<Quantity<D>>) -> Unit
     ): ReadWriteLoggableInput<Measurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityMeasurement(variable.name, getValue, setValue)}
 
     
-    public fun <D: AnyDimension> timestampedNullableQuantity(
+    public fun <D: AnyDimension> nullableQuantityMeasurement(
         getValue: () -> NullableMeasurement<Quantity<D>>, 
         setValue: (NullableMeasurement<Quantity<D>>) -> Unit
     ): ReadWriteLoggableInput<NullableMeasurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantityMeasurement(variable.name, getValue, setValue)}
 
     
-    public fun <T: AdvantageKitLoggable<T>> timestampedValue(
+    public fun <T: AdvantageKitLoggable<T>> valueMeasurement(
         getValue: () -> Measurement<T>, 
         setValue: (Measurement<T>) -> Unit
     ): ReadWriteLoggableInput<Measurement<T>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedMeasurement(variable.name, getValue,setValue)}
 
     
-    public fun <T: AdvantageKitLoggable<T>> timestampedNullableValue(
+    public fun <T: AdvantageKitLoggable<T>> nullableValueMeasurement(
         nullReprWhenLogged: T, 
         getValue: () -> NullableMeasurement<T>, 
         setValue: (NullableMeasurement<T>) -> Unit
@@ -204,7 +204,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -233,7 +233,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -260,7 +260,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -284,7 +284,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -310,7 +310,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -345,7 +345,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -382,7 +382,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -417,7 +417,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -445,7 +445,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -472,7 +472,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -499,7 +499,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -526,7 +526,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -552,7 +552,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup, dummyInputs)
+                Logger.getInstance().processInputs(logNamespace, dummyInputs)
             }
         }
 
@@ -576,7 +576,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup,dummyInputs)
+                Logger.getInstance().processInputs(logNamespace,dummyInputs)
             }
         }
 
@@ -602,7 +602,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup,dummyInputs)
+                Logger.getInstance().processInputs(logNamespace,dummyInputs)
             }
         }
 
@@ -666,7 +666,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup,dummyInputs)
+                Logger.getInstance().processInputs(logNamespace,dummyInputs)
             }
         }
 
@@ -705,7 +705,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup,dummyInputs)
+                Logger.getInstance().processInputs(logNamespace,dummyInputs)
             }
         }
 
@@ -751,7 +751,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup,dummyInputs)
+                Logger.getInstance().processInputs(logNamespace,dummyInputs)
             }
         }
 
@@ -791,7 +791,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logGroup,dummyInputs)
+                Logger.getInstance().processInputs(logNamespace,dummyInputs)
             }
         }
 

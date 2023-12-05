@@ -28,14 +28,14 @@ public class ApriltagPhotonCam(
      * Ensure that this namespace is the same accross real and sim equivalents of the photon camera.
      * @see LoggableInputsProvider
      */
-    public val logNamespace: LoggableInputsProvider,
+    public val inputs: LoggableInputsProvider,
     override val lensHeight: Distance,
     override val mountAngle: Angle
-): VisionPipeline<VisionResult.AprilTag>, PhotonCamera(logNamespace.logGroup){
+): VisionPipeline<VisionResult.AprilTag>, PhotonCamera(inputs.logNamespace){
 
 
     public inner class PoseEstimator(
-        logNamespace: LoggableInputsProvider,
+        public val logNamespace: LoggableInputsProvider,
         robotToCamera: UnitTransform3d,
         fieldTags: AprilTagFieldLayout,
         strategy: PoseStrategy = PoseStrategy.MULTI_TAG_PNP,
@@ -53,7 +53,7 @@ public class ApriltagPhotonCam(
 
         override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
         override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
-            by logNamespace.timestampedNullableValue(
+            by logNamespace.nullableValueMeasurement(
                 nullReprWhenLogged = UnitPose2d()
             ){
                 val signal = update()
@@ -69,7 +69,7 @@ public class ApriltagPhotonCam(
     }
 
 
-    override val visionData: VisionData<VisionResult.AprilTag>? by logNamespace.genericNullableValue(
+    override val visionData: VisionData<VisionResult.AprilTag>? by inputs.nullableValue(
         nullReprWhenLogged = emptyAprilTagVisionData()
     ){
         val data = latestResult
