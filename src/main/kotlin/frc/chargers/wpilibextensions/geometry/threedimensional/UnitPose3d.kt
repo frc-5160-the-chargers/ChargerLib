@@ -65,13 +65,13 @@ public data class UnitPose3d(
     }
 
     override fun getFromLog(table: LogTable, category: String): UnitPose3d = UnitPose3d(
-        x = table.getDouble("$category/xMeters",0.0).ofUnit(meters),
-        y = table.getDouble("$category/yMeters",0.0).ofUnit(meters),
-        z = table.getDouble("$category/zMeters",0.0).ofUnit(meters),
+        x = table.get("$category/xMeters",0.0).ofUnit(meters),
+        y = table.get("$category/yMeters",0.0).ofUnit(meters),
+        z = table.get("$category/zMeters",0.0).ofUnit(meters),
         rotation = Rotation3d(
-            table.getDouble("$category/rollRad",0.0),
-            table.getDouble("$category/pitchRad",0.0),
-            table.getDouble("$category/yawRad",0.0)
+            table.get("$category/rollRad",0.0),
+            table.get("$category/pitchRad",0.0),
+            table.get("$category/yawRad",0.0)
         )
     )
 

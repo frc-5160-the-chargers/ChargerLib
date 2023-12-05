@@ -56,9 +56,9 @@ public data class UnitTranslation3d(
     }
 
     override fun getFromLog(table: LogTable, category: String): UnitTranslation3d = UnitTranslation3d(
-        x = table.getDouble("$category/xMeters",0.0).ofUnit(meters),
-        y = table.getDouble("$category/yMeters",0.0).ofUnit(meters),
-        z = table.getDouble("$category/zMeters",0.0).ofUnit(meters)
+        x = table.get("$category/xMeters",0.0).ofUnit(meters),
+        y = table.get("$category/yMeters",0.0).ofUnit(meters),
+        z = table.get("$category/zMeters",0.0).ofUnit(meters)
     )
 
 }

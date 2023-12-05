@@ -70,8 +70,8 @@ public data class UnitTranslation2d(
     }
 
     override fun getFromLog(table: LogTable, category: String): UnitTranslation2d = UnitTranslation2d(
-        table.getDouble("$category/xMeters",0.0).ofUnit(meters),
-        table.getDouble("$category/yMeters",0.0).ofUnit(meters)
+        table.get("$category/xMeters",0.0).ofUnit(meters),
+        table.get("$category/yMeters",0.0).ofUnit(meters)
     )
 
 

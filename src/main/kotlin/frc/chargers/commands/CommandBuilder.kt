@@ -277,7 +277,7 @@ public class CommandBuilder {
     private inner class DuringRunGetter<T : Any>(private val get: () -> T) : ReadOnlyProperty<Any?, T> {
         init {
             commands.add(
-                object : CommandBase() { // Add a new command that initializes this value in its initialize() function.
+                object : Command() { // Add a new command that initializes this value in its initialize() function.
                     override fun initialize() {
                         if (!::value.isInitialized) {
                             initializeValue()
@@ -308,7 +308,7 @@ public class CommandBuilder {
         val getValue: () -> T,
         val commandMap: Map<T,Command>,
         default: Command
-    ): CommandBase(){
+    ): Command(){
         var allRequirements: Array<Subsystem> = arrayOf()
         var runsWhenDisabled = true
 

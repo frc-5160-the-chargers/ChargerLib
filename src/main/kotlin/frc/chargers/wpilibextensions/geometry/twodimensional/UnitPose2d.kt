@@ -84,9 +84,9 @@ public data class UnitPose2d(
 
     override fun getFromLog(table: LogTable, category: String): UnitPose2d {
         return UnitPose2d(
-            x = table.getDouble("$category/xMeters",0.0).ofUnit(meters),
-            y = table.getDouble("$category/yMeters",0.0).ofUnit(meters),
-            rotation = table.getDouble("$category/rotationRad",0.0).ofUnit(radians)
+            x = table.get("$category/xMeters",0.0).ofUnit(meters),
+            y = table.get("$category/yMeters",0.0).ofUnit(meters),
+            rotation = table.get("$category/rotationRad",0.0).ofUnit(radians)
         )
     }
 
