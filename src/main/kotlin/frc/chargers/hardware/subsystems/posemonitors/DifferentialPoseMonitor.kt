@@ -9,13 +9,13 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.hardware.sensors.RobotPoseSupplier
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.utils.Measurement
-import frc.chargers.utils.PoseEstimator
+import frc.chargerlibexternal.utils.PoseEstimator
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import org.littletonrobotics.junction.Logger
 
@@ -37,10 +37,9 @@ public class DifferentialPoseMonitor(
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.latestPose.ofUnit(meters),
-            fpgaTimestamp(),
-            true
+            fpgaTimestamp()
         )
-
+    override val robotPose: UnitPose2d get() = robotPoseMeasurement.value
     public constructor(
         vararg poseSuppliers: RobotPoseSupplier,
         gyro: HeadingProvider? = null,
@@ -73,8 +72,8 @@ public class DifferentialPoseMonitor(
     private var previousDistanceR = Distance(0.0)
 
     override fun periodic(){
-        val distanceL = inputs.leftAngularPosition * wheelTravelPerMotorRadian
-        val distanceR = inputs.rightAngularPosition * wheelTravelPerMotorRadian
+        val distanceL = io.leftWheelTravel * wheelTravelPerMotorRadian
+        val distanceR = io.rightWheelTravel * wheelTravelPerMotorRadian
 
         val twist = kinematics.toTwist2d(
             (distanceL-previousDistanceL).inUnit(meters),
@@ -94,7 +93,7 @@ public class DifferentialPoseMonitor(
         poseSuppliers.forEach{
             val measurement = it.robotPoseMeasurement
 
-            if (measurement.isValid){
+            if (measurement.nullableValue != null){
                 val stdDevVector = when(val deviation = it.poseStandardDeviation){
                     is StandardDeviation.Of -> deviation.getVector()
 
@@ -104,7 +103,7 @@ public class DifferentialPoseMonitor(
                 visionUpdates.add(
                     PoseEstimator.TimestampedVisionUpdate(
                         measurement.timestamp.inUnit(seconds),
-                        measurement.value.inUnit(meters),
+                        measurement.nullableValue.inUnit(meters),
                         stdDevVector
                     )
                 )
@@ -114,7 +113,13 @@ public class DifferentialPoseMonitor(
 
 
         field.robotPose = poseEstimator.latestPose
-        Logger.recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
+        Logger.getInstance().apply{
+            recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
+            // defined in EncoderDifferentialDrivetrain.kt
+            recordOutput("Drivetrain(Differential)/calculatedHeadingRad", heading.inUnit(radians))
+            recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
+            recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
+        }
 
 
     }

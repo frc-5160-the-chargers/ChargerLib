@@ -28,8 +28,25 @@ public fun Command.withStartEndLog(): Command = buildCommand{
  * Constructs a command with extra requirements.
  */
 public fun Command.withExtraRequirements(vararg requirements: Subsystem): Command =
-    object: WrapperCommand(this){}.also{
-        it.addRequirements(*requirements)
+    object: CommandBase(){
+        init{
+            addRequirements(*requirements)
+        }
+
+        override fun initialize(){
+            this@withExtraRequirements.initialize()
+        }
+
+        override fun execute(){
+            this@withExtraRequirements.execute()
+        }
+
+        override fun end(interrupted: Boolean) {
+            this@withExtraRequirements.end(interrupted)
+        }
+
+        override fun isFinished(): Boolean = this@withExtraRequirements.isFinished
+
     }
 
 

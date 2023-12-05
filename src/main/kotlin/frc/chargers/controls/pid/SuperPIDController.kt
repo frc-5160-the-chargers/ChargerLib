@@ -1,9 +1,10 @@
 package frc.chargers.controls.pid
 
 import edu.wpi.first.math.controller.PIDController
-import frc.chargers.commands.RunCommand
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.Feedforward
+import frc.chargers.framework.ChargerRobot
+import frc.chargers.utils.math.inputModulus
 
 /**
  * Wraps WPILib's [PIDController], adding various improvements.
@@ -17,7 +18,7 @@ import frc.chargers.controls.feedforward.Feedforward
  */
 public class SuperPIDController(
     pidConstants: PIDConstants,
-    private val getPIDInput: () -> Double,
+    private val getInput: () -> Double,
     public val outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
     public val continuousInputRange: ClosedRange<Double>? = null,
     public val integralRange: ClosedRange<Double> = outputRange,
@@ -34,41 +35,39 @@ public class SuperPIDController(
     public val getFFOutput: SuperPIDController.() -> Double = {0.0}
 ): FeedbackController<Double, Double> {
 
-    public companion object{
+    private fun Double.standardize(): Double =
+        if (continuousInputRange == null) this else this.inputModulus(continuousInputRange)
 
-        /**
-         * Fake Constructor of [SuperPIDController]
-         * where the input of the feedforward and the input of the PID controller are shared.
-         *
-         */
-        public operator fun invoke(
-            pidConstants: PIDConstants,
-            getInput: () -> Double,
-            outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
-            continuousInputRange: ClosedRange<Double>? = null,
-            integralRange: ClosedRange<Double> = outputRange,
-            target: Double,
-            selfSustain: Boolean = false,
-            feedforward: Feedforward<Double,Double> = Feedforward{0.0}
-        ): SuperPIDController = SuperPIDController(
-            pidConstants,
-            getInput,
-            outputRange,
-            continuousInputRange,
-            integralRange,
-            target,
-            selfSustain
-        ) { feedforward.calculate(this.target) }
 
-    }
+    /**
+     * Creates a [SuperPIDController]
+     * that uses the [Feedforward] interface.
+     */
+    public constructor(
+        pidConstants: PIDConstants,
+        getInput: () -> Double,
+        outputRange: ClosedRange<Double> = Double.NEGATIVE_INFINITY..Double.POSITIVE_INFINITY,
+        continuousInputRange: ClosedRange<Double>? = null,
+        integralRange: ClosedRange<Double> = outputRange,
+        target: Double,
+        selfSustain: Boolean = false,
+        feedforward: Feedforward<Double,Double> = Feedforward{0.0}
+    ): this(
+        pidConstants,
+        getInput,
+        outputRange,
+        continuousInputRange,
+        integralRange,
+        target,
+        selfSustain,
+        { feedforward.calculate(this.target) }
+    )
 
 
 
     init{
         if(selfSustain){
-            RunCommand{
-                calculateOutput()
-            }.schedule()
+            ChargerRobot.runPeriodically(runnable = ::calculateOutput)
         }
     }
 
@@ -90,15 +89,11 @@ public class SuperPIDController(
     /**
      * Calculates the next calculated output value. Should be called periodically, likely in [edu.wpi.first.wpilibj2.command.Command.execute]
      */
-    public override fun calculateOutput(): Double {
-        val output = pidController.calculate(getPIDInput()) + getFFOutput()
-        return ensureInOutputRange(output)
-    }
-
-
-    private fun ensureInOutputRange(output: Double): Double {
+    override fun calculateOutput(): Double {
+        val output = pidController.calculate(getInput().standardize()) + getFFOutput()
         return output.coerceIn(outputRange)
     }
+
 
     /**
      * The target is the value the PID controller is attempting to achieve.
@@ -130,5 +125,5 @@ public class SuperPIDController(
      * The error is a signed value representing how far the PID system currently is from the target value.
      */
     override val error: Double
-        get() = getPIDInput() - pidController.setpoint
+        get() = getInput() - pidController.setpoint
 }

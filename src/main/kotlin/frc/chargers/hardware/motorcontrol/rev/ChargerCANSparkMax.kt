@@ -9,33 +9,103 @@ import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
 import com.revrobotics.SparkMaxAlternateEncoder
 import com.revrobotics.SparkMaxPIDController
+import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.hardware.inputdevices.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.FeedbackMotorController
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
 import frc.chargers.wpilibextensions.delay
-import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
+import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import kotlin.math.roundToInt
 
 /**
  * A convenience function to create a [ChargerCANSparkMax]
  * specifically to drive a Neo motor.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup.
+ * This setting can be changed by setting factoryDefault = false.
  */
-public inline fun neoSparkMax(canBusId: Int, alternateEncoderConfiguration: AlternateEncoderConfiguration? = null, configure: SparkMaxConfiguration.() -> Unit = {}): ChargerCANSparkMax =
+public fun neoSparkMax(
+    canBusId: Int,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
+    factoryDefault: Boolean = true,
+): ChargerCANSparkMax =
     ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushless, alternateEncoderConfiguration)
-        .also { it.configure(SparkMaxConfiguration().apply(configure)) }
+        .also {
+            if (factoryDefault) {
+                it.restoreFactoryDefaults()
+                println("SparkMax has been factory defaulted.")
+            }
+        }
+
 
 /**
  * A convenience function to create a [ChargerCANSparkMax]
  * specifically to drive a brushed motor, such as a CIM.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup.
+ * This setting can be changed by setting factoryDefault = false.
  */
-public inline fun brushedSparkMax(canBusId: Int, alternateEncoderConfiguration: AlternateEncoderConfiguration? = null, configure: SparkMaxConfiguration.() -> Unit = {}): ChargerCANSparkMax =
+public fun brushedSparkMax(
+    canBusId: Int,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
+    factoryDefault: Boolean = true,
+): ChargerCANSparkMax =
     ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushed, alternateEncoderConfiguration)
-        .also { it.configure(SparkMaxConfiguration().apply(configure)) }
+        .also {
+            if (factoryDefault) {
+                it.restoreFactoryDefaults()
+                println("SparkMax has been factory defaulted.")
+            }
+        }
+
+
+
+/**
+ * A convenience function to create a [ChargerCANSparkMax]
+ * specifically to drive a Neo motor.
+ *
+ * This motor supports inline configuration using the [configure] lambda function,
+ * which has the context of a [SparkMaxConfiguration] object.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup,
+ * before configuration. This setting can be changed by setting factoryDefault = false.
+ */
+public inline fun neoSparkMax(
+    canBusId: Int,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
+    factoryDefault: Boolean = true,
+    configure: SparkMaxConfiguration.() -> Unit
+): ChargerCANSparkMax =
+    neoSparkMax(canBusId, alternateEncoderConfiguration, factoryDefault)
+        .also {
+            it.configure(SparkMaxConfiguration().apply(configure))
+        }
+
+/**
+ * A convenience function to create a [ChargerCANSparkMax]
+ * specifically to drive a brushed motor, such as a CIM.
+ *
+ * This motor supports inline configuration using the [configure] lambda function,
+ * which has the context of a [SparkMaxConfiguration] object.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup,
+ * before configuration. This setting can be changed by setting factoryDefault = false.
+ */
+public inline fun brushedSparkMax(
+    canBusId: Int,
+    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
+    factoryDefault: Boolean = true,
+    configure: SparkMaxConfiguration.() -> Unit
+): ChargerCANSparkMax =
+    brushedSparkMax(canBusId, alternateEncoderConfiguration, factoryDefault)
+        .also {
+            it.configure(SparkMaxConfiguration().apply(configure))
+        }
 
 /**
  * Represents a Spark Max motor controller.
@@ -50,11 +120,8 @@ public open class ChargerCANSparkMax(
     deviceId: Int,
     type: MotorType,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
-) : CANSparkMax(deviceId, type), FeedbackMotorController, MotorConfigurable<SparkMaxConfiguration> {
+) : CANSparkMax(deviceId, type), FeedbackMotorController, HardwareConfigurable<SparkMaxConfiguration> {
 
-    init{
-        warnIfInSimulation("ChargerCANSparkMax(ID = $deviceId)")
-    }
 
     private inner class EncoderConfiguration(
         var averageDepth: Int? = null,
@@ -128,10 +195,14 @@ public open class ChargerCANSparkMax(
             setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
         }
 
-        // apparently, these delays are nessecary for configuration to be set right
-        delay(200.milli.seconds)
+
+
+        if (RobotBase.isReal()) delay(200.milli.seconds)
         burnFlash()
-        delay(200.milli.seconds)
+        if (RobotBase.isReal()) delay(200.milli.seconds)
+
+        println("SparkMax has been configured.")
+
     }
 
 
@@ -183,7 +254,7 @@ public open class ChargerCANSparkMax(
         target: Angle,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
-        constraints: AngularTrapezoidProfile.Constraints,
+        constraints: AngularMotionConstraints,
         absoluteEncoder: PositionEncoder?
     ) {
         if (trapezoidProfile.constraints != constraints){
@@ -237,7 +308,7 @@ public data class SparkMaxConfiguration(
     var feedbackOutputRange: ClosedRange<Double>? = null,
     var positionPIDWrappingEnabled: Boolean? = null,
     var positionPIDWrappingInputRange: ClosedRange<Double>? = null,
-) : MotorConfiguration
+) : HardwareConfiguration
 
 public data class AlternateEncoderConfiguration(val countsPerRev: Int, val encoderType: SparkMaxAlternateEncoder.Type? = null) {
     public companion object {

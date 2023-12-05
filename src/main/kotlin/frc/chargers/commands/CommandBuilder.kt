@@ -3,9 +3,11 @@ package frc.chargers.commands
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.wpilibj2.command.*
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior
 import frc.chargers.utils.MappableContext
 import frc.chargers.utils.a
-import org.littletonrobotics.junction.Logger.recordOutput
+import org.littletonrobotics.junction.Logger
+import kotlin.internal.LowPriorityInOverloadResolution
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -23,17 +25,25 @@ public inline fun buildCommand(
     name: String = "Generic BuildCommand",
     logIndividualCommands: Boolean = false,
     block: CommandBuilder.() -> Unit
-): Command =
-    if(logIndividualCommands){
+): Command{
+    val builder = CommandBuilder().apply(block)
+    var command: Command = if(logIndividualCommands){
         loggedSequentialCommandGroup(
             name,
-            *CommandBuilder().apply(block).commands.toTypedArray()
+            *builder.commands.toTypedArray()
         )
     }else{
         SequentialCommandGroup(
-            *CommandBuilder().apply(block).commands.toTypedArray()
+            *builder.commands.toTypedArray()
         ).withName(name)
+    }.finallyDo(builder.endBehavior)
+
+    if (builder.requirements.size > 0){
+        command = command.withExtraRequirements(*builder.requirements.toTypedArray())
     }
+    return command
+}
+
 
 
 @DslMarker
@@ -41,15 +51,38 @@ public annotation class CommandBuilderMarker
 
 @CommandBuilderMarker
 public class CommandBuilder {
-    @PublishedApi
-    internal var commands: LinkedHashSet<Command> = linkedSetOf() // LinkedHashSet keeps commands in order, but also ensures they're not added multiple times
+    public var commands: LinkedHashSet<Command> = linkedSetOf() // LinkedHashSet keeps commands in order, but also ensures they're not added multiple times
 
+    public val requirements: MutableList<Subsystem> = mutableListOf()
+
+    public var endBehavior: (Boolean) -> Unit = {}
+    
     /**
      * Adds a single command to be run until its completion.
      */
     public operator fun <C : Command> C.unaryPlus(): C{
         commands.add(this)
         return this
+    }
+
+
+    public fun addRequirements(vararg requirements: Subsystem){
+        this.requirements.addAll(requirements)
+    }
+
+    /**
+     * Runs the function block when the [buildCommand] is finished.
+     */
+    public fun onEnd(run: (Boolean) -> Unit){
+        endBehavior = run
+    }
+
+    /**
+     * Runs the function block when the [buildCommand] is finished.
+     */
+    @LowPriorityInOverloadResolution
+    public inline fun onEnd(crossinline run: () -> Unit){
+        endBehavior = { run() }
     }
 
     /**
@@ -91,6 +124,22 @@ public class CommandBuilder {
             },
             default
         ).also(commands::add)
+
+
+    /**
+     * Runs a specific command out of many options when the correct index is passed in.
+     */
+    public fun runDependingOnIndex(
+        indexSupplier: () -> Int,
+        vararg commands: Command
+    ): Command{
+        var index = 0
+        return CustomSelectCommand(
+            indexSupplier,
+            commandMap = commands.associateBy { index.also{index++} },
+            default = InstantCommand{throw IndexOutOfBoundsException("The command index of your command is out of range.")}
+        ).also(this.commands::add)
+    }
 
 
     /**
@@ -228,7 +277,7 @@ public class CommandBuilder {
     private inner class DuringRunGetter<T : Any>(private val get: () -> T) : ReadOnlyProperty<Any?, T> {
         init {
             commands.add(
-                object : Command() { // Add a new command that initializes this value in its initialize() function.
+                object : CommandBase() { // Add a new command that initializes this value in its initialize() function.
                     override fun initialize() {
                         if (!::value.isInitialized) {
                             initializeValue()
@@ -259,7 +308,7 @@ public class CommandBuilder {
         val getValue: () -> T,
         val commandMap: Map<T,Command>,
         default: Command
-    ): Command(){
+    ): CommandBase(){
         var allRequirements: Array<Subsystem> = arrayOf()
         var runsWhenDisabled = true
 
@@ -323,7 +372,7 @@ internal fun Command.withLogInCommandGroup(commandGroupName: String): Command{
 
 
     fun logCommand(active: Boolean) = InstantCommand{
-        recordOutput(
+        Logger.getInstance().recordOutput(
             "/ActiveCommands/Subcommands Of: $commandGroupName/$name",active
         )
     }

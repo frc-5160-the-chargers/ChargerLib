@@ -2,6 +2,7 @@ package frc.chargers.hardware.inputdevices
 
 import frc.chargers.wpilibextensions.kinematics.ChassisPowers
 import frc.chargers.wpilibextensions.ratelimit.ScalarRateLimiter
+import kotlin.math.abs
 
 /**
  * An extension of [ChargerController] that provides tools to assist with controlling a swerve drivetrain.
@@ -23,7 +24,7 @@ public class SwerveDriveController(
          *
          * left Y goes straight, left X goes sideways, right X rotates,
          *
-         * leftTriggerAxis triggers turbo mode, rightTriggerAxis triggers precision mode.
+         * leftTriggerAxis triggers turbo mode, and rightTriggerAxis triggers precision mode.
          */
         public fun fromDefaultBindings(
             port: Int,
@@ -33,36 +34,54 @@ public class SwerveDriveController(
             precisionModeDividerRange: ClosedRange<Double> = 1.0..1.0,
             deadband: Double = 0.0,
             defaultAxisThreshold: Double = 0.5,
-            driveRateLimiter: ScalarRateLimiter? = null,
+            scaleDeadband: Boolean = false,
+            forwardRateLimiter: ScalarRateLimiter? = null,
+            strafeRateLimiter: ScalarRateLimiter? = null,
             rotationRateLimiter: ScalarRateLimiter? = null
-        ): SwerveDriveController =
-            SwerveDriveController(
-                port,
-                {
-                    driveRateLimiter?.calculate(leftY * driveMultiplier)
-                        ?: (leftY * driveMultiplier)
-                },
-                {
-                    driveRateLimiter?.calculate(leftX * driveMultiplier)
-                        ?: (leftX * driveMultiplier)
-                },
-                {
-                    rotationRateLimiter?.calculate(rightX * rotationMultiplier)
-                        ?: (rightX * rotationMultiplier)
-                },
-                {rightTriggerAxis.mapTriggerValue(turboModeMultiplierRange)},
-                {1/leftTriggerAxis.mapTriggerValue(precisionModeDividerRange)},
-                deadband,
-                defaultAxisThreshold
-            )
+        ): SwerveDriveController = SwerveDriveController(
+            port,
+            getForwardsPower = {
+                val input = if (scaleDeadband) {
+                    leftY.withScaledDeadband() * driveMultiplier
+                } else {
+                    leftY.withDeadband() * driveMultiplier
+                }
+                // return value
+                forwardRateLimiter?.calculate(input) ?: input
+            },
+            getStrafePower = {
+                val input = if (scaleDeadband) {
+                    leftX.withScaledDeadband() * driveMultiplier
+                } else {
+                    leftX.withDeadband() * driveMultiplier
+                }
+                // return value
+                strafeRateLimiter?.calculate(input) ?: input
+            },
+            getRotationPower = {
+                val input = if (scaleDeadband) {
+                    rightX.withScaledDeadband() * rotationMultiplier
+                } else {
+                    rightX.withDeadband() * rotationMultiplier
+                }
+                // return value
+                rotationRateLimiter?.calculate(input) ?: input
+            },
+            getTurboPower = {abs(rightTriggerAxis).mapTriggerValue(turboModeMultiplierRange)},
+            getPrecisionPower = {
+                1/abs(leftTriggerAxis).mapTriggerValue(precisionModeDividerRange)
+            },
+            deadband,
+            defaultAxisThreshold
+        )
     }
     public val swerveOutput: ChassisPowers
         get(){
             val multiplier = getTurboPower() * getPrecisionPower()
             return ChassisPowers(
-                getForwardsPower().withDeadband() * multiplier,
-                getStrafePower().withDeadband() * multiplier,
-                getRotationPower().withDeadband() * multiplier
+                getForwardsPower() * multiplier,
+                getStrafePower() * multiplier,
+                getRotationPower() * multiplier
             )
         }
 }

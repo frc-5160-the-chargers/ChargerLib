@@ -2,6 +2,7 @@ package frc.chargers.hardware.inputdevices
 
 import frc.chargers.wpilibextensions.kinematics.ChassisPowers
 import frc.chargers.wpilibextensions.ratelimit.ScalarRateLimiter
+import kotlin.math.abs
 
 /**
  * A subclass of [ChargerController] which has the capacity to control a differential drivetrain.
@@ -33,31 +34,44 @@ public class CurvatureDriveController(
             precisionModeDividerRange: ClosedRange<Double> = 0.0..1.0,
             deadband: Double = 0.0,
             defaultAxisThreshold: Double = 0.5,
+            scaleDeadband: Boolean = false,
             driveRateLimiter: ScalarRateLimiter? = null,
             rotationRateLimiter: ScalarRateLimiter? = null
         ): CurvatureDriveController =
             CurvatureDriveController(
                 port,
-                {
-                    driveRateLimiter?.calculate(leftY * driveMultiplier)
-                        ?: (leftY * driveMultiplier)
+                getForwardsPower = {
+                    val input = if (scaleDeadband) {
+                        leftY.withScaledDeadband() * driveMultiplier
+                    } else {
+                        leftY.withDeadband() * driveMultiplier
+                    }
+                    // return value
+                    driveRateLimiter?.calculate(input) ?: input
                 },
-                {
-                    rotationRateLimiter?.calculate(rightX * rotationMultiplier)
-                        ?: (rightX * rotationMultiplier)
+                getRotationPower = {
+                    val input = if (scaleDeadband) {
+                        rightX.withScaledDeadband() * rotationMultiplier
+                    } else {
+                        rightX.withDeadband() * rotationMultiplier
+                    }
+                    // return value
+                    rotationRateLimiter?.calculate(input) ?: input
                 },
-                {rightTriggerAxis.mapTriggerValue(turboModeMultiplierRange)},
-                {1/leftTriggerAxis.mapTriggerValue(precisionModeDividerRange)},
+                getTurboPower = {abs(rightTriggerAxis).mapTriggerValue(turboModeMultiplierRange)},
+                getPrecisionPower = {1/abs(leftTriggerAxis).mapTriggerValue(precisionModeDividerRange)},
                 deadband,
                 defaultAxisThreshold
             )
+
+
     }
     public val curvatureOutput: ChassisPowers
         get(){
             val multiplier = getTurboPower() * getPrecisionPower()
             return ChassisPowers(
-                xPower = getForwardsPower().withDeadband() * multiplier,
-                rotationPower = getRotationPower().withDeadband() * multiplier
+                xPower = getForwardsPower() * multiplier,
+                rotationPower = getRotationPower() * multiplier
             )
         }
 }

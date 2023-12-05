@@ -6,10 +6,9 @@ import com.ctre.phoenix.motorcontrol.*
 import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
 import com.ctre.phoenix.sensors.CANCoder
-import frc.chargers.hardware.inputdevices.warnIfInSimulation
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
-import frc.chargers.hardware.motorcontrol.MotorConfigurable
-import frc.chargers.hardware.motorcontrol.MotorConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonSRXEncoderAdapter
 import kotlin.math.roundToInt
@@ -17,16 +16,47 @@ import kotlin.math.roundToInt
 private const val TALON_SRX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
 private const val TIMEOUT_MILLIS = 1000
 
+public typealias PIDIndex = Int
+public typealias SlotIndex = Int
+public typealias CustomParameterIndex = Int
+public typealias CustomParameterValue = Int
+
+/**
+ * Represents a TalonSRX powering a redline/ CIM motor.
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup.
+ * This setting can be changed by setting factoryDefault = false.
+ */
+public fun redlineSRX(
+    deviceNumber: Int,
+    encoderTicksPerRotation: Int = 1024,
+    factoryDefault: Boolean = true
+): ChargerTalonSRX = ChargerTalonSRX(deviceNumber, encoderTicksPerRotation).also {
+    if (factoryDefault) {
+        it.configFactoryDefault()
+        println("TalonSRX has been factory defaulted.")
+    }
+}
+
+
+/**
+ * Represents a TalonSRX powering a redline/ CIM motor.
+ *
+ * This function supports inline configuration using the configure lambda function,
+ * which has the context of a [TalonSRXConfiguration].
+ *
+ * You do not need to manually factory default this motor, as it is factory defaulted on startup,
+ * before configuration. This setting can be changed by setting factoryDefault = false.
+ */
 public inline fun redlineSRX(
     deviceNumber: Int,
     encoderTicksPerRotation: Int = 1024,
+    factoryDefault: Boolean = true,
     configure: TalonSRXConfiguration.() -> Unit
-): ChargerTalonSRX = ChargerTalonSRX(
-    deviceNumber,
-    encoderTicksPerRotation
-).also{
-    it.configure(TalonSRXConfiguration().apply(configure))
-}
+): ChargerTalonSRX =
+    redlineSRX(deviceNumber,encoderTicksPerRotation, factoryDefault).also{
+        it.configure(TalonSRXConfiguration().apply(configure))
+    }
 
 /**
  * Represents a TalonSRX motor controller.
@@ -41,11 +71,8 @@ public inline fun redlineSRX(
 public open class ChargerTalonSRX(
     deviceNumber: Int,
     protected val encoderTicksPerRotation: Int
-) : WPI_TalonSRX(deviceNumber), EncoderMotorController, MotorConfigurable<TalonSRXConfiguration> {
+) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<TalonSRXConfiguration> {
 
-    init{
-        warnIfInSimulation("ChargerTalonSRX(ID = $deviceID)")
-    }
 
     final override val encoder: Encoder
         get() = TalonSRXEncoderAdapter(
@@ -124,6 +151,8 @@ public open class ChargerTalonSRX(
             configSetCustomParam(customParameter, i, TIMEOUT_MILLIS)
         }
 
+        println("TalonSRX has been configured.")
+
 
     }
 }
@@ -164,7 +193,7 @@ public data class TalonSRXConfiguration(
     public var reverseSoftLimitEnable: Boolean? = null,
 
     val customParameters: MutableMap<CustomParameterIndex, CustomParameterValue> = mutableMapOf()
-): MotorConfiguration
+): HardwareConfiguration
 
 public sealed interface RemoteFeedbackFilterDevice
 public data class CANCoderRemoteFeedbackFilterDevice(val canCoder: CANCoder, val remoteOrdinal: Int) :

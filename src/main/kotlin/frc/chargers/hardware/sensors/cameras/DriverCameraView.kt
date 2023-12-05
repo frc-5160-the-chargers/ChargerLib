@@ -6,10 +6,10 @@ import edu.wpi.first.cameraserver.CameraServer
 
 public class DriverCameraView(
     totalDriverCams: Int = 1,
-    public val defaultResWidth: Int,
-    public val defaultResHeight: Int
+    private val defaultResWidth: Int,
+    private val defaultResHeight: Int
 ){
-    private var driverCameras = List(totalDriverCams){ i ->
+    private val driverCameras = List(totalDriverCams){ i ->
         CameraServer.startAutomaticCapture(i).apply{
             setResolution(defaultResWidth,defaultResHeight)
         }

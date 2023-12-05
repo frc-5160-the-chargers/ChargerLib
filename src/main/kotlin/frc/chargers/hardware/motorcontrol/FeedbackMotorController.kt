@@ -5,7 +5,7 @@ import com.batterystaple.kmeasure.quantities.AngularVelocity
 import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
-import frc.chargers.wpilibextensions.geometry.AngularTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
 
 
 /**
@@ -51,7 +51,7 @@ public interface FeedbackMotorController: EncoderMotorController{
         target: Angle,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
-        constraints: AngularTrapezoidProfile.Constraints,
+        constraints: AngularMotionConstraints,
         absoluteEncoder: PositionEncoder?
     )
 
@@ -59,7 +59,7 @@ public interface FeedbackMotorController: EncoderMotorController{
         target: Angle,
         pidConstants: PIDConstants,
         feedforward: AngularMotorFF,
-        constraints: AngularTrapezoidProfile.Constraints
+        constraints: AngularMotionConstraints
     ): Unit = setAngularPosition(
         target,
         pidConstants,

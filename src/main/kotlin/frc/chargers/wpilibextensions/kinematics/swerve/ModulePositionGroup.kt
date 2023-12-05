@@ -3,9 +3,8 @@ package frc.chargers.wpilibextensions.kinematics.swerve
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.kinematics.SwerveModulePosition
-import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.utils.a
-import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 
 /**
  * A helper class that stores [SwerveModulePosition]s in a more clear way.

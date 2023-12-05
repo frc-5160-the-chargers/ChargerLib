@@ -5,20 +5,29 @@ package frc.chargers.wpilibextensions.kinematics
 
 import com.batterystaple.kmeasure.quantities.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import kotlin.math.abs
 
 /**
  * A helper class that stores direction powers for drivetrain classes.
  */
-public class ChassisPowers(
-    public var xPower: Double = 0.0,
-    public var yPower: Double = 0.0,
-    public var rotationPower: Double = 0.0
+public data class ChassisPowers(
+    var xPower: Double = 0.0,
+    var yPower: Double = 0.0,
+    var rotationPower: Double = 0.0
 ){
     public fun toChassisSpeeds(maxLinearVelocity: Velocity, maxRotationalVelocity: AngularVelocity): ChassisSpeeds = ChassisSpeeds(
         xPower * maxLinearVelocity,
         yPower * maxLinearVelocity,
         rotationPower * maxRotationalVelocity
     )
+
+    /**
+     * Measures whether 2 [ChassisPowers] are roughly equal.
+     */
+    public fun roughlyEquals(other: ChassisPowers): Boolean =
+        abs(xPower - other.xPower) <= 0.01
+            && abs(yPower - other.yPower) <= 0.01
+            && abs(rotationPower - other.rotationPower) <= 0.01
 }
 
 

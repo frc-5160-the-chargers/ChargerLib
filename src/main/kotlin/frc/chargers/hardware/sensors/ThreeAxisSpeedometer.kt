@@ -10,12 +10,18 @@ public interface ThreeAxisSpeedometer {
     public val yVelocity: Velocity
     public val zVelocity: Velocity
 
-    /**
-     * A [ThreeAxisSpeedometer] with static values for x, y, and z velocity; these default to 0.
-     */
-    public class Static(
-        override val xVelocity: Velocity = Velocity(0.0),
-        override val yVelocity: Velocity = Velocity(0.0),
-        override val zVelocity: Velocity = Velocity(0.0)
-    ): ThreeAxisSpeedometer
+    public companion object{
+        /**
+         * Inline syntax to create a generic [ThreeAxisSpeedometer].
+         */
+        public inline operator fun invoke(
+            crossinline getXSpeed: () -> Velocity,
+            crossinline getYSpeed: () -> Velocity,
+            crossinline getZSpeed: () -> Velocity
+        ): ThreeAxisSpeedometer = object: ThreeAxisSpeedometer{
+            override val xVelocity: Velocity get() = getXSpeed()
+            override val yVelocity: Velocity get() = getYSpeed()
+            override val zVelocity: Velocity get() = getZSpeed()
+        }
+    }
 }

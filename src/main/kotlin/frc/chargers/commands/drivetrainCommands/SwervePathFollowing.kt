@@ -2,7 +2,6 @@ package frc.chargers.commands.drivetrainCommands
 
 /*
 import com.batterystaple.kmeasure.units.meters
-import com.pathplanner.lib.PathConstraints
 import com.pathplanner.lib.PathPlanner
 import com.pathplanner.lib.PathPlannerTrajectory
 import com.pathplanner.lib.auto.SwerveAutoBuilder
@@ -14,11 +13,8 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.constants
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.*
-import frc.chargers.wpilibextensions.geometry.LinearTrapezoidProfile
+import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.kinematics.rotationSpeed
-import frc.chargers.wpilibextensions.kinematics.xVelocity
-import frc.chargers.wpilibextensions.kinematics.yVelocity
 import kotlin.internal.LowPriorityInOverloadResolution
 
 /*
@@ -34,7 +30,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
     trajectoryName: String,
     isFirstPath: Boolean = false
 ): Command = followPath(
-    PathPlanner.loadPath(trajectoryName, constraints),
+    PathPlanner.loadPath(trajectoryName, constraints.toPathConstraints()),
     translationConstants,rotationConstants,isFirstPath
 )
 /**
@@ -69,9 +65,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
         PIDController(0.0,0.0,0.0).apply{
             constants = rotationConstants
         },
-        {speeds ->
-        velocityDrive(speeds.xVelocity,-speeds.yVelocity,speeds.rotationSpeed)
-        },
+        {input -> velocityDrive(input, false)},
         true,
         this@followPath
     )
@@ -83,7 +77,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
  *
  * IMPORTANT: use PathPlannerServer.
  *
- * Utilizes a [trajectoryName] and [LinearTrapezoidProfile.Constraints] instead of a [PathPlannerTrajectory].
+ * Utilizes a [trajectoryName] and [LinearMotionConstraints] instead of a [PathPlannerTrajectory].
  */
 context(CommandBuilder)
 @LowPriorityInOverloadResolution
@@ -91,12 +85,12 @@ public fun EncoderHolonomicDrivetrain.followPath(
     trajectoryName: String,
     translationConstants: PIDConstants,
     rotationConstants: PIDConstants,
-    pathConstraints: PathConstraints,
+    pathConstraints: LinearMotionConstraints,
     isFirstPath: Boolean = false,
 ): Command = followPath(
     PathPlanner.loadPath(
         trajectoryName,
-        pathConstraints
+        pathConstraints.toPathConstraints()
     ),
     translationConstants,
     rotationConstants,
@@ -117,7 +111,6 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     eventsBlock
 )
 context(CommandBuilder)
-@LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     trajectories: List<PathPlannerTrajectory>,
     translationConstants: PIDConstants,
@@ -132,9 +125,9 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
         {poseEstimator.resetPose(it.ofUnit(meters))},  // Pose2d consumer, used to reset odometry at the beginning of auto
         translationConstants.asPathPlannerConstants(),  // PID constants to correct for translation error (used to create the X and Y PID controllers)
         rotationConstants.asPathPlannerConstants(),  // PID constants to correct for rotation error (used to create the rotation controller)
-        ::velocityDrive,  // chassis speeds consumer
+        {input -> velocityDrive(input, false)},
         MappableContext<String,Command>().apply(eventsBlock).map,
-        true,  // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true,
+        false,  // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true,
         this@runPathPlannerAuto // The drive subsystem. Used to properly set the requirements of path following commands
     )
 
@@ -147,12 +140,12 @@ public fun EncoderHolonomicDrivetrain.runPathPlannerAuto(
     pathGroupName: String,
     translationConstants: PIDConstants,
     rotationConstants: PIDConstants,
-    vararg allPathConstraints: PathConstraints,
+    vararg allPathConstraints: LinearMotionConstraints,
     eventsBlock: MappableContext<String,Command>.() -> Unit
 ): Command = runPathPlannerAuto(
     PathPlanner.loadPathGroup(
         pathGroupName,
-        listOf(*allPathConstraints)
+        allPathConstraints.map{it.toPathConstraints()}
     ),
     translationConstants,
     rotationConstants,

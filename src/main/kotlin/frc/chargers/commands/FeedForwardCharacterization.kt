@@ -7,9 +7,8 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Subsystem
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
-import frc.chargers.utils.characterization.FeedForwardCharacterization
-import frc.chargers.utils.characterization.FeedForwardCharacterizationData
-import kotlin.internal.LowPriorityInOverloadResolution
+import frc.chargerlibexternal.utils.characterization.FeedForwardCharacterization
+import frc.chargerlibexternal.utils.characterization.FeedForwardCharacterizationData
 
 public fun characterizeFFAngular(
     name: String,
@@ -18,7 +17,8 @@ public fun characterizeFFAngular(
     getVelocity: () -> AngularVelocity,
     vararg requirements: Subsystem
 ): FeedForwardCharacterization = object: FeedForwardCharacterization(
-    forwards, FeedForwardCharacterizationData(name), { inputVolts -> setVoltage(inputVolts.ofUnit(volts))},
+    forwards,
+    FeedForwardCharacterizationData(name), { inputVolts -> setVoltage(inputVolts.ofUnit(volts))},
     {getVelocity().siValue},
     *requirements
 ){
@@ -43,7 +43,8 @@ public fun characterizeFFLinear(
     getVelocity: () -> Velocity,
     vararg requirements: Subsystem
 ): FeedForwardCharacterization = object: FeedForwardCharacterization(
-    forwards, FeedForwardCharacterizationData(name), { inputVolts -> setVoltage(inputVolts.ofUnit(volts))},
+    forwards,
+    FeedForwardCharacterizationData(name), { inputVolts -> setVoltage(inputVolts.ofUnit(volts))},
     {getVelocity().siValue},
     *requirements
 ){
@@ -70,10 +71,10 @@ public fun EncoderHolonomicDrivetrain.characterizeDriveMotors(
             FeedForwardCharacterizationData("SwerveDriveFFData_Left"),
             FeedForwardCharacterizationData("SwerveDriveFFData_Right"),
             {leftVolts: Double, rightVolts: Double ->
-                topLeft.io.setDriveVoltage(leftVolts.ofUnit(volts))
-                bottomLeft.io.setDriveVoltage(leftVolts.ofUnit(volts))
-                topRight.io.setDriveVoltage(rightVolts.ofUnit(volts))
-                bottomRight.io.setDriveVoltage(rightVolts.ofUnit(volts))
+                topLeft.io.driveVoltage = leftVolts.ofUnit(volts)
+                bottomLeft.io.driveVoltage = leftVolts.ofUnit(volts)
+                topRight.io.driveVoltage = rightVolts.ofUnit(volts)
+                bottomRight.io.driveVoltage = rightVolts.ofUnit(volts)
 
                 topLeft.setDirection(0.degrees)
                 topRight.setDirection(0.degrees)
@@ -107,33 +108,54 @@ public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements
             +characterizeFFAngular(
                 "TOP LEFT turn motor data",
                 true,
-                {topLeft.io.setTurnVoltage(it)},
+                {topLeft.io.turnVoltage = it; println(it)},
                 {topLeft.currentTurningVelocity}
             )
 
             +characterizeFFAngular(
                 "TOP RIGHT turn motor data",
                 true,
-                {topRight.io.setTurnVoltage(it)},
+                {topRight.io.turnVoltage = it},
                 {topRight.currentTurningVelocity}
             )
 
             +characterizeFFAngular(
                 "BOTTOM LEFT turn motor data",
                 true,
-                {bottomLeft.io.setTurnVoltage(it)},
+                {bottomLeft.io.turnVoltage = it},
                 {bottomLeft.currentTurningVelocity}
             )
 
             +characterizeFFAngular(
                 "BOTTOM RIGHT turn motor data",
                 true,
-                {bottomRight.io.setTurnVoltage(it)},
+                {bottomRight.io.turnVoltage = it},
                 {bottomRight.currentTurningVelocity}
             )
         }
     }.withExtraRequirements(this@characterizeTurnMotors, *requirements)
 
+
+public fun EncoderHolonomicDrivetrain.driveTurnMotors(): Command = buildCommand{
+    runParallelUntilAllFinish{
+        loopForever{
+            topLeft.io.turnVoltage = 2.0.volts
+        }
+
+        loopForever{
+            topRight.io.turnVoltage = 2.0.volts
+        }
+
+        loopForever{
+            bottomLeft.io.turnVoltage = 2.0.volts
+        }
+
+        loopForever{
+            bottomRight.io.turnVoltage = 2.0.volts
+        }
+
+    }
+}
 
 
 public fun EncoderDifferentialDrivetrain.characterize(
@@ -165,7 +187,7 @@ public fun EncoderDifferentialDrivetrain.characterize(
     }
 
 
-
+/*
 
 context(CommandBuilder)
 @LowPriorityInOverloadResolution
@@ -184,3 +206,5 @@ public fun EncoderHolonomicDrivetrain.characterizeDriveMotors(
     forwards: Boolean = true, vararg requirements: Subsystem
 ): Command = characterizeDriveMotors(forwards,*requirements).also(commands::add)
 
+
+ */

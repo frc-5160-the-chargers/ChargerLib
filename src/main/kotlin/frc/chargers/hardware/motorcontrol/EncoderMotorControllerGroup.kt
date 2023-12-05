@@ -2,6 +2,8 @@ package frc.chargers.hardware.motorcontrol
 
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.AverageEncoder
 import frc.chargers.hardware.sensors.encoders.Encoder
 
@@ -51,16 +53,16 @@ public open class NonConfigurableEncoderMotorControllerGroup(
  *
  * @see NonConfigurableEncoderMotorControllerGroup
  */
-public open class EncoderMotorControllerGroup<C : MotorConfiguration> private constructor( // Actual constructor private; see fake constructors in companion object
+public open class EncoderMotorControllerGroup<C : HardwareConfiguration> private constructor( // Actual constructor private; see fake constructors in companion object
     vararg motorControllers: MotorController, encoder: Encoder
-) : NonConfigurableEncoderMotorControllerGroup(*motorControllers, encoder = encoder), MotorConfigurable<C> {
+) : NonConfigurableEncoderMotorControllerGroup(*motorControllers, encoder = encoder), HardwareConfigurable<C> {
 
     override fun configure(configuration: C) {
         motorControllers.forEach { motorController ->
             @Suppress("UNCHECKED_CAST") // Allowed because motorController is always set to an instance of
                                                 // MotorConfigurable<C> in the fake constructors
 
-            motorController as MotorConfigurable<C> // Tell the compiler we know motorController is MotorConfigurable<C>
+            motorController as HardwareConfigurable<C> // Tell the compiler we know motorController is MotorConfigurable<C>
 
             motorController.configure(configuration)
         }
@@ -76,7 +78,7 @@ public open class EncoderMotorControllerGroup<C : MotorConfiguration> private co
      * for more information on this technique.
      */
     public companion object {
-        public operator fun <M, C : MotorConfiguration> invoke(vararg motorControllers: M, encoder: Encoder, configuration: C? = null): EncoderMotorControllerGroup<C> where M : MotorController, M : MotorConfigurable<C> =
+        public operator fun <M, C : HardwareConfiguration> invoke(vararg motorControllers: M, encoder: Encoder, configuration: C? = null): EncoderMotorControllerGroup<C> where M : MotorController, M : HardwareConfigurable<C> =
             EncoderMotorControllerGroup<C>(*motorControllers, encoder = encoder)
                 .apply {
                     if (configuration != null) {
@@ -84,7 +86,7 @@ public open class EncoderMotorControllerGroup<C : MotorConfiguration> private co
                     }
                 }
 
-        public operator fun <M, C : MotorConfiguration> invoke(vararg encoderMotorControllers: M, configuration: C? = null) : EncoderMotorControllerGroup<C> where M : EncoderMotorController, M : MotorConfigurable<C> =
+        public operator fun <M, C : HardwareConfiguration> invoke(vararg encoderMotorControllers: M, configuration: C? = null) : EncoderMotorControllerGroup<C> where M : EncoderMotorController, M : HardwareConfigurable<C> =
             invoke(*encoderMotorControllers, encoder = AverageEncoder(*encoderMotorControllers))
                 .apply {
                     if (configuration != null) {

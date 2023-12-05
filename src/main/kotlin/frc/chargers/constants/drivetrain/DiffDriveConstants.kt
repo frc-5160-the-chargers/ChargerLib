@@ -4,6 +4,9 @@ import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.Length
 import frc.chargers.constants.AndymarkKitbot
 
+/**
+ * A class used to hold constants for an [frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain].
+ */
 public data class DiffDriveConstants(
     val invertMotors: Boolean = false,
     val gearRatio: Double = DEFAULT_GEAR_RATIO,

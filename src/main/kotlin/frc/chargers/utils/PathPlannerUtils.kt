@@ -1,13 +1,10 @@
 package frc.chargers.utils
 
-/*
-import com.batterystaple.kmeasure.quantities.Acceleration
-import com.batterystaple.kmeasure.quantities.Velocity
-import com.pathplanner.lib.PathConstraints
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.commands.buildCommand
 import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
 
 /**
  * Converts ChargerLib PIDConstants to PathPlanner's PIDConstants.
@@ -15,32 +12,26 @@ import frc.chargers.controls.pid.PIDConstants
 public fun PIDConstants.asPathPlannerConstants(): com.pathplanner.lib.auto.PIDConstants =
     com.pathplanner.lib.auto.PIDConstants(kP, kI, kD)
 
-
-public fun PathConstraints(maxVelocity: Velocity, maxAcceleration: Acceleration): PathConstraints = PathConstraints(
-    maxVelocity.siValue,
-    maxAcceleration.siValue
-)
-
 /**
  * Represents Data pertinent to PathPlanner autonomous routines.
  *
  * @param translationConstants: The translation PID constants used to converge to the path.
  * @param rotationConstants: The rotation PID constants used to converge to the path.
- * @param constraints: The primary [PathConstraints] for PathPlanner.
+ * @param constraints: The primary path constraints for PathPlanner. Represented as a [LinearMotionConstraints].
  * @param otherConstraints: The other PathConstraints pertinent.
  * This is useful if you have multiple path constraints for multiple paths within a path group.
  */
 public data class PathData(
     val translationConstants: PIDConstants,
     val rotationConstants: PIDConstants,
-    val constraints: PathConstraints,
-    val otherConstraints: List<PathConstraints>
+    val constraints: LinearMotionConstraints,
+    val otherConstraints: List<LinearMotionConstraints>
 ){
     public constructor(
         translationConstants: PIDConstants,
         rotationConstants: PIDConstants,
-        constraints: PathConstraints,
-        vararg otherConstraints: PathConstraints
+        constraints: LinearMotionConstraints,
+        vararg otherConstraints: LinearMotionConstraints
     ): this(
         translationConstants,
         rotationConstants,
@@ -84,5 +75,3 @@ public class PathPlannerAutoContext{
         context: CommandBuilder.() -> Unit
     ): Unit = onEvent(eventName, buildCommand(block = context))
 }
-
- */

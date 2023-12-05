@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.CodeBlockContext
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.constants.TurnPIDConstants
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.controls.pid.PIDConstants
@@ -28,13 +28,14 @@ context(CommandBuilder, HeadingProvider)
 public fun DifferentialDrivetrain.driveStraight(time: Time, power: Double, steeringPIDConstants: PIDConstants, maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER): Command = runSequentially {
     val initialHeading by getOnceDuringRun { this@HeadingProvider.heading }
 
-    val pid =
+    val pid by getOnceDuringRun {
         UnitSuperPIDController(
             pidConstants = steeringPIDConstants,
             getInput = { this@HeadingProvider.heading },
             target = initialHeading,
             outputRange = Scalar(0.0)..Scalar(maxSteeringPower)
         )
+    }
 
     loopFor(time, this@driveStraight) { arcadeDrive(power, pid.calculateOutput().value) }
 }
@@ -64,13 +65,14 @@ context(CommandBuilder, HeadingProvider)
 public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, power: Double, steeringPIDConstants: PIDConstants, maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER): Command = runSequentially {
     val initialPosition by getOnceDuringRun { distanceTraveled }
     val initialHeading by getOnceDuringRun { this@HeadingProvider.heading }
-    val pid =
+    val pid by getOnceDuringRun {
         UnitSuperPIDController(
             pidConstants = steeringPIDConstants,
             getInput = { this@HeadingProvider.heading },
             target = initialHeading,
             outputRange = Scalar(0.0)..Scalar(maxSteeringPower)
         )
+    }
 
     loopUntil(
         if (power > 0) {

@@ -4,8 +4,8 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import frc.chargers.wpilibextensions.geometry.asAngle
-import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargers.wpilibextensions.geometry.rotation.asAngle
+import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 
 public fun SwerveModuleState(
     speed: Velocity,

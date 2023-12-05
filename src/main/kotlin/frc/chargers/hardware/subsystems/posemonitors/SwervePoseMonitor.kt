@@ -1,9 +1,6 @@
 package frc.chargers.hardware.subsystems.posemonitors
 
-import com.batterystaple.kmeasure.quantities.Angle
-import com.batterystaple.kmeasure.quantities.Distance
-import com.batterystaple.kmeasure.quantities.inUnit
-import com.batterystaple.kmeasure.quantities.ofUnit
+import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
@@ -12,17 +9,16 @@ import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.advantagekitextensions.ChargerLoggableInputs
 import frc.chargers.hardware.sensors.RobotPoseSupplier
-import frc.chargers.hardware.sensors.gyroscopes.HeadingProvider
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.Measurement
-import frc.chargers.utils.PoseEstimator
-import frc.chargers.utils.PoseEstimator.TimestampedVisionUpdate
-import frc.chargers.utils.math.units.rem
+import frc.chargerlibexternal.utils.PoseEstimator
+import frc.chargerlibexternal.utils.PoseEstimator.TimestampedVisionUpdate
+import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
-import frc.chargers.wpilibextensions.geometry.UnitPose2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.kinematics.swerve.ModulePositionGroup
 import org.littletonrobotics.junction.Logger
@@ -38,9 +34,11 @@ import org.littletonrobotics.junction.Logger
 context(EncoderHolonomicDrivetrain)
 public class SwervePoseMonitor(
     private val gyro: HeadingProvider? = null,
-    private val poseSuppliers: List<RobotPoseSupplier>,
+    poseSuppliers: List<RobotPoseSupplier>,
     startingPose: UnitPose2d = UnitPose2d()
-): SubsystemBase(), RobotPoseSupplier, HeadingProvider{
+): SubsystemBase(), RobotPoseSupplier{
+
+    /* Public API */
 
     public constructor(
         vararg poseSuppliers: RobotPoseSupplier,
@@ -51,69 +49,45 @@ public class SwervePoseMonitor(
         poseSuppliers.toList(),
         startingPose
     )
+    public val field: Field2d = Field2d().also{ SmartDashboard.putData("Field",it) }
 
-
-
-    override val poseStandardDeviation: StandardDeviation
-        get() = StandardDeviation.Default
+    override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.latestPose.ofUnit(meters),
-            fpgaTimestamp(),
-            true
+            fpgaTimestamp()
         )
-    override val heading: Angle
-        get() = headingInputs.calculatedHeading
 
-
-
-
-    private val headingInputs = HeadingInputs()
-    private inner class HeadingInputs: ChargerLoggableInputs(){
-        var gyroUsed by loggedBoolean("realGyroUsedInEstimation", false)
-        var gyroInputHeading by loggedQuantity(degrees, "gyroInputHeading", Angle(0.0))
-        var calculatedHeading by loggedQuantity(degrees, "calculatedHeadingDeg", Angle(0.0))
-    }
-
-    private fun updateInputs(calculatedHeading: Angle){
-        headingInputs.apply{
-            gyroUsed = gyro != null
-            gyroInputHeading = gyro?.heading ?: Angle(0.0)
-            this.calculatedHeading = calculatedHeading
-        }
-    }
-
-
-
-
-    private val previousDistances = Array(4){Distance(0.0)}
-
-    private val field: Field2d = Field2d().also{
-        SmartDashboard.putData("Field",it)
-    }
-
-
-
-    private val poseEstimator: PoseEstimator = PoseEstimator(
-        VecBuilder.fill(0.003, 0.003, 0.00001),
-    ).also{
-        it.resetPose(startingPose.inUnit(meters))
-    }
-
+    override val robotPose: UnitPose2d get() = robotPoseMeasurement.value
+    public val heading: Angle get() = calculatedHeading
 
     public fun resetPose(pose: UnitPose2d){
         poseEstimator.resetPose(pose.inUnit(meters))
-        headingInputs.calculatedHeading = pose.rotation
+        calculatedHeading = pose.rotation
+    }
+
+    public fun addPoseSuppliers(vararg suppliers: RobotPoseSupplier){
+        this.poseSuppliers.addAll(suppliers)
     }
 
 
+    /* Private Implementation */
+
+
+    private val poseEstimator: PoseEstimator = PoseEstimator(VecBuilder.fill(0.003, 0.003, 0.00001),).also{
+        it.resetPose(startingPose.inUnit(meters))
+    }
+    private val poseSuppliers = poseSuppliers.toMutableList()
+    private var calculatedHeading = Angle(0.0)
+    private val previousDistances = Array(4){Distance(0.0)}
 
 
     override fun periodic(){
+        /*
+        Calculates the pose and heading from the data from the swerve modules; results in a Twist2d object.
+         */
         val wheelDeltas = ModulePositionGroup()
         val currentMPs = currentModulePositions
-
-
         wheelDeltas.apply{
             topLeftDistance = currentMPs.topLeftDistance - previousDistances[0]
             previousDistances[0] = currentMPs.topLeftDistance
@@ -132,28 +106,26 @@ public class SwervePoseMonitor(
             bottomLeftAngle = currentMPs.bottomLeftAngle
             bottomRightAngle = currentMPs.bottomRightAngle
         }
-
         val twist = kinematics.toTwist2d(*wheelDeltas.toArray())
+        calculatedHeading = (heading + twist.dtheta.ofUnit(radians)).inputModulus(0.0.degrees..360.degrees)
 
 
-        val currentEstimatedHeading =
-            (headingInputs.calculatedHeading + twist.dtheta.ofUnit(radians)) % 360.degrees
-
-        updateInputs(calculatedHeading = currentEstimatedHeading)
-
-        Logger.processInputs("Drivetrain(Swerve)/HeadingData",headingInputs)
-
+        /*
+        If a gyro is given, replace the calculated heading with the gyro's heading before adding the twist to the pose estimator.
+         */
         if (gyro != null){
-            twist.dtheta = headingInputs.gyroInputHeading.inUnit(radians)
+            twist.dtheta = gyro.heading.inUnit(radians)
         }
         poseEstimator.addDriveData(fpgaTimestamp().inUnit(seconds),twist)
 
 
+        /*
+        Sends all pose data to the pose estimator.
+         */
         val visionUpdates: MutableList<TimestampedVisionUpdate> = mutableListOf()
         poseSuppliers.forEach{
             val measurement = it.robotPoseMeasurement
-
-            if (measurement.isValid){
+            if (measurement.nullableValue != null){
                 val stdDevVector = when(val deviation = it.poseStandardDeviation){
                     is StandardDeviation.Of -> deviation.getVector()
 
@@ -163,7 +135,7 @@ public class SwervePoseMonitor(
                 visionUpdates.add(
                     TimestampedVisionUpdate(
                         measurement.timestamp.inUnit(seconds),
-                        measurement.value.inUnit(meters),
+                        measurement.nullableValue.inUnit(meters),
                         stdDevVector
                     )
                 )
@@ -172,11 +144,18 @@ public class SwervePoseMonitor(
         if (visionUpdates.size != 0) poseEstimator.addVisionData(visionUpdates)
 
 
+        /*
+        Records the robot's pose on the field and in AdvantageScope.
+         */
         field.robotPose = poseEstimator.latestPose
-        Logger.recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
-
-
+        Logger.getInstance().apply{
+            recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
+            recordOutput("Drivetrain(Swerve)/calculatedHeadingRad",calculatedHeading.inUnit(radians))
+            recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
+            recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
+        }
     }
+
 
 
 

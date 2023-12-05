@@ -12,7 +12,7 @@ public annotation class MappableContextMarker
 public class MappableContext<K,V> {
     public var map: MutableMap<K,V> = mutableMapOf()
 
-    public infix fun K.to(other: V){
+    public infix fun K.mapsTo(other: V){
         map[this] = other
     }
 }

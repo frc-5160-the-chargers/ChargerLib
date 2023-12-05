@@ -1,5 +1,6 @@
 package frc.chargers.hardware.subsystems.drivetrain
 
+import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj2.command.Subsystem
 import frc.chargers.wpilibextensions.kinematics.ChassisPowers
 
@@ -14,7 +15,7 @@ import frc.chargers.wpilibextensions.kinematics.ChassisPowers
  * See [here](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html) for more on differential drivetrains, and particularly
  * [here](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html#drive-modes) for an explanation of the various drive modes.
  */
-public interface DifferentialDrivetrain : Subsystem {
+public fun interface DifferentialDrivetrain : Subsystem {
     /**
      * Drives using "tank controls", a system by which each side of the drivetrain is controlled independently.
      * @param leftPower the power of the left side of the drivetrain (from [-1..1]).
@@ -28,7 +29,10 @@ public interface DifferentialDrivetrain : Subsystem {
      * @param power the power with which to drive forward (from [-1..1]).
      * @param rotation the power with which to rotate (proportional to the angular velocity, or how quickly the heading changes). (Must be from [-1..1]).
      */
-    public fun arcadeDrive(power: Double, rotation: Double = 0.0)
+    public fun arcadeDrive(power: Double, rotation: Double = 0.0){
+        val wheelSpeeds = DifferentialDrive.arcadeDriveIK(power,rotation, true)
+        tankDrive(wheelSpeeds.left,wheelSpeeds.right)
+    }
 
     /**
      * Drives the robot at a certain power forward and with a certain amount of steering.
@@ -38,12 +42,17 @@ public interface DifferentialDrivetrain : Subsystem {
      * Changing this value is can be thought of as changing how far a car's steering wheel is turned.
      * (Must be from [-1..1]).
      */
-    public fun curvatureDrive(power: Double, steering: Double)
+    public fun curvatureDrive(power: Double, steering: Double){
+        val wheelSpeeds = DifferentialDrive.curvatureDriveIK(power,steering, true)
+        tankDrive(wheelSpeeds.left,wheelSpeeds.right)
+    }
 
     /**
      * Stops the robot.
      */
-    public fun stop()
+    public fun stop(){
+        tankDrive(0.0,0.0)
+    }
 }
 
 public fun DifferentialDrivetrain.tankDrive(leftPower: Double, rightPower: Double, squareInputs: Boolean) {

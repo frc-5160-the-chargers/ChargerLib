@@ -3,20 +3,23 @@ package frc.chargers.framework
 import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.units.seconds
+import com.pathplanner.lib.server.PathPlannerServer
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.advantagekitextensions.*
 import org.littletonrobotics.junction.LogFileUtil
-import org.littletonrobotics.junction.Logger.*
+import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler
-import frc.chargers.builddata.ChargerLibBuildConstants
+import frc.chargerlibexternal.builddata.ChargerLibBuildConstants
 import frc.chargers.constants.tuning.DashboardTuner
+import frc.chargers.utils.SparkMaxBurnManager
 import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.LoggedRobot
+import org.littletonrobotics.junction.networktables.NT4Publisher
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -32,21 +35,56 @@ public open class ChargerRobot(
     private val config: RobotConfig
 ): LoggedRobot(config.loopPeriod.inUnit(seconds)){
     public companion object{
-        private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
-
-        private val simPeriodicRunnables: MutableList<() -> Unit> = mutableListOf()
-
-        public fun addToPeriodicLoop(runnable: () -> Unit){
-            periodicRunnables.add(runnable)
+        /**
+         * Determines if a SparkMax should burn it's flash or not.
+         */
+        public fun shouldBurnSparkMax(): Boolean = try{
+            burnManager.shouldBurn()
+        }catch(e: UninitializedPropertyAccessException){
+            RobotBase.isReal()
         }
 
-        public fun addToSimPeriodicLoop(runnable: () -> Unit){
-            simPeriodicRunnables.add(runnable)
+        /**
+         * Adds a specific lambda to the robot's periodic loop.
+         *
+         * All functions added this way will run before the command scheduler runs.
+         */
+        public fun runPeriodically(addToFront: Boolean = false, runnable: () -> Unit){
+            if (addToFront){
+                periodicRunnables.add(0,runnable)
+            }else{
+                periodicRunnables.add(runnable)
+            }
+
         }
 
+        /**
+         * Adds a specific lambda to the robot's periodic loop, which runs after the robot's periodic loop ends.
+         */
+        public fun runPeriodicallyWithLowPriority(addToFront: Boolean = false, runnable: () -> Unit){
+            if (addToFront){
+                lowPriorityPeriodicRunnables.add(0,runnable)
+            }else{
+                lowPriorityPeriodicRunnables.add(runnable)
+            }
+        }
+
+
+
+
+        /**
+         * The loop period of the current robot.
+         */
         public var LOOP_PERIOD: Time = 0.02.seconds
             private set
 
+
+
+        private lateinit var burnManager: SparkMaxBurnManager
+        private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
+        private val lowPriorityPeriodicRunnables: MutableList<() -> Unit> = mutableListOf()
+        private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
+        private val logReceiverQueueAlert = Alert.error(text = "Logging queue exceeded capacity, data will NOT be logged.")
 
     }
 
@@ -54,9 +92,6 @@ public open class ChargerRobot(
     private lateinit var autonomousCommand: Command
     private lateinit var testCommand: Command
 
-
-    private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
-    private val logReceiverQueueAlert = Alert.error(text = "Logging queue exceeded capacity, data will NOT be logged.")
 
 
     // Cancels a command; doing nothing if the command is not yet initialized.
@@ -66,70 +101,87 @@ public open class ChargerRobot(
             command.cancel()
         }catch(_: UninitializedPropertyAccessException){}
     }
+
     /**
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
      */
     override fun robotInit() {
-
         try{
+            burnManager = SparkMaxBurnManager(gitData.buildDate)
             LOOP_PERIOD = config.loopPeriod
+            // inits the ConsoleLogger
+            ConsoleLogger
 
+            val logger = Logger.getInstance()
             setUseTiming(
                 RobotBase.isReal() || !config.isReplay
             )
 
-            recordMetadata(
-                "Robot", if (RobotBase.isReal()) "REAL" else if (config.isReplay) "REPLAY" else "SIM"
-            )
-            recordMetadata("ProjectName", gitData.projectName)
-            recordMetadata("BuildDate", gitData.buildDate)
-            recordMetadata("GitSHA", gitData.sha)
-            recordMetadata("GitBranch", gitData.branch)
-            when(gitData.dirty){
-                0 -> recordMetadata("GitDirty", "All changes committed")
-                1 -> recordMetadata("GitDirty", "Uncommitted changes")
-                else -> recordMetadata("GitDirty", "Unknown")
-            }
-
-            recordMetadata("ChargerLibBuildDate", ChargerLibBuildConstants.BUILD_DATE)
-            recordMetadata("ChargerLibGitSHA", ChargerLibBuildConstants.GIT_SHA)
-            recordMetadata("ChargerLibGitBranch", ChargerLibBuildConstants.GIT_BRANCH)
-            when(ChargerLibBuildConstants.DIRTY){
-                0 -> recordMetadata("ChargerLibGitDirty", "All changes committed")
-                1 -> recordMetadata("ChargerLibGitDirty", "Uncommitted changes")
-                else -> recordMetadata("ChargerLibGitDirty", "Unknown")
-            }
-
-            // real robot
-            if (RobotBase.isReal()){
-                if (Files.exists(Path.of("media/sda1"))){
-                    addDataReceiver(WPILOGWriter("media/sda1"))
-                }else if (Files.exists(Path.of("media/sda2"))){
-                    addDataReceiver(WPILOGWriter("media/sda2"))
-                }else{
-                    noUsbSignalAlert.active = true
+            logger.apply{
+                recordMetadata(
+                    "Robot", if (RobotBase.isReal()) "REAL" else if (config.isReplay) "REPLAY" else "SIM"
+                )
+                recordMetadata("ProjectName", gitData.projectName)
+                recordMetadata("BuildDate", gitData.buildDate)
+                recordMetadata("GitSHA", gitData.sha)
+                recordMetadata("GitBranch", gitData.branch)
+                when(gitData.dirty){
+                    0 -> recordMetadata("GitDirty", "All changes committed")
+                    1 -> recordMetadata("GitDirty", "Uncommitted changes")
+                    else -> recordMetadata("GitDirty", "Unknown")
                 }
-                addDataReceiver(NTSafePublisher())
-            }else if (config.isReplay){
-                // replay mode; sim
-                val path = LogFileUtil.findReplayLog()
-                setReplaySource(WPILOGReader(path))
-                addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
-            }else{
-                // sim mode
-                addDataReceiver(NTSafePublisher())
-                // maybe add DriverStationSim? idk
+
+                recordMetadata("ChargerLibBuildDate", ChargerLibBuildConstants.BUILD_DATE)
+                recordMetadata("ChargerLibGitSHA", ChargerLibBuildConstants.GIT_SHA)
+                recordMetadata("ChargerLibGitBranch", ChargerLibBuildConstants.GIT_BRANCH)
+                when(ChargerLibBuildConstants.DIRTY){
+                    0 -> recordMetadata("ChargerLibGitDirty", "All changes committed")
+                    1 -> recordMetadata("ChargerLibGitDirty", "Uncommitted changes")
+                    else -> recordMetadata("ChargerLibGitDirty", "Unknown")
+                }
+
+                // real robot
+                if (RobotBase.isReal()){
+                    if (Files.exists(Path.of("media/sda1"))){
+                        addDataReceiver(WPILOGWriter("media/sda1"))
+                    }else if (Files.exists(Path.of("media/sda2"))){
+                        addDataReceiver(WPILOGWriter("media/sda2"))
+                    }else{
+                        noUsbSignalAlert.active = true
+                    }
+
+                    if (config.logToNTWhenFMSAttached){
+                        addDataReceiver(NT4Publisher())
+                    }else{
+                        addDataReceiver(NTSafePublisher())
+                    }
+                }else if (config.isReplay){
+                    // replay mode; sim
+                    val path = LogFileUtil.findReplayLog()
+                    setReplaySource(WPILOGReader(path))
+                    addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
+                }else{
+                    // sim mode
+                    if (config.logToNTWhenFMSAttached){
+                        addDataReceiver(NT4Publisher())
+                    }else{
+                        addDataReceiver(NTSafePublisher())
+                    }
+                    // maybe add DriverStationSim? idk
+                }
+
+                config.extraLoggerConfig(this)
+
+                // no more configuration from this point on
+                start()
             }
-
-            config.extraLoggerConfig()
-
-            // no more configuration from this point on
-            start()
 
             LiveWindow.disableAllTelemetry()
 
             DashboardTuner.tuningMode = config.tuningMode
+
+            PathPlannerServer.startServer(5811)
 
             // inits robotContainer
             robotContainer = getRobotContainer()
@@ -137,21 +189,22 @@ public open class ChargerRobot(
 
             robotContainer.robotInit()
 
-            // custom extension function in chargerlib
+
             CommandScheduler.getInstance().apply{
                 onCommandInitialize{
-                    recordOutput("/ActiveCommands/${it.name}", true)
+                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", true)
                 }
 
                 onCommandFinish {
-                    recordOutput("/ActiveCommands/${it.name}", false)
+                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", false)
                 }
 
-                onCommandInterrupt { it: Command ->
-                    recordOutput("/ActiveCommands/${it.name}", false)
+                onCommandInterrupt {
+                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", false)
                 }
             }
         }catch(e: Exception){
+            println("Error has been caught in [robotInit].")
             config.onError(e)
             throw e
         }
@@ -177,9 +230,15 @@ public open class ChargerRobot(
             // and running subsystem periodic() methods.  This must be called from the robot's periodic
             // block in order for anything in the Command-based framework to work.
             CommandScheduler.getInstance().run()
-            recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
-            logReceiverQueueAlert.active = getReceiverQueueFault()
+            Logger.getInstance().apply{
+                recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
+                logReceiverQueueAlert.active = receiverQueueFault
+            }
+            lowPriorityPeriodicRunnables.forEach{
+                it()
+            }
         }catch(e: Exception){
+            println("Error has been caught in [robotPeriodic].")
             config.onError(e)
             throw e
         }
@@ -191,20 +250,20 @@ public open class ChargerRobot(
         try{
             robotContainer.disabledInit()
         }catch(e: Exception){
+            println("Error has been caught in [disabledInit].")
             config.onError(e)
             throw e
         }
-
-
     }
+
     override fun disabledPeriodic() {
         try{
             robotContainer.disabledPeriodic()
         }catch(e: Exception){
+            println("Error has been caught in [disabledPeriodic].")
             config.onError(e)
             throw e
         }
-
     }
 
     /** This autonomous runs the autonomous command selected by your RobotContainer class.  */
@@ -215,6 +274,7 @@ public open class ChargerRobot(
             autonomousCommand.schedule()
             robotContainer.autonomousInit()
         }catch(e: Exception){
+            println("Error has been caught in [autonomousInit].")
             config.onError(e)
             throw e
         }
@@ -226,11 +286,13 @@ public open class ChargerRobot(
         try{
             robotContainer.autonomousPeriodic()
         }catch(e: Exception){
+            println("Error has been caught in [autonomousPeriodic].")
             config.onError(e)
             throw e
         }
 
     }
+
     override fun teleopInit() {
         try{
             cancelCommand{autonomousCommand}
@@ -238,6 +300,7 @@ public open class ChargerRobot(
             
             robotContainer.teleopInit()
         }catch(e: Exception){
+            println("Error has been caught in [teleopInit].")
             config.onError(e)
             throw e
         }
@@ -248,10 +311,12 @@ public open class ChargerRobot(
         try{
             robotContainer.teleopPeriodic()
         }catch(e: Exception){
+            println("Error has been caught in [teleopPeriodic].")
             config.onError(e)
             throw e
         }
     }
+
     override fun testInit() {
         // Cancels all running commands at the start of test mode.
         try{
@@ -260,6 +325,7 @@ public open class ChargerRobot(
             robotContainer.testInit()
             testCommand.schedule()
         }catch(e: Exception){
+            println("Error has been caught in [testInit].")
             config.onError(e)
             throw e
         }
@@ -270,6 +336,7 @@ public open class ChargerRobot(
         try{
             robotContainer.testPeriodic()
         }catch(e: Exception){
+            println("Error has been caught in [testPeriodic].")
             config.onError(e)
             throw e
         }
@@ -280,6 +347,7 @@ public open class ChargerRobot(
         try{
             robotContainer.simulationInit()
         }catch(e: Exception){
+            println("Error has been caught in [simulationInit].")
             config.onError(e)
             throw e
         }
@@ -289,10 +357,8 @@ public open class ChargerRobot(
     override fun simulationPeriodic() {
         try{
             robotContainer.simulationPeriodic()
-            simPeriodicRunnables.forEach{
-                it()
-            }
         }catch(e: Exception){
+            println("Error has been caught in [simulationPeriodic].")
             config.onError(e)
             throw e
         }

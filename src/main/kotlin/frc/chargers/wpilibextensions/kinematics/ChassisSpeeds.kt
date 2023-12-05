@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Twist2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import frc.chargers.framework.ChargerRobot
 
 
 /**
@@ -36,16 +37,19 @@ public val ChassisSpeeds.rotationSpeed: AngularVelocity
  *
  * Credits: [254](https://github.com/Team254/FRC-2022-Public), [5727](https://github.com/FRC5727/SwervyBoi/tree/THOR2023) repositories
  */
-public fun ChassisSpeeds.correctForDynamics(loopPeriod: Time = 0.02.seconds, multiplier: Double = 1.0): ChassisSpeeds {
+public fun ChassisSpeeds.correctForDynamics(loopPeriod: Time? = null, driftRate: Double = 1.0): ChassisSpeeds {
+
+    val period = loopPeriod ?: ChargerRobot.LOOP_PERIOD
+
     val futureRobotPose = Pose2d(
-        vxMetersPerSecond * loopPeriod.inUnit(seconds),
-        vyMetersPerSecond * loopPeriod.inUnit(seconds),
-        Rotation2d.fromRadians(omegaRadiansPerSecond * loopPeriod.inUnit(seconds) * multiplier)
+        vxMetersPerSecond * period.inUnit(seconds),
+        vyMetersPerSecond * period.inUnit(seconds),
+        Rotation2d.fromRadians(omegaRadiansPerSecond * period.inUnit(seconds) * driftRate)
     )
     val twistForPose: Twist2d = Pose2d().log(futureRobotPose)
     return ChassisSpeeds(
-        twistForPose.dx / loopPeriod.inUnit(seconds),
-        twistForPose.dy / loopPeriod.inUnit(seconds),
+        twistForPose.dx / period.inUnit(seconds),
+        twistForPose.dy / period.inUnit(seconds),
         this.omegaRadiansPerSecond
     )
 }

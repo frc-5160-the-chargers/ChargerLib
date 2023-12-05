@@ -22,6 +22,9 @@ public class ScalarRateLimiter{
         negativeLimit: Frequency,
         initialValue: Frequency
     ){
+        require(positiveLimit.siValue > 0.0){"Positive Rate Limit must be a positive value."}
+        require(negativeLimit.siValue < 0.0){"Negative Rate Limit must be a negative value."}
+
         rateLimiter = SlewRateLimiter(
             positiveLimit.siValue,
             negativeLimit.siValue,

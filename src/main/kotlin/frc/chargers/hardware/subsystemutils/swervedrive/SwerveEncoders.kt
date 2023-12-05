@@ -1,10 +1,13 @@
 package frc.chargers.hardware.subsystemutils.swervedrive
 
-import frc.chargers.hardware.sensors.encoders.EncoderConfigurable
-import frc.chargers.hardware.sensors.encoders.EncoderConfiguration
+import com.batterystaple.kmeasure.quantities.Angle
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.absolute.CANcoderConfiguration
 import frc.chargers.hardware.sensors.encoders.absolute.ChargerCANcoder
+import frc.chargers.hardware.sensors.withOffset
+import kotlin.internal.LowPriorityInOverloadResolution
 
 /**
  * Constructs an instance of [SwerveEncoders] with CTRE CANcoders.
@@ -40,6 +43,37 @@ public fun swerveCANcoders(
 
 }
 
+@LowPriorityInOverloadResolution
+public fun <E, C: HardwareConfiguration> SwerveEncoders(
+    topLeft: E,
+    topRight: E,
+    bottomLeft: E,
+    bottomRight: E,
+    configuration: C? = null
+): SwerveEncoders where E: PositionEncoder, E: HardwareConfigurable<C> =
+    SwerveEncoders(
+        topLeft.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        topRight.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        bottomLeft.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        },
+        bottomRight.apply{
+            if(configuration != null){
+                configure(configuration)
+            }
+        }
+    )
+
 
 public data class SwerveEncoders(
     val topLeft: PositionEncoder,
@@ -47,35 +81,17 @@ public data class SwerveEncoders(
     val bottomLeft: PositionEncoder,
     val bottomRight: PositionEncoder
 ){
-    public companion object{
-        public operator fun <E, C: EncoderConfiguration> invoke(
-            topLeft: E,
-            topRight: E,
-            bottomLeft: E,
-            bottomRight: E,
-            configuration: C? = null
-        ): SwerveEncoders where E: PositionEncoder, E: EncoderConfigurable<C> =
-            SwerveEncoders(
-                topLeft.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                topRight.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                bottomLeft.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                },
-                bottomRight.apply{
-                    if(configuration != null){
-                        configure(configuration)
-                    }
-                }
-        )
-    }
+
+    public fun withOffsets(
+        topLeftZero: Angle,
+        topRightZero: Angle,
+        bottomLeftZero: Angle,
+        bottomRightZero: Angle
+    ): SwerveEncoders = SwerveEncoders(
+        topLeft = topLeft.withOffset(topLeftZero),
+        topRight = topRight.withOffset(topRightZero),
+        bottomLeft = bottomLeft.withOffset(bottomLeftZero),
+        bottomRight = bottomRight.withOffset(bottomRightZero),
+    )
+
 }

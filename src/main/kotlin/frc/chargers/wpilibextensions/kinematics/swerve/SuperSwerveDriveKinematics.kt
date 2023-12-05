@@ -1,16 +1,16 @@
 package frc.chargers.wpilibextensions.kinematics.swerve
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
-import frc.chargers.utils.HeadingCorrector
-import frc.chargers.utils.SecondOrderSwerveKinematics
-import frc.chargers.wpilibextensions.geometry.UnitTranslation2d
-import frc.chargers.wpilibextensions.geometry.asRotation2d
+import frc.chargerlibexternal.utils.HeadingCorrector
+import frc.chargerlibexternal.utils.SecondOrderSwerveKinematics
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
+import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
+import frc.chargers.wpilibextensions.kinematics.correctForDynamics
 
 
 /**
@@ -51,12 +51,11 @@ public class SuperSwerveDriveKinematics(
      * Credits: 5727/4481 second kinematics
      * @see SecondOrderSwerveKinematics
      */
-    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle): SecondOrderModuleStateGroup{
-        val standardizedHeading = if (heading < 0.degrees) heading + 360.degrees else heading
+    public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle , fieldRelative: Boolean = true): SecondOrderModuleStateGroup{
 
-        val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,standardizedHeading.asRotation2d())
+        val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,heading.asRotation2d())
 
-        val output = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,standardizedHeading.asRotation2d())
+        val output = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,heading.asRotation2d(), fieldRelative)
         val states = output.moduleStates
 
         // lolll.... 4481's second order kinematics is returning NaN for turn speeds...
@@ -78,8 +77,15 @@ public class SuperSwerveDriveKinematics(
         )
     }
 
-    public fun toFirstOrderModuleStateGroup(speeds: ChassisSpeeds): ModuleStateGroup{
-        val arr = toSwerveModuleStates(speeds)
+    public fun toFirstOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle = Angle(0.0), fieldRelative: Boolean = true): ModuleStateGroup{
+        var newSpeeds = if(fieldRelative){
+            ChassisSpeeds.fromFieldRelativeSpeeds(speeds, heading.asRotation2d())
+        }else{
+            speeds
+        }
+        newSpeeds = newSpeeds.correctForDynamics(driftRate = 1.6)
+        newSpeeds = headingCorrector.correctHeading(newSpeeds,heading.asRotation2d())
+        val arr = toSwerveModuleStates(newSpeeds)
         return ModuleStateGroup(
             topLeftState = arr[0],
             topRightState = arr[1],
@@ -95,6 +101,24 @@ public class SuperSwerveDriveKinematics(
             stateGroup.bottomLeftState,
             stateGroup.bottomRightState
         )
+
+    /**
+     * Extracts the turn speeds out of an existing [ModuleStateGroup], with a target rotation speed.
+     */
+    public fun extractTurnSpeeds(stateGroup: ModuleStateGroup, rotationSpeed: AngularVelocity): List<AngularVelocity>{
+        val output = secondKinematics.extractTurnSpeeds(
+            arrayOf(stateGroup.topLeftState, stateGroup.topRightState, stateGroup.bottomLeftState, stateGroup.bottomRightState),
+            rotationSpeed.inUnit(radians/seconds)
+        )
+
+        return output.map{
+            if (it.isNaN()){
+                AngularVelocity(0.0)
+            }else{
+                it.ofUnit(radians/seconds)
+            }
+        }
+    }
 
 
 

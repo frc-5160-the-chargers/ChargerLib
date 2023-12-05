@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.utils.math.units.KmeasureUnit
+import frc.chargers.utils.math.units.siUnit
 import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber
@@ -47,7 +48,9 @@ public typealias TunableDelegate<T> = PropertyDelegateProvider<Any?, ReadOnlyPro
  * ```
  *
  */
-public open class DashboardTuner{
+public open class DashboardTuner(
+    private val dashKey: String = "TunableValues"
+){
 
     public companion object{
 
@@ -65,14 +68,12 @@ public open class DashboardTuner{
                 }
             }
 
-        private const val DASH_KEY = "TunableValues"
-
         private val isCompAlert = Alert.warning(text = "Tuning mode WAS NOT SET: It looks like you're in a match right now.")
         private val tuningModeEnabledAlert = Alert.warning(text = "Tuning mode is enabled; Expect loop times to be greater. ")
     }
 
     init{
-        ChargerRobot.addToPeriodicLoop{
+        ChargerRobot.runPeriodically{
             if (tuningMode){
                 val updateStatus: List<Boolean> = allTunables.map{
                     it.needsUpdate()
@@ -117,12 +118,12 @@ public open class DashboardTuner{
      * @see LoggedDashboardNumber
      */
     public fun double(default: Double, key: String? = null): TunableDelegate<Double> = PropertyDelegateProvider{
-        _, variable -> TunableDouble( key ?: variable.name, default)
+        _, variable -> TunableDouble( default,key ?: variable.name)
     }
 
-    private inner class TunableDouble(key: String, default: Double): ReadOnlyProperty<Any?, Double> {
+    private inner class TunableDouble(default: Double, key: String): ReadOnlyProperty<Any?, Double> {
 
-        val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",default)
+        val dashNumber = LoggedDashboardNumber("$dashKey/$key",default)
         private var value = default
 
         init{
@@ -144,83 +145,106 @@ public open class DashboardTuner{
      * @see Quantity
      * @see LoggedDashboardNumber
      */
-    public fun <D: AnyDimension> quantity(default: Quantity<D>, key: String, logUnit: KmeasureUnit<D>): ReadOnlyProperty<Any?, Quantity<D>> =
-        object : ReadOnlyProperty<Any?, Quantity<D>> {
-
-            val dashNumber = LoggedDashboardNumber("$DASH_KEY/$key",default.inUnit(logUnit))
-            private var value = default
-
-            init{
-                allTunables.add(
-                    Tunable(
-                        {value = dashNumber.get().ofUnit(logUnit)},
-                        {dashNumber.get() == value.inUnit(logUnit)}
-                    )
-                )
-            }
-
-            override fun getValue(thisRef: Any?, property: KProperty<*>): Quantity<D> = value
-
+    public fun <D: AnyDimension> quantity(
+        default: Quantity<D>, key: String? = null, logUnit: KmeasureUnit<D> = siUnit(default)
+    ): TunableDelegate<Quantity<D>> =
+        PropertyDelegateProvider{ _, variable ->
+            val name = key ?: (variable.name + "(SI unit)")
+            TunableQuantity(default, name, logUnit)
         }
+
+    private inner class TunableQuantity<D: AnyDimension>(
+        default: Quantity<D>, key: String, logUnit: KmeasureUnit<D>
+    ): ReadOnlyProperty<Any?, Quantity<D>> {
+
+        val dashNumber = LoggedDashboardNumber("$dashKey/$key",default.inUnit(logUnit))
+        private var value = default
+
+        init{
+            allTunables.add(
+                Tunable(
+                    {value = dashNumber.get().ofUnit(logUnit)},
+                    {dashNumber.get() == value.inUnit(logUnit)}
+                )
+            )
+        }
+
+        override fun getValue(thisRef: Any?, property: KProperty<*>): Quantity<D> = value
+
+    }
 
     /**
      * A property delegate that represents a tunable [Boolean].
      *
      * @see LoggedDashboardBoolean
      */
-    public fun boolean(default: Boolean, key: String): ReadOnlyProperty<Any?, Boolean> =
-        object: ReadOnlyProperty<Any?, Boolean> {
-
-            val dashBool = LoggedDashboardBoolean(key,default)
-            private var value = default
-
-            init{
-                allTunables.add(
-                    Tunable(
-                        {value = dashBool.get()},
-                        {value == dashBool.get()}
-                    )
-                )
-            }
-
-            override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean = value
+    public fun boolean(default: Boolean, key: String? = null): TunableDelegate<Boolean> =
+        PropertyDelegateProvider{ _, variable ->
+            TunableBoolean(default, key ?: variable.name)
         }
 
-    /**
-     * Represents [PIDConstants] that can be tuned from the dashboard.
-     */
-    public fun pidConstants(default: PIDConstants, key: String): ReadOnlyProperty<Any?, PIDConstants> =
-        object: ReadOnlyProperty<Any?, PIDConstants> {
-            val kpDashNumber = LoggedDashboardNumber("$DASH_KEY/$key-kP",default.kP)
-            val kiDashNumber = LoggedDashboardNumber("$DASH_KEY/$key-kI",default.kI)
-            val kdDashNumber = LoggedDashboardNumber("$DASH_KEY/$key-kD",default.kD)
 
-            private var value = default
-            // ap test stuff; cs and math
-            private fun getConstants() = PIDConstants(
-                kpDashNumber.get(),
-                kiDashNumber.get(),
-                kdDashNumber.get()
+    private inner class TunableBoolean(
+        default: Boolean, key: String
+    ): ReadOnlyProperty<Any?, Boolean> {
+
+        val dashBool = LoggedDashboardBoolean(key,default)
+        private var value = default
+
+        init{
+            allTunables.add(
+                Tunable(
+                    {value = dashBool.get()},
+                    {value == dashBool.get()}
+                )
             )
+        }
 
-            init{
-                allTunables.add(
-                    Tunable(
-                        { value = getConstants() },
-                        { value != getConstants() }
-                    )
-                )
-            }
+        override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean = value
+    }
 
-            override fun getValue(thisRef: Any?, property: KProperty<*>): PIDConstants = value
-
+    /**
+     * Represents [PIDConstants] that can be tuned from the dashboard.
+     */
+    public fun pidConstants(default: PIDConstants, key: String? = null): TunableDelegate<PIDConstants> =
+        PropertyDelegateProvider{ _, variable ->
+            TunablePIDConstants(default, key ?: variable.name)
         }
 
     /**
      * Represents [PIDConstants] that can be tuned from the dashboard.
      */
-    public fun pidConstants(kP: Double, kI: Double, kD: Double, key: String): ReadOnlyProperty<Any?,PIDConstants> =
+    public fun pidConstants(kP: Double, kI: Double, kD: Double, key: String? = null): TunableDelegate<PIDConstants> =
         pidConstants(PIDConstants(kP,kI,kD),key)
+
+
+    private inner class TunablePIDConstants(
+        default: PIDConstants, key: String
+    ): ReadOnlyProperty<Any?, PIDConstants> {
+        val kpDashNumber = LoggedDashboardNumber("$dashKey/$key-kP",default.kP)
+        val kiDashNumber = LoggedDashboardNumber("$dashKey/$key-kI",default.kI)
+        val kdDashNumber = LoggedDashboardNumber("$dashKey/$key-kD",default.kD)
+
+        private var value = default
+        // ap test stuff; cs and math
+        private fun getConstants() = PIDConstants(
+            kpDashNumber.get(),
+            kiDashNumber.get(),
+            kdDashNumber.get()
+        )
+
+        init{
+            allTunables.add(
+                Tunable(
+                    { value = getConstants() },
+                    { value != getConstants() }
+                )
+            )
+        }
+
+        override fun getValue(thisRef: Any?, property: KProperty<*>): PIDConstants = value
+
+    }
 
 
 
