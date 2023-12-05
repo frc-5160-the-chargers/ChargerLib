@@ -3,7 +3,6 @@ package frc.chargers.hardware.subsystems.drivetrain
 import com.batterystaple.kmeasure.interop.average
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
-import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
 import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -11,6 +10,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.wpilibj.drive.DifferentialDrive
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.DiffDriveConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
@@ -26,15 +26,13 @@ import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOSim
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveControl
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
-import org.littletonrobotics.junction.Logger
 
 public fun simulatedDrivetrain(
     simMotors: DifferentialDrivetrainSim.KitbotMotor,
-    loopPeriod: Time = 20.milli.seconds,
     constants: DiffDriveConstants = DiffDriveConstants.andymark(),
     controlScheme: DiffDriveControl = DiffDriveControl.None
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
-    DiffDriveIOSim(simMotors,loopPeriod),
+    DiffDriveIOSim(logTab = LoggableInputsProvider(logGroup = "Drivetrain(Differential)"),simMotors),
     constants, controlScheme
 )
 
@@ -79,6 +77,7 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
         io = DiffDriveIOReal(
+            logTab = LoggableInputsProvider(logGroup = "Drivetrain(Differential)"),
             leftMotors = leftMotors.apply { configure(configuration) },
             rightMotors = rightMotors.apply { configure(configuration) }
         ),
@@ -95,8 +94,6 @@ public class EncoderDifferentialDrivetrain(
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
 ): SubsystemBase(), DifferentialDrivetrain, HeadingProvider {
-
-    internal val inputs = DiffDriveIO.Inputs()
 
     // lazy initializer to prevent potentital NPE's and other problems
     // associated with leaking "this"
@@ -117,12 +114,8 @@ public class EncoderDifferentialDrivetrain(
 
 
     override fun periodic(){
-        io.updateInputs(inputs)
-        Logger.getInstance().processInputs("Drivetrain(Differential)",inputs)
-        
         leftController.calculateOutput()
         rightController.calculateOutput()
-
     }
 
     override fun tankDrive(leftPower: Double, rightPower: Double) {
@@ -161,14 +154,14 @@ public class EncoderDifferentialDrivetrain(
      */
     public val distanceTraveled: Distance
         get() =
-            a[inputs.leftAngularPosition,inputs.rightAngularPosition].average() * wheelTravelPerMotorRadian
+            a[io.leftWheelTravel,io.rightWheelTravel].average() * wheelTravelPerMotorRadian
 
     /**
      * The current linear velocity of the robot.
      */
     public val velocity: Velocity
         get() =
-            a[inputs.leftAngularVelocity,inputs.rightAngularVelocity].average() * wheelTravelPerMotorRadian
+            a[io.leftVelocity,io.rightVelocity].average() * wheelTravelPerMotorRadian
 
     /**
      * The current heading (the direction the robot is facing).
@@ -190,7 +183,7 @@ public class EncoderDifferentialDrivetrain(
      */
     public override val heading: Angle
         get() = wheelTravelPerMotorRadian *
-                (inputs.rightAngularPosition - inputs.leftAngularPosition) / constants.width
+                (io.rightWheelTravel - io.leftWheelTravel) / constants.width
 
 
     /**
@@ -204,7 +197,7 @@ public class EncoderDifferentialDrivetrain(
 
     private val leftController = UnitSuperPIDController(
         controlScheme.leftVelocityConstants,
-        {inputs.leftAngularVelocity},
+        {io.leftVelocity},
         target = AngularVelocity(0.0),
         selfSustain = false,
         feedforward = controlScheme.leftMotorFF
@@ -212,7 +205,7 @@ public class EncoderDifferentialDrivetrain(
 
     private val rightController = UnitSuperPIDController(
         controlScheme.rightVelocityConstants,
-        {inputs.rightAngularVelocity},
+        {io.rightVelocity},
         target = AngularVelocity(0.0),
         selfSustain = false,
         feedforward = controlScheme.rightMotorFF

@@ -18,34 +18,34 @@ import frc.chargers.wpilibextensions.motorcontrol.setVoltage
 
 
 public class ModuleIOReal(
-    logNamespace: LoggableInputsProvider,
+    logTab: LoggableInputsProvider,
     private val turnMotor: EncoderMotorController,
     private val turnEncoder: PositionEncoder,
     private val driveMotor: EncoderMotorController,
     private val driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     private val turnGearRatio: Double = DEFAULT_GEAR_RATIO
 ): ModuleIO {
-    override val logTab: String = logNamespace.logGroup
+    override val logTab: String = logTab.logGroup
 
     private val startingWheelTravel = driveMotor.encoder.angularPosition
 
-    override val direction: Angle by logNamespace.quantity{ turnEncoder.angularPosition.inputModulus(0.degrees..360.degrees) }
-    override val turnSpeed: AngularVelocity by logNamespace.quantity{ turnMotor.encoder.angularVelocity / turnGearRatio }
+    override val direction: Angle by logTab.quantity{ turnEncoder.angularPosition.inputModulus(0.degrees..360.degrees) }
+    override val turnSpeed: AngularVelocity by logTab.quantity{ turnMotor.encoder.angularVelocity / turnGearRatio }
 
-    override val speed: AngularVelocity by logNamespace.quantity{ driveMotor.encoder.angularVelocity / driveGearRatio }
-    override val wheelTravel: Angle by logNamespace.quantity{ (driveMotor.encoder.angularPosition - startingWheelTravel) / driveGearRatio }
+    override val speed: AngularVelocity by logTab.quantity{ driveMotor.encoder.angularVelocity / driveGearRatio }
+    override val wheelTravel: Angle by logTab.quantity{ (driveMotor.encoder.angularPosition - startingWheelTravel) / driveGearRatio }
 
-    private var driveAppliedVoltage = Voltage(0.0)
     private var turnAppliedVoltage = Voltage(0.0)
+    private var driveAppliedVoltage = Voltage(0.0)
 
-    override var turnVoltage: Voltage by logNamespace.quantity(
+    override var turnVoltage: Voltage by logTab.quantity(
         getValue = {turnAppliedVoltage},
         setValue = {
             turnAppliedVoltage = it.coerceIn(-12.volts..12.volts)
             turnMotor.setVoltage(turnAppliedVoltage)
         }
     )
-    override var driveVoltage: Voltage by logNamespace.quantity(
+    override var driveVoltage: Voltage by logTab.quantity(
         getValue = {driveAppliedVoltage},
         setValue = {
             driveAppliedVoltage = it.coerceIn(-12.volts..12.volts)
@@ -57,7 +57,7 @@ public class ModuleIOReal(
 
 
 public class ModuleIOSim(
-    logNamespace: LoggableInputsProvider,
+    logTab: LoggableInputsProvider,
     turnGearbox: DCMotor,
     driveGearbox: DCMotor,
     turnGearRatio: Double = DEFAULT_GEAR_RATIO,
@@ -66,7 +66,7 @@ public class ModuleIOSim(
     driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
 ): ModuleIO {
 
-    override val logTab: String = logNamespace.logGroup
+    override val logTab: String = logTab.logGroup
 
     private val turnMotorSim = FlywheelSim(
         turnGearbox,
@@ -93,22 +93,22 @@ public class ModuleIOSim(
 
 
 
-    override val direction: Angle by logNamespace.quantity{
+    override val direction: Angle by logTab.quantity{
         currentDirection.inputModulus(0.degrees..360.degrees)
     }
-    override val turnSpeed: AngularVelocity by logNamespace.quantity{
+    override val turnSpeed: AngularVelocity by logTab.quantity{
         turnMotorSim.angularVelocityRadPerSec.ofUnit(radians/seconds)
     }
 
-    override val speed: AngularVelocity by logNamespace.quantity{
+    override val speed: AngularVelocity by logTab.quantity{
         driveMotorSim.angularVelocityRadPerSec.ofUnit(radians/seconds)
     }
-    override val wheelTravel: Angle by logNamespace.quantity{currentWheelPosition}
+    override val wheelTravel: Angle by logTab.quantity{currentWheelPosition}
 
     private var turnAppliedVoltage = Voltage(0.0)
     private var driveAppliedVoltage = Voltage(0.0)
 
-    override var turnVoltage: Voltage by logNamespace.quantity(
+    override var turnVoltage: Voltage by logTab.quantity(
         getValue = {turnAppliedVoltage},
         setValue = {
             turnAppliedVoltage = it.coerceIn(-12.volts..12.volts)
@@ -116,7 +116,7 @@ public class ModuleIOSim(
         }
     )
 
-    override var driveVoltage: Voltage by logNamespace.quantity(
+    override var driveVoltage: Voltage by logTab.quantity(
         getValue = {driveAppliedVoltage},
         setValue = {
             driveAppliedVoltage = it.coerceIn(-12.volts..12.volts)

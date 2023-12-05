@@ -3,13 +3,14 @@ package frc.chargers.hardware.subsystemutils.differentialdrive
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
-import frc.chargers.advantagekitextensions.ChargerLoggableInputs
+import frc.chargers.advantagekitextensions.LoggableInputsProvider
+import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
-import frc.chargers.wpilibextensions.motorcontrol.voltage
 
 
 public class DiffDriveIOReal(
+    logTab: LoggableInputsProvider,
     private val leftMotors: NonConfigurableEncoderMotorControllerGroup,
     private val rightMotors: NonConfigurableEncoderMotorControllerGroup
 ): DiffDriveIO {
@@ -18,24 +19,27 @@ public class DiffDriveIOReal(
         leftMotors.inverted = false
         rightMotors.inverted = true
     }
+
+    private var leftAppliedVoltage = Voltage(0.0)
+    private var rightAppliedVoltage = Voltage(0.0)
+
+    override val leftWheelTravel: Angle by logTab.quantity{leftMotors.encoder.angularPosition}
+    override val rightWheelTravel: Angle by logTab.quantity{rightMotors.encoder.angularPosition}
+
+    override val leftVelocity: AngularVelocity by logTab.quantity{leftMotors.encoder.angularVelocity}
+    override val rightVelocity: AngularVelocity by logTab.quantity{rightMotors.encoder.angularVelocity}
+
+    override val leftVoltage: Voltage by logTab.quantity{leftAppliedVoltage}
+    override val rightVoltage: Voltage by logTab.quantity {rightAppliedVoltage}
+
     override fun setVoltages(left: Voltage, right: Voltage) {
+        leftAppliedVoltage = left
+        rightAppliedVoltage = right
         // uses custom extension functions; see wpilibextensions
         leftMotors.setVoltage(left)
         rightMotors.setVoltage(right)
     }
 
-    override fun updateInputs(inputs: DiffDriveIO.Inputs){
-        inputs.apply{
-            leftAngularPosition = leftMotors.encoder.angularPosition
-            rightAngularPosition = rightMotors.encoder.angularPosition
-
-            leftAngularVelocity = leftMotors.encoder.angularVelocity
-            rightAngularVelocity = rightMotors.encoder.angularVelocity
-
-            leftVoltage = leftMotors.voltage
-            rightVoltage = rightMotors.voltage
-        }
-    }
 
     override var inverted: Boolean = false
         set(invertMotors){
@@ -50,10 +54,17 @@ public class DiffDriveIOReal(
         }
 }
 
+
 public class DiffDriveIOSim(
-    motors: DifferentialDrivetrainSim.KitbotMotor,
-    private val loopPeriod: Time = 20.milli.seconds
-): DiffDriveIO {
+    logTab: LoggableInputsProvider,
+    motors: DifferentialDrivetrainSim.KitbotMotor
+): DiffDriveIO{
+    init{
+        ChargerRobot.runPeriodically(addToFront = true){
+            sim.update(ChargerRobot.LOOP_PERIOD.inUnit(seconds))
+        }
+    }
+
     private val sim: DifferentialDrivetrainSim = DifferentialDrivetrainSim.createKitbotSim(
         motors,
         DifferentialDrivetrainSim.KitbotGearing.k10p71,
@@ -63,9 +74,21 @@ public class DiffDriveIOSim(
 
     private var leftAppliedVoltage = Voltage(0.0)
     private var rightAppliedVoltage = Voltage(0.0)
-
     // gearRatio * wheelDiameter for simulator
     private val wheelTravelPerMotorRadian = 10.71 * 6.inches
+
+    override val leftWheelTravel: Angle by logTab.quantity{ sim.leftPositionMeters.ofUnit(meters) / wheelTravelPerMotorRadian }
+    override val rightWheelTravel: Angle by logTab.quantity{ sim.rightPositionMeters.ofUnit(meters) / wheelTravelPerMotorRadian }
+
+    override val leftVelocity: AngularVelocity by logTab.quantity{ sim.leftVelocityMetersPerSecond.ofUnit(meters/seconds) / wheelTravelPerMotorRadian }
+    override val rightVelocity: AngularVelocity by logTab.quantity{ sim.rightVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian }
+
+    override val leftVoltage: Voltage by logTab.quantity{leftAppliedVoltage}
+    override val rightVoltage: Voltage by logTab.quantity{rightAppliedVoltage}
+
+
+    override var inverted: Boolean = false
+
     override fun setVoltages(left: Voltage, right: Voltage) {
         if (inverted){
             leftAppliedVoltage = left.coerceIn(-12.volts,12.volts)
@@ -80,61 +103,19 @@ public class DiffDriveIOSim(
         )
     }
 
-    override fun updateInputs(inputs: DiffDriveIO.Inputs) {
-        sim.update(loopPeriod.inUnit(seconds))
-        inputs.apply{
-            leftAngularPosition =
-                sim.leftPositionMeters.ofUnit(meters) / wheelTravelPerMotorRadian
-            rightAngularPosition =
-                sim.rightPositionMeters.ofUnit(meters) / wheelTravelPerMotorRadian
-            leftAngularVelocity =
-                sim.leftVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian
-            rightAngularVelocity =
-                sim.rightVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian
-            leftVoltage = leftAppliedVoltage
-            rightVoltage = rightAppliedVoltage
-        }
-    }
-
-    override var inverted: Boolean = false
-
 }
 
-
 public interface DiffDriveIO{
-    public class Inputs: ChargerLoggableInputs(){
-        public var leftAngularPosition: Angle by loggedQuantity(
-            logUnit = degrees,
-            "leftPositionDeg"
-        )
-        public var rightAngularPosition: Angle by loggedQuantity(
-            logUnit = degrees,
-            "rightPositionDeg"
-        )
+    public val leftWheelTravel: Angle
+    public val rightWheelTravel: Angle
 
-        public var leftAngularVelocity: AngularVelocity by loggedQuantity(
-            logUnit = degrees / seconds,
-            "leftVelocityDegPerSecond"
-        )
-        public var rightAngularVelocity: AngularVelocity by loggedQuantity(
-            logUnit = degrees / seconds,
-            "rightVelocityDegPerSecond"
-        )
+    public val leftVelocity: AngularVelocity
+    public val rightVelocity: AngularVelocity
 
-        public var leftVoltage: Voltage by loggedQuantity(
-            logUnit = volts,
-            "leftVoltage"
-        )
-
-        public var rightVoltage: Voltage by loggedQuantity(
-            logUnit = volts,
-            "rightVoltage"
-        )
-    }
+    public val leftVoltage: Voltage
+    public val rightVoltage: Voltage
 
     public fun setVoltages(left: Voltage, right: Voltage)
 
     public var inverted: Boolean
-
-    public fun updateInputs(inputs: Inputs)
 }

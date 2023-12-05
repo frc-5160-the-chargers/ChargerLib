@@ -72,8 +72,8 @@ public class DifferentialPoseMonitor(
     private var previousDistanceR = Distance(0.0)
 
     override fun periodic(){
-        val distanceL = inputs.leftAngularPosition * wheelTravelPerMotorRadian
-        val distanceR = inputs.rightAngularPosition * wheelTravelPerMotorRadian
+        val distanceL = io.leftWheelTravel * wheelTravelPerMotorRadian
+        val distanceR = io.rightWheelTravel * wheelTravelPerMotorRadian
 
         val twist = kinematics.toTwist2d(
             (distanceL-previousDistanceL).inUnit(meters),
@@ -113,7 +113,13 @@ public class DifferentialPoseMonitor(
 
 
         field.robotPose = poseEstimator.latestPose
-        Logger.getInstance().recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
+        Logger.getInstance().apply{
+            recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
+            // defined in EncoderDifferentialDrivetrain.kt
+            recordOutput("Drivetrain(Differential)/calculatedHeadingRad", heading.inUnit(radians))
+            recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
+            recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
+        }
 
 
     }

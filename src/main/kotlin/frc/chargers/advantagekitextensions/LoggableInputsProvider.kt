@@ -12,7 +12,6 @@ import frc.chargers.utils.NullableMeasurement
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.inputs.LoggableInputs
-import kotlin.internal.LowPriorityInOverloadResolution
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -26,17 +25,6 @@ public typealias ReadOnlyLoggableInput<T> = PropertyDelegateProvider<Any?, ReadO
  * Represents a Loggable input property delegate that has read-write properties.
  */
 public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, ReadWriteProperty<Any?, T>>
-/**
- * Represents a generic scope where a field can be accessed;
- * mimicking the field term in kotlin's setters.
- */
-public interface AccessorScope<D>{
-    public var field: D
-}
-/**
- * Represents a generic function that can set the value of a class.
- */
-public typealias Setter<T> = AccessorScope<T>.(T) -> Unit
 
 
 
@@ -85,11 +73,11 @@ public class LoggableInputsProvider(
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityMeasurement(variable.name, getValue)}
     public fun <D: AnyDimension> timestampedNullableQuantity(getValue: () -> NullableMeasurement<Quantity<D>>): ReadOnlyLoggableInput<NullableMeasurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantityMeasurement(variable.name, getValue)}
-
-
+    
+    
     public fun <T: AdvantageKitLoggable<T>> timestampedValue(getValue: () -> Measurement<T>): ReadOnlyLoggableInput<Measurement<T>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedMeasurement(variable.name, getValue)}
-
+    
     public fun <T: AdvantageKitLoggable<T>> timestampedNullableValue(nullReprWhenLogged: T, getValue: () -> NullableMeasurement<T>): ReadOnlyLoggableInput<NullableMeasurement<T>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableMeasurement(variable.name, nullReprWhenLogged, getValue)}
 
@@ -97,91 +85,114 @@ public class LoggableInputsProvider(
 
 
 
-    @LowPriorityInOverloadResolution
-    public fun int(getValue: () -> Int, setValue: Setter<Int> = {field = it} ): ReadWriteLoggableInput<Int> =
+    
+    public fun int(getValue: () -> Int, setValue: (Int) -> Unit): ReadWriteLoggableInput<Int> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedInt(variable.name, getValue,setValue) }
-    @LowPriorityInOverloadResolution
-    public fun double(getValue: () -> Double, setValue: Setter<Double> = {field = it}): ReadWriteLoggableInput<Double> =
+    
+    public fun double(getValue: () -> Double, setValue: (Double) -> Unit): ReadWriteLoggableInput<Double> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedDouble(variable.name, getValue,setValue) }
-    @LowPriorityInOverloadResolution
-    public fun <D: AnyDimension> quantity(getValue: () -> Quantity<D>, setValue: Setter<Quantity<D>> = {field = it}): ReadWriteLoggableInput<Quantity<D>> =
+    
+    public fun <D: AnyDimension> quantity(getValue: () -> Quantity<D>, setValue: (Quantity<D>) -> Unit): ReadWriteLoggableInput<Quantity<D>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantity(variable.name + "(SI value)", getValue,setValue) }
-    @LowPriorityInOverloadResolution
-    public fun boolean(getValue: () -> Boolean, setValue: Setter<Boolean> = {field = it}): ReadWriteLoggableInput<Boolean> =
+
+    public fun boolean(getValue: () -> Boolean, setValue: (Boolean) -> Unit): ReadWriteLoggableInput<Boolean> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedBoolean(variable.name, getValue,setValue) }
-    @LowPriorityInOverloadResolution
-    public fun string(getValue: () -> String, setValue: Setter<String> = {field = it}): ReadWriteLoggableInput<String> =
+    
+    public fun string(getValue: () -> String, setValue: (String) -> Unit): ReadWriteLoggableInput<String> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedString(variable.name, getValue,setValue) }
 
 
 
-    @LowPriorityInOverloadResolution
-    public fun nullableInt(getValue: () -> Int?, setValue: Setter<Int?> = {field = it}): ReadWriteLoggableInput<Int?> =
+    
+    public fun nullableInt(getValue: () -> Int?, setValue: (Int?) -> Unit): ReadWriteLoggableInput<Int?> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableInt(variable.name, getValue,setValue) }
-    @LowPriorityInOverloadResolution
-    public fun nullableDouble(getValue: () -> Double?, setValue: Setter<Double?> = {field = it}): ReadWriteLoggableInput<Double?> =
+    
+    public fun nullableDouble(getValue: () -> Double?, setValue: (Double?) -> Unit): ReadWriteLoggableInput<Double?> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableDouble(variable.name, getValue,setValue) }
-    @LowPriorityInOverloadResolution
-    public fun <D: AnyDimension> nullableQuantity(getValue: () -> Quantity<D>?, setValue: Setter<Quantity<D>?> = {field = it}): ReadWriteLoggableInput<Quantity<D>?> =
+    
+    public fun <D: AnyDimension> nullableQuantity(getValue: () -> Quantity<D>?, setValue: (Quantity<D>?) -> Unit): ReadWriteLoggableInput<Quantity<D>?> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantity(variable.name + "(SI value)", getValue,setValue) }
 
 
-    @LowPriorityInOverloadResolution
-    public fun intList(getValue: () -> List<Int>, setValue: Setter<List<Int>> = {field = it}): ReadWriteLoggableInput<List<Int>> =
+    
+    public fun intList(getValue: () -> List<Int>, setValue: (List<Int>) -> Unit): ReadWriteLoggableInput<List<Int>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedIntList(variable.name, getValue,setValue) }
-    @LowPriorityInOverloadResolution
+    
     public fun <D: AnyDimension> quantityList(
         getValue: () -> List<Quantity<D>>,
-        setValue: Setter<List<Quantity<D>>> = {field = it}
+        setValue: (List<Quantity<D>>) -> Unit
     ): ReadWriteLoggableInput<List<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityList(variable.name + "(SI Value)", getValue,setValue) }
-    @LowPriorityInOverloadResolution
+    
     public fun doubleList(
         getValue: () -> List<Double>,
-        setValue: Setter<List<Double>> = {field = it}
+        setValue: (List<Double>) -> Unit
     ): ReadWriteLoggableInput<List<Double>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedDoubleList(variable.name, getValue, setValue) }
-    @LowPriorityInOverloadResolution
+    
     public fun booleanList(
         getValue: () -> List<Boolean>,
-        setValue: Setter<List<Boolean>> = {field = it}
+        setValue: (List<Boolean>) -> Unit
     ): ReadWriteLoggableInput<List<Boolean>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedBooleanList(variable.name, getValue, setValue) }
-    @LowPriorityInOverloadResolution
-    public fun stringList(getValue: () -> List<String>, setValue: Setter<List<String>> = {field = it}): ReadWriteLoggableInput<List<String>> =
+    
+    public fun stringList(
+        getValue: () -> List<String>, 
+        setValue: (List<String>) -> Unit
+    ): ReadWriteLoggableInput<List<String>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedStringList(variable.name, getValue, setValue) }
 
-    @LowPriorityInOverloadResolution
-    public fun <T: AdvantageKitLoggable<T>> genericValue(getValue: () -> T, setValue: Setter<T> = {field = it}): ReadWriteLoggableInput<T> =
+    
+    public fun <T: AdvantageKitLoggable<T>> genericValue(
+        getValue: () -> T, 
+        setValue: (T) -> Unit
+    ): ReadWriteLoggableInput<T> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValue(variable.name,getValue,setValue)}
 
-    @LowPriorityInOverloadResolution
-    public fun <T: AdvantageKitLoggable<T>> genericNullableValue(nullReprWhenLogged: T, getValue: () -> T?, setValue: Setter<T?> = {field = it}): ReadWriteLoggableInput<T?> =
+    
+    public fun <T: AdvantageKitLoggable<T>> genericNullableValue(
+        nullReprWhenLogged: T, 
+        getValue: () -> T?, 
+        setValue: (T?) -> Unit
+    ): ReadWriteLoggableInput<T?> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,nullReprWhenLogged, getValue, setValue)}
 
-    @LowPriorityInOverloadResolution
-    public fun <D: AnyDimension> timestampedQuantity(getValue: () -> Measurement<Quantity<D>>, setValue: Setter<Measurement<Quantity<D>>> = {field = it}): ReadWriteLoggableInput<Measurement<Quantity<D>>> =
+    
+    public fun <D: AnyDimension> timestampedQuantity(
+        getValue: () -> Measurement<Quantity<D>>, 
+        setValue: (Measurement<Quantity<D>>) -> Unit
+    ): ReadWriteLoggableInput<Measurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityMeasurement(variable.name, getValue, setValue)}
 
-    @LowPriorityInOverloadResolution
-    public fun <D: AnyDimension> timestampedNullableQuantity(getValue: () -> NullableMeasurement<Quantity<D>>, setValue: Setter<NullableMeasurement<Quantity<D>>> = {field = it}): ReadWriteLoggableInput<NullableMeasurement<Quantity<D>>> =
+    
+    public fun <D: AnyDimension> timestampedNullableQuantity(
+        getValue: () -> NullableMeasurement<Quantity<D>>, 
+        setValue: (NullableMeasurement<Quantity<D>>) -> Unit
+    ): ReadWriteLoggableInput<NullableMeasurement<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantityMeasurement(variable.name, getValue, setValue)}
 
-    @LowPriorityInOverloadResolution
-    public fun <T: AdvantageKitLoggable<T>> timestampedValue(getValue: () -> Measurement<T>, setValue: Setter<Measurement<T>> = {field = it}): ReadWriteLoggableInput<Measurement<T>> =
+    
+    public fun <T: AdvantageKitLoggable<T>> timestampedValue(
+        getValue: () -> Measurement<T>, 
+        setValue: (Measurement<T>) -> Unit
+    ): ReadWriteLoggableInput<Measurement<T>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedMeasurement(variable.name, getValue,setValue)}
 
-    @LowPriorityInOverloadResolution
-    public fun <T: AdvantageKitLoggable<T>> timestampedNullableValue(nullReprWhenLogged: T, getValue: () -> NullableMeasurement<T>, setValue: Setter<NullableMeasurement<T>> = {field = it}): ReadWriteLoggableInput<NullableMeasurement<T>> =
+    
+    public fun <T: AdvantageKitLoggable<T>> timestampedNullableValue(
+        nullReprWhenLogged: T, 
+        getValue: () -> NullableMeasurement<T>, 
+        setValue: (NullableMeasurement<T>) -> Unit
+    ): ReadWriteLoggableInput<NullableMeasurement<T>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableMeasurement(variable.name, nullReprWhenLogged, getValue,setValue)}
 
 
     private inner class AutoLoggedInt(
         val name: String,
         val get: () -> Int,
-        val set: Setter<Int> = {field = it}
-    ): ReadWriteProperty<Any?, Int>, AccessorScope<Int>{
-        override var field = get()
+        val set: (Int) -> Unit = {}
+    ): ReadWriteProperty<Any?, Int>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toLong())
@@ -207,9 +218,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedDouble(
         val name: String,
         val get: () -> Double,
-        val set: Setter<Double> = {field = it}
-    ): ReadWriteProperty<Any?, Double>, AccessorScope<Double>{
-        override var field = get()
+        val set: (Double) -> Unit = {}
+    ): ReadWriteProperty<Any?, Double>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field)
@@ -235,9 +246,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedQuantity<D: AnyDimension>(
         val name: String,
         val get: () -> Quantity<D>,
-        val set: Setter<Quantity<D>> = {field = it}
-    ): ReadWriteProperty<Any?, Quantity<D>>, AccessorScope<Quantity<D>>{
-        override var field = get()
+        val set: (Quantity<D>) -> Unit = {}
+    ): ReadWriteProperty<Any?, Quantity<D>>{
+        private var field = get()
 
 
         private val dummyInputs = object: LoggableInputs{
@@ -261,9 +272,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedBoolean(
         val name: String,
         val get: () -> Boolean,
-        val set: Setter<Boolean> = {field = it}
-    ): ReadWriteProperty<Any?,Boolean>, AccessorScope<Boolean>{
-        override var field = get()
+        val set: (Boolean) -> Unit = {}
+    ): ReadWriteProperty<Any?,Boolean>{
+        private var field = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field)
             override fun fromLog(table: LogTable) { field = table.getBoolean(name,false) }
@@ -287,9 +298,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedString(
         val name: String,
         val get: () -> String,
-        val set: Setter<String> = {field = it}
-    ): ReadWriteProperty<Any?,String>, AccessorScope<String>{
-        override var field = get()
+        val set: (String) -> Unit = {}
+    ): ReadWriteProperty<Any?,String>{
+        private var field = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field)
             override fun fromLog(table: LogTable) { field = table.getString(name,"NOTHING") }
@@ -311,9 +322,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedNullableInt(
         val name: String,
         val get: () -> Int?,
-        val set: Setter<Int?> = {field = it}
-    ): ReadWriteProperty<Any?, Int?>, AccessorScope<Int?>{
-        override var field = get()
+        val set: (Int?) -> Unit = {}
+    ): ReadWriteProperty<Any?, Int?>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable){
@@ -348,9 +359,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedNullableDouble(
         val name: String,
         val get: () -> Double?,
-        val set: Setter<Double?> = {field = it}
-    ): ReadWriteProperty<Any?, Double?>, AccessorScope<Double?> {
-        override var field = get()
+        val set: (Double?) -> Unit = {}
+    ): ReadWriteProperty<Any?, Double?>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable){
@@ -385,9 +396,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedNullableQuantity<D: AnyDimension>(
         val name: String,
         val get: () -> Quantity<D>?,
-        val set: Setter<Quantity<D>?> = {field = it}
-    ): ReadWriteProperty<Any?, Quantity<D>?>, AccessorScope<Quantity<D>?>{
-        override var field = get()
+        val set: (Quantity<D>?) -> Unit = {}
+    ): ReadWriteProperty<Any?, Quantity<D>?>{
+        private var field = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable){
                 table.put(name, field?.siValue ?: 0.0)
@@ -420,9 +431,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedIntList(
         val name: String,
         val get: () -> List<Int>,
-        val set: Setter<List<Int>> = {field = it}
-    ): ReadWriteProperty<Any?,List<Int>>, AccessorScope<List<Int>>{
-        override var field = get()
+        val set: (List<Int>) -> Unit = {}
+    ): ReadWriteProperty<Any?,List<Int>>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.map{it.toLong()}.toLongArray())
@@ -447,9 +458,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedQuantityList<D: AnyDimension>(
         val name: String,
         val get: () -> List<Quantity<D>>,
-        val set: Setter<List<Quantity<D>>> = {field = it}
-    ): ReadWriteProperty<Any?,List<Quantity<D>>>, AccessorScope<List<Quantity<D>>>{
-        override var field = get()
+        val set: (List<Quantity<D>>) -> Unit = {}
+    ): ReadWriteProperty<Any?,List<Quantity<D>>>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.map{it.siValue}.toDoubleArray())
@@ -474,9 +485,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedDoubleList(
         val name: String,
         val get: () -> List<Double>,
-        val set: Setter<List<Double>> = {field = it}
-    ): ReadWriteProperty<Any?,List<Double>>, AccessorScope<List<Double>>{
-        override var field = get()
+        val set: (List<Double>) -> Unit = {}
+    ): ReadWriteProperty<Any?,List<Double>>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toDoubleArray())
@@ -501,9 +512,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedBooleanList(
         val name: String,
         val get: () -> List<Boolean>,
-        val set: Setter<List<Boolean>> = {field = it}
-    ): ReadWriteProperty<Any?,List<Boolean>>, AccessorScope<List<Boolean>>{
-        override var field = get()
+        val set: (List<Boolean>) -> Unit = {}
+    ): ReadWriteProperty<Any?,List<Boolean>>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toBooleanArray())
@@ -527,9 +538,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedStringList(
         val name: String,
         val get: () -> List<String>,
-        val set: Setter<List<String>> = {field = it}
-    ): ReadWriteProperty<Any?,List<String>>, AccessorScope<List<String>>{
-        override var field = get()
+        val set: (List<String>) -> Unit = {}
+    ): ReadWriteProperty<Any?,List<String>>{
+        private var field = get()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toTypedArray())
@@ -553,9 +564,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedGenericValue<T: AdvantageKitLoggable<T>>(
         val name: String,
         val get: () -> T,
-        val set: Setter<T> = {field = it}
-    ): ReadWriteProperty<Any?,T>, AccessorScope<T>{
-        override var field: T = get()
+        val set: (T) -> Unit = {}
+    ): ReadWriteProperty<Any?,T>{
+        private var field: T = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) { field.pushToLog(table,name) }
 
@@ -583,9 +594,9 @@ public class LoggableInputsProvider(
         val name: String,
         val logNullRepr: T,
         val get: () -> T?,
-        val set: Setter<T?> = {field = it}
-    ): ReadWriteProperty<Any?,T?>, AccessorScope<T?>{
-        override var field: T? = get()
+        val set: (T?) -> Unit = {}
+    ): ReadWriteProperty<Any?,T?>{
+        private var field: T? = get()
 
 
         init{
@@ -628,9 +639,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedNullableQuantityMeasurement<D: AnyDimension>(
         val name: String,
         val get: () -> NullableMeasurement<Quantity<D>>,
-        val set: Setter<NullableMeasurement<Quantity<D>>> = {field = it}
-    ): ReadWriteProperty<Any?,NullableMeasurement<Quantity<D>>>, AccessorScope<NullableMeasurement<Quantity<D>>>{
-        override var field: NullableMeasurement<Quantity<D>> = get()
+        val set: (NullableMeasurement<Quantity<D>>) -> Unit = {}
+    ): ReadWriteProperty<Any?,NullableMeasurement<Quantity<D>>>{
+        private var field: NullableMeasurement<Quantity<D>> = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) {
                 table.apply{
@@ -672,9 +683,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedQuantityMeasurement<D: AnyDimension>(
         val name: String,
         val get: () -> Measurement<Quantity<D>>,
-        val set: Setter<Measurement<Quantity<D>>> = {field = it}
-    ): ReadWriteProperty<Any?,Measurement<Quantity<D>>>, AccessorScope<Measurement<Quantity<D>>>{
-        override var field: Measurement<Quantity<D>> = get()
+        val set: (Measurement<Quantity<D>>) -> Unit = {}
+    ): ReadWriteProperty<Any?,Measurement<Quantity<D>>>{
+        private var field: Measurement<Quantity<D>> = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) {
                 table.apply{
@@ -713,9 +724,9 @@ public class LoggableInputsProvider(
         val name: String,
         val logNullRepr: T,
         val get: () -> NullableMeasurement<T>,
-        val set: Setter<NullableMeasurement<T>> = {field = it}
-    ): ReadWriteProperty<Any?,NullableMeasurement<T>>, AccessorScope<NullableMeasurement<T>>{
-        override var field: NullableMeasurement<T> = get()
+        val set: (NullableMeasurement<T>) -> Unit = {}
+    ): ReadWriteProperty<Any?,NullableMeasurement<T>>{
+        private var field: NullableMeasurement<T> = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) {
                 table.apply{
@@ -758,9 +769,9 @@ public class LoggableInputsProvider(
     private inner class AutoLoggedMeasurement<T: AdvantageKitLoggable<T>>(
         val name: String,
         val get: () -> Measurement<T>,
-        val set: Setter<Measurement<T>> = {field = it}
-    ): ReadWriteProperty<Any?,Measurement<T>>, AccessorScope<Measurement<T>>{
-        override var field: Measurement<T> = get()
+        val set: (Measurement<T>) -> Unit = {}
+    ): ReadWriteProperty<Any?,Measurement<T>>{
+        private var field: Measurement<T> = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) {
                 table.apply{

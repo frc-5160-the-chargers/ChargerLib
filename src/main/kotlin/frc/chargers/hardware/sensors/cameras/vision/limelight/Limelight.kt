@@ -1,18 +1,22 @@
 package frc.chargers.hardware.sensors.cameras.vision.limelight
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.meters
-import com.batterystaple.kmeasure.units.seconds
+import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.CommandBase
 import frc.chargerlibexternal.utils.LimelightHelpers.*
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.commands.CommandBuilder
+import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.cameras.vision.*
+import frc.chargers.utils.NullableMeasurement
 import frc.chargers.utils.RequirementManager
 import frc.chargers.wpilibextensions.Alert
+import frc.chargers.wpilibextensions.StandardDeviation
+import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
+import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 
 
 public class Limelight(
@@ -96,7 +100,6 @@ public class Limelight(
 
 
 
-
     public open inner class ApriltagPipeline(
         public val logNamespace: LoggableInputsProvider,
         final override val id: Int
@@ -114,6 +117,42 @@ public class Limelight(
 
             // safe; id is initialized before being added.
             allPipelines.add(this as Pipeline)
+        }
+
+
+        public inner class PoseEstimator(
+            public val logNamespace: LoggableInputsProvider,
+        ): RobotPoseSupplier {
+            override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
+            override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
+                    by logNamespace.timestampedNullableValue(
+                        nullReprWhenLogged = UnitPose2d()
+                    ){
+                        val poseArray = when(DriverStation.getAlliance()){
+                            DriverStation.Alliance.Blue -> getBotPose_wpiBlue(name)
+                            DriverStation.Alliance.Red -> getBotPose_wpiRed(name)
+
+                            else -> when(defaultDriverStationIfUnavailable){
+                                DriverStation.Alliance.Blue -> getBotPose_wpiBlue(name)
+                                DriverStation.Alliance.Red -> getBotPose_wpiRed(name)
+                                DriverStation.Alliance.Invalid -> error("You cannot use Alliance.Invalid as your default alliance color.")
+                            }
+                        }
+
+                        // return value
+                        NullableMeasurement(
+                            nullableValue = if (getTV(name)){
+                                UnitPose2d(
+                                    poseArray[0].ofUnit(meters),
+                                    poseArray[1].ofUnit(meters),
+                                    poseArray[5].ofUnit(degrees)
+                                )
+                            }else{
+                                null
+                            },
+                            timestamp = fpgaTimestamp() - poseArray[6].ofUnit(milli.seconds)
+                        )
+                    }
         }
 
         override fun reset(){
