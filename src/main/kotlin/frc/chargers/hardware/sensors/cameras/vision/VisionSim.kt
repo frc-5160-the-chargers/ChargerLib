@@ -28,7 +28,7 @@ import org.photonvision.targeting.PhotonTrackedTarget
 
 
 public class ApriltagCamSim (
-    inputs: LoggableInputsProvider,
+    logInputs: LoggableInputsProvider,
     private val robotPoseSupplier: RobotPoseSupplier,
     private val robotToCam: UnitTransform3d,
     fov: Angle,
@@ -38,9 +38,9 @@ public class ApriltagCamSim (
     cameraResHeight: Int,
     private val fieldMap: AprilTagFieldLayout
 ): VisionPipeline<VisionResult.AprilTag> {
-    private val camera = PhotonCamera(inputs.logNamespace)
+    private val camera = PhotonCamera(logInputs.namespace)
     private val simSystem = SimVisionSystem(
-        inputs.logNamespace,
+        logInputs.namespace,
         fov.inUnit(degrees),
         robotToCam.inUnit(meters),
         ledRange.inUnit(meters),
@@ -59,7 +59,7 @@ public class ApriltagCamSim (
     }
 
     override val visionData: VisionData<VisionResult.AprilTag>?
-        by inputs.nullableValue(
+        by logInputs.nullableValue(
             nullReprWhenLogged = emptyAprilTagVisionData()
         ){
             val data = camera.latestResult
@@ -124,7 +124,7 @@ public class ApriltagCamSim (
 
 
 public class MLCamSim(
-    logNamespace: LoggableInputsProvider,
+    logInputs: LoggableInputsProvider,
     private val robotPoseSupplier: RobotPoseSupplier,
     robotToCam: UnitTransform3d,
     fov: Angle,
@@ -150,9 +150,9 @@ public class MLCamSim(
 
 
 
-    private val camera = PhotonCamera(logNamespace.logNamespace)
+    private val camera = PhotonCamera(logInputs.namespace)
     private val simSystem = SimVisionSystem(
-        logNamespace.logNamespace,
+        logInputs.namespace,
         fov.inUnit(degrees),
         robotToCam.inUnit(meters),
         ledRange.inUnit(meters),
@@ -173,7 +173,7 @@ public class MLCamSim(
     }
 
     override val visionData: VisionData<VisionResult.ML>?
-        by logNamespace.nullableValue(
+        by logInputs.nullableValue(
             nullReprWhenLogged = emptyMLVisionData()
         ){
             val data = camera.latestResult

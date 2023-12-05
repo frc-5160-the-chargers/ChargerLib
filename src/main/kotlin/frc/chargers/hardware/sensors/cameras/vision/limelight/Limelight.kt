@@ -101,7 +101,7 @@ public class Limelight(
 
 
     public open inner class ApriltagPipeline(
-        public val logTab: LoggableInputsProvider,
+        public val logInputs: LoggableInputsProvider,
         final override val id: Int
     ): Pipeline, VisionPipeline<VisionResult.AprilTag> {
         init{
@@ -121,11 +121,11 @@ public class Limelight(
 
 
         public inner class PoseEstimator(
-            public val logTab: LoggableInputsProvider,
+            public val logInputs: LoggableInputsProvider,
         ): RobotPoseSupplier {
             override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
             override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
-                    by logTab.nullableValueMeasurement(
+                    by logInputs.nullableValueMeasurement(
                         nullReprWhenLogged = UnitPose2d()
                     ){
                         val poseArray = when(DriverStation.getAlliance()){
@@ -161,7 +161,7 @@ public class Limelight(
 
 
         override val visionData: VisionData<VisionResult.AprilTag>?
-            by logTab.nullableValue(
+            by logInputs.nullableValue(
                 nullReprWhenLogged = emptyAprilTagVisionData()
             ){
                 val completeData = getLatestResults(name).targetingResults
@@ -200,7 +200,7 @@ public class Limelight(
             }.toMutableList()
     }
 
-    public inner class MLDetectorPipeline(logTab: LoggableInputsProvider, id: Int): Pipeline, VisionPipeline<VisionResult.ML>, MLClassifierPipeline(logTab, id){
+    public inner class MLDetectorPipeline(logInputs: LoggableInputsProvider, id: Int): Pipeline, VisionPipeline<VisionResult.ML>, MLClassifierPipeline(logInputs, id){
 
         override fun reset(){
             setPipelineIndex(name,id)
@@ -217,7 +217,7 @@ public class Limelight(
             }.toMutableList()
 
         override val visionData: VisionData<VisionResult.ML>?
-            by logTab.nullableValue(
+            by logInputs.nullableValue(
                 nullReprWhenLogged = emptyMLVisionData()
             ){
                 val completeData = getLatestResults(name).targetingResults
@@ -244,7 +244,7 @@ public class Limelight(
     }
 
     public open inner class MLClassifierPipeline(
-        public val logTab: LoggableInputsProvider,
+        public val logInputs: LoggableInputsProvider,
         final override val id: Int
     ): Classifier<Int?>, Pipeline {
         init{
@@ -265,7 +265,7 @@ public class Limelight(
 
 
         override val itemType: Int?
-            by logTab.nullableInt{
+            by logInputs.nullableInt{
                 if (getCurrentPipelineIndex(name).toInt() == id && getTV(name)){
                     getNeuralClassID(name).toInt()
                 }else{

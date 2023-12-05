@@ -29,7 +29,7 @@ public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, Read
 
 
 public class LoggableInputsProvider(
-    public val logNamespace: String
+    public val namespace: String
 ){
     public fun int(getValue: () -> Int): ReadOnlyLoggableInput<Int> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedInt(variable.name, getValue) }
@@ -204,7 +204,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -233,7 +233,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -260,7 +260,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -284,7 +284,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -310,7 +310,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -345,7 +345,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -382,7 +382,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -417,7 +417,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -445,7 +445,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -472,7 +472,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -499,7 +499,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -526,7 +526,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -552,7 +552,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace, dummyInputs)
+                Logger.getInstance().processInputs(namespace, dummyInputs)
             }
         }
 
@@ -576,7 +576,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace,dummyInputs)
+                Logger.getInstance().processInputs(namespace,dummyInputs)
             }
         }
 
@@ -602,7 +602,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace,dummyInputs)
+                Logger.getInstance().processInputs(namespace,dummyInputs)
             }
         }
 
@@ -666,7 +666,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace,dummyInputs)
+                Logger.getInstance().processInputs(namespace,dummyInputs)
             }
         }
 
@@ -705,7 +705,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace,dummyInputs)
+                Logger.getInstance().processInputs(namespace,dummyInputs)
             }
         }
 
@@ -751,7 +751,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace,dummyInputs)
+                Logger.getInstance().processInputs(namespace,dummyInputs)
             }
         }
 
@@ -791,7 +791,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(logNamespace,dummyInputs)
+                Logger.getInstance().processInputs(namespace,dummyInputs)
             }
         }
 

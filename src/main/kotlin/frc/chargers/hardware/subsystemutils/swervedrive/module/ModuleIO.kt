@@ -25,7 +25,7 @@ public class ModuleIOReal(
     private val driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     private val turnGearRatio: Double = DEFAULT_GEAR_RATIO
 ): ModuleIO {
-    override val logTab: String = logTab.logNamespace
+    override val logTab: String = logTab.namespace
 
     private val startingWheelTravel = driveMotor.encoder.angularPosition
 
@@ -66,7 +66,7 @@ public class ModuleIOSim(
     driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
 ): ModuleIO {
 
-    override val logTab: String = logTab.logNamespace
+    override val logTab: String = logTab.namespace
 
     private val turnMotorSim = FlywheelSim(
         turnGearbox,
