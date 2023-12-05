@@ -10,8 +10,8 @@ import edu.wpi.first.math.interpolation.Interpolatable
 import frc.chargers.advantagekitextensions.AdvantageKitLoggable
 import org.littletonrobotics.junction.LogTable
 
-@JvmInline
-public value class UnitTranslation3d(
+
+public data class UnitTranslation3d(
     public val siValue: Translation3d = Translation3d()
 ): Interpolatable<UnitTranslation3d>, AdvantageKitLoggable<UnitTranslation3d> {
 

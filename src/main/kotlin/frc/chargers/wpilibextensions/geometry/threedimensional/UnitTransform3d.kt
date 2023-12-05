@@ -11,8 +11,8 @@ import frc.chargers.advantagekitextensions.AdvantageKitLoggable
 import frc.chargers.utils.math.units.KmeasureUnit
 import org.littletonrobotics.junction.LogTable
 
-@JvmInline
-public value class UnitTransform3d(
+
+public data class UnitTransform3d(
     public val siValue: Transform3d = Transform3d()
 ): AdvantageKitLoggable<UnitTransform3d> {
 

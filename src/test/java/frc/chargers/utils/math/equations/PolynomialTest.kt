@@ -29,7 +29,7 @@ internal class PolynomialTest {
             computedOutput += coefficients[2]
 
             assertEquals(
-                Polynomial(coefficients)(5.0),
+                Polynomial(coefficients)(x = input),
                 computedOutput
             )
         }

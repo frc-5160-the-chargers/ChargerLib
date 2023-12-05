@@ -372,7 +372,7 @@ internal fun Command.withLogInCommandGroup(commandGroupName: String): Command{
 
 
     fun logCommand(active: Boolean) = InstantCommand{
-        Logger.getInstance().recordOutput(
+        Logger.recordOutput(
             "/ActiveCommands/Subcommands Of: $commandGroupName/$name",active
         )
     }

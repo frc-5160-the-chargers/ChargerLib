@@ -10,7 +10,7 @@ import frc.chargers.framework.ChargerRobot
 import frc.chargers.utils.Measurement
 import frc.chargers.utils.NullableMeasurement
 import org.littletonrobotics.junction.LogTable
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.Logger.*
 import org.littletonrobotics.junction.inputs.LoggableInputs
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
@@ -196,7 +196,7 @@ public class LoggableInputsProvider(
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toLong())
-            override fun fromLog(table: LogTable) { field = table.getInteger(name,0).toInt()}
+            override fun fromLog(table: LogTable) { field = table.get(name,0).toInt()}
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): Int = field
@@ -204,7 +204,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -224,7 +224,7 @@ public class LoggableInputsProvider(
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field)
-            override fun fromLog(table: LogTable) { field = table.getDouble(name,0.0) }
+            override fun fromLog(table: LogTable) { field = table.get(name,0.0) }
         }
 
 
@@ -233,7 +233,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -253,14 +253,14 @@ public class LoggableInputsProvider(
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.siValue)
-            override fun fromLog(table: LogTable) { field = Quantity(table.getDouble(name,0.0)) }
+            override fun fromLog(table: LogTable) { field = Quantity(table.get(name,0.0)) }
         }
         override fun getValue(thisRef: Any?, property: KProperty<*>): Quantity<D> = field
 
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -277,14 +277,14 @@ public class LoggableInputsProvider(
         private var field = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field)
-            override fun fromLog(table: LogTable) { field = table.getBoolean(name,false) }
+            override fun fromLog(table: LogTable) { field = table.get(name,false) }
         }
         override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean = field
 
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -303,14 +303,14 @@ public class LoggableInputsProvider(
         private var field = get()
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field)
-            override fun fromLog(table: LogTable) { field = table.getString(name,"NOTHING") }
+            override fun fromLog(table: LogTable) { field = table.get(name,"NOTHING") }
         }
         override fun getValue(thisRef: Any?, property: KProperty<*>): String = field
 
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -332,8 +332,8 @@ public class LoggableInputsProvider(
                 table.put(name + "isValid", field != null)
             }
             override fun fromLog(table: LogTable) {
-                field = if (table.getBoolean(name + "isValid", false)){
-                    table.getInteger(name,0).toInt()
+                field = if (table.get(name + "isValid", false)){
+                    table.get(name,0).toInt()
                 }else{
                     null
                 }
@@ -345,7 +345,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -369,8 +369,8 @@ public class LoggableInputsProvider(
                 table.put(name + "isValid", field != null)
             }
             override fun fromLog(table: LogTable) {
-                field = if (table.getBoolean(name + "isValid", false)){
-                    table.getDouble(name,0.0)
+                field = if (table.get(name + "isValid", false)){
+                    table.get(name,0.0)
                 }else{
                     null
                 }
@@ -382,7 +382,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -405,8 +405,8 @@ public class LoggableInputsProvider(
                 table.put(name + "isValid", field != null)
             }
             override fun fromLog(table: LogTable) {
-                field = if (table.getBoolean(name + "isValid",false)){
-                    Quantity(table.getDouble(name,0.0))
+                field = if (table.get(name + "isValid",false)){
+                    Quantity(table.get(name,0.0))
                 }else{
                     null
                 }
@@ -417,7 +417,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -437,7 +437,7 @@ public class LoggableInputsProvider(
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.map{it.toLong()}.toLongArray())
-            override fun fromLog(table: LogTable) { field = table.getIntegerArray(name,longArrayOf()).map{it.toInt()}}
+            override fun fromLog(table: LogTable) { field = table.get(name,longArrayOf()).map{it.toInt()}}
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): List<Int> = field
@@ -445,7 +445,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -464,7 +464,7 @@ public class LoggableInputsProvider(
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.map{it.siValue}.toDoubleArray())
-            override fun fromLog(table: LogTable) { field = table.getDoubleArray(name,doubleArrayOf()).map{Quantity(it)}}
+            override fun fromLog(table: LogTable) { field = table.get(name,doubleArrayOf()).map{Quantity(it)}}
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): List<Quantity<D>> = field
@@ -472,7 +472,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -491,7 +491,7 @@ public class LoggableInputsProvider(
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toDoubleArray())
-            override fun fromLog(table: LogTable) { field = table.getDoubleArray(name, doubleArrayOf()).toList() }
+            override fun fromLog(table: LogTable) { field = table.get(name, doubleArrayOf()).toList() }
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): List<Double> = field
@@ -499,7 +499,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -518,7 +518,7 @@ public class LoggableInputsProvider(
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toBooleanArray())
-            override fun fromLog(table: LogTable) { field = table.getBooleanArray(name, booleanArrayOf()).toList() }
+            override fun fromLog(table: LogTable) { field = table.get(name, booleanArrayOf()).toList() }
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): List<Boolean> = field
@@ -526,7 +526,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -544,7 +544,7 @@ public class LoggableInputsProvider(
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toTypedArray())
-            override fun fromLog(table: LogTable) { field = table.getStringArray(name,arrayOf()).toList() }
+            override fun fromLog(table: LogTable) { field = table.get(name,arrayOf<String>()).toList() }
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): List<String> = field
@@ -552,7 +552,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace, dummyInputs)
+                processInputs(namespace, dummyInputs)
             }
         }
 
@@ -576,7 +576,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace,dummyInputs)
+                processInputs(namespace,dummyInputs)
             }
         }
 
@@ -602,7 +602,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace,dummyInputs)
+                processInputs(namespace,dummyInputs)
             }
         }
 
@@ -620,7 +620,7 @@ public class LoggableInputsProvider(
 
             override fun fromLog(table: LogTable) {
                 val value: T = field ?: logNullRepr
-                field = if (table.getBoolean(name+"IsValid",false)){
+                field = if (table.get(name+"IsValid",false)){
                     value.getFromLog(table,name)
                 }else{
                     null
@@ -653,12 +653,12 @@ public class LoggableInputsProvider(
 
             override fun fromLog(table: LogTable) {
                 field = NullableMeasurement(
-                    nullableValue = if (table.getBoolean("$name/isValid",false)){
-                        Quantity(table.getDouble("$name/value(SI Unit)", 0.0))
+                    nullableValue = if (table.get("$name/isValid",false)){
+                        Quantity(table.get("$name/value(SI Unit)", 0.0))
                     }else{
                         null
                     },
-                    timestamp = table.getDouble("$name/timestampSecs",0.0).ofUnit(seconds)
+                    timestamp = table.get("$name/timestampSecs",0.0).ofUnit(seconds)
                 )
             }
         }
@@ -666,7 +666,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace,dummyInputs)
+                processInputs(namespace,dummyInputs)
             }
         }
 
@@ -696,8 +696,8 @@ public class LoggableInputsProvider(
 
             override fun fromLog(table: LogTable) {
                 field = Measurement(
-                    value = Quantity(table.getDouble("$name/value(SI Unit)", 0.0)),
-                    timestamp = table.getDouble("$name/timestampSecs",0.0).ofUnit(seconds)
+                    value = Quantity(table.get("$name/value(SI Unit)", 0.0)),
+                    timestamp = table.get("$name/timestampSecs",0.0).ofUnit(seconds)
                 )
             }
         }
@@ -705,7 +705,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace,dummyInputs)
+                processInputs(namespace,dummyInputs)
             }
         }
 
@@ -738,12 +738,12 @@ public class LoggableInputsProvider(
 
             override fun fromLog(table: LogTable) {
                 field = NullableMeasurement(
-                    nullableValue = if (table.getBoolean("$name/isValid",false)){
+                    nullableValue = if (table.get("$name/isValid",false)){
                         logNullRepr.getFromLog(table,"$name/value")
                     }else{
                         null
                     },
-                    timestamp = table.getDouble("$name/timestampSecs",0.0).ofUnit(seconds)
+                    timestamp = table.get("$name/timestampSecs",0.0).ofUnit(seconds)
                 )
             }
         }
@@ -751,7 +751,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace,dummyInputs)
+                processInputs(namespace,dummyInputs)
             }
         }
 
@@ -783,7 +783,7 @@ public class LoggableInputsProvider(
             override fun fromLog(table: LogTable) {
                 field = Measurement(
                     value = field.value.getFromLog(table,"$name/value"),
-                    timestamp = table.getDouble("$name/timestampSecs",0.0).ofUnit(seconds)
+                    timestamp = table.get("$name/timestampSecs",0.0).ofUnit(seconds)
                 )
             }
         }
@@ -791,7 +791,7 @@ public class LoggableInputsProvider(
         init{
             ChargerRobot.runPeriodically{
                 field = get()
-                Logger.getInstance().processInputs(namespace,dummyInputs)
+                processInputs(namespace,dummyInputs)
             }
         }
 

@@ -1,7 +1,6 @@
 package frc.chargers.wpilibextensions.geometry.motion
 
 import com.batterystaple.kmeasure.quantities.*
-import com.pathplanner.lib.PathConstraints
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 
 /**
@@ -21,8 +20,5 @@ public data class LinearMotionConstraints(
         )
 
 
-    public fun toPathConstraints(): PathConstraints = PathConstraints(
-        maxVelocity.siValue,
-        maxAcceleration.siValue
-    )
+
 }

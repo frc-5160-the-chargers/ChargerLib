@@ -13,8 +13,8 @@ import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import org.littletonrobotics.junction.LogTable
 
-@JvmInline
-public value class UnitPose3d(
+
+public data class UnitPose3d(
     public val siValue: Pose3d = Pose3d()
 ): AdvantageKitLoggable<UnitPose3d> {
     public constructor(x: Distance, y: Distance, z: Distance, rotation: Rotation3d): this(

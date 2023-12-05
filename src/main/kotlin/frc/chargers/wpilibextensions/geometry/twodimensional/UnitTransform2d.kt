@@ -16,8 +16,7 @@ import org.littletonrobotics.junction.LogTable
 /**
  * A wrapper for WPILib's [Transform2d], adding in Unit support.
  */
-@JvmInline
-public value class UnitTransform2d(
+public data class UnitTransform2d(
     public val siValue: Transform2d = Transform2d()
 ): AdvantageKitLoggable<UnitTransform2d>{
 

@@ -3,22 +3,23 @@ package frc.chargers.framework
 import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.units.seconds
-import com.pathplanner.lib.server.PathPlannerServer
+import com.pathplanner.lib.pathfinding.Pathfinding
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.advantagekitextensions.*
 import org.littletonrobotics.junction.LogFileUtil
-import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.chargerlibexternal.builddata.ChargerLibBuildConstants
+import frc.chargerlibexternal.utils.pathplanner.LocalADStarAK
 import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.utils.SparkMaxBurnManager
 import frc.chargers.wpilibextensions.Alert
 import org.littletonrobotics.junction.LoggedRobot
+import org.littletonrobotics.junction.Logger.*
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import java.nio.file.Files
 import java.nio.file.Path
@@ -84,7 +85,6 @@ public open class ChargerRobot(
         private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
         private val lowPriorityPeriodicRunnables: MutableList<() -> Unit> = mutableListOf()
         private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
-        private val logReceiverQueueAlert = Alert.error(text = "Logging queue exceeded capacity, data will NOT be logged.")
 
     }
 
@@ -108,107 +108,105 @@ public open class ChargerRobot(
      */
     override fun robotInit() {
         try{
-            burnManager = SparkMaxBurnManager(gitData.buildDate)
-            LOOP_PERIOD = config.loopPeriod
             // inits the ConsoleLogger
             ConsoleLogger
-
-            val logger = Logger.getInstance()
-            setUseTiming(
-                RobotBase.isReal() || !config.isReplay
-            )
-
-            logger.apply{
-                recordMetadata(
-                    "Robot", if (RobotBase.isReal()) "REAL" else if (config.isReplay) "REPLAY" else "SIM"
-                )
-                recordMetadata("ProjectName", gitData.projectName)
-                recordMetadata("BuildDate", gitData.buildDate)
-                recordMetadata("GitSHA", gitData.sha)
-                recordMetadata("GitBranch", gitData.branch)
-                when(gitData.dirty){
-                    0 -> recordMetadata("GitDirty", "All changes committed")
-                    1 -> recordMetadata("GitDirty", "Uncommitted changes")
-                    else -> recordMetadata("GitDirty", "Unknown")
-                }
-
-                recordMetadata("ChargerLibBuildDate", ChargerLibBuildConstants.BUILD_DATE)
-                recordMetadata("ChargerLibGitSHA", ChargerLibBuildConstants.GIT_SHA)
-                recordMetadata("ChargerLibGitBranch", ChargerLibBuildConstants.GIT_BRANCH)
-                when(ChargerLibBuildConstants.DIRTY){
-                    0 -> recordMetadata("ChargerLibGitDirty", "All changes committed")
-                    1 -> recordMetadata("ChargerLibGitDirty", "Uncommitted changes")
-                    else -> recordMetadata("ChargerLibGitDirty", "Unknown")
-                }
-
-                // real robot
-                if (RobotBase.isReal()){
-                    if (Files.exists(Path.of("media/sda1"))){
-                        addDataReceiver(WPILOGWriter("media/sda1"))
-                    }else if (Files.exists(Path.of("media/sda2"))){
-                        addDataReceiver(WPILOGWriter("media/sda2"))
-                    }else{
-                        noUsbSignalAlert.active = true
-                    }
-
-                    if (config.logToNTWhenFMSAttached){
-                        addDataReceiver(NT4Publisher())
-                    }else{
-                        addDataReceiver(NTSafePublisher())
-                    }
-                }else if (config.isReplay){
-                    // replay mode; sim
-                    val path = LogFileUtil.findReplayLog()
-                    setReplaySource(WPILOGReader(path))
-                    addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
-                }else{
-                    // sim mode
-                    if (config.logToNTWhenFMSAttached){
-                        addDataReceiver(NT4Publisher())
-                    }else{
-                        addDataReceiver(NTSafePublisher())
-                    }
-                    // maybe add DriverStationSim? idk
-                }
-
-                config.extraLoggerConfig(this)
-
-                // no more configuration from this point on
-                start()
-            }
-
+            configureAdvantageKit()
             LiveWindow.disableAllTelemetry()
 
+            burnManager = SparkMaxBurnManager(gitData.buildDate)
+            LOOP_PERIOD = config.loopPeriod
             DashboardTuner.tuningMode = config.tuningMode
 
-            PathPlannerServer.startServer(5811)
 
             // inits robotContainer
             robotContainer = getRobotContainer()
-
-
             robotContainer.robotInit()
+
+            Pathfinding.setPathfinder(LocalADStarAK())
 
 
             CommandScheduler.getInstance().apply{
                 onCommandInitialize{
-                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", true)
+                    recordOutput("/ActiveCommands/${it.name}", true)
                 }
 
                 onCommandFinish {
-                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", false)
+                    recordOutput("/ActiveCommands/${it.name}", false)
                 }
 
-                onCommandInterrupt {
-                    Logger.getInstance().recordOutput("/ActiveCommands/${it.name}", false)
+                onCommandInterrupt {it ->
+                    recordOutput("/ActiveCommands/${it.name}", false)
                 }
             }
+
         }catch(e: Exception){
             println("Error has been caught in [robotInit].")
             config.onError(e)
             throw e
         }
 
+    }
+
+    private fun configureAdvantageKit(){
+        setUseTiming(
+            RobotBase.isReal() || !config.isReplay
+        )
+        recordMetadata(
+            "Robot", if (RobotBase.isReal()) "REAL" else if (config.isReplay) "REPLAY" else "SIM"
+        )
+        recordMetadata("ProjectName", gitData.projectName)
+        recordMetadata("BuildDate", gitData.buildDate)
+        recordMetadata("GitSHA", gitData.sha)
+        recordMetadata("GitBranch", gitData.branch)
+        when(gitData.dirty){
+            0 -> recordMetadata("GitDirty", "All changes committed")
+            1 -> recordMetadata("GitDirty", "Uncommitted changes")
+            else -> recordMetadata("GitDirty", "Unknown")
+        }
+
+        recordMetadata("ChargerLibBuildDate", ChargerLibBuildConstants.BUILD_DATE)
+        recordMetadata("ChargerLibGitSHA", ChargerLibBuildConstants.GIT_SHA)
+        recordMetadata("ChargerLibGitBranch", ChargerLibBuildConstants.GIT_BRANCH)
+        when(ChargerLibBuildConstants.DIRTY){
+            0 -> recordMetadata("ChargerLibGitDirty", "All changes committed")
+            1 -> recordMetadata("ChargerLibGitDirty", "Uncommitted changes")
+            else -> recordMetadata("ChargerLibGitDirty", "Unknown")
+        }
+
+        // real robot
+        if (RobotBase.isReal()){
+            if (Files.exists(Path.of("media/sda1"))){
+                addDataReceiver(WPILOGWriter("media/sda1"))
+            }else if (Files.exists(Path.of("media/sda2"))){
+                addDataReceiver(WPILOGWriter("media/sda2"))
+            }else{
+                noUsbSignalAlert.active = true
+            }
+
+            if (config.logToNTWhenFMSAttached){
+                addDataReceiver(NT4Publisher())
+            }else{
+                addDataReceiver(NTSafePublisher())
+            }
+        }else if (config.isReplay){
+            // replay mode; sim
+            val path = LogFileUtil.findReplayLog()
+            setReplaySource(WPILOGReader(path))
+            addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
+        }else{
+            // sim mode
+            if (config.logToNTWhenFMSAttached){
+                addDataReceiver(NT4Publisher())
+            }else{
+                addDataReceiver(NTSafePublisher())
+            }
+            // maybe add DriverStationSim? idk
+        }
+
+        config.extraLoggerConfig()
+
+        // no more configuration from this point on
+        start()
     }
 
     /**
@@ -230,10 +228,7 @@ public open class ChargerRobot(
             // and running subsystem periodic() methods.  This must be called from the robot's periodic
             // block in order for anything in the Command-based framework to work.
             CommandScheduler.getInstance().run()
-            Logger.getInstance().apply{
-                recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
-                logReceiverQueueAlert.active = receiverQueueFault
-            }
+            recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
             lowPriorityPeriodicRunnables.forEach{
                 it()
             }

@@ -12,8 +12,7 @@ import org.littletonrobotics.junction.LogTable
 /**
  * A wrapper for WPILib's [Translation2d], adding in Unit support.
  */
-@JvmInline
-public value class UnitTranslation2d(
+public data class UnitTranslation2d(
     public val siValue: Translation2d = Translation2d()
 ): Interpolatable<UnitTranslation2d>, AdvantageKitLoggable<UnitTranslation2d> {
 

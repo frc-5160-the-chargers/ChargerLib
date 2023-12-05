@@ -166,8 +166,8 @@ public fun EncoderDifferentialDrivetrain.characterize(
         FeedForwardCharacterizationData("SwerveDriveFFData_Left"),
         FeedForwardCharacterizationData("SwerveDriveFFData_Right"),
         {leftVolts: Double, rightVolts -> io.setVoltages(leftVolts.volts, rightVolts.volts)},
-        {inputs.leftAngularVelocity.siValue},
-        {inputs.rightAngularVelocity.siValue},
+        {io.leftVelocity.siValue},
+        {io.rightVelocity.siValue},
         this, *requirements
     ){
 

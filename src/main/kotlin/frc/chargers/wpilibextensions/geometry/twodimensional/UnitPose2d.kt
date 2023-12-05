@@ -19,8 +19,7 @@ import org.littletonrobotics.junction.LogTable
 /**
  * A wrapper around WPILib's [UnitPose2d] class, adding in units support.
  */
-@JvmInline
-public value class UnitPose2d(
+public data class UnitPose2d(
     public val siValue: Pose2d = Pose2d()
 ): AdvantageKitLoggable<UnitPose2d>{
     public constructor(translation: UnitTranslation2d, rotation: Angle): this(

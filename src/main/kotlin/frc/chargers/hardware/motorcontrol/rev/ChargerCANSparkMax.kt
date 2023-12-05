@@ -257,6 +257,7 @@ public open class ChargerCANSparkMax(
         constraints: AngularMotionConstraints,
         absoluteEncoder: PositionEncoder?
     ) {
+        /*
         if (trapezoidProfile.constraints != constraints){
             trapezoidProfile = AngularTrapezoidProfile(
                 constraints
@@ -272,6 +273,8 @@ public open class ChargerCANSparkMax(
         }else{
             innerController.setReference(currentState.position.siValue, ControlType.kPosition,0,feedforward.calculate(currentState.velocity).inUnit(volts))
         }
+
+         */
     }
 }
 
