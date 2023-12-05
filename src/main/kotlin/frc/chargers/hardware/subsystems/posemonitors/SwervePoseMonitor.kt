@@ -38,17 +38,6 @@ public class SwervePoseMonitor(
     startingPose: UnitPose2d = UnitPose2d()
 ): SubsystemBase(), RobotPoseSupplier{
 
-
-    private val poseEstimator: PoseEstimator = PoseEstimator(VecBuilder.fill(0.003, 0.003, 0.00001),).also{
-        it.resetPose(startingPose.inUnit(meters))
-    }
-
-    private val poseSuppliers = poseSuppliers.toMutableList()
-    private var calculatedHeading = Angle(0.0)
-    private val previousDistances = Array(4){Distance(0.0)}
-
-
-
     /* Public API */
 
     public constructor(
@@ -60,11 +49,9 @@ public class SwervePoseMonitor(
         poseSuppliers.toList(),
         startingPose
     )
-
     public val field: Field2d = Field2d().also{ SmartDashboard.putData("Field",it) }
 
     override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
-
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.latestPose.ofUnit(meters),
@@ -72,9 +59,7 @@ public class SwervePoseMonitor(
         )
 
     override val robotPose: UnitPose2d get() = robotPoseMeasurement.value
-
-
-
+    public val heading: Angle get() = calculatedHeading
 
     public fun resetPose(pose: UnitPose2d){
         poseEstimator.resetPose(pose.inUnit(meters))
@@ -84,6 +69,17 @@ public class SwervePoseMonitor(
     public fun addPoseSuppliers(vararg suppliers: RobotPoseSupplier){
         this.poseSuppliers.addAll(suppliers)
     }
+
+
+    /* Private Implementation */
+
+
+    private val poseEstimator: PoseEstimator = PoseEstimator(VecBuilder.fill(0.003, 0.003, 0.00001),).also{
+        it.resetPose(startingPose.inUnit(meters))
+    }
+    private val poseSuppliers = poseSuppliers.toMutableList()
+    private var calculatedHeading = Angle(0.0)
+    private val previousDistances = Array(4){Distance(0.0)}
 
 
     override fun periodic(){
