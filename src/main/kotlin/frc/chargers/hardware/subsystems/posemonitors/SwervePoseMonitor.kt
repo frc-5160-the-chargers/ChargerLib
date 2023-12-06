@@ -21,7 +21,7 @@ import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.kinematics.swerve.ModulePositionGroup
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.Logger.*
 
 /**
  * A Helper class used to get the pose of an [EncoderHolonomicDrivetrain],
@@ -152,12 +152,10 @@ public class SwervePoseMonitor(
         Records the robot's pose on the field and in AdvantageScope.
          */
         field.robotPose = poseEstimator.latestPose
-        Logger.getInstance().apply{
-            recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
-            recordOutput("Drivetrain(Swerve)/calculatedHeadingRad",calculatedHeading.inUnit(radians))
-            recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
-            recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
-        }
+        recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
+        recordOutput("Drivetrain(Swerve)/calculatedHeadingRad",calculatedHeading.inUnit(radians))
+        recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
+        recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
     }
 
 
