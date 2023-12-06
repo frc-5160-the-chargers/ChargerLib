@@ -25,7 +25,6 @@ import kotlin.internal.LowPriorityInOverloadResolution
 
 
 context(CommandBuilder, PathData)
-@LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.followPath(
     trajectoryName: String,
     isFirstPath: Boolean = false
@@ -37,7 +36,6 @@ public fun EncoderHolonomicDrivetrain.followPath(
  * Makes an [EncoderHolonomicDrivetrain] follow a designated path, using [PPSwerveControllerCommand] and a [PathPlannerTrajectory].
  */
 context(CommandBuilder)
-@LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.followPath(
     trajectory: PathPlannerTrajectory,
     translationConstants: PIDConstants,
@@ -65,7 +63,7 @@ public fun EncoderHolonomicDrivetrain.followPath(
         PIDController(0.0,0.0,0.0).apply{
             constants = rotationConstants
         },
-        {input -> velocityDrive(input, false)},
+        {input -> velocityDrive(input, fieldRelative = false)},
         true,
         this@followPath
     )

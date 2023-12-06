@@ -80,6 +80,7 @@ public class SwervePoseMonitor(
     private val poseSuppliers = poseSuppliers.toMutableList()
     private var calculatedHeading = Angle(0.0)
     private val previousDistances = Array(4){Distance(0.0)}
+    private var lastGyroHeading = Angle(0.0)
 
 
     override fun periodic(){
@@ -107,14 +108,17 @@ public class SwervePoseMonitor(
             bottomRightAngle = currentMPs.bottomRightAngle
         }
         val twist = kinematics.toTwist2d(*wheelDeltas.toArray())
-        calculatedHeading = (heading + twist.dtheta.ofUnit(radians)).inputModulus(0.0.degrees..360.degrees)
+        calculatedHeading += twist.dtheta.ofUnit(radians)
+        calculatedHeading = calculatedHeading.inputModulus(0.0.degrees..360.degrees)
 
 
         /*
         If a gyro is given, replace the calculated heading with the gyro's heading before adding the twist to the pose estimator.
          */
         if (gyro != null){
-            twist.dtheta = gyro.heading.inUnit(radians)
+            val currentGyroHeading = gyro.heading
+            twist.dtheta = (currentGyroHeading - lastGyroHeading).inUnit(radians)
+            lastGyroHeading = currentGyroHeading
         }
         poseEstimator.addDriveData(fpgaTimestamp().inUnit(seconds),twist)
 

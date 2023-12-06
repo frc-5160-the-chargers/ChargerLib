@@ -18,4 +18,5 @@ public fun Encoder.withOffset(zeroOffset: Angle): Encoder = object: Encoder by t
 
 public fun HeadingProvider.withOffset(zeroOffset: Angle): HeadingProvider = HeadingProvider{heading - zeroOffset}
 
+public fun HeadingProvider.withZero(): HeadingProvider = withOffset(heading)
 
