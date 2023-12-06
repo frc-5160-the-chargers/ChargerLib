@@ -126,7 +126,7 @@ public class Limelight(
             override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
             override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
                     by logInputs.nullableValueMeasurement(
-                        nullReprWhenLogged = UnitPose2d()
+                        default = UnitPose2d()
                     ){
                         val poseArray = when(DriverStation.getAlliance()){
                             DriverStation.Alliance.Blue -> getBotPose_wpiBlue(name)
@@ -162,7 +162,7 @@ public class Limelight(
 
         override val visionData: VisionData<VisionResult.AprilTag>?
             by logInputs.nullableValue(
-                nullReprWhenLogged = emptyAprilTagVisionData()
+                default = emptyAprilTagVisionData()
             ){
                 val completeData = getLatestResults(name).targetingResults
 
@@ -218,7 +218,7 @@ public class Limelight(
 
         override val visionData: VisionData<VisionResult.ML>?
             by logInputs.nullableValue(
-                nullReprWhenLogged = emptyMLVisionData()
+                default = emptyMLVisionData()
             ){
                 val completeData = getLatestResults(name).targetingResults
 

@@ -60,7 +60,7 @@ public class ApriltagCamSim (
 
     override val visionData: VisionData<VisionResult.AprilTag>?
         by logInputs.nullableValue(
-            nullReprWhenLogged = emptyAprilTagVisionData()
+            default = emptyAprilTagVisionData()
         ){
             val data = camera.latestResult
             val bestTarget = data.bestTarget
@@ -105,7 +105,7 @@ public class ApriltagCamSim (
         override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
         override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
             by logNamespace.nullableValueMeasurement(
-                nullReprWhenLogged = UnitPose2d()
+                default = UnitPose2d()
             ){
                 val signal = update()
                 if (signal.isEmpty){
@@ -174,7 +174,7 @@ public class MLCamSim(
 
     override val visionData: VisionData<VisionResult.ML>?
         by logInputs.nullableValue(
-            nullReprWhenLogged = emptyMLVisionData()
+            default = emptyMLVisionData()
         ){
             val data = camera.latestResult
 
