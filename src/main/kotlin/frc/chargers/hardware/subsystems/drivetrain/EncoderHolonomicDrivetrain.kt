@@ -304,15 +304,6 @@ public class EncoderHolonomicDrivetrain(
     vararg poseSuppliers: RobotPoseSupplier,
 ): SubsystemBase(), ZeroableHeadingProvider, DifferentialDrivetrain{
 
-    init{
-        Thread{
-            Thread.sleep(1000)
-            if (gyro is ZeroableHeadingProvider){
-                gyro.zeroHeading()
-            }
-        }.start()
-    }
-
 
     /**
      * The pose estimator of the [EncoderHolonomicDrivetrain].
