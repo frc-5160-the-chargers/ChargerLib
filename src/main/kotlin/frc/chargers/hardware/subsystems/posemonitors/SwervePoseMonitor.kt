@@ -80,7 +80,7 @@ public class SwervePoseMonitor(
     private val poseSuppliers = poseSuppliers.toMutableList()
     private var calculatedHeading = Angle(0.0)
     private val previousDistances = Array(4){Distance(0.0)}
-    private var lastGyroHeading = gyro?.heading ?: Angle(0.0)
+    private var lastGyroHeading = Angle(0.0)
 
 
     override fun periodic(){
