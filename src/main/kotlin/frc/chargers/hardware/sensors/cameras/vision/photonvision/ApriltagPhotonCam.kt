@@ -54,7 +54,7 @@ public class ApriltagPhotonCam(
         override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
         override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
             by logInputs.nullableValueMeasurement(
-                nullReprWhenLogged = UnitPose2d()
+                default = UnitPose2d()
             ){
                 val signal = update()
                 if (signal.isEmpty){
@@ -70,7 +70,7 @@ public class ApriltagPhotonCam(
 
 
     override val visionData: VisionData<VisionResult.AprilTag>? by logInputs.nullableValue(
-        nullReprWhenLogged = emptyAprilTagVisionData()
+        default = emptyAprilTagVisionData()
     ){
         val data = latestResult
 
