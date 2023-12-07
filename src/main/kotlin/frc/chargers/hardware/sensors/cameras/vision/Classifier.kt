@@ -5,4 +5,5 @@ package frc.chargers.hardware.sensors.cameras.vision
  */
 public interface Classifier<T> {
     public val itemType: T
+    public fun reset(){}
 }

@@ -10,6 +10,7 @@ import frc.chargers.utils.math.units.Inertia
  * A class used to hold constants for an [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
  */
 public data class SwerveConstants(
+    val invertTurnMotors: Boolean = false,
     val turnGearRatio: Double = DEFAULT_GEAR_RATIO,
     val driveGearRatio: Double = DEFAULT_GEAR_RATIO,
     val turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
@@ -31,6 +32,7 @@ public data class SwerveConstants(
             turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
             driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
         ): SwerveConstants = SwerveConstants(
+            invertTurnMotors = true,
             MK4i.TURN_GEAR_RATIO,
             MK4i.GEAR_RATIO_L2,
             turnInertiaMoment,
@@ -52,6 +54,7 @@ public data class SwerveConstants(
             turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
             driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
         ): SwerveConstants = SwerveConstants(
+            invertTurnMotors = true,
             MK4i.TURN_GEAR_RATIO,
             MK4i.GEAR_RATIO_L3,
             turnInertiaMoment,
@@ -67,12 +70,13 @@ public data class SwerveConstants(
          * related to Mk4i L1 swerve modules.
          */
         public fun mk4iL1(
+            maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
             turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
             driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
-            maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
             trackWidth: Distance,
             wheelBase: Distance
         ): SwerveConstants = SwerveConstants(
+            invertTurnMotors = true,
             MK4i.TURN_GEAR_RATIO,
             MK4i.GEAR_RATIO_L1,
             turnInertiaMoment,

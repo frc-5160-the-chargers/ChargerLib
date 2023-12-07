@@ -6,11 +6,13 @@ import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.apriltag.AprilTagFieldLayout
+import edu.wpi.first.wpilibj.RobotBase.isSimulation
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.cameras.vision.*
 import frc.chargers.utils.Measurement
 import frc.chargers.utils.NullableMeasurement
+import frc.chargers.wpilibextensions.Alert
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
@@ -28,17 +30,29 @@ public class ApriltagPhotonCam(
      * Ensure that this namespace is the same accross real and sim equivalents of the photon camera.
      * @see LoggableInputsProvider
      */
+    @Suppress("ConstructorParameterNeverUsedAsProperty")
     public val logInputs: LoggableInputsProvider,
     override val lensHeight: Distance,
     override val mountAngle: Angle
 ): VisionPipeline<VisionResult.AprilTag>, PhotonCamera(logInputs.namespace){
 
+    init{
+        if (isSimulation()){
+            Alert.warning(text =
+                "You have instantiated a Photon camera in sim. " +
+                "This class still supports log replay in sim; " +
+                "however, it is reccomended to use VisionSim instead."
+            ).active = true
+        }
+    }
+
 
     public inner class PoseEstimator(
+        @SuppressWarnings
         public val logInputs: LoggableInputsProvider,
         robotToCamera: UnitTransform3d,
         fieldTags: AprilTagFieldLayout,
-        strategy: PoseStrategy = PoseStrategy.MULTI_TAG_PNP,
+        strategy: PoseStrategy = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
     ): RobotPoseSupplier, PhotonPoseEstimator(
         fieldTags,
         strategy,
@@ -57,7 +71,7 @@ public class ApriltagPhotonCam(
                 default = UnitPose2d()
             ){
                 val signal = update()
-                if (signal.isEmpty){
+                if (signal.isEmpty || isSimulation()){
                     NullableMeasurement(null, fpgaTimestamp())
                 }else{
                     Measurement(
@@ -79,7 +93,7 @@ public class ApriltagPhotonCam(
         otherTargets.remove(bestTarget)
 
         // return value
-        if (!data.hasTargets()) null else VisionData(
+        if (!data.hasTargets() || isSimulation()) null else VisionData(
             data.timestampSeconds.ofUnit(seconds),
             toVisionTarget(bestTarget),
             otherTargets.map{toVisionTarget(it)}

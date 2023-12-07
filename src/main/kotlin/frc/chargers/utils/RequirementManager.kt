@@ -1,6 +1,6 @@
 package frc.chargers.utils
 
-import edu.wpi.first.wpilibj2.command.CommandBase
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.commands.CommandBuilder
 import frc.chargers.wpilibextensions.Alert
@@ -22,7 +22,7 @@ public class RequirementManager(public val name: String) {
     }
 
 
-    context(CommandBase)
+    context(Command)
     public fun requireTemporarily(){
         if (!isRequiredIndefinetly){
             addRequirements(dummySubsystem)

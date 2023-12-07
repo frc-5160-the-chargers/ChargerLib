@@ -12,6 +12,7 @@ import frc.chargers.constants.drivetrain.SwerveConstants
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
+import frc.chargers.hardware.sensors.withZero
 import frc.chargers.hardware.subsystems.posemonitors.SwervePoseMonitor
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveMotors
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveEncoders
@@ -29,6 +30,17 @@ import frc.chargers.wpilibextensions.kinematics.*
 import frc.chargers.wpilibextensions.kinematics.swerve.*
 import org.littletonrobotics.junction.Logger.*
 
+@PublishedApi
+internal val TOP_LEFT_MODULE_INPUTS: LoggableInputsProvider = LoggableInputsProvider("Drivetrain(Swerve)/TopLeftModule")
+
+@PublishedApi
+internal val TOP_RIGHT_MODULE_INPUTS: LoggableInputsProvider = LoggableInputsProvider("Drivetrain(Swerve)/TopRightModule")
+
+@PublishedApi
+internal val BOTTOM_LEFT_MODULE_INPUTS: LoggableInputsProvider = LoggableInputsProvider("Drivetrain(Swerve)/BottomLeftModule")
+
+@PublishedApi
+internal val BOTTOM_RIGHT_MODULE_INPUTS: LoggableInputsProvider = LoggableInputsProvider("Drivetrain(Swerve)/BottomRightModule")
 
 /**
  * A convenience function used to create an [EncoderHolonomicDrivetrain],
@@ -44,7 +56,6 @@ public fun EncoderHolonomicDrivetrain(
     constants: SwerveConstants,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
-    invertTurnMotors: Boolean = true,
     realPoseSuppliers: List<RobotPoseSupplier> = listOf(),
     simPoseSuppliers: List<RobotPoseSupplier> = listOf()
 ): EncoderHolonomicDrivetrain{
@@ -52,32 +63,32 @@ public fun EncoderHolonomicDrivetrain(
         return EncoderHolonomicDrivetrain(
             topLeft = SwerveModule(
                 ModuleIOSim(
-                    LoggableInputsProvider("Drivetrain(Swerve)/TopLeftSwerveModule"),
+                    TOP_LEFT_MODULE_INPUTS,
                     turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
                 ), controlScheme
             ),
             topRight = SwerveModule(
                 ModuleIOSim(
-                    LoggableInputsProvider("Drivetrain(Swerve)/TopRightSwerveModule"),
+                    TOP_RIGHT_MODULE_INPUTS,
                     turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
                 ), controlScheme
             ),
             bottomLeft = SwerveModule(
                 ModuleIOSim(
-                    LoggableInputsProvider("Drivetrain(Swerve)/BottomLeftSwerveModule"),
+                    BOTTOM_LEFT_MODULE_INPUTS,
                     turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
                 ), controlScheme
             ),
             bottomRight = SwerveModule(
                 ModuleIOSim(
-                    LoggableInputsProvider("Drivetrain(Swerve)/BottomRightSwerveModule"),
+                    BOTTOM_RIGHT_MODULE_INPUTS,
                     turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
                 ), controlScheme
             ),
             controlScheme, constants, gyro, startingPose, *simPoseSuppliers.toTypedArray()
         )
     }else{
-        if (invertTurnMotors){
+        if (constants.invertTurnMotors){
             turnMotors.apply{
                 println(topLeft.inverted)
                 println(topRight.inverted)
@@ -95,7 +106,7 @@ public fun EncoderHolonomicDrivetrain(
 
         val topLeft = SwerveModule(
             ModuleIOReal(
-                LoggableInputsProvider("Drivetrain(Swerve)/TopLeftSwerveModule"),
+                TOP_LEFT_MODULE_INPUTS,
                 turnMotor = turnMotors.topLeft,
                 turnEncoder = turnEncoders.topLeft,
                 driveMotor = driveMotors.topLeft,
@@ -106,7 +117,7 @@ public fun EncoderHolonomicDrivetrain(
 
         val topRight = SwerveModule(
             ModuleIOReal(
-                LoggableInputsProvider("Drivetrain(Swerve)/TopRightSwerveModule",),
+                TOP_RIGHT_MODULE_INPUTS,
                 turnMotor = turnMotors.topRight,
                 turnEncoder = turnEncoders.topRight,
                 driveMotor = driveMotors.topRight,
@@ -117,7 +128,7 @@ public fun EncoderHolonomicDrivetrain(
 
         val bottomLeft = SwerveModule(
             ModuleIOReal(
-                LoggableInputsProvider("Drivetrain(Swerve)/BottomLeftSwerveModule"),
+                BOTTOM_LEFT_MODULE_INPUTS,
                 turnMotor = turnMotors.bottomLeft,
                 turnEncoder = turnEncoders.bottomLeft,
                 driveMotor = driveMotors.bottomLeft,
@@ -128,7 +139,7 @@ public fun EncoderHolonomicDrivetrain(
 
         val bottomRight = SwerveModule(
             ModuleIOReal(
-                LoggableInputsProvider("Drivetrain(Swerve)/BottomRightSwerveModule",),
+                BOTTOM_RIGHT_MODULE_INPUTS,
                 turnMotor = turnMotors.bottomRight,
                 turnEncoder = turnEncoders.bottomRight,
                 driveMotor = driveMotors.bottomRight,
@@ -145,137 +156,6 @@ public fun EncoderHolonomicDrivetrain(
 }
 
 
-/*
-/**
- * A convenience function used to create an [EncoderHolonomicDrivetrain], with [ModuleIOSim] as the Module IO.t
- *
- * In other words, it creates an EncoderHolonomicDrivetrain that can be used in simulation.
- */
-public fun simEncoderHolonomicDrivetrain(
-    turnGearbox: DCMotor,
-    driveGearbox: DCMotor,
-    controlScheme: SwerveControl,
-    constants: SwerveConstants,
-    gyro: HeadingProvider? = null,
-    startingPose: UnitPose2d = UnitPose2d(),
-    vararg poseSuppliers: RobotPoseSupplier,
-): EncoderHolonomicDrivetrain = EncoderHolonomicDrivetrain(
-    topLeft = SwerveModule(
-        "Drivetrain(Swerve)/TopLeftSwerveModule",
-        ModuleIOSim(
-            turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
-        ), controlScheme
-    ),
-    topRight = SwerveModule(
-        "Drivetrain(Swerve)/TopRightSwerveModule",
-        ModuleIOSim(
-            turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
-        ), controlScheme
-    ),
-    bottomLeft = SwerveModule(
-        "Drivetrain(Swerve)/BottomLeftSwerveModule",
-        ModuleIOSim(
-            turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
-        ), controlScheme
-    ),
-    bottomRight = SwerveModule(
-        "Drivetrain(Swerve)/BottomRightSwerveModule",
-        ModuleIOSim(
-            turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
-        ), controlScheme
-    ),
-    controlScheme, constants, gyro, startingPose, *poseSuppliers
-)
-
-
-/**
- * A Convenience function for creating an [EncoderHolonomicDrivetrain] with [ModuleIOReal] as the swerve module IO.
- *
- * In other words, it creates a swerve drivetrain that can be used on the real robot.
- *
- * It uses the [SwerveMotors] and [SwerveEncoders] classes
- * instead of defining individual swerve modules.
- *
- * This allows the motors and encoders to all be group-configured.
- */
-public fun realEncoderHolonomicDrivetrain(
-    turnMotors: SwerveMotors,
-    turnEncoders: SwerveEncoders,
-    driveMotors: SwerveMotors,
-    controlScheme: SwerveControl,
-    constants: SwerveConstants,
-    gyro: HeadingProvider? = null,
-    startingPose: UnitPose2d = UnitPose2d(),
-    invertTurnMotors: Boolean = true,
-    vararg poseSuppliers: RobotPoseSupplier,
-): EncoderHolonomicDrivetrain {
-    if (invertTurnMotors){
-        turnMotors.apply{
-            println(topLeft.inverted)
-            println(topRight.inverted)
-            println(bottomLeft.inverted)
-            println(bottomRight.inverted)
-            topLeft.inverted = !topLeft.inverted
-            topRight.inverted = !topRight.inverted
-            bottomLeft.inverted = !bottomLeft.inverted
-            bottomRight.inverted = !bottomRight.inverted
-        }
-    }
-
-
-
-
-    val topLeft = SwerveModule(
-        "Drivetrain(Swerve)/TopLeftSwerveModule",
-        ModuleIOReal(
-            turnMotor = turnMotors.topLeft,
-            turnEncoder = turnEncoders.topLeft,
-            driveMotor = driveMotors.topLeft,
-            constants.driveGearRatio, constants.turnGearRatio
-        ),
-        controlScheme
-    )
-
-    val topRight = SwerveModule(
-        "Drivetrain(Swerve)/TopRightSwerveModule",
-        ModuleIOReal(
-            turnMotor = turnMotors.topRight,
-            turnEncoder = turnEncoders.topRight,
-            driveMotor = driveMotors.topRight,
-            constants.driveGearRatio, constants.turnGearRatio
-        ),
-        controlScheme
-    )
-
-    val bottomLeft = SwerveModule(
-        "Drivetrain(Swerve)/BottomLeftSwerveModule",
-        ModuleIOReal(
-            turnMotor = turnMotors.bottomLeft,
-            turnEncoder = turnEncoders.bottomLeft,
-            driveMotor = driveMotors.bottomLeft,
-            constants.driveGearRatio,constants.turnGearRatio
-        ),
-        controlScheme
-    )
-
-    val bottomRight = SwerveModule(
-        "Drivetrain(Swerve)/BottomRightSwerveModule",
-        ModuleIOReal(
-            turnMotor = turnMotors.bottomRight,
-            turnEncoder = turnEncoders.bottomRight,
-            driveMotor = driveMotors.bottomRight,
-            constants.driveGearRatio, constants.turnGearRatio
-        ),
-        controlScheme
-    )
-
-    return EncoderHolonomicDrivetrain(
-        topLeft, topRight, bottomLeft, bottomRight,
-        controlScheme, constants, gyro, startingPose, *poseSuppliers
-    )
-}
-
- */
 
 
 
@@ -299,10 +179,15 @@ public class EncoderHolonomicDrivetrain(
     public val bottomRight: SwerveModule,
     private val controlScheme: SwerveControl,
     private val constants: SwerveConstants,
-    private val gyro: HeadingProvider? = null,
+    private var gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
 ): SubsystemBase(), ZeroableHeadingProvider, DifferentialDrivetrain{
+    init{
+        gyro?.run{
+            gyro = withZero()
+        }
+    }
 
 
     /**

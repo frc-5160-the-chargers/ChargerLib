@@ -11,9 +11,7 @@ import frc.chargers.wpilibextensions.timeSinceMatchStart
  */
 
 public fun Command.withStartEndLog(): Command = buildCommand{
-    val startTime by getOnceDuringRun{
-        timeSinceMatchStart()
-    }
+    val startTime by getOnceDuringRun{ timeSinceMatchStart() }
 
     printToConsole{ ("Command $name: started at " + startTime.inUnit(seconds) + " seconds." ).uppercase() }
 
@@ -28,7 +26,7 @@ public fun Command.withStartEndLog(): Command = buildCommand{
  * Constructs a command with extra requirements.
  */
 public fun Command.withExtraRequirements(vararg requirements: Subsystem): Command =
-    object: CommandBase(){
+    object: Command(){
         init{
             addRequirements(*requirements)
         }

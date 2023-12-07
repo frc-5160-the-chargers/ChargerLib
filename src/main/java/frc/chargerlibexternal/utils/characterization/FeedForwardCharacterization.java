@@ -5,7 +5,7 @@ package frc.chargerlibexternal.utils.characterization;
 
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import java.util.function.BiConsumer;
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 /**
  * Credits: 6328 repository: <a name = "6328 repository" href="https://github.com/Mechanical-Advantage/RobotCode2023/">(Repository Here)</a>
  */
-public class FeedForwardCharacterization extends CommandBase {
+public class FeedForwardCharacterization extends Command {
     private static final double startDelaySecs = 2.0;
     private static final double rampRateVoltsPerSec = 0.05;
 
