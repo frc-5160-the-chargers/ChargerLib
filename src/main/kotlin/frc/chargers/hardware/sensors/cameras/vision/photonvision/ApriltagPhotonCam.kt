@@ -6,7 +6,7 @@ import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.apriltag.AprilTagFieldLayout
-import edu.wpi.first.wpilibj.RobotBase.isSimulation
+import edu.wpi.first.wpilibj.RobotBase.*
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.cameras.vision.*
@@ -30,7 +30,6 @@ public class ApriltagPhotonCam(
      * Ensure that this namespace is the same accross real and sim equivalents of the photon camera.
      * @see LoggableInputsProvider
      */
-    @Suppress("ConstructorParameterNeverUsedAsProperty")
     public val logInputs: LoggableInputsProvider,
     override val lensHeight: Distance,
     override val mountAngle: Angle
@@ -39,17 +38,15 @@ public class ApriltagPhotonCam(
     init{
         if (isSimulation()){
             Alert.warning(text =
-                "You have instantiated a Photon camera in sim. " +
-                "This class still supports log replay in sim; " +
-                "however, it is reccomended to use VisionSim instead."
+            "You have instantiated a Photon camera in sim. " +
+                    "This class still supports log replay in sim; " +
+                    "however, it is reccomended to use VisionSim instead."
             ).active = true
         }
     }
 
 
     public inner class PoseEstimator(
-        @SuppressWarnings
-        public val logInputs: LoggableInputsProvider,
         robotToCamera: UnitTransform3d,
         fieldTags: AprilTagFieldLayout,
         strategy: PoseStrategy = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,

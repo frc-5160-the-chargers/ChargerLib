@@ -3,8 +3,7 @@ package frc.chargers.hardware.sensors.cameras.vision.limelight
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.RobotBase.isReal
-import edu.wpi.first.wpilibj.RobotBase.isSimulation
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargerlibexternal.utils.LimelightHelpers.*
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
@@ -36,7 +35,7 @@ public class Limelight(
             error("This limelight shares a name with another limelight.")
         }
 
-        if (isSimulation()){
+        if (RobotBase.isSimulation()){
             Alert.warning(text =
             "You have instantiated a Photon camera in sim. " +
                     "This class still supports log replay in sim; " +
@@ -111,11 +110,11 @@ public class Limelight(
 
 
     public open inner class ApriltagPipeline(
-        @SuppressWarnings
         public val logInputs: LoggableInputsProvider,
         final override val id: Int
     ): Pipeline, VisionPipeline<VisionResult.AprilTag> {
         init{
+            setPipelineIndex(name,id)
             if (id < 0 || id > 9){
                 error("Your pipeline's ID is out of range.")
             }
@@ -131,40 +130,37 @@ public class Limelight(
         }
 
 
-        public inner class PoseEstimator(
-            @SuppressWarnings
-            public val logInputs: LoggableInputsProvider,
-        ): RobotPoseSupplier {
+        public inner class PoseEstimator: RobotPoseSupplier {
             override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
             override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
-                by logInputs.nullableValueMeasurement(
-                    default = UnitPose2d()
-                ){
-                    val allianceColor = DriverStation.getAlliance().getOrNull()
-                    val poseArray = when(allianceColor){
-                        DriverStation.Alliance.Blue -> getBotPose_wpiBlue(name)
-                        DriverStation.Alliance.Red -> getBotPose_wpiRed(name)
-
-                        null -> when(defaultDriverStationIfUnavailable){
+                    by logInputs.nullableValueMeasurement(
+                        default = UnitPose2d()
+                    ){
+                        val allianceColor = DriverStation.getAlliance().getOrNull()
+                        val poseArray = when(allianceColor){
                             DriverStation.Alliance.Blue -> getBotPose_wpiBlue(name)
                             DriverStation.Alliance.Red -> getBotPose_wpiRed(name)
-                        }
-                    }
 
-                    // return value
-                    NullableMeasurement(
-                        nullableValue = if (getTV(name) && isReal()){
-                            UnitPose2d(
-                                poseArray[0].ofUnit(meters),
-                                poseArray[1].ofUnit(meters),
-                                poseArray[5].ofUnit(degrees)
-                            )
-                        }else{
-                            null
-                        },
-                        timestamp = fpgaTimestamp() - poseArray[6].ofUnit(milli.seconds)
-                    )
-                }
+                            null -> when(defaultDriverStationIfUnavailable){
+                                DriverStation.Alliance.Blue -> getBotPose_wpiBlue(name)
+                                DriverStation.Alliance.Red -> getBotPose_wpiRed(name)
+                            }
+                        }
+
+                        // return value
+                        NullableMeasurement(
+                            nullableValue = if (getTV(name) && RobotBase.isReal()){
+                                UnitPose2d(
+                                    poseArray[0].ofUnit(meters),
+                                    poseArray[1].ofUnit(meters),
+                                    poseArray[5].ofUnit(degrees)
+                                )
+                            }else{
+                                null
+                            },
+                            timestamp = fpgaTimestamp() - poseArray[6].ofUnit(milli.seconds)
+                        )
+                    }
         }
 
         override fun reset(){
@@ -183,7 +179,7 @@ public class Limelight(
                 allTargets.removeAt(0)
 
                 // return value
-                if (!completeData.valid || isSimulation()) {
+                if (!completeData.valid || RobotBase.isSimulation()) {
                     null
                 }else if (getCurrentPipelineIndex(name).toInt() != id){
                     println("The current pipeline index for the limelight is incorrect. You must call reset() on the pipeline.")
@@ -241,7 +237,7 @@ public class Limelight(
                 val bestTarget = allTargets[0]
                 allTargets.removeAt(0)
 
-                if (!completeData.valid || isSimulation()) {
+                if (!completeData.valid || RobotBase.isSimulation()) {
                     null
                 }else if (getCurrentPipelineIndex(name).toInt() != id){
                     println("The current pipeline index for the limelight is incorrect. You must call reset() on the pipeline.")
@@ -260,7 +256,6 @@ public class Limelight(
     }
 
     public open inner class MLClassifierPipeline(
-        @SuppressWarnings
         public val logInputs: LoggableInputsProvider,
         final override val id: Int
     ): Classifier<Int?>, Pipeline {
@@ -276,19 +271,14 @@ public class Limelight(
             }
 
             // safe; id is initialized before being added.
-            @Suppress("LeakingThis")
             allPipelines.add(this as Pipeline)
-            setPipelineIndex(name,id)
-        }
-
-        override fun reset(){
             setPipelineIndex(name,id)
         }
 
 
         override val itemType: Int?
             by logInputs.nullableInt{
-                if (getCurrentPipelineIndex(name).toInt() == id && getTV(name) && isReal()){
+                if (getCurrentPipelineIndex(name).toInt() == id && getTV(name)){
                     getNeuralClassID(name).toInt()
                 }else{
                     null

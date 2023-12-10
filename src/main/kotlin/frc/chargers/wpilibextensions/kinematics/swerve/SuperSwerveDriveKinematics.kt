@@ -53,7 +53,7 @@ public class SuperSwerveDriveKinematics(
      */
     public fun toSecondOrderModuleStateGroup(speeds: ChassisSpeeds, heading: Angle , fieldRelative: Boolean = true): SecondOrderModuleStateGroup{
 
-        val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,heading.asRotation2d())
+        val headingCorrectedSpeeds = headingCorrector.correctHeading(speeds,-heading.asRotation2d())
 
         val output = secondKinematics.toSwerveModuleState(headingCorrectedSpeeds,heading.asRotation2d(), fieldRelative)
         val states = output.moduleStates
@@ -84,7 +84,7 @@ public class SuperSwerveDriveKinematics(
             speeds
         }
         newSpeeds = newSpeeds.correctForDynamics(driftRate = 1.6)
-        newSpeeds = headingCorrector.correctHeading(newSpeeds,heading.asRotation2d())
+        newSpeeds = headingCorrector.correctHeading(newSpeeds,-heading.asRotation2d())
         val arr = toSwerveModuleStates(newSpeeds)
         return ModuleStateGroup(
             topLeftState = arr[0],
