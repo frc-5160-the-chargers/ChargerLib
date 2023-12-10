@@ -39,11 +39,14 @@ public class HeadingCorrector {
             setTargetHeading(inputYaw);
             return desiredSpeed;
         }
+        if (v < 0.1){
+            setTargetHeading(inputYaw);
+            return desiredSpeed;
+        }
         //Determine target and current heading
         setTargetHeading( getTargetHeading().plus(new Rotation2d(vr * dt)) );
-        Rotation2d currentHeading = inputYaw;
         //Calculate the change in heading that is needed to achieve the target
-        Rotation2d deltaHeading = getTargetHeading().minus(currentHeading);
+        Rotation2d deltaHeading = getTargetHeading().minus(inputYaw);
         if (Math.abs(deltaHeading.getDegrees()) < 0.05){
             return desiredSpeed;
         }

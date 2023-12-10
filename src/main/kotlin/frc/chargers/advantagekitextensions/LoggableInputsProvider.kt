@@ -31,6 +31,10 @@ public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, Read
 public class LoggableInputsProvider(
     public val namespace: String
 ){
+    public fun subgroup(group: String): LoggableInputsProvider =
+        LoggableInputsProvider("$namespace/$group")
+
+
     public fun int(getValue: () -> Int): ReadOnlyLoggableInput<Int> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedInt(variable.name, getValue) }
     public fun double(getValue: () -> Double): ReadOnlyLoggableInput<Double> =

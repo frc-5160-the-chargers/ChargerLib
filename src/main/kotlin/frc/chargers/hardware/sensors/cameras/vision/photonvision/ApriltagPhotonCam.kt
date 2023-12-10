@@ -35,7 +35,6 @@ public class ApriltagPhotonCam(
 
 
     public inner class PoseEstimator(
-        public val logInputs: LoggableInputsProvider,
         robotToCamera: UnitTransform3d,
         fieldTags: AprilTagFieldLayout,
         strategy: PoseStrategy = PoseStrategy.MULTI_TAG_PNP,

@@ -5,11 +5,13 @@ import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import com.kauailabs.navx.frc.AHRS
+import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
 import frc.chargers.hardware.sensors.ThreeAxisSpeedometer
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.utils.math.units.g
+import frc.chargers.wpilibextensions.Alert
 
 public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
 
@@ -24,6 +26,9 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
      */
     init {
         reset()
+        if (RobotBase.isSimulation()){
+            Alert.warning(text = "You have instantiated a NavX in sim. It is recommended to use the IMUSim class.")
+        }
     }
 
     override fun zeroHeading(){

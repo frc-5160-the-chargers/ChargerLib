@@ -120,9 +120,7 @@ public class Limelight(
         }
 
 
-        public inner class PoseEstimator(
-            public val logInputs: LoggableInputsProvider,
-        ): RobotPoseSupplier {
+        public inner class PoseEstimator(): RobotPoseSupplier {
             override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
             override val robotPoseMeasurement: NullableMeasurement<UnitPose2d>
                     by logInputs.nullableValueMeasurement(
@@ -244,7 +242,7 @@ public class Limelight(
     }
 
     public open inner class MLClassifierPipeline(
-        public val logInputs: LoggableInputsProvider,
+        logInputs: LoggableInputsProvider,
         final override val id: Int
     ): Classifier<Int?>, Pipeline {
         init{
