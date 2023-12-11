@@ -9,28 +9,13 @@ import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
 import org.littletonrobotics.junction.LogTable
 
-public fun emptyAprilTagVisionData(): VisionData<VisionResult.AprilTag> =
-    VisionData(
-        timestamp = fpgaTimestamp(),
-        bestTarget = VisionResult.AprilTag(
-            0.0,0.0,0.0,0,UnitTransform3d()
-        )
-    )
-
-public fun emptyMLVisionData(): VisionData<VisionResult.ML> =
-    VisionData(
-        timestamp = fpgaTimestamp(),
-        bestTarget = VisionResult.ML(
-            0.0,0.0,0.0,0
-        )
-    )
 
 /**
  * Represents Vision Data(timestamp, best target, and other targets)
  *
  * that can be pushed to log.
  */
-public class VisionData<R>(
+public class VisionData<out R>(
     timestamp: Time,
     bestTarget: R,
     otherTargets: List<R>
@@ -55,7 +40,7 @@ public class VisionData<R>(
     }
 
     override fun getFromLog(table: LogTable, category: String): VisionData<R> = VisionData(
-        timestamp = table.getDouble("timestampSecs", fpgaTimestamp().inUnit(seconds)).ofUnit(seconds),
+        timestamp = table.get("timestampSecs", fpgaTimestamp().inUnit(seconds)).ofUnit(seconds),
         bestTarget = bestTarget.getFromLog(table,"$category/bestTarget"),
         otherTargets = otherTargets.mapIndexed{ index, target ->
             target.getFromLog(table,"$category/otherTarget$index")
@@ -107,9 +92,9 @@ public sealed interface VisionResult{
 
         override fun getFromLog(table: LogTable, category: String): Generic {
             return Generic(
-                table.getDouble("$category/tx",0.0),
-                table.getDouble("$category/ty",0.0),
-                table.getDouble("$category/areaPercent",0.0)
+                table.get("$category/tx",0.0),
+                table.get("$category/ty",0.0),
+                table.get("$category/areaPercent",0.0)
             )
         }
 
@@ -135,10 +120,10 @@ public sealed interface VisionResult{
 
         override fun getFromLog(table: LogTable, category: String): AprilTag {
             return AprilTag(
-                table.getDouble("$category/tx",0.0),
-                table.getDouble("$category/ty",0.0),
-                table.getDouble("$category/areaPercent",0.0),
-                table.getInteger("$category/id",0).toInt(),
+                table.get("$category/tx",0.0),
+                table.get("$category/ty",0.0),
+                table.get("$category/areaPercent",0.0),
+                table.get("$category/id",0).toInt(),
                 targetTransformFromCam.getFromLog(table,"$category/transformFromCam")
             )
         }
@@ -161,10 +146,10 @@ public sealed interface VisionResult{
 
         override fun getFromLog(table: LogTable, category: String): ML {
             return ML(
-                table.getDouble("$category/tx",0.0),
-                table.getDouble("$category/ty",0.0),
-                table.getDouble("$category/areaPercent",0.0),
-                table.getInteger("$category/id",0).toInt()
+                table.get("$category/tx",0.0),
+                table.get("$category/ty",0.0),
+                table.get("$category/areaPercent",0.0),
+                table.get("$category/id",0).toInt()
             )
         }
     }

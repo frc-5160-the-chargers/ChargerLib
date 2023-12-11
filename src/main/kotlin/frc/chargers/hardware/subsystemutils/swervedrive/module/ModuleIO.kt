@@ -29,11 +29,19 @@ public class ModuleIOReal(
 
     private val startingWheelTravel = driveMotor.encoder.angularPosition
 
-    override val direction: Angle by logInputs.quantity{ turnEncoder.angularPosition.inputModulus(0.degrees..360.degrees) }
-    override val turnSpeed: AngularVelocity by logInputs.quantity{ turnMotor.encoder.angularVelocity * turnGearRatio}
+    override val direction: Angle by logInputs.quantity{
+        turnEncoder.angularPosition.inputModulus(0.degrees..360.degrees)
+    }
+    override val turnSpeed: AngularVelocity by logInputs.quantity{
+        turnMotor.encoder.angularVelocity * turnGearRatio
+    }
 
-    override val speed: AngularVelocity by logInputs.quantity{ driveMotor.encoder.angularVelocity * driveGearRatio }
-    override val wheelTravel: Angle by logInputs.quantity{ (driveMotor.encoder.angularPosition - startingWheelTravel) * driveGearRatio }
+    override val speed: AngularVelocity by logInputs.quantity{
+        driveMotor.encoder.angularVelocity * driveGearRatio
+    }
+    override val wheelTravel: Angle by logInputs.quantity{
+        (driveMotor.encoder.angularPosition - startingWheelTravel) * driveGearRatio
+    }
 
     private var turnAppliedVoltage = Voltage(0.0)
     private var driveAppliedVoltage = Voltage(0.0)
@@ -128,7 +136,6 @@ public class ModuleIOSim(
 
 public interface ModuleIO{
     public val logTab: String
-
 
     public val direction: Angle
     public val turnSpeed: AngularVelocity

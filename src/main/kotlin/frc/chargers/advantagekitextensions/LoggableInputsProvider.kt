@@ -3,12 +3,7 @@ package frc.chargers.advantagekitextensions
 
 import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
-import com.batterystaple.kmeasure.quantities.inUnit
-import com.batterystaple.kmeasure.quantities.ofUnit
-import com.batterystaple.kmeasure.units.seconds
 import frc.chargers.framework.ChargerRobot
-import frc.chargers.utils.Measurement
-import frc.chargers.utils.NullableMeasurement
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.inputs.LoggableInputs
@@ -73,17 +68,7 @@ public class LoggableInputsProvider(
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericValue(variable.name,getValue)}
     public fun <T: AdvantageKitLoggable<T>> nullableValue(default: T, getValue: () -> T?): ReadOnlyLoggableInput<T?> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,default, getValue)}
-    public fun <D: AnyDimension> quantityMeasurement(getValue: () -> Measurement<Quantity<D>>): ReadOnlyLoggableInput<Measurement<Quantity<D>>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityMeasurement(variable.name, getValue)}
-    public fun <D: AnyDimension> nullableQuantityMeasurement(getValue: () -> NullableMeasurement<Quantity<D>>): ReadOnlyLoggableInput<NullableMeasurement<Quantity<D>>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantityMeasurement(variable.name, getValue)}
-    
-    
-    public fun <T: AdvantageKitLoggable<T>> valueMeasurement(getValue: () -> Measurement<T>): ReadOnlyLoggableInput<Measurement<T>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedMeasurement(variable.name, getValue)}
-    
-    public fun <T: AdvantageKitLoggable<T>> nullableValueMeasurement(default: T, getValue: () -> NullableMeasurement<T>): ReadOnlyLoggableInput<NullableMeasurement<T>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableMeasurement(variable.name, default, getValue)}
+
 
 
 
@@ -135,6 +120,8 @@ public class LoggableInputsProvider(
         setValue: (List<String>) -> Unit
     ): ReadWriteLoggableInput<List<String>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedStringList(variable.name, getValue, setValue) }
+
+
     public fun <T: AdvantageKitLoggable<T>> value(
         getValue: () -> T, 
         setValue: (T) -> Unit
@@ -146,27 +133,6 @@ public class LoggableInputsProvider(
         setValue: (T?) -> Unit
     ): ReadWriteLoggableInput<T?> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,default, getValue, setValue)}
-    public fun <D: AnyDimension> quantityMeasurement(
-        getValue: () -> Measurement<Quantity<D>>, 
-        setValue: (Measurement<Quantity<D>>) -> Unit
-    ): ReadWriteLoggableInput<Measurement<Quantity<D>>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityMeasurement(variable.name, getValue, setValue)}
-    public fun <D: AnyDimension> nullableQuantityMeasurement(
-        getValue: () -> NullableMeasurement<Quantity<D>>, 
-        setValue: (NullableMeasurement<Quantity<D>>) -> Unit
-    ): ReadWriteLoggableInput<NullableMeasurement<Quantity<D>>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantityMeasurement(variable.name, getValue, setValue)}
-    public fun <T: AdvantageKitLoggable<T>> valueMeasurement(
-        getValue: () -> Measurement<T>, 
-        setValue: (Measurement<T>) -> Unit
-    ): ReadWriteLoggableInput<Measurement<T>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedMeasurement(variable.name, getValue,setValue)}
-    public fun <T: AdvantageKitLoggable<T>> nullableValueMeasurement(
-        default: T,
-        getValue: () -> NullableMeasurement<T>,
-        setValue: (NullableMeasurement<T>) -> Unit
-    ): ReadWriteLoggableInput<NullableMeasurement<T>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableMeasurement(variable.name, default, getValue,setValue)}
 
 
 
@@ -624,174 +590,6 @@ public class LoggableInputsProvider(
         }
     }
 
-    private inner class AutoLoggedNullableQuantityMeasurement<D: AnyDimension>(
-        val name: String,
-        val get: () -> NullableMeasurement<Quantity<D>>,
-        val set: (NullableMeasurement<Quantity<D>>) -> Unit = {}
-    ): ReadWriteProperty<Any?,NullableMeasurement<Quantity<D>>>{
-        private var field: NullableMeasurement<Quantity<D>> = get()
-        private val dummyInputs = object: LoggableInputs{
-            override fun toLog(table: LogTable) {
-                table.apply{
-                    put("$name/value(SI Unit)", field.nullableValue?.siValue ?: 0.0)
-                    put("$name/isValid",field.nullableValue != null)
-                    put("$name/timestampSecs",field.timestamp.inUnit(seconds))
-                }
-            }
-
-            override fun fromLog(table: LogTable) {
-                field = NullableMeasurement(
-                    nullableValue = if (table.get("$name/isValid",false)){
-                        Quantity(table.get("$name/value(SI Unit)", 0.0))
-                    }else{
-                        null
-                    },
-                    timestamp = table.get("$name/timestampSecs",0.0).ofUnit(seconds)
-                )
-            }
-        }
-
-        init{
-            ChargerRobot.runPeriodically{
-                field = get()
-                Logger.processInputs(namespace,dummyInputs)
-            }
-        }
-
-
-
-        override fun getValue(thisRef: Any?, property: KProperty<*>): NullableMeasurement<Quantity<D>> = field
-
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: NullableMeasurement<Quantity<D>>) {
-            set(value)
-        }
-
-    }
-
-    private inner class AutoLoggedQuantityMeasurement<D: AnyDimension>(
-        val name: String,
-        val get: () -> Measurement<Quantity<D>>,
-        val set: (Measurement<Quantity<D>>) -> Unit = {}
-    ): ReadWriteProperty<Any?,Measurement<Quantity<D>>>{
-        private var field: Measurement<Quantity<D>> = get()
-        private val dummyInputs = object: LoggableInputs{
-            override fun toLog(table: LogTable) {
-                table.apply{
-                    put("$name/value(SI Unit)", field.value.siValue)
-                    put("$name/timestampSecs",field.timestamp.inUnit(seconds))
-                }
-            }
-
-            override fun fromLog(table: LogTable) {
-                field = Measurement(
-                    value = Quantity(table.get("$name/value(SI Unit)", 0.0)),
-                    timestamp = table.get("$name/timestampSecs",0.0).ofUnit(seconds)
-                )
-            }
-        }
-
-        init{
-            ChargerRobot.runPeriodically{
-                field = get()
-                Logger.processInputs(namespace,dummyInputs)
-            }
-        }
-
-
-
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Measurement<Quantity<D>> = field
-
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: Measurement<Quantity<D>>) {
-            set(value)
-        }
-
-    }
-
-
-    private inner class AutoLoggedNullableMeasurement<T: AdvantageKitLoggable<T>>(
-        val name: String,
-        val default: T,
-        val get: () -> NullableMeasurement<T>,
-        val set: (NullableMeasurement<T>) -> Unit = {}
-    ): ReadWriteProperty<Any?,NullableMeasurement<T>>{
-        private var field: NullableMeasurement<T> = get()
-        private val dummyInputs = object: LoggableInputs{
-            override fun toLog(table: LogTable) {
-                table.apply{
-                    field.nullableValue?.pushToLog(table, "$name/value") ?: default.pushToLog(table,name)
-                    put("$name/isValid",field.nullableValue != null)
-                    put("$name/timestampSecs",field.timestamp.inUnit(seconds))
-                }
-            }
-
-            override fun fromLog(table: LogTable) {
-                field = NullableMeasurement(
-                    nullableValue = if (table.get("$name/isValid",false)){
-                        default.getFromLog(table,"$name/value")
-                    }else{
-                        null
-                    },
-                    timestamp = table.get("$name/timestampSecs",0.0).ofUnit(seconds)
-                )
-            }
-        }
-
-        init{
-            ChargerRobot.runPeriodically{
-                field = get()
-                Logger.processInputs(namespace,dummyInputs)
-            }
-        }
-
-
-
-        override fun getValue(thisRef: Any?, property: KProperty<*>): NullableMeasurement<T> = field
-
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: NullableMeasurement<T>) {
-            set(value)
-        }
-
-    }
-
-
-    private inner class AutoLoggedMeasurement<T: AdvantageKitLoggable<T>>(
-        val name: String,
-        val get: () -> Measurement<T>,
-        val set: (Measurement<T>) -> Unit = {}
-    ): ReadWriteProperty<Any?,Measurement<T>>{
-        private var field: Measurement<T> = get()
-        private val dummyInputs = object: LoggableInputs{
-            override fun toLog(table: LogTable) {
-                table.apply{
-                    field.value.pushToLog(table, "$name/value")
-                    put("$name/timestampSecs",field.timestamp.inUnit(seconds))
-                }
-            }
-
-            override fun fromLog(table: LogTable) {
-                field = Measurement(
-                    value = field.value.getFromLog(table,"$name/value"),
-                    timestamp = table.get("$name/timestampSecs",0.0).ofUnit(seconds)
-                )
-            }
-        }
-
-        init{
-            ChargerRobot.runPeriodically{
-                field = get()
-                Logger.processInputs(namespace,dummyInputs)
-            }
-        }
-
-
-
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Measurement<T> = field
-
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: Measurement<T>) {
-            set(value)
-        }
-
-    }
 
 
 

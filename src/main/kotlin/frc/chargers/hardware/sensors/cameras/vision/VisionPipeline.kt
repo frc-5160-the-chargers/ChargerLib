@@ -15,6 +15,11 @@ import kotlin.math.sqrt
 public interface VisionPipeline<R: VisionResult> {
 
     /**
+     * The pipeline index.
+     */
+    public val index: Int
+
+    /**
      * resets the camera that the [VisionPipeline] belongs to in order to return proper results.
      */
     public fun reset(){}

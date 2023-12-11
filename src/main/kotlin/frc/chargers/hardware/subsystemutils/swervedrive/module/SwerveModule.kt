@@ -10,26 +10,18 @@ import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.pid.AngularProfiledPIDController
 import frc.chargers.controls.pid.UnitSuperPIDController
-import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.subsystemutils.swervedrive.ProfiledPIDControlScheme
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.utils.within
 import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.Logger.recordOutput
 
 public class SwerveModule(
     public val io: ModuleIO,
     private val controlScheme: SwerveControl
 ){
-
-    init{
-        ChargerRobot.runPeriodically{
-            velocityController.calculateOutput()
-            turnController.calculateOutput()
-        }
-    }
 
     private val tuner = DashboardTuner()
 
@@ -64,17 +56,15 @@ public class SwerveModule(
         io.logTab + "/Driving PID Constants"
     )
 
-
-
-
-    public val velocityController: UnitSuperPIDController<AngularVelocityDimension, VoltageDimension>
+    private val velocityController: UnitSuperPIDController<AngularVelocityDimension, VoltageDimension>
         by tuner.refreshWhenTuned{
             UnitSuperPIDController(
                 drivePIDConstants,
                 {io.speed},
                 -12.volts..12.volts,
                 target = AngularVelocity(0.0),
-                feedforward = controlScheme.driveFF
+                feedforward = controlScheme.driveFF,
+                selfSustain = true
             )
         }
 
@@ -90,7 +80,8 @@ public class SwerveModule(
                     continuousInputRange = 0.degrees..360.degrees,
                     target = Angle(0.0),
                     constraints = controlScheme.turnConstraints,
-                    feedforward = controlScheme.turnFF
+                    feedforward = controlScheme.turnFF,
+                    selfSustain = true
                 )
 
                 else -> UnitSuperPIDController(
@@ -98,17 +89,16 @@ public class SwerveModule(
                     getInput = {io.direction.standardize()},
                     outputRange = -12.volts..12.volts,
                     continuousInputRange = 0.degrees..360.degrees,
-                    target = Angle(0.0)
+                    target = Angle(0.0),
+                    selfSustain = true
                 )
             }
         }
 
-
-
-    public val currentDirection: Angle
-        get() = io.direction.standardize()
-
-
+    public val currentDirection: Angle get() = io.direction.standardize()
+    public val currentVelocity: AngularVelocity get() = io.speed
+    public val currentTurningVelocity: AngularVelocity get() = io.turnSpeed
+    public val wheelPosition: Angle get() = io.wheelTravel
 
     // Note: turnSpeed will only be set if the control scheme includes second order kinematics functionality.
     public fun setDirection(direction: Angle, secondOrderTurnSpeed: AngularVelocity = AngularVelocity(0.0)){
@@ -163,31 +153,18 @@ public class SwerveModule(
             }
         }
 
-        Logger.getInstance().apply{
-            recordOutput(io.logTab + "/controllerErrorRad", turnController.error.inUnit(radians))
-            recordOutput(io.logTab + "/controllerOutputVolts", turnController.calculateOutput().inUnit(volts))
-        }
-
-
+        recordOutput(io.logTab + "/controllerErrorRad", turnController.error.inUnit(radians))
+        recordOutput(io.logTab + "/controllerOutputVolts", turnController.calculateOutput().inUnit(volts))
     }
-
-    public fun setPower(power: Double) {
-        io.driveVoltage = power * 12.volts
-    }
-
-    public val currentVelocity: AngularVelocity
-        get() = io.speed
-
-    public val currentTurningVelocity: AngularVelocity
-        get() = io.turnSpeed
 
     public fun setVelocity(velocity: AngularVelocity) {
         velocityController.target = velocity
         io.driveVoltage = velocityController.calculateOutput()
     }
 
-    public val wheelPosition: Angle
-        get() = io.wheelTravel
+    public fun setPower(power: Double) {
+        io.driveVoltage = power * 12.volts
+    }
 
     public fun setDirectionalPower(
         power:Double,
@@ -217,7 +194,6 @@ public class SwerveModule(
         }
     }
 
-
     public fun getModuleState(wheelRadius: Length): SwerveModuleState =
         SwerveModuleState(
             currentVelocity.inUnit(radians / seconds) * wheelRadius.inUnit(meters),
@@ -230,7 +206,6 @@ public class SwerveModule(
             currentDirection.asRotation2d()
         )
 
-
     public fun halt() {
         io.driveVoltage = if(controlScheme.staticVoltageStall){
             controlScheme.driveFF.kS
@@ -239,6 +214,5 @@ public class SwerveModule(
         }
         setDirection(io.direction)
     }
-
 
 }
