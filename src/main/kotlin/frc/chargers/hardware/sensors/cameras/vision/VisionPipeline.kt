@@ -2,6 +2,7 @@ package frc.chargers.hardware.sensors.cameras.vision
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
+import edu.wpi.first.wpilibj2.command.Command
 import org.photonvision.PhotonUtils
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -30,23 +31,10 @@ public interface VisionPipeline<R: VisionResult> {
     public val mountAngle: Angle
 
     /**
-     * resets the camera that the [VisionPipeline] belongs to in order to return proper results.
-     * This can include setting the overall camera's pipeline index to the index specified.
-     */
-    public fun reset(){
-        println("A generic vision camera's pipeline has just tried to reset the pipeline to $index.")
-        println("This pipeline did not provide an implementation of the reset() method; use override fun reset(){} if this is necessary.")
-    }
-
-    /**
      * Fetches the full vision data of the [VisionPipeline]; These are all from the exact same timestamp.
      * A null value represents the vision data being invalid/the pipeline having no available targets.
      */
     public val visionData: NonLoggableVisionData<R>?
-
-
-
-
 
     /**
      * Fetches the current best target of the [VisionPipeline].
@@ -56,6 +44,21 @@ public interface VisionPipeline<R: VisionResult> {
     public val bestTarget: R?
         get() = visionData?.bestTarget
 
+    /**
+     * resets the camera that the [VisionPipeline] belongs to in order to return proper results.
+     * This can include setting the overall camera's pipeline index to the index specified.
+     */
+    public fun reset(){
+        println("A generic vision camera's pipeline has just tried to reset the pipeline to $index.")
+        println("However, this pipeline did not provide an implementation of the reset() method; use override fun reset(){} if this is necessary.")
+    }
+
+
+
+
+    /**
+     * Calculates the horizontal distance to a target, utilizing the pitch and height of the target.
+     */
     public fun horizontalDistanceToTarget(
         targetHeight: Distance, targetPitch: Angle = Angle(0.0)
     ): Distance = PhotonUtils.calculateDistanceToTargetMeters(
@@ -65,6 +68,9 @@ public interface VisionPipeline<R: VisionResult> {
         targetPitch.inUnit(radians)
     ).ofUnit(meters)
 
+    /**
+     * Calculates the diagonal distance to the target.
+     */
     public fun diagonalDistanceToTarget(targetHeight: Distance): Distance =
         Distance(
             sqrt(horizontalDistanceToTarget(targetHeight).siValue.pow(2) + targetHeight.siValue.pow(2.0))
