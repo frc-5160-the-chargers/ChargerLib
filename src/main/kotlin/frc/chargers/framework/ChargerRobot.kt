@@ -14,7 +14,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.chargerlibexternal.builddata.ChargerLibBuildConstants
-import frc.chargerlibexternal.utils.pathplanner.LocalADStarAK
+import frc.chargerlibexternal.pathplanner.LocalADStarAK
 import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.utils.SparkMaxBurnManager
 import frc.chargers.wpilibextensions.Alert

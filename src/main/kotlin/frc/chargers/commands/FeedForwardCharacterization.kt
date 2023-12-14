@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Subsystem
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
-import frc.chargerlibexternal.utils.characterization.FeedForwardCharacterization
-import frc.chargerlibexternal.utils.characterization.FeedForwardCharacterizationData
+import frc.chargerlibexternal.frc6328.characterization.FeedForwardCharacterization
+import frc.chargerlibexternal.frc6328.characterization.FeedForwardCharacterizationData
 
 public fun characterizeFFAngular(
     name: String,

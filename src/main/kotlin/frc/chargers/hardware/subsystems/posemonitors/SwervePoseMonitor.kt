@@ -13,8 +13,8 @@ import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.Measurement
-import frc.chargerlibexternal.utils.PoseEstimator
-import frc.chargerlibexternal.utils.PoseEstimator.TimestampedVisionUpdate
+import frc.chargerlibexternal.frc6328.PoseEstimator
+import frc.chargerlibexternal.frc6328.PoseEstimator.TimestampedVisionUpdate
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
@@ -74,7 +74,9 @@ public class SwervePoseMonitor(
     /* Private Implementation */
 
 
-    private val poseEstimator: PoseEstimator = PoseEstimator(VecBuilder.fill(0.003, 0.003, 0.00001),).also{
+    private val poseEstimator: PoseEstimator = PoseEstimator(
+        VecBuilder.fill(0.003, 0.003, 0.00001),
+    ).also{
         it.resetPose(startingPose.inUnit(meters))
     }
     private val poseSuppliers = poseSuppliers.toMutableList()

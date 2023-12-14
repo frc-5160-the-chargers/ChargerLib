@@ -1,4 +1,4 @@
-package frc.chargerlibexternal.utils.pathplanner;
+package frc.chargerlibexternal.pathplanner;
 
 
 import edu.wpi.first.math.Pair;

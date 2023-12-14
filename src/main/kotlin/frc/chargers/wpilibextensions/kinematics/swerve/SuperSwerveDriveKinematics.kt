@@ -6,8 +6,8 @@ import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
-import frc.chargerlibexternal.utils.HeadingCorrector
-import frc.chargerlibexternal.utils.SecondOrderSwerveKinematics
+import frc.chargerlibexternal.frc4481.HeadingCorrector
+import frc.chargerlibexternal.frc4481.SecondOrderSwerveKinematics
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.correctForDynamics

@@ -1,4 +1,4 @@
-package frc.chargerlibexternal.utils;
+package frc.chargerlibexternal.frc6328;
 
 // Copyright (c) 2023 FRC 6328
 // http://github.com/Mechanical-Advantage

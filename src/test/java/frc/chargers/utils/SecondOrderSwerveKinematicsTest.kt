@@ -7,8 +7,8 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
-import frc.chargerlibexternal.utils.HeadingCorrector
-import frc.chargerlibexternal.utils.SecondOrderSwerveKinematics
+import frc.chargerlibexternal.frc4481.HeadingCorrector
+import frc.chargerlibexternal.frc4481.SecondOrderSwerveKinematics
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.swerve.SuperSwerveDriveKinematics
@@ -123,10 +123,10 @@ internal class SecondOrderSwerveKinematicsTest {
             UnitTranslation2d(-0.5.meters,-0.5.meters)
         )
         val secondKinematics = SecondOrderSwerveKinematics(
-            Translation2d(0.5,0.5),
-            Translation2d(-0.5,0.5),
-            Translation2d(0.5,-0.5),
-            Translation2d(-0.5,-0.5)
+            Translation2d(0.5, 0.5),
+            Translation2d(-0.5, 0.5),
+            Translation2d(0.5, -0.5),
+            Translation2d(-0.5, -0.5)
         )
 
         val speeds = ChassisSpeeds(1.5,0.0,0.5)

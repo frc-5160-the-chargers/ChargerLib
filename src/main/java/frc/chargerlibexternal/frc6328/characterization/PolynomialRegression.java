@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.chargerlibexternal.utils.characterization;
+package frc.chargerlibexternal.frc6328.characterization;
 
 import Jama.Matrix;
 import Jama.QRDecomposition;
