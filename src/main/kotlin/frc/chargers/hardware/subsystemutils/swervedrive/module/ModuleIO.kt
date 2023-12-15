@@ -3,6 +3,7 @@ package frc.chargers.hardware.subsystemutils.swervedrive.module
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.RobotController.getBatteryVoltage
 import edu.wpi.first.wpilibj.simulation.FlywheelSim
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.framework.ChargerRobot
@@ -41,14 +42,14 @@ public class ModuleIOReal(
     override var turnVoltage: Voltage by logInputs.quantity(
         getValue = {turnAppliedVoltage},
         setValue = {
-            turnAppliedVoltage = it.coerceIn(-12.volts..12.volts)
+            turnAppliedVoltage = it.coerceIn(realRobotVoltageRange())
             turnMotor.setVoltage(turnAppliedVoltage)
         }
     )
     override var driveVoltage: Voltage by logInputs.quantity(
         getValue = {driveAppliedVoltage},
         setValue = {
-            driveAppliedVoltage = it.coerceIn(-12.volts..12.volts)
+            driveAppliedVoltage = it.coerceIn(realRobotVoltageRange())
             driveMotor.setVoltage(driveAppliedVoltage)
         }
     )
@@ -138,6 +139,16 @@ public interface ModuleIO{
 
     public var turnVoltage: Voltage
     public var driveVoltage: Voltage
+}
+
+private fun realRobotVoltageRange(): ClosedRange<Voltage>{
+    val upperLimit = getBatteryVoltage().ofUnit(volts)
+    return if (upperLimit < 1.volts){
+        println("Robot controller seems to be sus atm.")
+        -12.volts..12.volts
+    }else{
+        -upperLimit..upperLimit
+    }
 }
 
 
