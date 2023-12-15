@@ -1,7 +1,5 @@
 package frc.chargers.hardware.subsystemutils.swervedrive.module
 
-import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
-import com.batterystaple.kmeasure.dimensions.VoltageDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.kinematics.SwerveModulePosition
@@ -45,25 +43,24 @@ public class SwerveModule(
 
     private val turnPIDConstants by tuner.pidConstants(
         controlScheme.turnPIDConstants,
-        logTab + "/Turning PID Constants"
+        "$logTab/Turning PID Constants"
     )
 
     private val drivePIDConstants by tuner.pidConstants(
         controlScheme.drivePIDConstants,
-        logTab + "/Driving PID Constants"
+        "$logTab/Driving PID Constants"
     )
 
-    private val velocityController: UnitSuperPIDController<AngularVelocityDimension, VoltageDimension>
-        by tuner.refreshWhenTuned{
-            UnitSuperPIDController(
-                drivePIDConstants,
-                {speed},
-                -12.volts..12.volts,
-                target = AngularVelocity(0.0),
-                feedforward = controlScheme.driveFF,
-                selfSustain = true
-            )
-        }
+    private val velocityController by tuner.refreshWhenTuned{
+        UnitSuperPIDController(
+            drivePIDConstants,
+            {speed},
+            -12.volts..12.volts,
+            target = AngularVelocity(0.0),
+            feedforward = controlScheme.driveFF,
+            selfSustain = true
+        )
+    }
 
 
 
@@ -146,8 +143,8 @@ public class SwerveModule(
             }
         }
 
-        recordOutput(logTab + "/controllerErrorRad", turnController.error.inUnit(radians))
-        recordOutput(logTab + "/controllerOutputVolts", turnController.calculateOutput().inUnit(volts))
+        recordOutput("$logTab/controllerErrorRad", turnController.error.inUnit(radians))
+        recordOutput("$logTab/controllerOutputVolts", turnController.calculateOutput().inUnit(volts))
     }
 
     public fun setVelocity(velocity: AngularVelocity) {

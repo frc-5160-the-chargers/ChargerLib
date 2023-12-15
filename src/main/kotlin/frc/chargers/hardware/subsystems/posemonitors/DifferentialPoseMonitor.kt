@@ -17,7 +17,7 @@ import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.Logger.recordOutput
 
 /**
  * A Helper class used to get the pose of an [EncoderDifferentialDrivetrain].
@@ -72,8 +72,8 @@ public class DifferentialPoseMonitor(
     private var previousDistanceR = Distance(0.0)
 
     override fun periodic(){
-        val distanceL = io.leftWheelTravel * wheelTravelPerMotorRadian
-        val distanceR = io.rightWheelTravel * wheelTravelPerMotorRadian
+        val distanceL = leftWheelTravel * wheelTravelPerMotorRadian
+        val distanceR = rightWheelTravel * wheelTravelPerMotorRadian
 
         val twist = kinematics.toTwist2d(
             (distanceL-previousDistanceL).inUnit(meters),
@@ -93,7 +93,7 @@ public class DifferentialPoseMonitor(
         poseSuppliers.forEach{
             val measurement = it.robotPoseMeasurement
 
-            if (measurement.nullableValue != null){
+            if (measurement != null){
                 val stdDevVector = when(val deviation = it.poseStandardDeviation){
                     is StandardDeviation.Of -> deviation.getVector()
 
@@ -103,7 +103,7 @@ public class DifferentialPoseMonitor(
                 visionUpdates.add(
                     PoseEstimator.TimestampedVisionUpdate(
                         measurement.timestamp.inUnit(seconds),
-                        measurement.nullableValue.inUnit(meters),
+                        measurement.value.inUnit(meters),
                         stdDevVector
                     )
                 )
@@ -113,13 +113,11 @@ public class DifferentialPoseMonitor(
 
 
         field.robotPose = poseEstimator.latestPose
-        Logger.getInstance().apply{
-            recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
-            // defined in EncoderDifferentialDrivetrain.kt
-            recordOutput("Drivetrain(Differential)/calculatedHeadingRad", heading.inUnit(radians))
-            recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
-            recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
-        }
+        recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
+        // defined in EncoderDifferentialDrivetrain.kt
+        recordOutput("Drivetrain(Differential)/calculatedHeadingRad", heading.inUnit(radians))
+        recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
+        recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
 
 
     }

@@ -9,8 +9,8 @@ import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
 /**
  * Converts ChargerLib PIDConstants to PathPlanner's PIDConstants.
  */
-public fun PIDConstants.asPathPlannerConstants(): com.pathplanner.lib.auto.PIDConstants =
-    com.pathplanner.lib.auto.PIDConstants(kP, kI, kD)
+public fun PIDConstants.asPathPlannerConstants(): com.pathplanner.lib.util.PIDConstants =
+    com.pathplanner.lib.util.PIDConstants(kP, kI, kD)
 
 /**
  * Represents Data pertinent to PathPlanner autonomous routines.

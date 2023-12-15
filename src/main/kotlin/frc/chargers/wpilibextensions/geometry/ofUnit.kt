@@ -9,7 +9,6 @@ import frc.chargers.utils.math.units.KmeasureUnit
 import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
 import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
-import frc.chargers.wpilibextensions.geometry.motion.LinearTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.rotation.asAngle
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
@@ -85,6 +84,8 @@ public fun TrapezoidProfile.Constraints.ofUnit(angleUnit: Angle, timeUnit: Time)
         this.maxVelocity.ofUnit(angleUnit/timeUnit),
         this.maxAcceleration.ofUnit(angleUnit/timeUnit/timeUnit)
     )
+
+/*
 /**
  * Converts WPILib's [TrapezoidProfile.State] into a [LinearTrapezoidProfile.State].
  */
@@ -93,6 +94,8 @@ public fun TrapezoidProfile.State.ofUnit(distanceUnit: Distance, timeUnit: Time)
         this.position.ofUnit(distanceUnit),
         this.velocity.ofUnit(distanceUnit/timeUnit)
     )
+
+ */
 
 /**
  * Converts WPILib's [TrapezoidProfile.Constraints] into a [LinearMotionConstraints].

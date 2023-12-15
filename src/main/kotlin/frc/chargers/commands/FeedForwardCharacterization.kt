@@ -165,18 +165,16 @@ public fun EncoderDifferentialDrivetrain.characterize(
         forwards,
         FeedForwardCharacterizationData("SwerveDriveFFData_Left"),
         FeedForwardCharacterizationData("SwerveDriveFFData_Right"),
-        {leftVolts: Double, rightVolts -> io.setVoltages(leftVolts.volts, rightVolts.volts)},
-        {io.leftVelocity.siValue},
-        {io.rightVelocity.siValue},
+        {leftVolts: Double, rightVolts -> setVoltages(leftVolts.volts, rightVolts.volts)},
+        {leftVelocity.siValue},
+        {rightVelocity.siValue},
         this, *requirements
     ){
-
         override fun initialize(){
             println("ANGULAR DRIVETRAIN characterization is starting.")
             println("To stop the characterization, the command must be manually stopped!")
             super.initialize()
         }
-
 
         override fun end(interrupted: Boolean) {
             super.end(interrupted)

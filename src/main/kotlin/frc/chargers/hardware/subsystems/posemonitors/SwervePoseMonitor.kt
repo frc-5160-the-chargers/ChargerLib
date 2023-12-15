@@ -131,7 +131,7 @@ public class SwervePoseMonitor(
         val visionUpdates: MutableList<TimestampedVisionUpdate> = mutableListOf()
         poseSuppliers.forEach{
             val measurement = it.robotPoseMeasurement
-            if (measurement.nullableValue != null){
+            if (measurement != null){
                 val stdDevVector = when(val deviation = it.poseStandardDeviation){
                     is StandardDeviation.Of -> deviation.getVector()
 
@@ -141,7 +141,7 @@ public class SwervePoseMonitor(
                 visionUpdates.add(
                     TimestampedVisionUpdate(
                         measurement.timestamp.inUnit(seconds),
-                        measurement.nullableValue.inUnit(meters),
+                        measurement.value.inUnit(meters),
                         stdDevVector
                     )
                 )

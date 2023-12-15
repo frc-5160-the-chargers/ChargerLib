@@ -76,7 +76,7 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
     configuration: C
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
-        io = DiffDriveIOReal(
+        lowLevel = DiffDriveIOReal(
             logInputs = LoggableInputsProvider(namespace = "Drivetrain(Differential)"),
             leftMotors = leftMotors.apply { configure(configuration) },
             rightMotors = rightMotors.apply { configure(configuration) }
@@ -87,13 +87,13 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
 
 
 public class EncoderDifferentialDrivetrain(
-    public val io: DiffDriveIO,
+    lowLevel: DiffDriveIO,
     private val constants: DiffDriveConstants = DiffDriveConstants.andymark(),
     controlScheme: DiffDriveControl = DiffDriveControl.None,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
-): SubsystemBase(), DifferentialDrivetrain, HeadingProvider {
+): SubsystemBase(), DifferentialDrivetrain, HeadingProvider, DiffDriveIO by lowLevel {
 
     // lazy initializer to prevent potentital NPE's and other problems
     // associated with leaking "this"
@@ -106,10 +106,8 @@ public class EncoderDifferentialDrivetrain(
     )
 
     init{
-        io.inverted = constants.invertMotors
+        inverted = constants.invertMotors
     }
-
-
 
 
 
@@ -119,7 +117,7 @@ public class EncoderDifferentialDrivetrain(
     }
 
     override fun tankDrive(leftPower: Double, rightPower: Double) {
-        io.setVoltages(leftPower * 12.volts, rightPower * 12.volts)
+        setVoltages(leftPower * 12.volts, rightPower * 12.volts)
     }
 
     override fun arcadeDrive(power: Double, rotation: Double) {
@@ -133,7 +131,7 @@ public class EncoderDifferentialDrivetrain(
     }
 
     override fun stop() {
-        io.setVoltages(0.volts,0.volts)
+        setVoltages(0.volts,0.volts)
     }
 
 
@@ -154,14 +152,14 @@ public class EncoderDifferentialDrivetrain(
      */
     public val distanceTraveled: Distance
         get() =
-            a[io.leftWheelTravel,io.rightWheelTravel].average() * wheelTravelPerMotorRadian
+            a[leftWheelTravel,rightWheelTravel].average() * wheelTravelPerMotorRadian
 
     /**
      * The current linear velocity of the robot.
      */
     public val velocity: Velocity
         get() =
-            a[io.leftVelocity,io.rightVelocity].average() * wheelTravelPerMotorRadian
+            a[leftVelocity,rightVelocity].average() * wheelTravelPerMotorRadian
 
     /**
      * The current heading (the direction the robot is facing).
@@ -183,7 +181,7 @@ public class EncoderDifferentialDrivetrain(
      */
     public override val heading: Angle
         get() = wheelTravelPerMotorRadian *
-                (io.rightWheelTravel - io.leftWheelTravel) / constants.width
+                (rightWheelTravel - leftWheelTravel) / constants.width
 
 
     /**
@@ -195,26 +193,10 @@ public class EncoderDifferentialDrivetrain(
         constants.width.inUnit(meters)
     )
 
-    private val leftController = UnitSuperPIDController(
-        controlScheme.leftVelocityConstants,
-        {io.leftVelocity},
-        target = AngularVelocity(0.0),
-        selfSustain = false,
-        feedforward = controlScheme.leftMotorFF
-    )
-
-    private val rightController = UnitSuperPIDController(
-        controlScheme.rightVelocityConstants,
-        {io.rightVelocity},
-        target = AngularVelocity(0.0),
-        selfSustain = false,
-        feedforward = controlScheme.rightMotorFF
-    )
-
     public fun velocityDrive(leftSpeed: Velocity, rightSpeed: Velocity){
         leftController.target = leftSpeed / (constants.gearRatio * constants.wheelDiameter)
         rightController.target = rightSpeed / (constants.gearRatio * constants.wheelDiameter)
-        io.setVoltages(
+        setVoltages(
             left = leftController.calculateOutput(),
             right = rightController.calculateOutput()
         )
@@ -228,11 +210,21 @@ public class EncoderDifferentialDrivetrain(
         )
     }
 
+    private val leftController = UnitSuperPIDController(
+        controlScheme.leftVelocityConstants,
+        {leftVelocity},
+        target = AngularVelocity(0.0),
+        selfSustain = false,
+        feedforward = controlScheme.leftMotorFF
+    )
 
+    private val rightController = UnitSuperPIDController(
+        controlScheme.rightVelocityConstants,
+        {rightVelocity},
+        target = AngularVelocity(0.0),
+        selfSustain = false,
+        feedforward = controlScheme.rightMotorFF
+    )
 
-
-
-
-    
 
 }
