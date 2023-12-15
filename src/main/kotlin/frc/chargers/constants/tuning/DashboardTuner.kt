@@ -146,7 +146,7 @@ public open class DashboardTuner(
      * @see LoggedDashboardNumber
      */
     public fun <D: AnyDimension> quantity(
-        default: Quantity<D>, key: String? = null, logUnit: KmeasureUnit<D> = siUnit(default)
+        default: Quantity<D>, key: String? = null, logUnit: KmeasureUnit<D> = siUnit()
     ): TunableDelegate<Quantity<D>> =
         PropertyDelegateProvider{ _, variable ->
             val name = key ?: (variable.name + "(SI unit)")

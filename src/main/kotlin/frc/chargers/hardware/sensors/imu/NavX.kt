@@ -26,21 +26,26 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
      */
     init {
         reset()
+        zeroHeading()
         if (RobotBase.isSimulation()){
             Alert.warning(text = "You have instantiated a NavX in sim. It is recommended to use the IMUSim class.")
         }
     }
 
     override fun zeroHeading(){
-        ahrs.zeroYaw()
+        headingOffset = -ahrs.fusedHeading.toDouble().ofUnit(degrees)
+        println("NavX fused heading has been zeroed.")
     }
+
+    private var headingOffset = 0.0.degrees
 
     override fun reset() {
         ahrs.reset()
+        println("NavX YAW has been zeroed.")
     }
 
     override val heading: Angle by IMU_INPUTS.quantity{
-        -ahrs.fusedHeading.toDouble().ofUnit(degrees)
+        -ahrs.fusedHeading.toDouble().ofUnit(degrees) - headingOffset
     } // Negative sign because the navX reports clockwise as positive, whereas we want counterclockwise to be positive
 
     override val altitude: Distance? by IMU_INPUTS.nullableQuantity{

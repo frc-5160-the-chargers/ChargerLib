@@ -1,7 +1,9 @@
 package frc.chargers.utils.math.units
 
 import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.interop.transformWithSIValue
 import com.batterystaple.kmeasure.quantities.Quantity
+import kotlin.math.pow
 
 /**
  * In kmeasure, Units are considered the same as quantities;
@@ -18,6 +20,14 @@ public typealias KmeasureUnit<D> = Quantity<D>
 /**
  * Gets an SI unit representation of a specific quantity and/or dimension.
  */
-public fun <D: AnyDimension> siUnit(
-    quantity: Quantity<D> = Quantity(0.0)
-): KmeasureUnit<D> = KmeasureUnit(1.0)
+public fun <D: AnyDimension> siUnit(): KmeasureUnit<D> = KmeasureUnit(1.0)
+
+
+public operator fun <D: AnyDimension> Quantity<D>.rem(other: Quantity<D>): Quantity<D> =
+    Quantity(siValue%other.siValue)
+
+public fun <D: AnyDimension> Quantity<D>.pow(exponent: Number): Quantity<D> =
+    transformWithSIValue{it.pow(exponent.toDouble())}
+
+public fun <D: AnyDimension> sqrt(value: Quantity<D>): Quantity<D> =
+    Quantity(kotlin.math.sqrt(value.siValue))
