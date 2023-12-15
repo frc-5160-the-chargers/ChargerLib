@@ -1,5 +1,7 @@
 package frc.chargers.hardware.sensors.encoders.absolute
 
+import com.batterystaple.kmeasure.dimensions.AngleDimension
+import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.hertz
 import com.batterystaple.kmeasure.units.rotations
@@ -12,7 +14,7 @@ import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
-import frc.chargers.utils.Measurement
+import frc.chargers.utils.QuantityMeasurement
 
 
 /**
@@ -49,10 +51,10 @@ public class ChargerCANcoder(
     public val absolute: TimestampedEncoder = AbsoluteEncoderAdaptor()
 
     private inner class AbsoluteEncoderAdaptor: TimestampedEncoder by this, HardwareConfigurable<CANcoderConfiguration> by this{
-        override val timestampedAngularPosition: Measurement<Angle>
+        override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
             get(){
                 val statusSignal = absolutePosition
-                return Measurement(
+                return QuantityMeasurement(
                     value = statusSignal.value.ofUnit(rotations),
                     timestamp = statusSignal.timestamp.time.ofUnit(seconds)
                 )
@@ -90,19 +92,19 @@ public class ChargerCANcoder(
     override fun setZero(newZero: Angle){
         setPosition(newZero.inUnit(rotations))
     }
-    override val timestampedAngularPosition: Measurement<Angle>
+    override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
         get(){
             val statusSignal = position
-            return Measurement(
+            return QuantityMeasurement(
                 value = statusSignal.value.ofUnit(rotations),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds)
             )
         }
 
-    override val timestampedAngularVelocity: Measurement<AngularVelocity>
+    override val timestampedAngularVelocity: QuantityMeasurement<AngularVelocityDimension>
         get(){
             val statusSignal = if (filterVelocity) velocity else unfilteredVelocity
-            return Measurement(
+            return QuantityMeasurement(
                 value = statusSignal.value.ofUnit(rotations / seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
             )

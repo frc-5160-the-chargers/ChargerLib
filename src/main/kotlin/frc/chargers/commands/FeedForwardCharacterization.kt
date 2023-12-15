@@ -71,18 +71,18 @@ public fun EncoderHolonomicDrivetrain.characterizeDriveMotors(
             FeedForwardCharacterizationData("SwerveDriveFFData_Left"),
             FeedForwardCharacterizationData("SwerveDriveFFData_Right"),
             {leftVolts: Double, rightVolts: Double ->
-                topLeft.io.driveVoltage = leftVolts.ofUnit(volts)
-                bottomLeft.io.driveVoltage = leftVolts.ofUnit(volts)
-                topRight.io.driveVoltage = rightVolts.ofUnit(volts)
-                bottomRight.io.driveVoltage = rightVolts.ofUnit(volts)
+                topLeft.driveVoltage = leftVolts.ofUnit(volts)
+                bottomLeft.driveVoltage = leftVolts.ofUnit(volts)
+                topRight.driveVoltage = rightVolts.ofUnit(volts)
+                bottomRight.driveVoltage = rightVolts.ofUnit(volts)
 
                 topLeft.setDirection(0.degrees)
                 topRight.setDirection(0.degrees)
                 bottomLeft.setDirection(0.degrees)
                 bottomRight.setDirection(0.degrees)
             },
-            { (topLeft.currentVelocity + bottomLeft.currentVelocity).siValue / 2.0 },
-            { (topRight.currentVelocity + bottomRight.currentVelocity).siValue / 2.0 },
+            { (topLeft.speed + bottomLeft.speed).siValue / 2.0 },
+            { (topRight.speed + bottomRight.speed).siValue / 2.0 },
             this, *requirements
         ){
 
@@ -108,29 +108,29 @@ public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements
             +characterizeFFAngular(
                 "TOP LEFT turn motor data",
                 true,
-                {topLeft.io.turnVoltage = it; println(it)},
-                {topLeft.currentTurningVelocity}
+                {topLeft.turnVoltage = it; println(it)},
+                {topLeft.turnSpeed}
             )
 
             +characterizeFFAngular(
                 "TOP RIGHT turn motor data",
                 true,
-                {topRight.io.turnVoltage = it},
-                {topRight.currentTurningVelocity}
+                {topRight.turnVoltage = it},
+                {topRight.turnSpeed}
             )
 
             +characterizeFFAngular(
                 "BOTTOM LEFT turn motor data",
                 true,
-                {bottomLeft.io.turnVoltage = it},
-                {bottomLeft.currentTurningVelocity}
+                {bottomLeft.turnVoltage = it},
+                {bottomLeft.turnSpeed}
             )
 
             +characterizeFFAngular(
                 "BOTTOM RIGHT turn motor data",
                 true,
-                {bottomRight.io.turnVoltage = it},
-                {bottomRight.currentTurningVelocity}
+                {bottomRight.turnVoltage = it},
+                {bottomRight.turnSpeed}
             )
         }
     }.withExtraRequirements(this@characterizeTurnMotors, *requirements)
@@ -139,19 +139,19 @@ public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements
 public fun EncoderHolonomicDrivetrain.driveTurnMotors(): Command = buildCommand{
     runParallelUntilAllFinish{
         loopForever{
-            topLeft.io.turnVoltage = 2.0.volts
+            topLeft.turnVoltage = 2.0.volts
         }
 
         loopForever{
-            topRight.io.turnVoltage = 2.0.volts
+            topRight.turnVoltage = 2.0.volts
         }
 
         loopForever{
-            bottomLeft.io.turnVoltage = 2.0.volts
+            bottomLeft.turnVoltage = 2.0.volts
         }
 
         loopForever{
-            bottomRight.io.turnVoltage = 2.0.volts
+            bottomRight.turnVoltage = 2.0.volts
         }
 
     }

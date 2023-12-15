@@ -275,7 +275,7 @@ public class EncoderHolonomicDrivetrain(
      */
     private val wheelRadius = constants.wheelDiameter / 2.0
     private val moduleArray = a[topLeft,topRight,bottomLeft,bottomRight]
-    private fun averageEncoderPosition() = moduleArray.map{it.wheelPosition}.average()
+    private fun averageEncoderPosition() = moduleArray.map{it.wheelTravel}.average()
     
     private val distanceOffset: Distance = averageEncoderPosition() * wheelRadius
 
@@ -360,14 +360,14 @@ public class EncoderHolonomicDrivetrain(
      */
     public val currentModulePositions: ModulePositionGroup
         get() = ModulePositionGroup(
-            topLeftDistance = topLeft.wheelPosition.inUnit(radians) * wheelRadius,
-            topRightDistance = topRight.wheelPosition.inUnit(radians) * wheelRadius,
-            bottomLeftDistance = bottomLeft.wheelPosition.inUnit(radians) * wheelRadius,
-            bottomRightDistance = bottomRight.wheelPosition.inUnit(radians) * wheelRadius,
-            topLeftAngle = topLeft.currentDirection,
-            topRightAngle = topRight.currentDirection,
-            bottomLeftAngle = bottomLeft.currentDirection,
-            bottomRightAngle = bottomRight.currentDirection
+            topLeftDistance = topLeft.wheelTravel.inUnit(radians) * wheelRadius,
+            topRightDistance = topRight.wheelTravel.inUnit(radians) * wheelRadius,
+            bottomLeftDistance = bottomLeft.wheelTravel.inUnit(radians) * wheelRadius,
+            bottomRightDistance = bottomRight.wheelTravel.inUnit(radians) * wheelRadius,
+            topLeftAngle = topLeft.direction,
+            topRightAngle = topRight.direction,
+            bottomLeftAngle = bottomLeft.direction,
+            bottomRightAngle = bottomRight.direction
         ).also{
             recordOutput("ModulePositions/topLeft/DistanceMeters", it.topLeftDistance.inUnit(meters))
             recordOutput("ModulePositions/topRight/DistanceMeters", it.topRightDistance.inUnit(meters))

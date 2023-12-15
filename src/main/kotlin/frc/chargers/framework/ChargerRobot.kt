@@ -56,7 +56,6 @@ public open class ChargerRobot(
             }else{
                 periodicRunnables.add(runnable)
             }
-
         }
 
         /**
@@ -220,8 +219,10 @@ public open class ChargerRobot(
     override fun robotPeriodic() {
         try{
             robotContainer.robotPeriodic()
-            periodicRunnables.forEach{
-                it()
+            runAndLogLatency("LoggedRobot/PeriodicRunnableLoopTime/RegularPriority"){
+                periodicRunnables.forEach{
+                    it()
+                }
             }
             // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
             // commands, running already-scheduled commands, removing finished or interrupted commands,
@@ -229,8 +230,10 @@ public open class ChargerRobot(
             // block in order for anything in the Command-based framework to work.
             CommandScheduler.getInstance().run()
             recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
-            lowPriorityPeriodicRunnables.forEach{
-                it()
+            runAndLogLatency("LoggedRobot/PeriodicRunnableLoopTime/LowPriority"){
+                lowPriorityPeriodicRunnables.forEach{
+                    it()
+                }
             }
         }catch(e: Exception){
             println("Error has been caught in [robotPeriodic].")

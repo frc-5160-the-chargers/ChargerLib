@@ -8,18 +8,12 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection
 import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
 import com.revrobotics.SparkMaxAlternateEncoder
-import com.revrobotics.SparkMaxPIDController
 import edu.wpi.first.wpilibj.RobotBase
-import frc.chargers.controls.feedforward.AngularMotorFF
-import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
-import frc.chargers.hardware.sensors.encoders.PositionEncoder
+import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
 import frc.chargers.wpilibextensions.delay
-import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
-import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import kotlin.math.roundToInt
 
 /**
@@ -120,7 +114,7 @@ public open class ChargerCANSparkMax(
     deviceId: Int,
     type: MotorType,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
-) : CANSparkMax(deviceId, type), FeedbackMotorController, HardwareConfigurable<SparkMaxConfiguration> {
+) : CANSparkMax(deviceId, type), EncoderMotorController, HardwareConfigurable<SparkMaxConfiguration> {
 
 
     private inner class EncoderConfiguration(
@@ -137,7 +131,6 @@ public open class ChargerCANSparkMax(
     /*
     CANSparkMax throws some exception if this is initialized on motor creation,
     so by lazy here delays the initialization until the encoder is accessed.
-    *Note: Exception is unknown; rohen forgot lol
      */
     override val encoder: SparkMaxEncoderAdapter by lazy {
         (alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
@@ -205,77 +198,6 @@ public open class ChargerCANSparkMax(
 
     }
 
-
-    /*
-    Below is the implementation of the FeedbackMotorController Interface
-     */
-
-
-
-    // equivalent to SparkMax.getPIDController() (uses property access syntax)
-    private val innerController = pidController
-    private var currentConstants = PIDConstants(0.0,0.0,0.0)
-    private var trapezoidProfile = AngularTrapezoidProfile.None
-
-    private fun updateControllerConstants(newConstants: PIDConstants){
-        if(currentConstants != newConstants){
-            innerController.constants = newConstants
-            currentConstants = newConstants
-        }
-    }
-
-    private var SparkMaxPIDController.constants: PIDConstants
-        get() = PIDConstants(getP(0), getI(0), getD(0) )
-        set(newConstants){
-            setP(newConstants.kP,0)
-            setI(newConstants.kI,0)
-            setD(newConstants.kD,0)
-        }
-    override fun setAngularVelocity(
-        target: AngularVelocity,
-        pidConstants: PIDConstants,
-        feedforward: AngularMotorFF
-    ) {
-        updateControllerConstants(pidConstants)
-        innerController.setReference(target.siValue, ControlType.kVelocity,0,feedforward.calculate(target).inUnit(volts))
-    }
-
-    override fun setAngularPosition(target: Angle, pidConstants: PIDConstants,absoluteEncoder: PositionEncoder?) {
-        val actualTarget = if (absoluteEncoder != null){
-            encoder.angularPosition - (absoluteEncoder.angularPosition - target)
-        }else{
-            target
-        }
-        updateControllerConstants(pidConstants)
-        innerController.setReference(actualTarget.siValue,ControlType.kPosition,0)
-    }
-
-    override fun setAngularPosition(
-        target: Angle,
-        pidConstants: PIDConstants,
-        feedforward: AngularMotorFF,
-        constraints: AngularMotionConstraints,
-        absoluteEncoder: PositionEncoder?
-    ) {
-        /*
-        if (trapezoidProfile.constraints != constraints){
-            trapezoidProfile = AngularTrapezoidProfile(
-                constraints
-            )
-        }
-        val currentState = trapezoidProfile.calculateCurrentState(
-            AngularTrapezoidProfile.State(target,encoder.angularVelocity),
-            AngularTrapezoidProfile.State(encoder.angularPosition,AngularVelocity(0.0))
-        )
-        updateControllerConstants(pidConstants)
-        if (absoluteEncoder != null){
-            innerController.setReference((currentState.position + (encoder.angularPosition - absoluteEncoder.angularPosition)).siValue, ControlType.kPosition,0,feedforward.calculate(currentState.velocity).inUnit(volts))
-        }else{
-            innerController.setReference(currentState.position.siValue, ControlType.kPosition,0,feedforward.calculate(currentState.velocity).inUnit(volts))
-        }
-
-         */
-    }
 }
 
 

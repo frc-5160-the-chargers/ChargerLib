@@ -8,8 +8,6 @@ import frc.chargers.commands.InstantCommand
  */
 public abstract class ChargerRobotContainer {
 
-
-
     public abstract val autonomousCommand: Command
 
     // instantCommand is used over DoNothing in case the test command isn't canceled for some reason
@@ -18,6 +16,7 @@ public abstract class ChargerRobotContainer {
     /*
     Here are functions that replicate functionality of the Robot class.
      */
+
     /**
      * Called once when robot starts up.
      */

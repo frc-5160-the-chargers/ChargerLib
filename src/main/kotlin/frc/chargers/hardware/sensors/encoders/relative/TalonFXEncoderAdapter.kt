@@ -1,16 +1,17 @@
 package frc.chargers.hardware.sensors.encoders.relative
 
+import com.batterystaple.kmeasure.dimensions.AngleDimension
+import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.rotations
 import com.batterystaple.kmeasure.units.seconds
 import com.ctre.phoenix6.hardware.TalonFX
 import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
-import frc.chargers.utils.Measurement
+import frc.chargers.utils.QuantityMeasurement
 
 /**
  * Adapts the TalonFX motor class's builtin encoder functionality to the charger encoder interface.
  * Also used for fusedCANCoder applications
- *
  */
 public class TalonFXEncoderAdapter(
     private val motorController: TalonFX
@@ -21,18 +22,18 @@ public class TalonFXEncoderAdapter(
     }
 
 
-    override val timestampedAngularPosition: Measurement<Angle>
+    override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
         get(){
             val statusSignal = motorController.rotorPosition
-            return Measurement(
+            return QuantityMeasurement(
                 value = statusSignal.value.ofUnit(rotations),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds)
             )
         }
-    override val timestampedAngularVelocity: Measurement<AngularVelocity>
+    override val timestampedAngularVelocity: QuantityMeasurement<AngularVelocityDimension>
         get(){
             val statusSignal = motorController.rotorVelocity
-            return Measurement(
+            return QuantityMeasurement(
                 value = statusSignal.value.ofUnit(rotations / seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds)
             )

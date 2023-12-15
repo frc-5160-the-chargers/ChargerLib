@@ -2,21 +2,14 @@ package frc.chargers.hardware.motorcontrol.ctre
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
-import com.ctre.phoenix6.configs.MotionMagicConfigs
 import com.ctre.phoenix6.configs.Slot0Configs
-import com.ctre.phoenix6.controls.MotionMagicVoltage
-import com.ctre.phoenix6.controls.PositionVoltage
-import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.*
-import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.hardware.motorcontrol.FeedbackMotorController
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
-import frc.chargers.hardware.sensors.encoders.PositionEncoder
+import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.sensors.encoders.relative.TalonFXEncoderAdapter
-import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
 
@@ -72,7 +65,7 @@ public inline fun falcon(
  * @see TalonFXConfiguration
  */
 public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : TalonFX(deviceNumber, canBus),
-    FeedbackMotorController, HardwareConfigurable<TalonFXConfiguration> {
+    EncoderMotorController, HardwareConfigurable<TalonFXConfiguration> {
 
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
@@ -110,103 +103,6 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
         println("TalonFX has been configured.")
 
     }
-
-
-    /*
-    Below is the Implementation of the FeedbackMotorController interface.
-     */
-
-    private val currentMMConfigs = MotionMagicConfigs()
-    private val currentSlotConfigs = Slot0Configs()
-    private val velocityRequest = VelocityVoltage(0.0).also{ it.Slot = 0 }
-    private val positionRequest = PositionVoltage(0.0).also{it.Slot = 0 }
-    private val mmRequest = MotionMagicVoltage(0.0).also{it.Slot = 0 }
-
-    final override fun setAngularVelocity(
-        target: AngularVelocity,
-        pidConstants: PIDConstants,
-        feedforward: AngularMotorFF
-    ) {
-        if (currentSlotConfigs.pidConstants != pidConstants ||
-            currentSlotConfigs.kS != feedforward.kS.inUnit(volts) ||
-            currentSlotConfigs.kV != feedforward.getKV(rotations,seconds)){
-
-            currentSlotConfigs.pidConstants = pidConstants
-            currentSlotConfigs.kS = feedforward.kS.inUnit(volts)
-            currentSlotConfigs.kV = feedforward.getKV(rotations,seconds)
-            configurator.apply(currentSlotConfigs)
-        }
-
-        velocityRequest.Velocity = target.inUnit(rotations/seconds)
-        velocityRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.get()).inUnit(volts)
-        setControl(velocityRequest)
-    }
-
-    final override fun setAngularPosition(target: Angle, pidConstants: PIDConstants, absoluteEncoder: PositionEncoder?) {
-
-        if (currentSlotConfigs.pidConstants != pidConstants){
-            currentSlotConfigs.pidConstants = pidConstants
-            configurator.apply(currentSlotConfigs)
-        }
-
-        /**
-         * Onboard PID control usually does not support external Encoders,
-         * especially not ones that aren't from the motor vendor.
-         *
-         * This essentially uses a workaround to allow an external Encoder to be used.
-         *
-         * Let's assume that the integrated Encoder returns a position of 540 degrees,
-         * the [absoluteEncoder] returns a position of 180 degrees,
-         * and the target is 90 degrees.
-         *
-         * By setting the target of the PID loop to 540 - (180-90) = 450 degrees,
-         * the same effect is acheived, since the motor is spinning 90 degrees to the left in both instances.
-         */
-        if (absoluteEncoder == null){
-            positionRequest.Position = target.inUnit(rotations)
-        }else{
-            positionRequest.Position = (encoder.angularPosition - (absoluteEncoder.angularPosition - target)).inUnit(rotations)
-        }
-        setControl(positionRequest)
-    }
-
-    final override fun setAngularPosition(
-        target: Angle,
-        pidConstants: PIDConstants,
-        feedforward: AngularMotorFF,
-        constraints: AngularMotionConstraints,
-        absoluteEncoder: PositionEncoder?
-    ) {
-        if(constraints.maxVelocity != currentMMConfigs.MotionMagicCruiseVelocity.ofUnit(rotations/seconds)
-            || constraints.maxAcceleration != currentMMConfigs.MotionMagicAcceleration.ofUnit(rotations/seconds/seconds)){
-            currentMMConfigs.MotionMagicCruiseVelocity = constraints.maxVelocity.inUnit(rotations/seconds)
-            currentMMConfigs.MotionMagicAcceleration = constraints.maxAcceleration.inUnit(rotations/seconds/seconds)
-            configurator.apply(currentMMConfigs)
-        }
-
-        if (currentSlotConfigs.pidConstants != pidConstants ||
-            currentSlotConfigs.kS != feedforward.kS.inUnit(volts) ||
-            currentSlotConfigs.kV != feedforward.getKV(rotations,seconds)){
-
-            currentSlotConfigs.pidConstants = pidConstants
-            currentSlotConfigs.kS = feedforward.kS.inUnit(volts)
-            currentSlotConfigs.kV = feedforward.getKV(rotations,seconds)
-            configurator.apply(currentSlotConfigs)
-        }
-
-        /**
-         * See above for an explanation.
-         */
-        if (absoluteEncoder == null){
-            mmRequest.Position = target.inUnit(rotations)
-        }else{
-            mmRequest.Position = (encoder.angularPosition - (absoluteEncoder.angularPosition - target)).inUnit(rotations)
-        }
-        mmRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.get()).inUnit(volts)
-        setControl(mmRequest)
-    }
-
-
 }
 
 

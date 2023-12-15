@@ -70,7 +70,7 @@ public inline fun redlineSRX(
  */
 public open class ChargerTalonSRX(
     deviceNumber: Int,
-    protected val encoderTicksPerRotation: Int
+    private val encoderTicksPerRotation: Int
 ) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<TalonSRXConfiguration> {
 
 

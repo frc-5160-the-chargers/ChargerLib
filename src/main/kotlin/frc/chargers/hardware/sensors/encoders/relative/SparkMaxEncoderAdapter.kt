@@ -10,7 +10,6 @@ import frc.chargers.hardware.sensors.encoders.ResettableEncoder
  * An adapter from the REV RelativeEncoder class to the ChargerLib Encoder interface.
  */
 public class SparkMaxEncoderAdapter(private val revEncoder: RelativeEncoder) : ResettableEncoder, RelativeEncoder by revEncoder {
-
     override fun setZero(newZero: Angle){
         position = newZero.inUnit(rotations)
     }
