@@ -32,14 +32,18 @@ public class DifferentialPoseMonitor(
     private val poseSuppliers: List<RobotPoseSupplier> = listOf(),
     startingPose: UnitPose2d = UnitPose2d()
 ): SubsystemBase(), RobotPoseSupplier {
+
     override val poseStandardDeviation: StandardDeviation
         get() = StandardDeviation.Default
+
     override val robotPoseMeasurement: Measurement<UnitPose2d>
         get() = Measurement(
             poseEstimator.latestPose.ofUnit(meters),
             fpgaTimestamp()
         )
+
     override val robotPose: UnitPose2d get() = robotPoseMeasurement.value
+
     public constructor(
         vararg poseSuppliers: RobotPoseSupplier,
         gyro: HeadingProvider? = null,
@@ -49,7 +53,6 @@ public class DifferentialPoseMonitor(
         poseSuppliers.toList(),
         startingPose
     )
-
 
 
 
@@ -114,11 +117,7 @@ public class DifferentialPoseMonitor(
 
         field.robotPose = poseEstimator.latestPose
         recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
-        // defined in EncoderDifferentialDrivetrain.kt
-        recordOutput("Drivetrain(Differential)/calculatedHeadingRad", heading.inUnit(radians))
-        recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
-        recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
-
-
+        recordOutput("Drivetrain(Differential)/realGyroUsedInPoseEstimation", gyro != null)
+        recordOutput("Drivetrain(Differential)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
     }
 }
