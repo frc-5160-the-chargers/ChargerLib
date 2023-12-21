@@ -26,6 +26,7 @@ import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOSim
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveControl
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
+import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
 import org.littletonrobotics.junction.Logger.recordOutput
 
 public fun simulatedDrivetrain(
@@ -89,9 +90,9 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
 
 public class EncoderDifferentialDrivetrain(
     lowLevel: DiffDriveIO,
-    private val constants: DiffDriveConstants = DiffDriveConstants.andymark(),
-    controlScheme: DiffDriveControl = DiffDriveControl.None,
-    gyro: HeadingProvider? = null,
+    public val constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    public val controlScheme: DiffDriveControl = DiffDriveControl.None,
+    public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
 ): SubsystemBase(), DifferentialDrivetrain, HeadingProvider, DiffDriveIO by lowLevel {
@@ -100,19 +101,19 @@ public class EncoderDifferentialDrivetrain(
     internal val wheelTravelPerMotorRadian = constants.gearRatio * wheelRadius
 
     private val leftController = UnitSuperPIDController(
-        controlScheme.leftVelocityConstants,
+        controlScheme.leftVelocityPID,
         {leftVelocity},
         target = AngularVelocity(0.0),
         selfSustain = true,
-        feedforward = controlScheme.leftMotorFF,
+        feedforward = controlScheme.leftFF,
     )
 
     private val rightController = UnitSuperPIDController(
-        controlScheme.rightVelocityConstants,
+        controlScheme.rightVelocityPID,
         {rightVelocity},
         target = AngularVelocity(0.0),
         selfSustain = true,
-        feedforward = controlScheme.rightMotorFF
+        feedforward = controlScheme.rightPID
     )
 
 
@@ -180,9 +181,13 @@ public class EncoderDifferentialDrivetrain(
     public override val heading: Angle
         get() = wheelTravelPerMotorRadian * (rightWheelTravel - leftWheelTravel) / constants.width
 
+
     override fun tankDrive(leftPower: Double, rightPower: Double) {
         setVoltages(leftPower * 12.volts, rightPower * 12.volts)
     }
+
+    public fun velocityDrive(xVelocity: Velocity, yVelocity: Velocity, rotationSpeed: AngularVelocity): Unit =
+        velocityDrive(ChassisSpeeds(xVelocity,yVelocity,rotationSpeed))
 
     public fun velocityDrive(speeds: ChassisSpeeds){
         val wheelSpeeds = kinematics.toWheelSpeeds(speeds)

@@ -1,10 +1,12 @@
-package frc.chargers.commands.drivetrainCommands
+package frc.chargers.commands.drivetrainCommands.turn
 
 import com.batterystaple.kmeasure.dimensions.AngleDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import edu.wpi.first.wpilibj2.command.Command
-import frc.chargers.commands.CommandBuilder
+import frc.chargers.commands.commandbuilder.CodeBlockContext
+import frc.chargers.commands.commandbuilder.CommandBuilder
+import frc.chargers.commands.drivetrainCommands.drive.DEFAULT_MAX_STEERING_POWER
 import frc.chargers.constants.TurnPIDConstants
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
@@ -14,23 +16,22 @@ import frc.chargers.controls.pid.UnitSuperPIDController
 //import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
 
+/*
 /**
  * Adds a command to the command builder turning the robot
  * at a specified [rotationPower] until reaching a specified [angle].
  */
 context(CommandBuilder, HeadingProvider)
 @LowPriorityInOverloadResolution
-public fun DifferentialDrivetrain.turn(angle: Angle, rotationPower: Double): Command {
-    val startHeading = heading
-    return loopUntil(
-        when {
-            angle < 0.degrees -> { { heading < startHeading + angle } }
-            angle > 0.degrees -> { { heading > startHeading + angle } }
-            else -> { { true } }
-        },
-        this
-    ) {
-        arcadeDrive(power = 0.0, rotation = rotationPower)
+public fun DifferentialDrivetrain.turn(
+    angle: Angle,
+    pidConstants: PIDConstants = PIDConstants(0.7,0.0,0.0),
+    maxTurnSpeed: Double = DEFAULT_MAX_STEERING_POWER
+): Command {
+    val controller by getOnceDuringRun{
+        UnitSuperPIDController(
+
+        )
     }
 }
 
@@ -62,7 +63,7 @@ public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleD
         target = targetHeading
     )
 
-    val runToTarget: () -> Unit = { arcadeDrive(power = 0.0, rotation = pidController.calculateOutput().siValue) }
+    val runToTarget: CodeBlockContext.() -> Unit = { arcadeDrive(power = 0.0, rotation = pidController.calculateOutput().siValue) }
 
     when(precision) {
         Precision.AllowOvershoot -> {
@@ -125,6 +126,8 @@ public fun EncoderHolonomicDrivetrain.turn(angle: Angle, precision: Precision<An
 
  */
 
+
+ */
 
 
 

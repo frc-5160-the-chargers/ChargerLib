@@ -8,7 +8,10 @@ import com.ctre.phoenix6.signals.*
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
+import frc.chargers.hardware.motorcontrol.CurrentProvider
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
+import frc.chargers.hardware.motorcontrol.TemperatureProvider
+import frc.chargers.hardware.motorcontrol.VoltageProvider
 import frc.chargers.hardware.sensors.encoders.relative.TalonFXEncoderAdapter
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
@@ -65,7 +68,16 @@ public inline fun falcon(
  * @see TalonFXConfiguration
  */
 public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : TalonFX(deviceNumber, canBus),
-    EncoderMotorController, HardwareConfigurable<TalonFXConfiguration> {
+    EncoderMotorController, HardwareConfigurable<TalonFXConfiguration>, TemperatureProvider, CurrentProvider, VoltageProvider {
+
+    final override val appliedVoltage: Voltage
+        get() = supplyVoltage.value.ofUnit(volts)
+
+    final override val appliedCurrent: Current
+        get() = statorCurrent.value.ofUnit(amps)
+
+    final override val tempCelsius: Double
+        get() = deviceTemp.value
 
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
@@ -127,15 +139,10 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
  * @see ChargerTalonFX
  */
 public data class TalonFXConfiguration(
-
-
     // audio configs
     var beepOnBoot: Boolean? = null,
 
     // closed loop general configs
-
-    // Note: While this value is by default false in CTRE's configuration,
-    // We want it to be true.
     var closedLoopContinuousWrap: Boolean? = null,
 
     // Closed Loop Ramps Configs

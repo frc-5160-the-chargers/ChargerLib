@@ -9,6 +9,9 @@ import com.ctre.phoenix.sensors.CANCoder
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
+import frc.chargers.hardware.motorcontrol.CurrentProvider
+import frc.chargers.hardware.motorcontrol.TemperatureProvider
+import frc.chargers.hardware.motorcontrol.VoltageProvider
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonSRXEncoderAdapter
 import kotlin.math.roundToInt
@@ -71,7 +74,8 @@ public inline fun redlineSRX(
 public open class ChargerTalonSRX(
     deviceNumber: Int,
     private val encoderTicksPerRotation: Int
-) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<TalonSRXConfiguration> {
+) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<TalonSRXConfiguration>,
+    TemperatureProvider, CurrentProvider, VoltageProvider {
 
 
     final override val encoder: Encoder
@@ -155,6 +159,13 @@ public open class ChargerTalonSRX(
 
 
     }
+
+    override val appliedCurrent: Current
+        get() = supplyCurrent.ofUnit(amps)
+    override val tempCelsius: Double
+        get() = temperature
+    override val appliedVoltage: Voltage
+        get() = busVoltage.ofUnit(volts)
 }
 
 /**

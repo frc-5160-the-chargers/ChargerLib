@@ -1,8 +1,8 @@
 package frc.chargers.utils
 
 import edu.wpi.first.wpilibj2.command.Command
-import frc.chargers.commands.CommandBuilder
-import frc.chargers.commands.buildCommand
+import frc.chargers.commands.commandbuilder.CommandBuilder
+import frc.chargers.commands.commandbuilder.buildCommand
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
 

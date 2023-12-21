@@ -13,6 +13,9 @@ import frc.chargers.utils.math.inputModulus
 import frc.chargers.utils.math.units.Inertia
 import frc.chargers.utils.math.units.times
 
+/**
+ * Represents the low level hardware of a [SwerveModule] during simulation.
+ */
 public class ModuleIOSim(
     logInputs: LoggableInputsProvider,
     turnGearbox: DCMotor,
@@ -27,18 +30,23 @@ public class ModuleIOSim(
         1 / turnGearRatio,
         turnInertiaMoment.inUnit(kilo.grams * meters * meters)
     )
+
     private val driveMotorSim = FlywheelSim(
         driveGearbox,
         1 / driveGearRatio,
         driveInertiaMoment.inUnit(kilo.grams * meters * meters)
     )
+
     private var currentDirection = Angle(0.0)
+
     private var currentWheelPosition = Angle(0.0)
+
     private var turnAppliedVoltage = Voltage(0.0)
+
     private var driveAppliedVoltage = Voltage(0.0)
 
     init{
-        ChargerRobot.runPeriodically(addToFront = true){
+        ChargerRobot.runPeriodically(addToFront = true /* Makes this block run before everything else */ ){
             turnMotorSim.update(ChargerRobot.LOOP_PERIOD.inUnit(seconds))
             driveMotorSim.update(ChargerRobot.LOOP_PERIOD.inUnit(seconds))
             currentDirection += turnMotorSim.angularVelocityRadPerSec.ofUnit(radians / seconds) * ChargerRobot.LOOP_PERIOD
@@ -79,5 +87,17 @@ public class ModuleIOSim(
             driveMotorSim.setInputVoltage(driveAppliedVoltage.inUnit(volts))
         }
     )
+
+    override val driveCurrent: Current by logInputs.quantity{
+        driveMotorSim.currentDrawAmps.ofUnit(amps)
+    }
+
+    override val turnCurrent: Current by logInputs.quantity{
+        turnMotorSim.currentDrawAmps.ofUnit(amps)
+    }
+
+    override val driveTempCelsius: Double by logInputs.double{ 0.0 }
+
+    override val turnTempCelsius: Double by logInputs.double{ 0.0 }
 
 }

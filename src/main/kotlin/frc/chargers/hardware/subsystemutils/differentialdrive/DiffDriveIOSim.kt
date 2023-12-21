@@ -30,17 +30,6 @@ public class DiffDriveIOSim(
     // gearRatio * wheelDiameter for simulator
     private val wheelTravelPerMotorRadian = 10.71 * 6.inches
 
-    override val leftWheelTravel: Angle by logInputs.quantity{ sim.leftPositionMeters.ofUnit(meters) / wheelTravelPerMotorRadian }
-    override val rightWheelTravel: Angle by logInputs.quantity{ sim.rightPositionMeters.ofUnit(meters) / wheelTravelPerMotorRadian }
-
-    override val leftVelocity: AngularVelocity by logInputs.quantity{ sim.leftVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian }
-    override val rightVelocity: AngularVelocity by logInputs.quantity{ sim.rightVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian }
-
-    override val leftVoltage: Voltage by logInputs.quantity{leftAppliedVoltage}
-    override val rightVoltage: Voltage by logInputs.quantity{rightAppliedVoltage}
-
-
-    override var inverted: Boolean = false
 
     override fun setVoltages(left: Voltage, right: Voltage) {
         if (inverted){
@@ -55,5 +44,17 @@ public class DiffDriveIOSim(
             rightAppliedVoltage.inUnit(volts)
         )
     }
+
+
+    override val leftWheelTravel: Angle by logInputs.quantity{ sim.leftPositionMeters.ofUnit(meters) / wheelTravelPerMotorRadian }
+    override val rightWheelTravel: Angle by logInputs.quantity{ sim.rightPositionMeters.ofUnit(meters) / wheelTravelPerMotorRadian }
+
+    override val leftVelocity: AngularVelocity by logInputs.quantity{ sim.leftVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian }
+    override val rightVelocity: AngularVelocity by logInputs.quantity{ sim.rightVelocityMetersPerSecond.ofUnit(meters / seconds) / wheelTravelPerMotorRadian }
+
+    override val leftVoltage: Voltage by logInputs.quantity{leftAppliedVoltage}
+    override val rightVoltage: Voltage by logInputs.quantity{rightAppliedVoltage}
+
+    override var inverted: Boolean = false
 
 }

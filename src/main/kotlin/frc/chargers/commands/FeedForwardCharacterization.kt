@@ -9,6 +9,7 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargerlibexternal.frc6328.characterization.FeedForwardCharacterization
 import frc.chargerlibexternal.frc6328.characterization.FeedForwardCharacterizationData
+import frc.chargers.commands.commandbuilder.buildCommand
 
 public fun characterizeFFAngular(
     name: String,

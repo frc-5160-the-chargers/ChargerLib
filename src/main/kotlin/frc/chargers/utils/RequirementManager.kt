@@ -2,7 +2,7 @@ package frc.chargers.utils
 
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.commands.CommandBuilder
+import frc.chargers.commands.commandbuilder.CommandBuilder
 import frc.chargers.wpilibextensions.Alert
 
 /**

@@ -15,7 +15,9 @@ public open class NonConfigurableEncoderMotorControllerGroup(
     protected vararg val motorControllers: MotorController,
     override val encoder: Encoder
 ) : MotorControllerGroup(motorControllers), EncoderMotorController {
-    public constructor(vararg encoderMotorControllers: EncoderMotorController) : this(*encoderMotorControllers, encoder = AverageEncoder(*encoderMotorControllers))
+    public constructor(
+        vararg encoderMotorControllers: EncoderMotorController
+    ) : this(*encoderMotorControllers, encoder = AverageEncoder(*encoderMotorControllers))
 
     // getInverted()/setInverted() in the WPILib MotorControllerGroup class
     // inverts motors by storing whether the MotorControllerGroup is currently inverted,
@@ -57,6 +59,7 @@ public open class EncoderMotorControllerGroup<C : HardwareConfiguration> private
     vararg motorControllers: MotorController, encoder: Encoder
 ) : NonConfigurableEncoderMotorControllerGroup(*motorControllers, encoder = encoder), HardwareConfigurable<C> {
 
+
     override fun configure(configuration: C) {
         motorControllers.forEach { motorController ->
             @Suppress("UNCHECKED_CAST") // Allowed because motorController is always set to an instance of
@@ -69,16 +72,20 @@ public open class EncoderMotorControllerGroup<C : HardwareConfiguration> private
     }
 
     /**
-     * Contains fake constructors in order to ensure that EncoderMotorControllerGroups
-     * are always both MotorControllers and MotorConfigurable<C>, which isn't possible
-     * to ensure in a regular constructor.
+     * Contains fake constructors in order to obtain the desired functionality:
+     * Where 1 constructor accepts a vararg of [EncoderMotorController]s which must also be [HardwareConfigurable]s,
+     * while another constructor accepts a vararg of [MotorController]s which also must be [HardwareConfigurable].
+     *
+     * In order to ensure both of these conditions are met, a generic with a where clause must be used; however,
+     * new generics cannot be introduced with other constructors.
      *
      * These functions add the "invoke" operator to the companion in order to create
      * a fake constructor. See [here](https://medium.com/@pablisco/companion-factory-methods-in-kotlin-e2eeb1e87f1b)
      * for more information on this technique.
      */
     public companion object {
-        public operator fun <M, C : HardwareConfiguration> invoke(vararg motorControllers: M, encoder: Encoder, configuration: C? = null): EncoderMotorControllerGroup<C> where M : MotorController, M : HardwareConfigurable<C> =
+        public operator fun <M, C : HardwareConfiguration> invoke(vararg motorControllers: M, encoder: Encoder, configuration: C? = null):
+                EncoderMotorControllerGroup<C> where M : MotorController, M : HardwareConfigurable<C> =
             EncoderMotorControllerGroup<C>(*motorControllers, encoder = encoder)
                 .apply {
                     if (configuration != null) {
@@ -86,7 +93,8 @@ public open class EncoderMotorControllerGroup<C : HardwareConfiguration> private
                     }
                 }
 
-        public operator fun <M, C : HardwareConfiguration> invoke(vararg encoderMotorControllers: M, configuration: C? = null) : EncoderMotorControllerGroup<C> where M : EncoderMotorController, M : HardwareConfigurable<C> =
+        public operator fun <M, C : HardwareConfiguration> invoke(vararg encoderMotorControllers: M, configuration: C? = null) :
+                EncoderMotorControllerGroup<C> where M : EncoderMotorController, M : HardwareConfigurable<C> =
             invoke(*encoderMotorControllers, encoder = AverageEncoder(*encoderMotorControllers))
                 .apply {
                     if (configuration != null) {

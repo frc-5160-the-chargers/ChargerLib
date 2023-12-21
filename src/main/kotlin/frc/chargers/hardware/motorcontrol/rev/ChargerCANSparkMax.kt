@@ -11,7 +11,10 @@ import com.revrobotics.SparkMaxAlternateEncoder
 import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
+import frc.chargers.hardware.motorcontrol.CurrentProvider
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
+import frc.chargers.hardware.motorcontrol.TemperatureProvider
+import frc.chargers.hardware.motorcontrol.VoltageProvider
 import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
 import frc.chargers.wpilibextensions.delay
 import kotlin.math.roundToInt
@@ -114,7 +117,8 @@ public open class ChargerCANSparkMax(
     deviceId: Int,
     type: MotorType,
     alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
-) : CANSparkMax(deviceId, type), EncoderMotorController, HardwareConfigurable<SparkMaxConfiguration> {
+) : CANSparkMax(deviceId, type), EncoderMotorController, HardwareConfigurable<SparkMaxConfiguration>,
+    TemperatureProvider, CurrentProvider, VoltageProvider {
 
 
     private inner class EncoderConfiguration(
@@ -197,6 +201,13 @@ public open class ChargerCANSparkMax(
         println("SparkMax has been configured.")
 
     }
+
+    override val appliedCurrent: Current
+        get() = outputCurrent.ofUnit(amps)
+    override val tempCelsius: Double
+        get() = motorTemperature
+    override val appliedVoltage: Voltage
+        get() = busVoltage.ofUnit(volts)
 
 }
 

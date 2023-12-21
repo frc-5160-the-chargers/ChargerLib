@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
 
 /**
- * A class that holds data about the Precision of a certain mechanism, or generic item
+ * A class that holds data about the Precision of a certain mechanism,
  */
 public sealed class Precision<out D : AnyDimension> {
     public data object AllowOvershoot : Precision<Nothing>()

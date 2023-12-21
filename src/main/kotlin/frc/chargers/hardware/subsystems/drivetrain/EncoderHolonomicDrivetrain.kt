@@ -4,19 +4,19 @@ import com.batterystaple.kmeasure.interop.average
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.chargerlibexternal.frc4481.HeadingCorrector
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.SwerveConstants
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
-import frc.chargers.hardware.sensors.withZero
 import frc.chargers.hardware.subsystems.posemonitors.SwervePoseMonitor
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveMotors
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveEncoders
-import frc.chargers.hardware.subsystemutils.swervedrive.SecondOrderControlScheme
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.hardware.subsystemutils.swervedrive.module.*
 import frc.chargers.utils.a
@@ -52,8 +52,8 @@ public fun EncoderHolonomicDrivetrain(
     driveMotors: SwerveMotors,
     turnGearbox: DCMotor,
     driveGearbox: DCMotor,
-    controlScheme: SwerveControl,
     constants: SwerveConstants,
+    controlScheme: SwerveControl,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     realPoseSuppliers: List<RobotPoseSupplier> = listOf(),
@@ -85,7 +85,7 @@ public fun EncoderHolonomicDrivetrain(
                     turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
                 ), controlScheme
             ),
-            controlScheme, constants, gyro, startingPose, *simPoseSuppliers.toTypedArray()
+            constants, controlScheme, gyro, startingPose, *simPoseSuppliers.toTypedArray()
         )
     }else{
         if (constants.invertTurnMotors){
@@ -150,11 +150,10 @@ public fun EncoderHolonomicDrivetrain(
 
         return EncoderHolonomicDrivetrain(
             topLeft, topRight, bottomLeft, bottomRight,
-            controlScheme, constants, gyro, startingPose, *realPoseSuppliers.toTypedArray()
+            constants, controlScheme, gyro, startingPose, *realPoseSuppliers.toTypedArray()
         )
     }
 }
-
 
 
 
@@ -177,83 +176,24 @@ public class EncoderHolonomicDrivetrain(
     public val topRight: SwerveModule,
     public val bottomLeft: SwerveModule,
     public val bottomRight: SwerveModule,
-    private val controlScheme: SwerveControl,
-    private val constants: SwerveConstants,
-    private var gyro: HeadingProvider? = null,
+    public val constants: SwerveConstants,
+    public val controlScheme: SwerveControl,
+    public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
 ): SubsystemBase(), ZeroableHeadingProvider, DifferentialDrivetrain{
-    init{
-        gyro?.run{
-            gyro = withZero()
-        }
-    }
+    /* Private Implementation */
+    private val wheelRadius = constants.wheelDiameter / 2.0
+    private val moduleArray = a[topLeft,topRight,bottomLeft,bottomRight]
+    private fun averageEncoderPosition() = moduleArray.map{it.wheelTravel}.average()
 
-
-    /**
-     * The pose estimator of the [EncoderHolonomicDrivetrain].
-     */
-    public val poseEstimator: SwervePoseMonitor = SwervePoseMonitor(
-        *poseSuppliers,
-        gyro = gyro, startingPose = startingPose
-    )
-
-
+    private val distanceOffset: Distance = averageEncoderPosition() * wheelRadius
     private var angleOffset = Angle(0.0)
-    /**
-     * Heading of the robot; from 0-360 degrees.
-     */
-    override val heading: Angle get() = poseEstimator.heading - angleOffset
 
-    override fun zeroHeading(){
-        angleOffset = heading
-    }
-
-
+    private val headingCorrector = HeadingCorrector()
+    private val mostReliableHeading: Angle
+        get() = (gyro?.heading ?: this.heading).inputModulus(0.0.degrees..360.degrees)
     /*
-    Summary of Kinematics usage:
-
-    the EncoderHolonomicDrivetrain has 4 different control modes,
-    represented using the SwerveControl class.
-
-    These control modes control the drivetrain in slightly different ways.
-
-    1. PIDFirstOrder uses basic PID control for swerve angle targeting,
-    in addition to basic(first order) kinematics.
-    The kinematics converts x speed, y speed, and rotation speed into target angles and speeds for each swerve module.
-
-    2. PIDSecondOrder uses basic PID control and second order kinematics.
-    Second order kinematics is similar to first order, except that it does some extra computation
-    to reduce drift of the robot when driving while turning.
-
-    3. ProfiledPIDFirstOrder uses Profiled PID control instead of regular PID control. Still in development right now.
-
-    4. ProfiledPIDSecondOrder uses profiled PID control and second order kinematics.
-
-     */
-
-
-    /**
-     * The kinematics class for the drivetrain.
-     * Uses [SuperSwerveDriveKinematics], a custom wrapper class around
-     * the [edu.wpi.first.math.kinematics.SwerveDriveKinematics] class.
-     */
-    public val kinematics: SuperSwerveDriveKinematics = SuperSwerveDriveKinematics(
-        UnitTranslation2d(constants.trackWidth/2,constants.wheelBase/2),
-        UnitTranslation2d(constants.trackWidth/2,-constants.wheelBase/2),
-        UnitTranslation2d(-constants.trackWidth/2,constants.wheelBase/2),
-        UnitTranslation2d(-constants.trackWidth/2,-constants.wheelBase/2)
-    )
-
-
-
-
-
-
-
-
-    /*
-    Control Mode-based functions:
     OPEN_LOOP indicates percent-out(power) based drive,
     while CLOSED_LOOP uses PID and feedforward for velocity-based driving.
      */
@@ -264,28 +204,63 @@ public class EncoderHolonomicDrivetrain(
 
 
 
+    /* PUBLIC API */
 
-
-
-
-
-
-    /*
-    Encoder-based functions below. They use similar tactics to the EncoderDifferentialDrivetrain class.
+    /**
+     * The pose estimator of the [EncoderHolonomicDrivetrain].
      */
-    private val wheelRadius = constants.wheelDiameter / 2.0
-    private val moduleArray = a[topLeft,topRight,bottomLeft,bottomRight]
-    private fun averageEncoderPosition() = moduleArray.map{it.wheelTravel}.average()
-    
-    private val distanceOffset: Distance = averageEncoderPosition() * wheelRadius
+    public val poseEstimator: SwervePoseMonitor = SwervePoseMonitor(
+        *poseSuppliers,
+        gyro = gyro, startingPose = startingPose
+    )
+
+    /**
+     * The current heading (the direction the robot is facing).
+     *
+     * This value is calculated using the encoders, not a gyroscope or accelerometer,
+     * so note that it may become inaccurate if the wheels slip. If available, consider
+     * using a [frc.chargers.hardware.sensors.imu.NavX] or similar device to calculate heading instead.
+     *
+     * This value by itself is not particularly meaningful as it may be fairly large,
+     * positive or negative, based on previous rotations of the motors, including
+     * from previous times the robot has been enabled.
+     *
+     * Thus, it's more common to use this property to determine *change* in heading.
+     * If the initial value of this property is stored, the amount of rotation since
+     * that initial point can easily be determined by subtracting the initial heading
+     * from the current heading.
+     *
+     * @see HeadingProvider
+     */
+    override val heading: Angle get() = (poseEstimator.heading - angleOffset).inputModulus(0.degrees..360.degrees)
+
+    /**
+     * Zeroes the drivetrain's calculated heading.
+     */
+    override fun zeroHeading(){
+        angleOffset = heading
+    }
 
 
+    /**
+     * The kinematics class for the drivetrain.
+     * Uses [SuperSwerveDriveKinematics], a custom wrapper class around
+     * the [edu.wpi.first.math.kinematics.SwerveDriveKinematics] class.
+     */
+    public val kinematics: SwerveDriveKinematics = SwerveDriveKinematics(
+        UnitTranslation2d(constants.trackWidth/2,constants.wheelBase/2).inUnit(meters),
+        UnitTranslation2d(constants.trackWidth/2,-constants.wheelBase/2).inUnit(meters),
+        UnitTranslation2d(-constants.trackWidth/2,constants.wheelBase/2).inUnit(meters),
+        UnitTranslation2d(-constants.trackWidth/2,-constants.wheelBase/2).inUnit(meters)
+    )
 
 
     /**
      * The distance the robot has traveled in total.
      */
-    public val distanceTraveled: Distance get() = (averageEncoderPosition() * wheelRadius) - distanceOffset
+    public val distanceTraveled: Distance get() =
+        (averageEncoderPosition() * wheelRadius) - distanceOffset
+
 
     /**
      * The current overall velocity of the robot.
@@ -297,16 +272,10 @@ public class EncoderHolonomicDrivetrain(
 
 
     /**
-     * The current speeds of the robot.
+     * The current [ChassisSpeeds] of the robot.
      */
     public val currentSpeeds: ChassisSpeeds
-        get() = kinematics.toChassisSpeeds(currentModuleStates)
-
-
-
-
-
-
+        get() = kinematics.toChassisSpeeds(*currentModuleStates.toArray())
 
 
     /**
@@ -326,30 +295,18 @@ public class EncoderHolonomicDrivetrain(
         }
         set(ms){
             ms.desaturate(constants.maxModuleSpeed)
-            var secondOrderTurnSpeedTL = AngularVelocity(0.0)
-            var secondOrderTurnSpeedTR = AngularVelocity(0.0)
-            var secondOrderTurnSpeedBL = AngularVelocity(0.0)
-            var secondOrderTurnSpeedBR = AngularVelocity(0.0)
-            if (controlScheme is SecondOrderControlScheme && ms is SecondOrderModuleStateGroup){
-                secondOrderTurnSpeedTL = ms.topLeftTurnSpeed
-                secondOrderTurnSpeedTR = ms.topRightTurnSpeed
-                secondOrderTurnSpeedBL = ms.bottomLeftTurnSpeed
-                secondOrderTurnSpeedBR = ms.bottomRightTurnSpeed
-            }
             if (currentControlMode == ControlMode.CLOSED_LOOP){
-
-                topLeft.setDirectionalVelocity(ms.topLeftSpeed / wheelRadius,ms.topLeftAngle,secondOrderTurnSpeedTL)
-                topRight.setDirectionalVelocity(ms.topRightSpeed / wheelRadius,ms.topRightAngle,secondOrderTurnSpeedTR)
-                bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed / wheelRadius,ms.bottomLeftAngle,secondOrderTurnSpeedBL)
-                bottomRight.setDirectionalVelocity(ms.bottomRightSpeed / wheelRadius,ms.bottomRightAngle,secondOrderTurnSpeedBR)
+                topLeft.setDirectionalVelocity(ms.topLeftSpeed / wheelRadius,ms.topLeftAngle)
+                topRight.setDirectionalVelocity(ms.topRightSpeed / wheelRadius,ms.topRightAngle)
+                bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed / wheelRadius,ms.bottomLeftAngle)
+                bottomRight.setDirectionalVelocity(ms.bottomRightSpeed / wheelRadius,ms.bottomRightAngle)
             }else{
-                topLeft.setDirectionalPower((ms.topLeftSpeed/constants.maxModuleSpeed).siValue, ms.topLeftAngle,secondOrderTurnSpeedTL)
-                topRight.setDirectionalPower((ms.topRightSpeed/constants.maxModuleSpeed).siValue, ms.topRightAngle,secondOrderTurnSpeedTR)
-                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/constants.maxModuleSpeed).siValue, ms.bottomLeftAngle,secondOrderTurnSpeedBL)
-                bottomRight.setDirectionalPower((ms.bottomRightSpeed/constants.maxModuleSpeed).siValue, ms.bottomRightAngle,secondOrderTurnSpeedBR)
+                topLeft.setDirectionalPower((ms.topLeftSpeed/constants.maxModuleSpeed).siValue, ms.topLeftAngle)
+                topRight.setDirectionalPower((ms.topRightSpeed/constants.maxModuleSpeed).siValue, ms.topRightAngle)
+                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/constants.maxModuleSpeed).siValue, ms.bottomLeftAngle)
+                bottomRight.setDirectionalPower((ms.bottomRightSpeed/constants.maxModuleSpeed).siValue, ms.bottomRightAngle)
             }
             recordOutput("Drivetrain(Swerve)/DesiredModuleStates", ms.topLeftState,ms.topRightState,ms.bottomLeftState,ms.bottomRightState)
-
         }
 
 
@@ -381,20 +338,13 @@ public class EncoderHolonomicDrivetrain(
         }
 
 
-
-
-
-
-
-
-
     /**
      * The max linear velocity of the drivetrain, calculated by simulating
      * driving each swerve module at their maximum potential,
      * then calculating the output using the kinematics object.
      */
     public val maxLinearVelocity: Velocity = abs(kinematics.toChassisSpeeds(
-        ModuleStateGroup(
+        *ModuleStateGroup(
             topLeftSpeed = constants.maxModuleSpeed,
             topRightSpeed = constants.maxModuleSpeed,
             bottomLeftSpeed = constants.maxModuleSpeed,
@@ -403,8 +353,9 @@ public class EncoderHolonomicDrivetrain(
             topRightAngle = Angle(0.0),
             bottomLeftAngle = Angle(0.0),
             bottomRightAngle = Angle(0.0)
-        )
+        ).toArray()
     ).xVelocity)
+
 
     /**
      * The max angular velocity of the drivetrain, calculated by simulating
@@ -412,7 +363,7 @@ public class EncoderHolonomicDrivetrain(
      * then calculating the output using the kinematics object.
      */
     public val maxRotationalVelocity: AngularVelocity = abs(kinematics.toChassisSpeeds(
-        ModuleStateGroup(
+        *ModuleStateGroup(
             topLeftSpeed = constants.maxModuleSpeed,
             topRightSpeed = -constants.maxModuleSpeed,
             bottomLeftSpeed = constants.maxModuleSpeed,
@@ -421,19 +372,9 @@ public class EncoderHolonomicDrivetrain(
             topRightAngle = 45.degrees,
             bottomLeftAngle = 45.degrees,
             bottomRightAngle = -45.degrees
-        )
+        ).toArray()
     ).rotationSpeed)
 
-
-
-
-
-
-    private val mostReliableHeading: Angle
-        get() = (gyro?.heading ?: this.heading).inputModulus(0.0.degrees..360.degrees)
-
-    /* Below are the open-loop drive functions.
-    */
 
     /**
      * A generic drive function; mainly used if driving at a specific velocity is not required, or during teleop.
@@ -450,6 +391,7 @@ public class EncoderHolonomicDrivetrain(
         fieldRelative: Boolean = RobotBase.isSimulation() || gyro != null
     ): Unit = swerveDrive(ChassisPowers(xPower,yPower,rotationPower), fieldRelative)
 
+
     /**
      * A generic drive function; mainly used if driving at a specific velocity is not required, or during teleop.
      *
@@ -462,38 +404,21 @@ public class EncoderHolonomicDrivetrain(
         powers: ChassisPowers,
         fieldRelative: Boolean = RobotBase.isSimulation() || gyro != null
     ){
-        val speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
         currentControlMode = ControlMode.OPEN_LOOP
-
-
-        /*
-        4481's second order swerve kinematics already applies field relative drive;
-        thus, fromFieldRelativeSpeeds is not called if second order kinematics is used.
-
-        Note: the multipliers here are relatively arbitrary; they are simply what has worked best for us.
-        In addition, second order kinematics in open-loop control over-corrects
-         */
-        currentModuleStates = if (controlScheme is SecondOrderControlScheme){
-            kinematics.toSecondOrderModuleStateGroup(
-                speeds,
-                mostReliableHeading,
-                fieldRelative
-            )
-        }else{
-            kinematics.toFirstOrderModuleStateGroup(
-                speeds,
-                mostReliableHeading,
-                fieldRelative
-            )
-        }
-
+        var speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
+        if (fieldRelative) speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
+        speeds = speeds.correctForDynamics(driftRate = 1.6)
+        // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
+        speeds = headingCorrector.correctHeading(speeds,-mostReliableHeading.asRotation2d())
+        val stateArray = kinematics.toSwerveModuleStates(speeds)
+        currentModuleStates = ModuleStateGroup(
+            topLeftState = stateArray[0],
+            topRightState = stateArray[1],
+            bottomLeftState = stateArray[2],
+            bottomRightState = stateArray[3]
+        )
         currentControlMode = ControlMode.CLOSED_LOOP
     }
-
-
-
-
-    /* Here are the closed-loop drive functions. */
 
 
     /**
@@ -524,30 +449,22 @@ public class EncoderHolonomicDrivetrain(
         speeds: ChassisSpeeds,
         fieldRelative: Boolean = RobotBase.isSimulation() || gyro != null
     ){
-
         currentControlMode = ControlMode.CLOSED_LOOP
-
-        /*
-        4481's second order swerve kinematics already applies field relative drive;
-        thus, fromFieldRelativeSpeeds is not called if second order kinematics is used.
-         */
-        currentModuleStates = if(controlScheme is SecondOrderControlScheme){
-            kinematics.toSecondOrderModuleStateGroup(
-                speeds,
-                mostReliableHeading,
-                fieldRelative
-            )
-        }else{
-            kinematics.toFirstOrderModuleStateGroup(
-                if(fieldRelative){
-                    ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
-                }else{
-                    speeds
-                }.correctForDynamics(driftRate = if (RobotBase.isReal()) 1.3 else 1.0)
-            )
-        }
-
+        var newSpeeds: ChassisSpeeds =
+            if (fieldRelative) ChassisSpeeds.fromFieldRelativeSpeeds(speeds,mostReliableHeading.asRotation2d()) else speeds
+        newSpeeds = newSpeeds.correctForDynamics(driftRate = if (RobotBase.isReal()) 1.3 else 1.0)
+        // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
+        newSpeeds = headingCorrector.correctHeading(newSpeeds,-mostReliableHeading.asRotation2d())
+        val stateArray = kinematics.toSwerveModuleStates(newSpeeds)
+        currentModuleStates = ModuleStateGroup(
+            topLeftState = stateArray[0],
+            topRightState = stateArray[1],
+            bottomLeftState = stateArray[2],
+            bottomRightState = stateArray[3]
+        )
+        currentControlMode = ControlMode.CLOSED_LOOP
     }
+
 
     override fun tankDrive(leftPower: Double, rightPower: Double) {
         topLeft.setDirectionalPower(leftPower,0.0.degrees)
@@ -578,7 +495,28 @@ public class EncoderHolonomicDrivetrain(
     }
 
 
+    /**
+     * Stalls the drivetrain motors in the forward direction, using the kS constant provided in the control scheme.
+     */
+    public fun stallForwards(){
+        // subtracts 0.05 volts from the stall voltage to correct for inaccuracies with kS constant.
+        topLeft.driveVoltage = controlScheme.velocityFF.kS - 0.05.volts
+        topRight.driveVoltage = controlScheme.velocityFF.kS - 0.05.volts
+        bottomLeft.driveVoltage = controlScheme.velocityFF.kS - 0.05.volts
+        bottomRight.driveVoltage = controlScheme.velocityFF.kS - 0.05.volts
+    }
 
+
+    /**
+     * Stalls the drivetrain motors in the backward direction, using the kS constant provided in the control scheme.
+     */
+    public fun stallBackwards(){
+        // adds 0.05 volts from the stall voltage to correct for inaccuracies with kS constant.
+        topLeft.driveVoltage = -controlScheme.velocityFF.kS + 0.05.volts
+        topRight.driveVoltage = -controlScheme.velocityFF.kS + 0.05.volts
+        bottomLeft.driveVoltage = -controlScheme.velocityFF.kS + 0.05.volts
+        bottomRight.driveVoltage = -controlScheme.velocityFF.kS + 0.05.volts
+    }
 
 
     /**

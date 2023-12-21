@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("edu.wpi.first.GradleRIO") version "2024.1.1-beta-2"
+    id("edu.wpi.first.GradleRIO") version "2024.1.1-beta-4"
     id("org.jetbrains.kotlin.jvm") version "1.9.20-Beta"
     id("maven-publish")
     id("org.jetbrains.dokka") version "1.8.10"
@@ -70,6 +70,7 @@ dependencies {
     simulationRelease wpi.sim.enableRelease()
 
     implementation "gov.nist.math:jama:1.0.3"
+    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.21-1.0.15")
 
     testImplementation "io.mockk:mockk:1.13.7"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'

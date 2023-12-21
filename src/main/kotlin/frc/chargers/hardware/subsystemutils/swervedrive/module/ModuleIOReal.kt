@@ -6,12 +6,17 @@ import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.wpilibj.RobotController
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
+import frc.chargers.hardware.motorcontrol.CurrentProvider
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
+import frc.chargers.hardware.motorcontrol.TemperatureProvider
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.Alert
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
 
+/**
+ * Represents the low level hardware of a [SwerveModule] on the real robot.
+ */
 public class ModuleIOReal(
     logInputs: LoggableInputsProvider,
     private val turnMotor: EncoderMotorController,
@@ -21,10 +26,32 @@ public class ModuleIOReal(
     private val turnGearRatio: Double = DEFAULT_GEAR_RATIO
 ): ModuleIO {
     private val startingWheelTravel = driveMotor.encoder.angularPosition
+
     private var turnAppliedVoltage = Voltage(0.0)
+
     private var driveAppliedVoltage = Voltage(0.0)
+
     private val batteryVoltageIssueAlert = Alert.warning(
-        text = "It seems that the battery voltage from the Robot controller is being reported as 0."
+        text = "It seems that the battery voltage from the Robot controller is being reported as extremely low(possibly 0)."
+    )
+
+
+
+
+    override var turnVoltage: Voltage by logInputs.quantity(
+        getValue = {turnAppliedVoltage},
+        setValue = {
+            turnAppliedVoltage = it.coerceIn(getVoltageRange())
+            turnMotor.setVoltage(turnAppliedVoltage)
+        }
+    )
+
+    override var driveVoltage: Voltage by logInputs.quantity(
+        getValue = {driveAppliedVoltage},
+        setValue = {
+            driveAppliedVoltage = it.coerceIn(getVoltageRange())
+            driveMotor.setVoltage(driveAppliedVoltage)
+        }
     )
 
 
@@ -47,21 +74,37 @@ public class ModuleIOReal(
         (driveMotor.encoder.angularPosition - startingWheelTravel) * driveGearRatio
     }
 
-    override var turnVoltage: Voltage by logInputs.quantity(
-        getValue = {turnAppliedVoltage},
-        setValue = {
-            turnAppliedVoltage = it.coerceIn(getVoltageRange())
-            turnMotor.setVoltage(turnAppliedVoltage)
+    override val driveCurrent: Current by logInputs.quantity{
+        if (driveMotor is CurrentProvider){
+            driveMotor.appliedCurrent
+        }else{
+            Current(0.0)
         }
-    )
+    }
 
-    override var driveVoltage: Voltage by logInputs.quantity(
-        getValue = {driveAppliedVoltage},
-        setValue = {
-            driveAppliedVoltage = it.coerceIn(getVoltageRange())
-            driveMotor.setVoltage(driveAppliedVoltage)
+    override val turnCurrent: Current by logInputs.quantity{
+        if (turnMotor is CurrentProvider){
+            turnMotor.appliedCurrent
+        }else{
+            Current(0.0)
         }
-    )
+    }
+
+    override val driveTempCelsius: Double by logInputs.double{
+        if (driveMotor is TemperatureProvider){
+            driveMotor.tempCelsius
+        }else{
+            0.0
+        }
+    }
+
+    override val turnTempCelsius: Double by logInputs.double{
+        if (turnMotor is TemperatureProvider){
+            turnMotor.tempCelsius
+        }else{
+            0.0
+        }
+    }
 
     private fun getVoltageRange(): ClosedRange<Voltage>{
         val upperLimit = RobotController.getBatteryVoltage().ofUnit(volts)

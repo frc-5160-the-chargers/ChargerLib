@@ -20,7 +20,7 @@ public inline fun redlineSpark(channel: Int, configure: SparkConfiguration.() ->
  * but has additional features to mesh better with the rest
  * of this library.
  */
-public class ChargerSpark(channel: Int) : Spark(channel), HardwareConfigurable<SparkConfiguration> {
+public open class ChargerSpark(channel: Int) : Spark(channel), HardwareConfigurable<SparkConfiguration> {
     override fun configure(configuration: SparkConfiguration) {
         configuration.inverted?.let(::setInverted)
         println("Spark has been configured.")

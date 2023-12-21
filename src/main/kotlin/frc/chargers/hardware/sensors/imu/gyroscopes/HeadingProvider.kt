@@ -27,9 +27,6 @@ public interface HeadingProvider {
          * val headingProvider = HeadingProvider{ Angle(0.0) }
          */
         public inline operator fun invoke(crossinline getHeading: () -> Angle): HeadingProvider =
-            object: HeadingProvider {
-                override val heading: Angle get() = getHeading()
-            }
-
+            object: HeadingProvider { override val heading: Angle get() = getHeading() }
     }
 }

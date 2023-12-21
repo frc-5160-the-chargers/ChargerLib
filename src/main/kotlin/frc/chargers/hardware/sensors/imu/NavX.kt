@@ -44,17 +44,17 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
         println("NavX YAW has been zeroed.")
     }
 
-    override val heading: Angle by IMU_INPUTS.quantity{
+    override val heading: Angle by ImuLog.quantity{
         -ahrs.fusedHeading.toDouble().ofUnit(degrees) - headingOffset
     } // Negative sign because the navX reports clockwise as positive, whereas we want counterclockwise to be positive
 
-    override val altitude: Distance? by IMU_INPUTS.nullableQuantity{
+    override val altitude: Distance? by ImuLog.nullableQuantity{
         if (ahrs.isAltitudeValid) ahrs.altitude.toDouble().ofUnit(meters) else null
     }
 
     public val firmwareVersion: String get() = ahrs.firmwareVersion
 
-    override val isConnected: Boolean by IMU_INPUTS.boolean{ ahrs.isConnected }
+    override val isConnected: Boolean by ImuLog.boolean{ ahrs.isConnected }
 
     override val gyroscope: Gyroscope = Gyroscope()
     override val compass: Compass = Compass()
@@ -62,47 +62,47 @@ public class NavX(public val ahrs: AHRS = AHRS()) : IMU {
     override val speedometer: Speedometer = Speedometer()
 
     public inner class Gyroscope internal constructor(): ThreeAxisGyroscope {
-        override val yaw: Angle by GYRO_INPUTS.quantity{
+        override val yaw: Angle by GyroLog.quantity{
             ahrs.yaw.toDouble().ofUnit(degrees)
         }
-        override val pitch: Angle by GYRO_INPUTS.quantity{
+        override val pitch: Angle by GyroLog.quantity{
             ahrs.pitch.toDouble().ofUnit(degrees)
         }
-        override val roll: Angle by GYRO_INPUTS.quantity{
+        override val roll: Angle by GyroLog.quantity{
             ahrs.roll.toDouble().ofUnit(degrees)
         }
-        override val heading: Angle by GYRO_INPUTS.quantity{
+        override val heading: Angle by GyroLog.quantity{
             ahrs.angle.ofUnit(degrees)
         }
     }
 
     public inner class Compass internal constructor(): HeadingProvider {
-        public override val heading: Angle by COMPASS_INPUTS.quantity{
+        public override val heading: Angle by CompassLog.quantity{
             -ahrs.compassHeading.toDouble().ofUnit(degrees)
         } // Negative sign because the navX reports clockwise as positive
         // whereas we want counterclockwise to be positive
     }
 
     public inner class Accelerometer internal constructor(): ThreeAxisAccelerometer {
-        override val xAcceleration: Acceleration by ACCELEROMETER_INPUTS.quantity{
+        override val xAcceleration: Acceleration by AccelerometerLog.quantity{
             ahrs.worldLinearAccelX.toDouble().ofUnit(g)
         }
-        override val yAcceleration: Acceleration by ACCELEROMETER_INPUTS.quantity{
+        override val yAcceleration: Acceleration by AccelerometerLog.quantity{
             ahrs.worldLinearAccelY.toDouble().ofUnit(g)
         }
-        override val zAcceleration: Acceleration by ACCELEROMETER_INPUTS.quantity{
+        override val zAcceleration: Acceleration by AccelerometerLog.quantity{
             ahrs.worldLinearAccelZ.toDouble().ofUnit(g)
         }
     }
 
     public inner class Speedometer internal constructor(): ThreeAxisSpeedometer {
-        override val xVelocity: Velocity by SPEEDOMETER_INPUTS.quantity{
+        override val xVelocity: Velocity by SpeedometerLog.quantity{
             ahrs.velocityX.toDouble().ofUnit(meters / seconds)
         }
-        override val yVelocity: Velocity by SPEEDOMETER_INPUTS.quantity{
+        override val yVelocity: Velocity by SpeedometerLog.quantity{
             ahrs.velocityY.toDouble().ofUnit(meters / seconds)
         }
-        override val zVelocity: Velocity by SPEEDOMETER_INPUTS.quantity{
+        override val zVelocity: Velocity by SpeedometerLog.quantity{
             ahrs.velocityZ.toDouble().ofUnit(meters / seconds)
         }
     }
