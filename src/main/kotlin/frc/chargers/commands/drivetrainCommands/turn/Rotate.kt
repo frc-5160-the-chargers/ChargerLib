@@ -4,47 +4,14 @@ import com.batterystaple.kmeasure.dimensions.AngleDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import edu.wpi.first.wpilibj2.command.Command
-import frc.chargers.commands.commandbuilder.CodeBlockContext
 import frc.chargers.commands.commandbuilder.CommandBuilder
-import frc.chargers.commands.drivetrainCommands.drive.DEFAULT_MAX_STEERING_POWER
-import frc.chargers.constants.TurnPIDConstants
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.utils.Precision
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
-//import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
 
-/*
-/**
- * Adds a command to the command builder turning the robot
- * at a specified [rotationPower] until reaching a specified [angle].
- */
-context(CommandBuilder, HeadingProvider)
-@LowPriorityInOverloadResolution
-public fun DifferentialDrivetrain.turn(
-    angle: Angle,
-    pidConstants: PIDConstants = PIDConstants(0.7,0.0,0.0),
-    maxTurnSpeed: Double = DEFAULT_MAX_STEERING_POWER
-): Command {
-    val controller by getOnceDuringRun{
-        UnitSuperPIDController(
-
-        )
-    }
-}
-
-/**
- * Adds a command to the command builder turning the robot
- * to a specified [angle] (with a specified [precision]) using PID,
- * with PID constants gotten from the local context.
- *
- * @see Precision
- */
-context(CommandBuilder, HeadingProvider, TurnPIDConstants)
-public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension> = Precision.AllowOvershoot): Command =
-    turn(angle, precision, turnPIDConstants)
 
 /**
  * Adds a command to the command builder turning the robot
@@ -54,80 +21,47 @@ public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleD
  */
 context(CommandBuilder, HeadingProvider)
 @LowPriorityInOverloadResolution
-public fun DifferentialDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension> = Precision.AllowOvershoot, pidConstants: PIDConstants): Command {
-    val targetHeading = heading
-    val pidController = UnitSuperPIDController(
-        pidConstants = pidConstants,
-        getInput = { heading },
-        outputRange = Scalar(0.0)..Scalar(1.0),
-        target = targetHeading
-    )
-
-    val runToTarget: CodeBlockContext.() -> Unit = { arcadeDrive(power = 0.0, rotation = pidController.calculateOutput().siValue) }
-
-    when(precision) {
-        Precision.AllowOvershoot -> {
-            return loopUntil(
-                when {
-                    angle < 0.degrees -> { { heading < targetHeading } }
-                    angle > 0.degrees -> { { heading > targetHeading } }
-                    else -> { { true } } // If target rotation is 0 degrees or NaN, immediately stop
-                },
-                this,
-                execute = runToTarget
-            )
-        }
-        is Precision.Within -> {
-            return loopUntil({ pidController.error in precision.allowableError }, this, execute = runToTarget)
-        }
+public fun DifferentialDrivetrain.rotateAction(
+    angle: Angle,
+    pidConstants: PIDConstants = PIDConstants(0.6,0.0,0.0),
+    precision: Precision<AngleDimension> = Precision.AllowOvershoot
+): Command = runSequentially {
+    val targetAngle by getOnceDuringRun{ this@HeadingProvider.heading + angle }
+    val controller by getOnceDuringRun{
+        UnitSuperPIDController(
+            pidConstants,
+            { this@HeadingProvider.heading },
+            Scalar(-1.0)..Scalar(1.0),
+            target = targetAngle,
+            continuousInputRange = 0.degrees..360.degrees
+        )
     }
-}
 
-/*
-context(CommandBuilder,HeadingProvider)
-@JvmName("turnWithExternalHeadingProvider")
-@LowPriorityInOverloadResolution
-public fun EncoderHolonomicDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension> = Precision.AllowOvershoot, pidConstants: PIDConstants): Command{
-    val targetHeading = heading
-    val pidController = UnitSuperPIDController<AngleDimension,VelocityDimension>(
-        pidConstants = pidConstants,
-        getInput = { heading },
-        target = targetHeading
-    )
+    fun hasHitTarget(): Boolean = when (precision){
+        Precision.AllowOvershoot ->
+            // checks that both the heading and target angle have the same sign
+            this@HeadingProvider.heading * targetAngle >= 0.degrees &&
+            // checks whether the heading has hit or exceeded the target.
+            abs(this@HeadingProvider.heading) >= abs(targetAngle)
 
-    val runToTarget: () -> Unit = { rotateInPlace(pidController.calculateOutput()) }
+        is Precision.Within -> this@HeadingProvider.heading in precision.allowableError
+    }
 
-    when(precision) {
-        Precision.AllowOvershoot -> {
-            return loopUntil(
-                when {
-                    angle < 0.degrees -> { { heading < targetHeading } }
-                    angle > 0.degrees -> { { heading > targetHeading } }
-                    else -> { { true } } // If target rotation is 0 degrees or NaN, immediately stop
-                },
-                this,
-                execute = runToTarget
-            )
-        }
-        is Precision.Within -> {
-            return loopUntil({ pidController.error in precision.allowableError }, this, execute = runToTarget)
-        }
+    loopUntil(
+        condition = ::hasHitTarget,
+        this@DifferentialDrivetrain
+    ){
+        arcadeDrive(0.0, controller.calculateOutput().siValue)
     }
 }
 
 
-context(CommandBuilder)
-@JvmName("turnWithBuiltinGyro")
-@LowPriorityInOverloadResolution
-public fun EncoderHolonomicDrivetrain.turn(angle: Angle, precision: Precision<AngleDimension> = Precision.AllowOvershoot, pidConstants: PIDConstants): Command =
-    with(gyro){
-        return turn(angle,precision,pidConstants)
-    }
-
- */
 
 
- */
+
+
+
+
 
 
 

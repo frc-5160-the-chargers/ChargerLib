@@ -13,9 +13,6 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
 
 
-
-
-
 /**
  * Adds a command to the command builder driving the robot for
  * a specified [time] with a specified [power].
@@ -33,6 +30,40 @@ public fun DifferentialDrivetrain.driveStraightAction(
     runOnce(this@DifferentialDrivetrain) {
         stop()
     }
+}
+
+/**
+ * Adds a command to the command builder driving a swerve-drive robot for
+ * a specified [time] with a specified [power], at a certain [direction].
+ */
+context(CommandBuilder)
+@JvmName("driveTime")
+public fun EncoderHolonomicDrivetrain.driveStraightAction(
+    time: Time,
+    power: Double,
+    direction: Angle = Angle(0.0),
+    fieldRelative: Boolean = false
+): Command = runSequentially{
+
+    loopFor(time,this@EncoderHolonomicDrivetrain){
+        if (fieldRelative){
+            val fieldRelativeDelta = gyro?.heading ?: this@EncoderHolonomicDrivetrain.heading
+            topLeft.setDirectionalPower(power,direction - fieldRelativeDelta )
+            topRight.setDirectionalPower(power,direction - fieldRelativeDelta )
+            bottomLeft.setDirectionalPower(power,direction - fieldRelativeDelta )
+            bottomRight.setDirectionalPower(power,direction - fieldRelativeDelta )
+        }else{
+            topLeft.setDirectionalPower(power,direction)
+            topRight.setDirectionalPower(power,direction)
+            bottomLeft.setDirectionalPower(power,direction)
+            bottomRight.setDirectionalPower(power,direction)
+        }
+    }
+
+    runOnce(this@EncoderHolonomicDrivetrain){
+        stop()
+    }
+
 }
 
 
@@ -93,143 +124,7 @@ public fun EncoderDifferentialDrivetrain.driveStraightAction(
     steeringPIDConstants: PIDConstants,
     direction: Angle = heading,
     maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER
-): Command = with (this as HeadingProvider){
+): Command = with (gyro ?: this){// provides this block with the context of a HeadingProvider
     driveStraightAction(time, power, steeringPIDConstants,direction, maxSteeringPower)
 }
 
-/**
- * Adds a command to the command builder driving a swerve-drive robot for
- * a specified [time] with a specified [power], using
- * PID to ensure a straight drive without deviation.
- */
-context(CommandBuilder)
-public fun EncoderHolonomicDrivetrain.driveStraightAction(
-    time: Time,
-    power: Double,
-    direction: Angle
-): Command = runSequentially{
-
-    loopFor(time,this@EncoderHolonomicDrivetrain){
-        topLeft.setDirectionalPower(power,direction)
-        topRight.setDirectionalPower(power,direction)
-        bottomLeft.setDirectionalPower(power,direction)
-        bottomRight.setDirectionalPower(power,direction)
-    }
-
-    runOnce(this@EncoderHolonomicDrivetrain){
-        stop()
-    }
-
-}
-
-
-
-
-
-
-
-
-
-/*
-
-
-context(CommandBuilder, TurnPIDConstants)
-@JvmName("driveDistanceWithVelocity")
-@LowPriorityInOverloadResolution
-public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, velocity: Velocity, maxSteeringVelocity: AngularVelocity = DEFAULT_MAX_STEERING_VELOCITY): Command =
-    driveStraight(distance, velocity, turnPIDConstants, maxSteeringVelocity)
-
-context(CommandBuilder)
-@JvmName("driveDistanceWithVelocity")
-@LowPriorityInOverloadResolution
-@CommandBuilderMarker
-public fun EncoderDifferentialDrivetrain.driveStraight(distance: Distance, velocity: Velocity, steeringPIDConstants: PIDConstants, maxSteeringVelocity: AngularVelocity = DEFAULT_MAX_STEERING_VELOCITY): Command = runSequentially {
-    val initialPosition by getOnceDuringRun { distanceTraveled }
-    val initialHeading by getOnceDuringRun { heading }
-    val pid by getOnceDuringRun {
-        UnitSuperPIDController(
-            pidConstants = steeringPIDConstants,
-            getInput = { heading },
-            target = initialHeading,
-            outputRange = -maxSteeringVelocity..maxSteeringVelocity
-        )
-    }
-
-    loopUntil(
-        if (velocity > Velocity(0.0)) {
-            { (distanceTraveled - initialPosition) >= distance }
-        } else {
-            { (distanceTraveled - initialPosition) <= distance }
-        },
-        this@driveStraight
-    ) {
-        velocityDrive(ChassisSpeeds(velocity,Quantity(0.0),pid.calculateOutput()))
-    }
-}
-
-context(CommandBuilder, HeadingProvider)
-@JvmName("driveTimeWithVelocity")
-@LowPriorityInOverloadResolution
-public fun EncoderDifferentialDrivetrain.driveStraight(time: Time, velocity: Velocity, steeringPIDConstants: PIDConstants, maxSteeringVelocity: AngularVelocity = DEFAULT_MAX_STEERING_VELOCITY): Command = runSequentially {
-    val initialHeading by getOnceDuringRun { this@HeadingProvider.heading }
-
-    val pid by getOnceDuringRun {
-        UnitSuperPIDController(
-            pidConstants = steeringPIDConstants,
-            getInput = { this@HeadingProvider.heading },
-            target = initialHeading,
-            outputRange = -maxSteeringVelocity..maxSteeringVelocity
-        )
-    }
-
-
-    loopFor(time, this@driveStraight) { velocityDrive(ChassisSpeeds(velocity,Quantity(0.0),pid.calculateOutput())) }
-}
-
-
-context(CommandBuilder)
-@JvmName("swerveDriveTime")
-@LowPriorityInOverloadResolution
-@CommandBuilderMarker
-public fun EncoderHolonomicDrivetrain.driveStraight(
-    direction: Angle = gyro?.heading ?: this.heading,
-    time: Time,
-    power: Double
-): Command =
-    loopFor(time,this){
-        topLeft.setDirectionalPower(power,direction)
-        topRight.setDirectionalPower(power,direction)
-        bottomLeft.setDirectionalPower(power,direction)
-        bottomRight.setDirectionalPower(power,direction)
-    }
-
-context(CommandBuilder)
-@JvmName("swerveDriveDistance")
-@LowPriorityInOverloadResolution
-@CommandBuilderMarker
-public fun EncoderHolonomicDrivetrain.driveStraight(
-    direction: Angle = gyro?.heading ?: this.heading,
-    distance: Distance,
-    power: Double
-): Command =
-    loopWhile({distanceTraveled < distance},this){
-        topLeft.setDirectionalPower(power,direction)
-        topRight.setDirectionalPower(power,direction)
-        bottomLeft.setDirectionalPower(power,direction)
-        bottomRight.setDirectionalPower(power,direction)
-    }
-
-
-private fun test(drive: EncoderHolonomicDrivetrain) = buildCommand {
-    runOnce{
-        with(HeadingProvider{Angle(0.0)}){
-            drive.driveStraight(
-                time = Time(0.0),
-                2.0,
-                steeringPIDConstants = PIDConstants(0.0,0.0,0.0)
-            )
-        }
-    }
-}
-
- */

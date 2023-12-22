@@ -2,7 +2,7 @@ package frc.chargers.constants.drivetrain
 
 import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.Length
-import frc.chargers.constants.AndymarkKitbot
+import com.batterystaple.kmeasure.units.inches
 
 /**
  * A class used to hold constants for an [frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain].
@@ -14,12 +14,12 @@ public data class DiffDriveConstants(
     val width: Distance,
 ){
     public companion object{
-        public fun andymark(invertMotors: Boolean = false): DiffDriveConstants =
+        public fun andyMark(invertMotors: Boolean = false): DiffDriveConstants =
             DiffDriveConstants(
                 invertMotors,
-                AndymarkKitbot.GEAR_RATIO,
-                AndymarkKitbot.WHEEL_DIAMETER,
-                AndymarkKitbot.WIDTH
+                1.0 / 10.71,
+                6.inches,
+                27.inches
             )
     }
 }

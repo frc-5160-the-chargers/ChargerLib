@@ -103,11 +103,35 @@ public class CommandBuilder{
 
     public var addingCommandsLocked: Boolean = false
 
-    private fun addCommand(c: Command){
+    public fun addCommand(c: Command){
         if (addingCommandsLocked){
-            error("You CANNOT add commands to the CommandBuilder while the command is running. \n" +
-                    "Make sure you are NOT calling a CommandBuilder context extension function \n" +
-                    "(I.E drivetrain.driveStraight()) within a runOnce or loopForever block. ")
+            error(
+                """
+                It seems that you have attempted to add a command to the CommandBuilder during runtime. This is not allowed.
+                Make sure that you don't have any nested runOnce, loopForever, loopUntil, etc. blocks 
+                within another command-adding block, and make sure that all functions that are suffixed with 'Action' 
+                are placed in the command builder block instead of a code block. For instance: 
+                
+                buildCommand{
+                
+                    runOnce{
+                        // NOT ALLOWED
+                        this@buildCommand.runOnce{
+                            doSomething()
+                        }
+                        // Will not compile
+                        runOnce{
+                            doSomethingElse()
+                        }
+                        // NOT ALLOWED
+                        drivetrain.driveStraightAction(...)
+                    }
+                    
+                    // Intended behavior
+                    drivetrain.driveStraightAction(...)
+                } 
+                """.trimIndent()
+            )
         }else{
             commands.add(c)
         }

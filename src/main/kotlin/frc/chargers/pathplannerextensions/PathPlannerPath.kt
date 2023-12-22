@@ -8,11 +8,13 @@ import com.batterystaple.kmeasure.units.seconds
 import com.pathplanner.lib.path.GoalEndState
 import com.pathplanner.lib.path.PathConstraints
 import com.pathplanner.lib.path.PathPlannerPath
-import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
 
+
+public fun bezierFromPoses(vararg poses: UnitPose2d): List<UnitTranslation2d> =
+    PathPlannerPath.bezierFromPoses(poses.map{it.siValue}).map{UnitTranslation2d(it)}
 
 public fun PathConstraints(
     maxLinearVelocity: Velocity,
@@ -25,6 +27,7 @@ public fun PathConstraints(
     maxAngularVelocity.inUnit(radians/seconds),
     maxAngularAcceleration.inUnit(radians/seconds/seconds)
 )
+
 
 public fun GoalEndState(
     velocity: Velocity,
@@ -42,8 +45,4 @@ public fun PathPlannerPath(
     bezierPoints.map{it.siValue},
     constraints,endState
 )
-
-public fun bezierFromPoses(
-    vararg poses: UnitPose2d
-): List<UnitTranslation2d> = PathPlannerPath.bezierFromPoses(poses.map{it.siValue}).map{UnitTranslation2d(it)}
 

@@ -3,7 +3,7 @@ package frc.chargers.constants.drivetrain
 import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.Length
 import com.batterystaple.kmeasure.quantities.Velocity
-import frc.chargers.constants.MK4i
+import com.batterystaple.kmeasure.units.inches
 import frc.chargers.utils.math.units.Inertia
 
 /**
@@ -33,12 +33,12 @@ public data class SwerveConstants(
             driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
         ): SwerveConstants = SwerveConstants(
             invertTurnMotors = true,
-            MK4i.TURN_GEAR_RATIO,
-            MK4i.GEAR_RATIO_L2,
+            7.0 / 150.0,
+            1.0 / 6.75,
             turnInertiaMoment,
             driveInertiaMoment,
             maxModuleSpeed,
-            MK4i.WHEEL_DIAMETER,
+            4.inches,
             trackWidth,
             wheelBase
         )
@@ -55,12 +55,12 @@ public data class SwerveConstants(
             driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
         ): SwerveConstants = SwerveConstants(
             invertTurnMotors = true,
-            MK4i.TURN_GEAR_RATIO,
-            MK4i.GEAR_RATIO_L3,
+            7.0 / 150.0,
+            1.0 / 6.12,
             turnInertiaMoment,
             driveInertiaMoment,
             maxModuleSpeed,
-            MK4i.WHEEL_DIAMETER,
+            4.inches,
             trackWidth,
             wheelBase
         )
@@ -77,12 +77,12 @@ public data class SwerveConstants(
             wheelBase: Distance
         ): SwerveConstants = SwerveConstants(
             invertTurnMotors = true,
-            MK4i.TURN_GEAR_RATIO,
-            MK4i.GEAR_RATIO_L1,
+            7.0 / 150.0,
+            1.0 / 8.14,
             turnInertiaMoment,
             driveInertiaMoment,
             maxModuleSpeed,
-            MK4i.WHEEL_DIAMETER,
+            4.inches,
             trackWidth,
             wheelBase
         )

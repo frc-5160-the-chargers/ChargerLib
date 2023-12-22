@@ -8,6 +8,7 @@ import com.batterystaple.kmeasure.units.seconds
 import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
@@ -31,7 +32,7 @@ import org.littletonrobotics.junction.Logger.recordOutput
 
 public fun simulatedDrivetrain(
     simMotors: DifferentialDrivetrainSim.KitbotMotor,
-    constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
     controlScheme: DiffDriveControl = DiffDriveControl.None
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
     DiffDriveIOSim(logInputs = LoggableInputsProvider(namespace = "Drivetrain(Differential)"),simMotors),
@@ -45,7 +46,7 @@ public fun simulatedDrivetrain(
 public inline fun sparkMaxDrivetrain(
     leftMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
     rightMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
-    constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
     controlScheme: DiffDriveControl = DiffDriveControl.None,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
@@ -59,7 +60,7 @@ public inline fun sparkMaxDrivetrain(
 public inline fun talonFXDrivetrain(
     leftMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
     rightMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
-    constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
     controlScheme: DiffDriveControl = DiffDriveControl.None,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
@@ -73,7 +74,7 @@ public inline fun talonFXDrivetrain(
 public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
     leftMotors: EncoderMotorControllerGroup<C>,
     rightMotors: EncoderMotorControllerGroup<C>,
-    constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
     controlScheme: DiffDriveControl = DiffDriveControl.None,
     configuration: C
 ): EncoderDifferentialDrivetrain =
@@ -90,7 +91,7 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
 
 public class EncoderDifferentialDrivetrain(
     lowLevel: DiffDriveIO,
-    public val constants: DiffDriveConstants = DiffDriveConstants.andymark(),
+    public val constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
     public val controlScheme: DiffDriveControl = DiffDriveControl.None,
     public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
@@ -181,6 +182,16 @@ public class EncoderDifferentialDrivetrain(
     public override val heading: Angle
         get() = wheelTravelPerMotorRadian * (rightWheelTravel - leftWheelTravel) / constants.width
 
+    /**
+     * Gets the current [ChassisSpeeds] of the robot.
+     */
+    public val currentSpeeds: ChassisSpeeds
+        get() = kinematics.toChassisSpeeds(
+            DifferentialDriveWheelSpeeds(
+                (leftVelocity * wheelTravelPerMotorRadian).inUnit(meters/seconds),
+                (rightVelocity * wheelTravelPerMotorRadian).inUnit(meters/seconds),
+            )
+        )
 
     override fun tankDrive(leftPower: Double, rightPower: Double) {
         setVoltages(leftPower * 12.volts, rightPower * 12.volts)

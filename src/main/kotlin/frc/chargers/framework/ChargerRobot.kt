@@ -18,6 +18,8 @@ import frc.chargerlibexternal.pathplanner.LocalADStarAK
 import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.utils.SparkMaxBurnManager
 import frc.chargers.wpilibextensions.Alert
+import org.littletonrobotics.junction.LogReplaySource
+import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.LoggedRobot
 import org.littletonrobotics.junction.Logger.*
 import org.littletonrobotics.junction.networktables.NT4Publisher
@@ -80,10 +82,13 @@ public open class ChargerRobot(
 
 
 
+
         private lateinit var burnManager: SparkMaxBurnManager
         private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
         private val lowPriorityPeriodicRunnables: MutableList<() -> Unit> = mutableListOf()
         private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
+
+        internal var replaySource: LogReplaySource? = null
 
     }
 
@@ -190,7 +195,8 @@ public open class ChargerRobot(
         }else if (config.isReplay){
             // replay mode; sim
             val path = LogFileUtil.findReplayLog()
-            setReplaySource(WPILOGReader(path))
+            replaySource = WPILOGReader(path)
+            setReplaySource(replaySource)
             addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
         }else{
             // sim mode
@@ -206,6 +212,11 @@ public open class ChargerRobot(
 
         // no more configuration from this point on
         start()
+
+        // configuration for AdvantageKitLoggable
+        val baseEntry = LogTable(0)
+        AK_LOGGABLE_REPLAY_TABLE = baseEntry.getSubtable("ReplayOutputs")
+        AK_LOGGABLE_REAL_TABLE = baseEntry.getSubtable("RealOutputs")
     }
 
     /**
