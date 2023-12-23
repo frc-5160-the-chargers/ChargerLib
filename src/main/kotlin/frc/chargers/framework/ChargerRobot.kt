@@ -60,6 +60,14 @@ public open class ChargerRobot(
         }
 
         /**
+         * Removes a function from the periodic loop of the robot.
+         */
+        public fun removeFromLoop(runnable: () -> Unit){
+            periodicRunnables.remove(runnable)
+            lowPriorityPeriodicRunnables.remove(runnable)
+        }
+
+        /**
          * The loop period of the current robot.
          */
         public var LOOP_PERIOD: Time = 0.02.seconds

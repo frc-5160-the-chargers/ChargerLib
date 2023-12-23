@@ -11,7 +11,6 @@ import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.cameras.vision.*
 import frc.chargers.utils.Measurement
-import frc.chargers.wpilibextensions.Alert
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
@@ -20,7 +19,7 @@ import org.photonvision.PhotonPoseEstimator
 import org.photonvision.targeting.PhotonTrackedTarget
 
 /**
- * A wrapper over PhotonVision's [PhotonCamera] that is designed to detect apriltags.
+ * A wrapper over PhotonVision's [PhotonCamera], built for ChargerLib.
  */
 public class ChargerPhotonCam(
     name: String,
@@ -38,20 +37,11 @@ public class ChargerPhotonCam(
         private val logInputs: LoggableInputsProvider
     ): VisionPipeline<VisionResult.AprilTag>{
 
-        init{
-            reset()
-            if (isSimulation()){
-                Alert.warning(text =
-                    "You have instantiated a Real Photon Cam pipeline in sim. " +
-                    "This class still supports log replay in sim; " +
-                    "however, it is reccomended to use VisionSim instead."
-                ).active = true
-            }
-        }
+        init{ reset() }
 
         override fun reset(){
             pipelineIndex = index
-            println("Photon Camera with name $name has had it's pipeline reset to $index")
+            println("Photon Camera with name $name has had it's pipeline reset to $index.")
         }
 
         override val lensHeight: Distance = this@ChargerPhotonCam.lensHeight
@@ -92,10 +82,9 @@ public class ChargerPhotonCam(
             override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
 
             override val robotPoseMeasurement: Measurement<UnitPose2d>?
-                by logInputs.nullableValue(
-                    default = Measurement(UnitPose2d(),0.0.seconds)
-                ){
+                by logInputs.nullableValue(default = Measurement(UnitPose2d(), 0.0.seconds)){
                     val signal = update()
+
                     return@nullableValue if (signal.isEmpty || isSimulation()){
                         null
                     }else{
@@ -118,15 +107,7 @@ public class ChargerPhotonCam(
         logInputs: LoggableInputsProvider
     ): VisionPipeline<VisionResult.Generic>{
 
-        init{
-            if (isSimulation()){
-                Alert.warning(text =
-                "You have instantiated a Real Photon Cam pipeline in sim. " +
-                        "This class still supports log replay in sim; " +
-                        "however, it is reccomended to use VisionSim instead."
-                ).active = true
-            }
-        }
+        init{ reset() }
 
         override fun reset(){
             pipelineIndex = index
