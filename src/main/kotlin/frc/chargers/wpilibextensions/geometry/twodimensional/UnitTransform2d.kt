@@ -2,10 +2,7 @@ package frc.chargers.wpilibextensions.geometry.twodimensional
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
-import com.batterystaple.kmeasure.quantities.inUnit
-import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.meters
-import com.batterystaple.kmeasure.units.radians
 import edu.wpi.first.math.geometry.Transform2d
 import frc.chargers.advantagekitextensions.AdvantageKitLoggable
 import frc.chargers.wpilibextensions.geometry.ofUnit
@@ -19,6 +16,7 @@ import org.littletonrobotics.junction.LogTable
 public data class UnitTransform2d(
     public val siValue: Transform2d = Transform2d()
 ): AdvantageKitLoggable<UnitTransform2d>{
+
 
     public constructor(translation: UnitTranslation2d, rotation: Angle): this(
         Transform2d(translation.siValue,rotation.asRotation2d())
@@ -78,18 +76,11 @@ public data class UnitTransform2d(
 
     public operator fun unaryMinus(): UnitTransform2d = UnitTransform2d(siValue.inverse())
     override fun pushToLog(table: LogTable, category: String) {
-        table.apply{
-            put("$category/xMeters",x.inUnit(meters))
-            put("$category/yMeters",y.inUnit(meters))
-            put("$category/rotationRad",rotation.inUnit(radians))
-        }
+        table.put(category,siValue)
     }
 
-    override fun getFromLog(table: LogTable, category: String): UnitTransform2d = UnitTransform2d(
-        x = table.get("$category/xMeters",0.0).ofUnit(meters),
-        y = table.get("$category/yMeters",0.0).ofUnit(meters),
-        rotation = table.get("$category/rotationRad",0.0).ofUnit(radians)
-    )
+    override fun getFromLog(table: LogTable, category: String): UnitTransform2d =
+        UnitTransform2d(table.get(category,Transform2d()))
 
 
 }

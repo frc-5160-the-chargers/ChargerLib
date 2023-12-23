@@ -80,7 +80,7 @@ public open class ChargerController(
         if (loop == null){
             leftTrigger(threshold).apply(bindings)
         }else{
-            leftTrigger(loop,threshold).apply(bindings)
+            leftTrigger(threshold,loop).apply(bindings)
         }
     }
 

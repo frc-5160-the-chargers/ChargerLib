@@ -11,14 +11,11 @@ import frc.chargers.advantagekitextensions.*
 import org.littletonrobotics.junction.LogFileUtil
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
-
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.chargerlibexternal.builddata.ChargerLibBuildConstants
 import frc.chargerlibexternal.pathplanner.LocalADStarAK
 import frc.chargers.constants.tuning.DashboardTuner
-import frc.chargers.utils.SparkMaxBurnManager
 import frc.chargers.wpilibextensions.Alert
-import org.littletonrobotics.junction.LogReplaySource
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.LoggedRobot
 import org.littletonrobotics.junction.Logger.*
@@ -39,16 +36,7 @@ public open class ChargerRobot(
 ): LoggedRobot(config.loopPeriod.inUnit(seconds)){
     public companion object{
         /**
-         * Determines if a SparkMax should burn it's flash or not.
-         */
-        public fun shouldBurnSparkMax(): Boolean = try{
-            burnManager.shouldBurn()
-        }catch(e: UninitializedPropertyAccessException){
-            RobotBase.isReal()
-        }
-
-        /**
-         * Adds a specific lambda to the robot's periodic loop.
+         * Adds a specific function to the robot's periodic loop.
          *
          * All functions added this way will run before the command scheduler runs.
          */
@@ -61,7 +49,7 @@ public open class ChargerRobot(
         }
 
         /**
-         * Adds a specific lambda to the robot's periodic loop, which runs after the robot's periodic loop ends.
+         * Adds a specific function to the robot's periodic loop, which runs after the robot's periodic loop ends.
          */
         public fun runPeriodicallyWithLowPriority(addToFront: Boolean = false, runnable: () -> Unit){
             if (addToFront){
@@ -70,9 +58,6 @@ public open class ChargerRobot(
                 lowPriorityPeriodicRunnables.add(runnable)
             }
         }
-
-
-
 
         /**
          * The loop period of the current robot.
@@ -83,13 +68,9 @@ public open class ChargerRobot(
 
 
 
-        private lateinit var burnManager: SparkMaxBurnManager
         private val periodicRunnables: MutableList<() -> Unit> = mutableListOf()
         private val lowPriorityPeriodicRunnables: MutableList<() -> Unit> = mutableListOf()
         private val noUsbSignalAlert = Alert.warning(text = "No logging to WPILOG is happening; cannot find USB stick")
-
-        internal var replaySource: LogReplaySource? = null
-
     }
 
     private lateinit var robotContainer: ChargerRobotContainer
@@ -112,22 +93,19 @@ public open class ChargerRobot(
      */
     override fun robotInit() {
         try{
+            LOOP_PERIOD = config.loopPeriod
             // inits the ConsoleLogger
             ConsoleLogger
             configureAdvantageKit()
             LiveWindow.disableAllTelemetry()
 
-            burnManager = SparkMaxBurnManager(gitData.buildDate)
-            LOOP_PERIOD = config.loopPeriod
             DashboardTuner.tuningMode = config.tuningMode
-
 
             // inits robotContainer
             robotContainer = getRobotContainer()
             robotContainer.robotInit()
 
             Pathfinding.setPathfinder(LocalADStarAK())
-
 
             CommandScheduler.getInstance().apply{
                 onCommandInitialize{
@@ -142,7 +120,6 @@ public open class ChargerRobot(
                     recordOutput("/ActiveCommands/${it.name}", false)
                 }
             }
-
         }catch(e: Exception){
             println("Error has been caught in [robotInit].")
             config.onError(e)
@@ -186,26 +163,15 @@ public open class ChargerRobot(
             }else{
                 noUsbSignalAlert.active = true
             }
-
-            if (config.logToNTWhenFMSAttached){
-                addDataReceiver(NT4Publisher())
-            }else{
-                addDataReceiver(NTSafePublisher())
-            }
         }else if (config.isReplay){
             // replay mode; sim
             val path = LogFileUtil.findReplayLog()
-            replaySource = WPILOGReader(path)
-            setReplaySource(replaySource)
+            setReplaySource(WPILOGReader(path))
             addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(path, "_replayed")))
-        }else{
-            // sim mode
-            if (config.logToNTWhenFMSAttached){
-                addDataReceiver(NT4Publisher())
-            }else{
-                addDataReceiver(NTSafePublisher())
-            }
-            // maybe add DriverStationSim? idk
+        }
+
+        if (config.logToNetworkTables && !config.isReplay){
+            addDataReceiver(NT4Publisher())
         }
 
         config.extraLoggerConfig()
@@ -287,7 +253,6 @@ public open class ChargerRobot(
             config.onError(e)
             throw e
         }
-
     }
 
     /** This function is called periodically during autonomous.  */
@@ -299,14 +264,12 @@ public open class ChargerRobot(
             config.onError(e)
             throw e
         }
-
     }
 
     override fun teleopInit() {
         try{
             cancelCommand{autonomousCommand}
             cancelCommand{testCommand}
-            
             robotContainer.teleopInit()
         }catch(e: Exception){
             println("Error has been caught in [teleopInit].")

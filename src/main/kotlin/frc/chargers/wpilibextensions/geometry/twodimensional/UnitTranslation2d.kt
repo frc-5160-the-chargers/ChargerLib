@@ -9,6 +9,12 @@ import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import org.littletonrobotics.junction.LogTable
 
+// A function must be used here, as a second constructor would cause a platform declaration crash.
+public fun UnitTranslation2d(norm: Distance, angle: Angle): UnitTranslation2d =
+    UnitTranslation2d(
+        Translation2d(norm.siValue,angle.asRotation2d())
+    )
+
 /**
  * A wrapper for WPILib's [Translation2d], adding in Unit support.
  */
@@ -17,15 +23,6 @@ public data class UnitTranslation2d(
 ): Interpolatable<UnitTranslation2d>, AdvantageKitLoggable<UnitTranslation2d> {
 
     public constructor(x: Distance, y: Distance): this(Translation2d(x.siValue,y.siValue))
-
-    // a companion object must be used to prevent a platform declaration crash,
-    // as Distance and Angle are both represented as Doubles during JVM runtime.
-    public companion object{
-        public operator fun invoke(norm: Distance, angle: Angle): UnitTranslation2d =
-            UnitTranslation2d(
-                Translation2d(norm.siValue,angle.asRotation2d())
-            )
-    }
 
 
     /**
@@ -60,20 +57,12 @@ public data class UnitTranslation2d(
 
     public fun getDistance(other: UnitTranslation2d): Distance = siValue.getDistance(other.inUnit(meters)).meters
     override fun interpolate(other: UnitTranslation2d, t: Double): UnitTranslation2d = siValue.interpolate(other.inUnit(meters),t).ofUnit(meters)
-
     public fun rotateBy(other: Angle): UnitTranslation2d = siValue.rotateBy(other.asRotation2d()).ofUnit(meters)
     override fun pushToLog(table: LogTable, category: String) {
-        table.apply{
-            put("$category/xMeters",x.inUnit(meters))
-            put("$category/yMeters",y.inUnit(meters))
-        }
+        table.put(category,siValue)
     }
-
-    override fun getFromLog(table: LogTable, category: String): UnitTranslation2d = UnitTranslation2d(
-        table.get("$category/xMeters",0.0).ofUnit(meters),
-        table.get("$category/yMeters",0.0).ofUnit(meters)
-    )
-
+    override fun getFromLog(table: LogTable, category: String): UnitTranslation2d =
+        UnitTranslation2d(table.get(category,Translation2d()))
 
 }
 

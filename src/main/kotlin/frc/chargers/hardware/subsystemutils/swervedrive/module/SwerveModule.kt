@@ -95,6 +95,7 @@ public class SwerveModule(
     // Note: turnSpeed will only be set if the control scheme includes second order kinematics functionality.
     public fun setDirection(direction: Angle){
         turnController.target = direction.standardize()
+        // turnVoltage is a setter variable of ModuleIO
         turnVoltage = if( (turnController.error).within(controlScheme.modulePrecision) ){
             0.0.volts
         }else{
@@ -106,6 +107,7 @@ public class SwerveModule(
 
     public fun setVelocity(velocity: AngularVelocity) {
         velocityController.target = velocity
+        // driveVoltage is a setter variable of ModuleIO
         driveVoltage = velocityController.calculateOutput()
     }
 

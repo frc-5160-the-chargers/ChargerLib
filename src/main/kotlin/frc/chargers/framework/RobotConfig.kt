@@ -9,5 +9,5 @@ public data class RobotConfig(
     val extraLoggerConfig: () -> Unit = {},
     val onError: (Throwable) -> Unit = {},
     val loopPeriod: Time = 0.02.seconds,
-    val logToNTWhenFMSAttached: Boolean = true
+    val logToNetworkTables: Boolean = true
 )

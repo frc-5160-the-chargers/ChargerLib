@@ -3,10 +3,6 @@ package frc.chargers.wpilibextensions.geometry.twodimensional
 import com.batterystaple.kmeasure.dimensions.DistanceDimension
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.Distance
-import com.batterystaple.kmeasure.quantities.inUnit
-import com.batterystaple.kmeasure.quantities.ofUnit
-import com.batterystaple.kmeasure.units.meters
-import com.batterystaple.kmeasure.units.radians
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
 import frc.chargers.advantagekitextensions.AdvantageKitLoggable
@@ -20,7 +16,7 @@ import org.littletonrobotics.junction.LogTable
  * A wrapper around WPILib's [UnitPose2d] class, adding in units support.
  */
 public data class UnitPose2d(
-    public val siValue: Pose2d = Pose2d()
+    val siValue: Pose2d = Pose2d()
 ): AdvantageKitLoggable<UnitPose2d>{
     public constructor(translation: UnitTranslation2d, rotation: Angle): this(
         Pose2d(translation.siValue, rotation.asRotation2d())
@@ -75,19 +71,10 @@ public data class UnitPose2d(
     public operator fun times(scalar: Double): UnitPose2d = UnitPose2d(siValue * scalar)
     public operator fun div(scalar: Double): UnitPose2d = UnitPose2d(siValue / scalar)
     override fun pushToLog(table: LogTable, category: String) {
-        table.apply{
-            put("$category/xMeters",x.inUnit(meters))
-            put("$category/yMeters",y.inUnit(meters))
-            put("$category/rotationRad",rotation.inUnit(radians))
-        }
+        table.put(category,siValue)
     }
 
-    override fun getFromLog(table: LogTable, category: String): UnitPose2d {
-        return UnitPose2d(
-            x = table.get("$category/xMeters",0.0).ofUnit(meters),
-            y = table.get("$category/yMeters",0.0).ofUnit(meters),
-            rotation = table.get("$category/rotationRad",0.0).ofUnit(radians)
-        )
-    }
+    override fun getFromLog(table: LogTable, category: String): UnitPose2d =
+        UnitPose2d(table.get(category,Pose2d()))
 
 }

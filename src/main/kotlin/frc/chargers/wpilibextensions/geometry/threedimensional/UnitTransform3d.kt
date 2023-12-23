@@ -2,9 +2,6 @@ package frc.chargers.wpilibextensions.geometry.threedimensional
 
 import com.batterystaple.kmeasure.dimensions.DistanceDimension
 import com.batterystaple.kmeasure.quantities.Distance
-import com.batterystaple.kmeasure.quantities.inUnit
-import com.batterystaple.kmeasure.quantities.ofUnit
-import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.geometry.Transform3d
 import frc.chargers.advantagekitextensions.AdvantageKitLoggable
@@ -39,28 +36,10 @@ public data class UnitTransform3d(
     public operator fun plus(other: UnitTransform3d): UnitTransform3d = UnitTransform3d(siValue + other.siValue)
 
     override fun pushToLog(table: LogTable, category: String) {
-        table.apply{
-            put("$category/xMeters",x.inUnit(meters))
-            put("$category/yMeters",y.inUnit(meters))
-            put("$category/zMeters",z.inUnit(meters))
-
-            put("$category/rollRad",rotation.x)
-            put("$category/pitchRad",rotation.y)
-            put("$category/yawRad",rotation.z)
-        }
+        table.put(category,siValue)
     }
 
-    override fun getFromLog(table: LogTable, category: String): UnitTransform3d = UnitTransform3d(
-        translation = UnitTranslation3d(
-            x = table.get("$category/xMeters",0.0).ofUnit(meters),
-            y = table.get("$category/yMeters",0.0).ofUnit(meters),
-            z = table.get("$category/zMeters",0.0).ofUnit(meters)
-        ),
-        rotation = Rotation3d(
-            table.get("$category/rollRad",0.0),
-            table.get("$category/pitchRad",0.0),
-            table.get("$category/yawRad",0.0)
-        )
-    )
+    override fun getFromLog(table: LogTable, category: String): UnitTransform3d =
+        UnitTransform3d(table.get(category,Transform3d()))
 
 }

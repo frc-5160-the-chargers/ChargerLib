@@ -9,7 +9,6 @@ import frc.chargers.commands.then
 import frc.chargers.commands.withExtraRequirements
 import frc.chargers.utils.MappableContext
 import org.littletonrobotics.junction.Logger
-import kotlin.internal.LowPriorityInOverloadResolution
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -183,16 +182,8 @@ public class CommandBuilder{
     /**
      * Runs the function block when the [buildCommand] is finished.
      */
-    public fun onEnd(run: (Boolean) -> Unit){
-        endBehavior = run
-    }
-
-    /**
-     * Runs the function block when the [buildCommand] is finished.
-     */
-    @LowPriorityInOverloadResolution
-    public inline fun onEnd(crossinline run: CodeBlockContext.() -> Unit){
-        endBehavior = { CodeBlockContext.run() }
+    public inline fun onEnd(crossinline run: CodeBlockContext.(Boolean) -> Unit){
+        endBehavior = { CodeBlockContext.run(it) }
     }
 
 

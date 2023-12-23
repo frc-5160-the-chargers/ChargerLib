@@ -2,8 +2,6 @@ package frc.chargers.wpilibextensions.geometry.threedimensional
 
 import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.inUnit
-import com.batterystaple.kmeasure.quantities.ofUnit
-import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.interpolation.Interpolatable
@@ -48,18 +46,11 @@ public data class UnitTranslation3d(
         UnitTranslation3d(siValue.interpolate(endValue.siValue,t))
 
     override fun pushToLog(table: LogTable, category: String) {
-        table.apply{
-            put("$category/xMeters",x.inUnit(meters))
-            put("$category/yMeters",y.inUnit(meters))
-            put("$category/zMeters",z.inUnit(meters))
-        }
+        table.put(category,siValue)
     }
 
-    override fun getFromLog(table: LogTable, category: String): UnitTranslation3d = UnitTranslation3d(
-        x = table.get("$category/xMeters",0.0).ofUnit(meters),
-        y = table.get("$category/yMeters",0.0).ofUnit(meters),
-        z = table.get("$category/zMeters",0.0).ofUnit(meters)
-    )
+    override fun getFromLog(table: LogTable, category: String): UnitTranslation3d =
+        UnitTranslation3d(table.get(category,Translation3d()))
 
 }
 
