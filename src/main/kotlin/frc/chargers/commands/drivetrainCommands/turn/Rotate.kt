@@ -10,20 +10,22 @@ import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.utils.Precision
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
+import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
 
 
 /**
  * Adds a command to the command builder turning the robot
- * to a specified [angle] (with a specified [precision]) using PID.
+ * to a specified [angle] (with a specified [precision]) using PID and an external
+ * [HeadingProvider].
  *
  * @see Precision
  */
 context(CommandBuilder, HeadingProvider)
-@LowPriorityInOverloadResolution
 public fun DifferentialDrivetrain.rotateAction(
     angle: Angle,
-    pidConstants: PIDConstants = PIDConstants(0.6,0.0,0.0),
+    pidConstants: PIDConstants,
     precision: Precision<AngleDimension> = Precision.AllowOvershoot
 ): Command = runSequentially {
     val targetAngle by getOnceDuringRun{ this@HeadingProvider.heading + angle }
@@ -54,6 +56,74 @@ public fun DifferentialDrivetrain.rotateAction(
         arcadeDrive(0.0, controller.calculateOutput().siValue)
     }
 }
+
+
+/**
+ * Adds a command to the command builder turning the robot
+ * to a specified [angle] (with a specified [precision]) using PID and the [EncoderDifferentialDrivetrain]'s
+ * best available [HeadingProvider].
+ *
+ * @see Precision
+ */
+context(CommandBuilder)
+@LowPriorityInOverloadResolution
+public fun EncoderDifferentialDrivetrain.rotateAction(
+    angle: Angle,
+    pidConstants: PIDConstants = controlScheme.robotRotationPID,
+    precision: Precision<AngleDimension> = Precision.AllowOvershoot
+): Command = with (gyro ?: this as HeadingProvider) {
+    rotateAction(angle,pidConstants,precision)
+}
+
+/**
+ * Adds a command to the command builder turning a swerve drive robot
+ * to a specified [angle] (with a specified [precision]) using PID and the [EncoderHolonomicDrivetrain]'s
+ * best available [HeadingProvider].
+ *
+ * @see Precision
+ */
+context(CommandBuilder)
+@LowPriorityInOverloadResolution
+public fun EncoderHolonomicDrivetrain.rotateAction(
+    angle: Angle,
+    pidConstants: PIDConstants = controlScheme.robotRotationPID,
+    precision: Precision<AngleDimension> = Precision.AllowOvershoot
+): Command = runSequentially {
+    fun getHeading(): Angle = gyro?.heading ?: this@EncoderHolonomicDrivetrain.heading
+
+    val targetAngle by getOnceDuringRun{ getHeading() + angle }
+    val controller by getOnceDuringRun{
+        UnitSuperPIDController(
+            pidConstants,
+            { getHeading() },
+            Scalar(-1.0)..Scalar(1.0),
+            target = targetAngle,
+            continuousInputRange = 0.degrees..360.degrees
+        )
+    }
+
+    fun hasHitTarget(): Boolean = when (precision){
+        Precision.AllowOvershoot ->
+            // checks that both the heading and target angle have the same sign
+            getHeading() * targetAngle >= 0.degrees &&
+                    // checks whether the heading has hit or exceeded the target.
+                    abs(getHeading()) >= abs(targetAngle)
+
+        is Precision.Within -> getHeading() in precision.allowableError
+    }
+
+    loopUntil(
+        condition = ::hasHitTarget,
+        this@EncoderHolonomicDrivetrain
+    ){
+        arcadeDrive(0.0, controller.calculateOutput().siValue)
+    }
+
+}
+
+
+
+
 
 
 

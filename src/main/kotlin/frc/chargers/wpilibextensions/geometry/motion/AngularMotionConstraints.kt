@@ -1,6 +1,8 @@
 package frc.chargers.wpilibextensions.geometry.motion
 
 import com.batterystaple.kmeasure.quantities.*
+import com.batterystaple.kmeasure.units.radians
+import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 
 /**
@@ -18,4 +20,7 @@ public data class AngularMotionConstraints(
             maxVelocity.inUnit(angleUnit / timeUnit),
             maxAcceleration.inUnit(angleUnit / timeUnit / timeUnit)
         )
+
+    public val siValue: TrapezoidProfile.Constraints =
+        inUnit(radians, seconds)
 }

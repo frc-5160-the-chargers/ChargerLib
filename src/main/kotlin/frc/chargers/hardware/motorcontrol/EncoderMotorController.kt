@@ -14,3 +14,11 @@ public interface EncoderMotorController : MotorController {
     public val encoder: Encoder
 }
 
+
+/**
+ * An interface that represents an [EncoderMotorController]
+ * that can measure it's recorded temperature, applied current, and applied voltage.
+ */
+public interface SmartEncoderMotorController:
+    EncoderMotorController, TemperatureProvider, CurrentProvider, VoltageProvider
+

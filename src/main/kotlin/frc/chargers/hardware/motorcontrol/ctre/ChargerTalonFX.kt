@@ -8,10 +8,7 @@ import com.ctre.phoenix6.signals.*
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
-import frc.chargers.hardware.motorcontrol.CurrentProvider
-import frc.chargers.hardware.motorcontrol.EncoderMotorController
-import frc.chargers.hardware.motorcontrol.TemperatureProvider
-import frc.chargers.hardware.motorcontrol.VoltageProvider
+import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.relative.TalonFXEncoderAdapter
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
@@ -68,7 +65,7 @@ public inline fun falcon(
  * @see TalonFXConfiguration
  */
 public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : TalonFX(deviceNumber, canBus),
-    EncoderMotorController, HardwareConfigurable<TalonFXConfiguration>, TemperatureProvider, CurrentProvider, VoltageProvider {
+    SmartEncoderMotorController, HardwareConfigurable<TalonFXConfiguration> {
 
     final override val appliedVoltage: Voltage
         get() = supplyVoltage.value.ofUnit(volts)

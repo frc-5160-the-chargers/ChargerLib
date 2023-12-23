@@ -4,14 +4,12 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.controller.ProfiledPIDController
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.feedforward.LinearMotorFF
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.utils.math.inputModulus
-import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
-import frc.chargers.wpilibextensions.geometry.motion.LinearTrapezoidProfile
-import frc.chargers.wpilibextensions.geometry.ofUnit
 
 
 /**
@@ -49,7 +47,7 @@ public class LinearProfiledPIDController(
     private val pidController = ProfiledPIDController(0.0, 0.0, 0.0,constraints.inUnit(meters,seconds))
         .apply {
             constants = pidConstants
-            goal = LinearTrapezoidProfile.State(target,Velocity(0.0)).inUnit(meters,seconds)
+            goal = TrapezoidProfile.State(target.inUnit(meters),0.0)
             setIntegratorRange(integralRange.start.siValue, integralRange.endInclusive.siValue)
             if (continuousInputRange != null){
                 enableContinuousInput(
@@ -76,18 +74,7 @@ public class LinearProfiledPIDController(
         get() = Quantity(pidController.goal.position)
         set(target) {
             if (target.siValue != pidController.goal.position) {
-                pidController.goal = LinearTrapezoidProfile.State(target,Velocity(0.0)).inUnit(meters,seconds)
-            }
-        }
-
-    /**
-     * An alternative to the target variable; sets the profiled PID controller to a specific [AngularTrapezoidProfile.State].
-     */
-    public var targetState: LinearTrapezoidProfile.State
-        get() = pidController.goal.ofUnit(meters,seconds)
-        set(target){
-            if (target != pidController.goal.ofUnit(meters,seconds)){
-                pidController.goal = target.inUnit(meters,seconds)
+                pidController.goal = TrapezoidProfile.State(target.inUnit(meters),0.0)
             }
         }
 

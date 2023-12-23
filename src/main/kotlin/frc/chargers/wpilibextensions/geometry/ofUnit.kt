@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import frc.chargers.utils.math.units.KmeasureUnit
 import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
-import frc.chargers.wpilibextensions.geometry.motion.AngularTrapezoidProfile
 import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
 import frc.chargers.wpilibextensions.geometry.rotation.asAngle
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
@@ -68,15 +67,6 @@ public fun Pose3d.ofUnit(unit: KmeasureUnit<DistanceDimension>): UnitPose3d =
 
 
 /**
- * Converts WPILib's [TrapezoidProfile.State] into an [AngularTrapezoidProfile.State].
- */
-public fun TrapezoidProfile.State.ofUnit(angleUnit: Angle, timeUnit: Time): AngularTrapezoidProfile.State =
-    AngularTrapezoidProfile.State(
-        this.position.ofUnit(angleUnit),
-        this.velocity.ofUnit(angleUnit/timeUnit)
-    )
-
-/**
  * Converts WPILib's [TrapezoidProfile.Constraints] into an [AngularMotionConstraints].
  */
 public fun TrapezoidProfile.Constraints.ofUnit(angleUnit: Angle, timeUnit: Time): AngularMotionConstraints =
@@ -84,18 +74,6 @@ public fun TrapezoidProfile.Constraints.ofUnit(angleUnit: Angle, timeUnit: Time)
         this.maxVelocity.ofUnit(angleUnit/timeUnit),
         this.maxAcceleration.ofUnit(angleUnit/timeUnit/timeUnit)
     )
-
-/*
-/**
- * Converts WPILib's [TrapezoidProfile.State] into a [LinearTrapezoidProfile.State].
- */
-public fun TrapezoidProfile.State.ofUnit(distanceUnit: Distance, timeUnit: Time): LinearTrapezoidProfile.State =
-    LinearTrapezoidProfile.State(
-        this.position.ofUnit(distanceUnit),
-        this.velocity.ofUnit(distanceUnit/timeUnit)
-    )
-
- */
 
 /**
  * Converts WPILib's [TrapezoidProfile.Constraints] into a [LinearMotionConstraints].

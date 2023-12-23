@@ -9,6 +9,7 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargerlibexternal.frc6328.characterization.FeedForwardCharacterization
 import frc.chargerlibexternal.frc6328.characterization.FeedForwardCharacterizationData
+import frc.chargers.commands.commandbuilder.CommandBuilder
 import frc.chargers.commands.commandbuilder.buildCommand
 
 public fun characterizeFFAngular(
@@ -63,7 +64,7 @@ public fun characterizeFFLinear(
     }
 }
 
-
+context(CommandBuilder)
 public fun EncoderHolonomicDrivetrain.characterizeDriveMotors(
     forwards: Boolean = true, vararg requirements: Subsystem
 ): FeedForwardCharacterization =
@@ -100,11 +101,11 @@ public fun EncoderHolonomicDrivetrain.characterizeDriveMotors(
                 println("Angle UNIT: RADIANS")
                 println("Time UNIT: SECONDS")
             }
-        }
+        }.also(::addCommand)
 
+context(CommandBuilder)
 public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements: Subsystem): Command =
     buildCommand{
-
         runParallelUntilAllFinish{
             +characterizeFFAngular(
                 "TOP LEFT turn motor data",
@@ -134,31 +135,10 @@ public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements
                 {bottomRight.turnSpeed}
             )
         }
-    }.withExtraRequirements(this@characterizeTurnMotors, *requirements)
+    }.withExtraRequirements(this@characterizeTurnMotors, *requirements).also(::addCommand)
 
 
-public fun EncoderHolonomicDrivetrain.driveTurnMotors(): Command = buildCommand{
-    runParallelUntilAllFinish{
-        loopForever{
-            topLeft.turnVoltage = 2.0.volts
-        }
-
-        loopForever{
-            topRight.turnVoltage = 2.0.volts
-        }
-
-        loopForever{
-            bottomLeft.turnVoltage = 2.0.volts
-        }
-
-        loopForever{
-            bottomRight.turnVoltage = 2.0.volts
-        }
-
-    }
-}
-
-
+context(CommandBuilder)
 public fun EncoderDifferentialDrivetrain.characterize(
     forwards: Boolean = true, vararg requirements: Subsystem
 ): FeedForwardCharacterization =
@@ -183,27 +163,5 @@ public fun EncoderDifferentialDrivetrain.characterize(
             println("Angle UNIT: RADIANS")
             println("Time UNIT: SECONDS")
         }
-    }
+    }.also(::addCommand)
 
-
-/*
-
-context(CommandBuilder)
-@LowPriorityInOverloadResolution
-public fun EncoderDifferentialDrivetrain.characterize(
-    forwards: Boolean = true, vararg requirements: Subsystem
-): Command = characterize(forwards,*requirements).also(commands::add)
-
-context(CommandBuilder)
-@LowPriorityInOverloadResolution
-public fun EncoderHolonomicDrivetrain.characterizeTurnMotors(vararg requirements: Subsystem): Command =
-    characterizeTurnMotors(*requirements).also(commands::add)
-
-context(CommandBuilder)
-@LowPriorityInOverloadResolution
-public fun EncoderHolonomicDrivetrain.characterizeDriveMotors(
-    forwards: Boolean = true, vararg requirements: Subsystem
-): Command = characterizeDriveMotors(forwards,*requirements).also(commands::add)
-
-
- */
