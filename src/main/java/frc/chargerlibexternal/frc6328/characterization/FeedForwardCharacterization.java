@@ -1,8 +1,6 @@
-package frc.chargerlibexternal.frc6328.characterization;
-
 // Copyright (c) 2023 FRC 6328
 // http://github.com/Mechanical-Advantage
-
+package frc.chargerlibexternal.frc6328.characterization;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;

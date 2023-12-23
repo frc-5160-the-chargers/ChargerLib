@@ -13,8 +13,23 @@ import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
+import frc.chargers.utils.revertIfInvalid
 import frc.chargers.wpilibextensions.delay
 import kotlin.math.roundToInt
+
+
+/**
+ * A preset configuration for Spark max periodic frame rates, based off of 6328's code.
+ */
+public val NOT_LEADER_STATUS_FRAME_PERIODS: MutableMap<PeriodicFrame, Int> =
+    mutableMapOf(
+        PeriodicFrame.kStatus0 to 100,
+        PeriodicFrame.kStatus3 to 65535,
+        PeriodicFrame.kStatus4 to 65535,
+        PeriodicFrame.kStatus5 to 65535,
+        PeriodicFrame.kStatus6 to 65535,
+    )
+
 
 /**
  * A convenience function to create a [ChargerCANSparkMax]
@@ -127,6 +142,10 @@ public open class ChargerCANSparkMax(
 
     private var encoderConfig = EncoderConfiguration()
 
+    private var previousCurrent = Current(0.0)
+    private var previousTemp = 0.0
+    private var previousVoltage = Voltage(0.0)
+
 
     /*
     CANSparkMax throws some exception if this is initialized on motor creation,
@@ -200,10 +219,17 @@ public open class ChargerCANSparkMax(
 
     override val appliedCurrent: Current
         get() = outputCurrent.ofUnit(amps)
+            .revertIfInvalid(previousCurrent)
+            .also{previousCurrent = it}
     override val tempCelsius: Double
         get() = motorTemperature
+            .revertIfInvalid(previousTemp)
+            .also{previousTemp = it}
     override val appliedVoltage: Voltage
         get() = busVoltage.ofUnit(volts)
+            .revertIfInvalid(previousVoltage)
+            .also{previousVoltage = it}
+
 
 }
 
@@ -212,9 +238,12 @@ public open class ChargerCANSparkMax(
  * A data class representing all possible configuration parameters
  * of a ChargerCANSparkMax.
  *
+ * All properties here are variables and are nullable, with null representing no configuration at all.
+ *
  * @see ChargerCANSparkMax
  */
 public data class SparkMaxConfiguration(
+    // motor configs
     var idleMode: IdleMode? = null,
     var inverted: Boolean? = null,
     var voltageCompensationNominalVoltage: Voltage? = null,
@@ -234,7 +263,7 @@ public data class SparkMaxConfiguration(
     var encoderPositionConversionFactor: Double? = null,
     var encoderVelocityConversionFactor: Double? = null,
 
-    // sparkMaxPIDController configs
+    // sparkMaxPIDController configs; not used by ChargerLib
     var feedbackDFilter: Double? = null,
     var feedbackIZone: Double? = null,
     var feedbackOutputRange: ClosedRange<Double>? = null,

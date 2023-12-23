@@ -30,6 +30,7 @@ public class TalonFXEncoderAdapter(
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds)
             )
         }
+
     override val timestampedAngularVelocity: QuantityMeasurement<AngularVelocityDimension>
         get(){
             val statusSignal = motorController.rotorVelocity
