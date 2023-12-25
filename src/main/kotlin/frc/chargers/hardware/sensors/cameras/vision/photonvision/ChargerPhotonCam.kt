@@ -68,16 +68,21 @@ public class ChargerPhotonCam(
                 )
             }
 
-        override var isRequired: Boolean
-            get() = this@ChargerPhotonCam.required
-            set(shouldRequire) {
-                if (this@ChargerPhotonCam.required && shouldRequire){
-                    error("A Photon Camera with name '$name' has been required in 2 different places. \n " +
-                            "Make sure to call pipeline.isRequired = false at the end of all commands!"
-                    )
-                }
-                this@ChargerPhotonCam.required = shouldRequire
+        override fun require(){
+            if (required){
+                error("A Limelight with name '$name' has been required in 2 different places. \n " +
+                        "Make sure to call pipeline.isRequired = false at the end of all commands!"
+                )
             }
+            required = true
+        }
+
+        override fun removeRequirement(){
+            if (!required){
+                println("A requirement was removed; however, this requirement was never set in the first place.")
+            }
+            required = false
+        }
 
         public inner class PoseEstimator(
             robotToCamera: UnitTransform3d,
@@ -147,16 +152,21 @@ public class ChargerPhotonCam(
                 )
             }
 
-        override var isRequired: Boolean
-            get() = this@ChargerPhotonCam.required
-            set(shouldRequire) {
-                if (this@ChargerPhotonCam.required && shouldRequire){
-                    error("A Photon camera with name '$name' has been required in 2 different places. \n " +
-                            "Make sure to call pipeline.isRequired = false at the end of all commands!"
-                    )
-                }
-                this@ChargerPhotonCam.required = shouldRequire
+        override fun require(){
+            if (required){
+                error("A Limelight with name '$name' has been required in 2 different places. \n " +
+                        "Make sure to call pipeline.isRequired = false at the end of all commands!"
+                )
             }
+            required = true
+        }
+
+        override fun removeRequirement(){
+            if (!required){
+                println("A requirement was removed; however, this requirement was never set in the first place.")
+            }
+            required = false
+        }
 
         override val lensHeight: Distance = this@ChargerPhotonCam.lensHeight
 

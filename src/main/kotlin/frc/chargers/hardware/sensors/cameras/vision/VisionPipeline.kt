@@ -36,16 +36,22 @@ public interface VisionPipeline<R: VisionResult> {
     public val mountAngle: Angle
 
     /**
-     * A getter-setter variable which is intended to require the overarching vision camera
-     * of the pipeline.
-     */
-    public var isRequired: Boolean
-
-    /**
      * Resets the camera that the [VisionPipeline] belongs to in order to return proper results.
      * This can include setting the overall camera's pipeline index to the index specified.
      */
     public fun reset()
+
+    /**
+     * Requires the overarching vision camera
+     * of the pipeline.
+     */
+    public fun require()
+
+    /**
+     * Removes the requirement of the overarching vision camera
+     * of the pipeline.
+     */
+    public fun removeRequirement()
 
 
 
@@ -62,7 +68,7 @@ public interface VisionPipeline<R: VisionResult> {
     /**
      * Calculates the horizontal distance to a target, utilizing the pitch and height of the target.
      */
-    public fun horizontalDistanceToTarget(
+    public fun distanceToTarget(
         targetHeight: Distance, targetPitch: Angle = Angle(0.0)
     ): Distance = PhotonUtils.calculateDistanceToTargetMeters(
         lensHeight.inUnit(meters),
@@ -74,9 +80,9 @@ public interface VisionPipeline<R: VisionResult> {
     /**
      * Calculates the diagonal distance to the target.
      */
-    public fun diagonalDistanceToTarget(targetHeight: Distance): Distance =
+    public fun diagonalDistanceToTarget(targetHeight: Distance, targetPitch: Angle = Angle(0.0)): Distance =
         Distance(
-            sqrt(horizontalDistanceToTarget(targetHeight).siValue.pow(2) + targetHeight.siValue.pow(2.0))
+            sqrt(distanceToTarget(targetHeight, targetPitch).siValue.pow(2) + targetHeight.siValue.pow(2.0))
         )
 
 }

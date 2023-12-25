@@ -10,14 +10,20 @@ public interface Classifier<T> {
     public val itemType: T
 
     /**
-     * A get-set variable used to control whether the classifier's overarching
-     * vision camera is required or not.
-     */
-    public var isRequired: Boolean
-
-    /**
      * Resets the pipeline of the overarching vision camera to the appropriate value
      * for this pipeline.
      */
     public fun reset()
+
+    /**
+     * Requires the overarching vision camera
+     * of the pipeline.
+     */
+    public fun require()
+
+    /**
+     * Removes the requirement of the overarching vision camera
+     * of the pipeline.
+     */
+    public fun removeRequirement()
 }

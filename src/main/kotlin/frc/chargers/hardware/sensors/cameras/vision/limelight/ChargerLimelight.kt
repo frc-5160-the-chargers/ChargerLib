@@ -153,16 +153,21 @@ public class ChargerLimelight(
 
         override val mountAngle: Angle = this@ChargerLimelight.mountAngle
 
-        override var isRequired: Boolean
-            get() = this@ChargerLimelight.required
-            set(shouldRequire) {
-                if (this@ChargerLimelight.required && shouldRequire){
-                    error("A Limelight with name '$name' has been required in 2 different places. \n " +
-                            "Make sure to call pipeline.isRequired = false at the end of all commands!"
-                    )
-                }
-                this@ChargerLimelight.required = shouldRequire
+        override fun require(){
+            if (required){
+                error("A Limelight with name '$name' has been required in 2 different places. \n " +
+                        "Make sure to call pipeline.isRequired = false at the end of all commands!"
+                )
             }
+            required = true
+        }
+
+        override fun removeRequirement(){
+            if (!required){
+                println("A requirement was removed; however, this requirement was never set in the first place.")
+            }
+            required = false
+        }
 
         public inner class PoseEstimator: RobotPoseSupplier {
             override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
@@ -239,7 +244,6 @@ public class ChargerLimelight(
                     return@nullableValue null
                 }
 
-
                 val allTargets = if (useJsonDump){
                     latestResults.targets_Detector.toVisionTargets()
                 }else{
@@ -314,16 +318,22 @@ public class ChargerLimelight(
                 }
             }
 
-        final override var isRequired: Boolean
-            get() = this@ChargerLimelight.required
-            set(shouldRequire) {
-                if (this@ChargerLimelight.required && shouldRequire){
-                    error("A Limelight with name '$name' has been required in 2 different places. \n " +
-                            "Make sure to call pipeline.isRequired = false at the end of all commands!"
-                    )
-                }
-                this@ChargerLimelight.required = shouldRequire
+        final override fun require(){
+            if (required){
+                error("A Limelight with name '$name' has been required in 2 different places. \n " +
+                        "Make sure to call pipeline.isRequired = false at the end of all commands!"
+                )
             }
+            required = true
+        }
+
+        final override fun removeRequirement(){
+            if (!required){
+                println("A requirement was removed; however, this requirement was never set in the first place.")
+            }
+            required = false
+        }
+
 
     }
 
