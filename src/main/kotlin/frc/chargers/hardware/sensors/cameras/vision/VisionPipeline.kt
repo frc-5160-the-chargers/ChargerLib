@@ -15,6 +15,12 @@ import kotlin.math.sqrt
 public interface VisionPipeline<R: VisionResult> {
 
     /**
+     * Fetches the full vision data of the [VisionPipeline]; These are all from the exact same timestamp.
+     * A null value represents the vision data being invalid/the pipeline having no available targets.
+     */
+    public val visionData: NonLoggableVisionData<R>?
+
+    /**
      * The pipeline index of the [VisionPipeline].
      */
     public val index: Int
@@ -28,20 +34,6 @@ public interface VisionPipeline<R: VisionResult> {
      * The mount angle describes how many degrees the vision camera is from perfectly vertical.
      */
     public val mountAngle: Angle
-
-    /**
-     * Fetches the full vision data of the [VisionPipeline]; These are all from the exact same timestamp.
-     * A null value represents the vision data being invalid/the pipeline having no available targets.
-     */
-    public val visionData: NonLoggableVisionData<R>?
-
-    /**
-     * Fetches the current best target of the [VisionPipeline].
-     *
-     * The values fetched here are not nessecarily from the exact same timestamp.
-     */
-    public val bestTarget: R?
-        get() = visionData?.bestTarget
 
     /**
      * A getter-setter variable which is intended to require the overarching vision camera
@@ -59,6 +51,13 @@ public interface VisionPipeline<R: VisionResult> {
 
 
 
+    /**
+     * Fetches the current best target of the [VisionPipeline].
+     *
+     * The values fetched here are not nessecarily from the exact same timestamp.
+     */
+    public val bestTarget: R?
+        get() = visionData?.bestTarget
 
     /**
      * Calculates the horizontal distance to a target, utilizing the pitch and height of the target.

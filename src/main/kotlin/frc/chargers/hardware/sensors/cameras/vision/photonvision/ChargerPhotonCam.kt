@@ -51,16 +51,17 @@ public class ChargerPhotonCam(
         override val mountAngle: Angle = this@ChargerPhotonCam.mountAngle
 
         override val visionData: VisionData<VisionResult.AprilTag>?
-            by logInputs.nullableValue(
-                default = emptyAprilTagVisionData()
-            ){
+            by logInputs.nullableValue(default = emptyAprilTagVisionData()){
                 val data = latestResult
+                if (!data.hasTargets() || isSimulation()){
+                    return@nullableValue null
+                }
 
                 val bestTarget = data.bestTarget
                 val otherTargets = data.getTargets()
                 otherTargets.remove(bestTarget)
 
-                return@nullableValue if (!data.hasTargets() || isSimulation()) null else VisionData(
+                return@nullableValue VisionData(
                     data.timestampSeconds.ofUnit(seconds),
                     toAprilTagTarget(bestTarget),
                     otherTargets.map{toAprilTagTarget(it)}
@@ -131,20 +132,19 @@ public class ChargerPhotonCam(
         override val visionData: VisionData<VisionResult.Generic>?
             by logInputs.nullableValue(default = emptyGenericVisionData()){
                 val data = latestResult
+                if (!data.hasTargets() || isSimulation()){
+                    return@nullableValue null
+                }
 
                 val bestTarget = data.bestTarget
                 val otherTargets = data.getTargets()
                 otherTargets.remove(bestTarget)
 
-                return@nullableValue if (!data.hasTargets() || isSimulation()){
-                    null
-                } else {
-                    VisionData(
-                        data.timestampSeconds.ofUnit(seconds),
-                        toGenericTarget(bestTarget),
-                        otherTargets.map{toGenericTarget(it)}
-                    )
-                }
+                return@nullableValue VisionData(
+                    data.timestampSeconds.ofUnit(seconds),
+                    toGenericTarget(bestTarget),
+                    otherTargets.map{toGenericTarget(it)}
+                )
             }
 
         override var isRequired: Boolean

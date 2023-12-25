@@ -63,7 +63,35 @@ public class ChargerLimelight(
 
     init{
         this.useJsonDump = useJsonDump
+        limelights.add(this)
     }
+
+    public companion object{
+        private val limelights: MutableList<ChargerLimelight> = mutableListOf()
+
+        /**
+         * Enables JSON dump for all limelights.
+         *
+         * @see ChargerLimelight.useJsonDump
+         */
+        public fun enableJsonDumpForAll(){
+            limelights.forEach{
+                it.useJsonDump = true
+            }
+        }
+
+        /**
+         * Disables JSON dump for all limelights.
+         *
+         * @see ChargerLimelight.useJsonDump
+         */
+        public fun disableJsonDumpForAll(){
+            limelights.forEach{
+                it.useJsonDump = false
+            }
+        }
+    }
+
 
 
     public inner class ApriltagPipeline(
@@ -76,10 +104,10 @@ public class ChargerLimelight(
         private val logInputs: LoggableInputsProvider
     ): VisionPipeline<VisionResult.AprilTag> {
         init{
-            reset()
             if (index < 0 || index > 9){
                 error("Your pipeline's ID is out of range.")
             }
+            reset()
         }
 
         override fun reset(){
@@ -87,14 +115,14 @@ public class ChargerLimelight(
             println("Limelight with name $name has had it's pipeline reset to $index")
         }
 
-
-
-
         override val visionData: VisionData<VisionResult.AprilTag>?
-            by logInputs.nullableValue(
-                default = emptyAprilTagVisionData()
-            ){
-                if (isSimulation()) return@nullableValue null
+            by logInputs.nullableValue(default = emptyAprilTagVisionData()){
+                if (isSimulation() || !hasTargets()) {
+                    return@nullableValue null
+                }else if (getCurrentPipelineIndex(name).toInt() != index){
+                    println("The current pipeline index for the limelight is incorrect. You must call reset() on the pipeline.")
+                    return@nullableValue null
+                }
 
                 val allTargets: MutableList<VisionResult.AprilTag>
                 val timestamp: Time
@@ -117,17 +145,8 @@ public class ChargerLimelight(
                         .ofUnit(milli.seconds)
                 }
 
-
                 val bestTarget = allTargets.removeAt(0)
-
-                return@nullableValue if (!hasTargets()) {
-                    null
-                }else if (getCurrentPipelineIndex(name).toInt() != index){
-                    println("The current pipeline index for the limelight is incorrect. You must call reset() on the pipeline.")
-                    null
-                }else{
-                    VisionData(timestamp, bestTarget, allTargets)
-                }
+                return@nullableValue VisionData(timestamp, bestTarget, allTargets)
             }
 
         override val lensHeight: Distance = this@ChargerLimelight.lensHeight
@@ -150,7 +169,9 @@ public class ChargerLimelight(
 
             override val robotPoseMeasurement: Measurement<UnitPose2d>?
                 by logInputs.nullableValue(default = Measurement(UnitPose2d(), 0.0.seconds)){
-                    if (isSimulation()) return@nullableValue null
+                    if (isSimulation() || !hasTargets() || getCurrentPipelineIndex(name).toInt() != index) {
+                        return@nullableValue null
+                    }
 
                     val allianceColor: DriverStation.Alliance =
                         DriverStation.getAlliance().orElse(defaultDriverStationIfUnavailable)
@@ -175,18 +196,14 @@ public class ChargerLimelight(
                         }
                     }
 
-                    return@nullableValue if (hasTargets() && getCurrentPipelineIndex(name).toInt() == index) {
-                        Measurement(
-                            value = UnitPose2d(
-                                poseArray[0].ofUnit(meters),
-                                poseArray[1].ofUnit(meters),
-                                poseArray[5].ofUnit(degrees)
-                            ),
-                            timestamp = fpgaTimestamp() - poseArray[6].ofUnit(milli.seconds)
-                        )
-                    } else {
-                        null
-                    }
+                    return@nullableValue Measurement(
+                        value = UnitPose2d(
+                            poseArray[0].ofUnit(meters),
+                            poseArray[1].ofUnit(meters),
+                            poseArray[5].ofUnit(degrees)
+                        ),
+                        timestamp = fpgaTimestamp() - poseArray[6].ofUnit(milli.seconds)
+                    )
                 }
         }
 
@@ -214,10 +231,14 @@ public class ChargerLimelight(
     ): MLClassifierPipeline(index,logInputs), VisionPipeline<VisionResult.ML>{
 
         override val visionData: VisionData<VisionResult.ML>?
-            by logInputs.nullableValue(
-                default = emptyMLVisionData()
-            ){
-                if (isSimulation()) return@nullableValue null
+            by logInputs.nullableValue(default = emptyMLVisionData()){
+                if (isSimulation() || !hasTargets()) {
+                    return@nullableValue null
+                }else if (getCurrentPipelineIndex(name).toInt() != index){
+                    println("The current pipeline index for the limelight is incorrect. You must call reset() on the pipeline.")
+                    return@nullableValue null
+                }
+
 
                 val allTargets = if (useJsonDump){
                     latestResults.targets_Detector.toVisionTargets()
@@ -234,17 +255,10 @@ public class ChargerLimelight(
 
                 val bestTarget = allTargets.removeAt(0)
 
-                return@nullableValue if (!hasTargets()) {
-                    null
-                }else if (getCurrentPipelineIndex(name).toInt() != index){
-                    println("The current pipeline index for the limelight of name '$name' is incorrect. You must call reset() on the pipeline.")
-                    null
-                }else{
-                    VisionData(
-                        latestResults.timestamp_RIOFPGA_capture.ofUnit(seconds),
-                        bestTarget, allTargets
-                    )
-                }
+                return@nullableValue VisionData(
+                    latestResults.timestamp_RIOFPGA_capture.ofUnit(seconds),
+                    bestTarget, allTargets
+                )
             }
 
         override val lensHeight: Distance = this@ChargerLimelight.lensHeight
@@ -271,6 +285,7 @@ public class ChargerLimelight(
          */
         logInputs: LoggableInputsProvider
     ): Classifier<Int?> {
+
         init{
             if (index < 0 || index > 9){
                 error("Your pipeline's ID is out of range.")
@@ -278,19 +293,12 @@ public class ChargerLimelight(
             reset()
         }
 
-
-
         final override fun reset(){
             setPipelineIndex(name,index)
             println("Limelight with name $name has had it's pipeline reset to $index")
         }
 
-
-
-
-
-
-        override val itemType: Int?
+        final override val itemType: Int?
             by logInputs.nullableInt{
                 if (getCurrentPipelineIndex(name).toInt() == index && hasTargets() && isReal()){
                     if (useJsonDump){
@@ -305,7 +313,8 @@ public class ChargerLimelight(
                     null
                 }
             }
-        override var isRequired: Boolean
+
+        final override var isRequired: Boolean
             get() = this@ChargerLimelight.required
             set(shouldRequire) {
                 if (this@ChargerLimelight.required && shouldRequire){
