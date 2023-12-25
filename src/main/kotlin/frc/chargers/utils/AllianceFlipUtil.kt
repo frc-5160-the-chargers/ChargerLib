@@ -20,8 +20,6 @@ public fun UnitTranslation2d.applyFlip(fieldLength: Distance): UnitTranslation2d
         this
     }
 
-
-
 /** Flips an x coordinate to the correct side of the field based on the current alliance color. */
 public fun flipXCoord(xCoordinate: Length, fieldLength: Distance): Length =
     if (shouldFlip()) {
@@ -48,9 +46,6 @@ public fun UnitPose2d.applyFlip(fieldLength: Distance): UnitPose2d =
     } else {
         this
     }
-
-
-
 
 private fun shouldFlip(): Boolean =
     try{

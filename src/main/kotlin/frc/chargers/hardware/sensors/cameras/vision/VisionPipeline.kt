@@ -44,13 +44,18 @@ public interface VisionPipeline<R: VisionResult> {
         get() = visionData?.bestTarget
 
     /**
-     * resets the camera that the [VisionPipeline] belongs to in order to return proper results.
+     * A getter-setter variable which is intended to require the overarching vision camera
+     * of the pipeline.
+     */
+    public var isRequired: Boolean
+
+    /**
+     * Resets the camera that the [VisionPipeline] belongs to in order to return proper results.
      * This can include setting the overall camera's pipeline index to the index specified.
      */
-    public fun reset(){
-        println("A generic vision camera's pipeline has just tried to reset the pipeline to $index.")
-        println("However, this pipeline did not provide an implementation of the reset() method; use override fun reset(){} if this is necessary.")
-    }
+    public fun reset()
+
+
 
 
 

@@ -14,9 +14,11 @@ import frc.chargers.utils.Measurement
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
+import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
 import org.photonvision.targeting.PhotonTrackedTarget
+import java.util.*
 
 /**
  * A wrapper over PhotonVision's [PhotonCamera], built for ChargerLib.
@@ -26,6 +28,7 @@ public class ChargerPhotonCam(
     public val lensHeight: Distance,
     public val mountAngle: Angle
 ): PhotonCamera(name){
+    private var required: Boolean = false
 
     public inner class ApriltagPipeline(
         override val index: Int,
@@ -64,6 +67,17 @@ public class ChargerPhotonCam(
                 )
             }
 
+        override var isRequired: Boolean
+            get() = this@ChargerPhotonCam.required
+            set(shouldRequire) {
+                if (this@ChargerPhotonCam.required && shouldRequire){
+                    error("A Photon Camera with name '$name' has been required in 2 different places. \n " +
+                            "Make sure to call pipeline.isRequired = false at the end of all commands!"
+                    )
+                }
+                this@ChargerPhotonCam.required = shouldRequire
+            }
+
         public inner class PoseEstimator(
             robotToCamera: UnitTransform3d,
             fieldTags: AprilTagFieldLayout,
@@ -83,12 +97,12 @@ public class ChargerPhotonCam(
 
             override val robotPoseMeasurement: Measurement<UnitPose2d>?
                 by logInputs.nullableValue(default = Measurement(UnitPose2d(), 0.0.seconds)){
-                    val signal = update()
+                    if (isSimulation()) return@nullableValue null
 
-                    return@nullableValue if (signal.isEmpty || isSimulation()){
-                        null
-                    }else{
-                        Measurement(
+                    return@nullableValue when(val signal = update()){
+                        Optional.empty<EstimatedRobotPose>() -> null
+
+                        else -> Measurement(
                             UnitPose2d(signal.get().estimatedPose.toPose2d()),
                             signal.get().timestampSeconds.ofUnit(seconds)
                         )
@@ -115,9 +129,7 @@ public class ChargerPhotonCam(
         }
 
         override val visionData: VisionData<VisionResult.Generic>?
-            by logInputs.nullableValue(
-                default = emptyGenericVisionData()
-            ){
+            by logInputs.nullableValue(default = emptyGenericVisionData()){
                 val data = latestResult
 
                 val bestTarget = data.bestTarget
@@ -135,10 +147,20 @@ public class ChargerPhotonCam(
                 }
             }
 
+        override var isRequired: Boolean
+            get() = this@ChargerPhotonCam.required
+            set(shouldRequire) {
+                if (this@ChargerPhotonCam.required && shouldRequire){
+                    error("A Photon camera with name '$name' has been required in 2 different places. \n " +
+                            "Make sure to call pipeline.isRequired = false at the end of all commands!"
+                    )
+                }
+                this@ChargerPhotonCam.required = shouldRequire
+            }
 
         override val lensHeight: Distance = this@ChargerPhotonCam.lensHeight
-        override val mountAngle: Angle = this@ChargerPhotonCam.mountAngle
 
+        override val mountAngle: Angle = this@ChargerPhotonCam.mountAngle
     }
 
 

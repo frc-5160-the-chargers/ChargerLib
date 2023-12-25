@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.LogTable
 
 
 /**
- * A [Double] accompanied by a timestamped.
+ * A [Double] accompanied by a timestamp.
  */
 public data class DoubleMeasurement(
     val value: Double,
@@ -30,7 +30,7 @@ public data class DoubleMeasurement(
 }
 
 /**
- * A [Quantity] accompanied by a timestamped.
+ * A [Quantity] accompanied by a timestamp.
  */
 public data class QuantityMeasurement<D: AnyDimension>(
     val value: Quantity<D>,
@@ -53,9 +53,9 @@ public data class QuantityMeasurement<D: AnyDimension>(
  * Represents a Loggable value accompanied by a timestamp.
  */
 public data class Measurement<T: AdvantageKitLoggable<T>>(
-    @JvmField val value: T,
-    val timestamp: Time
-): AdvantageKitLoggable<Measurement<T>> {
+    override val value: T,
+    override val timestamp: Time
+): BasicMeasurement<T>(value, timestamp), AdvantageKitLoggable<Measurement<T>> {
     override fun pushToLog(table: LogTable, category: String) {
         value.pushToLog(table, "$category/value")
         table.put("$category/timestampSecs",timestamp.inUnit(seconds))
@@ -65,4 +65,24 @@ public data class Measurement<T: AdvantageKitLoggable<T>>(
             value.getFromLog(table,"$category/value"),
             timestamp = table.get("$category/timestampSecs",0.0).ofUnit(seconds)
         )
+}
+
+/**
+ * Represents a simple value accompanied by a timestamp,
+ * without any logging capabilities.
+ */
+public open class BasicMeasurement<T>(
+    public open val value: T,
+    public open val timestamp: Time
+){
+    override fun equals(other: Any?): Boolean {
+        return other is BasicMeasurement<*> && value == other.value && timestamp == other.timestamp
+    }
+
+    override fun hashCode(): Int {
+        var result = value?.hashCode() ?: 0
+        result = 31 * result + timestamp.hashCode()
+        return result
+    }
+
 }
