@@ -16,6 +16,7 @@ import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
 import frc.chargers.hardware.subsystems.posemonitors.SwervePoseMonitor
+import frc.chargers.hardware.subsystemutils.swervedrive.OnboardPIDSwerveMotors
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveMotors
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveEncoders
 import frc.chargers.hardware.subsystemutils.swervedrive.module.*
@@ -56,6 +57,7 @@ public fun EncoderHolonomicDrivetrain(
     driveGearbox: DCMotor,
     hardwareData: SwerveHardwareData,
     controlData: SwerveControlData,
+    useOnboardPID: Boolean = false,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     realPoseSuppliers: List<RobotPoseSupplier> = listOf(),
@@ -103,50 +105,101 @@ public fun EncoderHolonomicDrivetrain(
             }
         }
 
+        val topLeft: SwerveModule
+        val topRight: SwerveModule
+        val bottomLeft: SwerveModule
+        val bottomRight: SwerveModule
 
-        val topLeft = RioPIDSwerveModule(
-            ModuleIOReal(
+
+        if (useOnboardPID){
+            if (turnMotors !is OnboardPIDSwerveMotors){
+                error("the turning motors of the drivetrain do not support onboard PID control; however, onboard PID control was requested.")
+            }
+            if (driveMotors !is OnboardPIDSwerveMotors){
+                error("the driving motors of the drivetrain do not support onboard PID control; however, onboard PID control was requested.")
+            }
+
+            topLeft = OnboardPIDSwerveModule(
                 TOP_LEFT_MODULE_INPUTS,
-                turnMotor = turnMotors.topLeft,
-                turnEncoder = turnEncoders.topLeft,
-                driveMotor = driveMotors.topLeft,
+                controlData,
+                turnMotors.topLeft,
+                turnEncoders.topLeft,
+                driveMotors.topLeft,
                 hardwareData.driveGearRatio, hardwareData.turnGearRatio
-            ),
-            controlData
-        )
+            )
 
-        val topRight = RioPIDSwerveModule(
-            ModuleIOReal(
+            topRight = OnboardPIDSwerveModule(
                 TOP_RIGHT_MODULE_INPUTS,
-                turnMotor = turnMotors.topRight,
-                turnEncoder = turnEncoders.topRight,
-                driveMotor = driveMotors.topRight,
+                controlData,
+                turnMotors.topRight,
+                turnEncoders.topRight,
+                driveMotors.topRight,
                 hardwareData.driveGearRatio, hardwareData.turnGearRatio
-            ),
-            controlData
-        )
+            )
 
-        val bottomLeft = RioPIDSwerveModule(
-            ModuleIOReal(
+            bottomLeft = OnboardPIDSwerveModule(
                 BOTTOM_LEFT_MODULE_INPUTS,
-                turnMotor = turnMotors.bottomLeft,
-                turnEncoder = turnEncoders.bottomLeft,
-                driveMotor = driveMotors.bottomLeft,
-                hardwareData.driveGearRatio,hardwareData.turnGearRatio
-            ),
-            controlData
-        )
-
-        val bottomRight = RioPIDSwerveModule(
-            ModuleIOReal(
-                BOTTOM_RIGHT_MODULE_INPUTS,
-                turnMotor = turnMotors.bottomRight,
-                turnEncoder = turnEncoders.bottomRight,
-                driveMotor = driveMotors.bottomRight,
+                controlData,
+                turnMotors.bottomLeft,
+                turnEncoders.bottomLeft,
+                driveMotors.bottomLeft,
                 hardwareData.driveGearRatio, hardwareData.turnGearRatio
-            ),
-            controlData
-        )
+            )
+
+            bottomRight = OnboardPIDSwerveModule(
+                BOTTOM_RIGHT_MODULE_INPUTS,
+                controlData,
+                turnMotors.bottomRight,
+                turnEncoders.bottomRight,
+                driveMotors.bottomRight,
+                hardwareData.driveGearRatio, hardwareData.turnGearRatio
+            )
+
+        }else{
+            topLeft = RioPIDSwerveModule(
+                ModuleIOReal(
+                    TOP_LEFT_MODULE_INPUTS,
+                    turnMotor = turnMotors.topLeft,
+                    turnEncoder = turnEncoders.topLeft,
+                    driveMotor = driveMotors.topLeft,
+                    hardwareData.driveGearRatio, hardwareData.turnGearRatio
+                ),
+                controlData
+            )
+
+            topRight = RioPIDSwerveModule(
+                ModuleIOReal(
+                    TOP_RIGHT_MODULE_INPUTS,
+                    turnMotor = turnMotors.topRight,
+                    turnEncoder = turnEncoders.topRight,
+                    driveMotor = driveMotors.topRight,
+                    hardwareData.driveGearRatio, hardwareData.turnGearRatio
+                ),
+                controlData
+            )
+
+            bottomLeft = RioPIDSwerveModule(
+                ModuleIOReal(
+                    BOTTOM_LEFT_MODULE_INPUTS,
+                    turnMotor = turnMotors.bottomLeft,
+                    turnEncoder = turnEncoders.bottomLeft,
+                    driveMotor = driveMotors.bottomLeft,
+                    hardwareData.driveGearRatio,hardwareData.turnGearRatio
+                ),
+                controlData
+            )
+
+            bottomRight = RioPIDSwerveModule(
+                ModuleIOReal(
+                    BOTTOM_RIGHT_MODULE_INPUTS,
+                    turnMotor = turnMotors.bottomRight,
+                    turnEncoder = turnEncoders.bottomRight,
+                    driveMotor = driveMotors.bottomRight,
+                    hardwareData.driveGearRatio, hardwareData.turnGearRatio
+                ),
+                controlData
+            )
+        }
 
         return EncoderHolonomicDrivetrain(
             topLeft, topRight, bottomLeft, bottomRight,
@@ -244,8 +297,6 @@ public class EncoderHolonomicDrivetrain(
 
     /**
      * The kinematics class for the drivetrain.
-     * Uses [SuperSwerveDriveKinematics], a custom wrapper class around
-     * the [edu.wpi.first.math.kinematics.SwerveDriveKinematics] class.
      */
     public val kinematics: SwerveDriveKinematics = SwerveDriveKinematics(
         UnitTranslation2d(hardwareData.trackWidth/2,hardwareData.wheelBase/2).inUnit(meters),

@@ -14,11 +14,11 @@ import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
  * Stores a produced Setpoint; with the appropriate setpoint value,
  * and additional produced output.
  */
-public data class Setpoint<I, O>(
+public data class Setpoint<S, O>(
     /**
      * The value of the setpoint.
      */
-    val value: I,
+    val value: S,
     /**
      * Additional control output provided by a [SetpointSupplier];
      * usually calculated via a feedforward.
@@ -29,13 +29,13 @@ public data class Setpoint<I, O>(
 /**
  * A class that can supply a certain setpoint to a [FeedbackController] or [Controller].
  */
-public fun interface SetpointSupplier<I, O>{
+public fun interface SetpointSupplier<S, O>{
 
     /**
      * Fetches a calculated [Setpoint],
      * with the appropriate target goal.
      */
-    public fun getSetpoint(target: I): Setpoint<I, O>
+    public fun getSetpoint(target: S): Setpoint<S, O>
 
 
     /**
