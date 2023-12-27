@@ -9,7 +9,7 @@ import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.utils.Precision
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
@@ -30,11 +30,11 @@ public fun DifferentialDrivetrain.rotateAction(
 ): Command = runSequentially {
     val targetAngle by getOnceDuringRun{ this@HeadingProvider.heading + angle }
     val controller by getOnceDuringRun{
-        UnitSuperPIDController(
+        SuperPIDController(
             pidConstants,
             { this@HeadingProvider.heading },
-            Scalar(-1.0)..Scalar(1.0),
             target = targetAngle,
+            outputRange = Scalar(-1.0)..Scalar(1.0),
             continuousInputRange = 0.degrees..360.degrees
         )
     }
@@ -86,18 +86,18 @@ context(CommandBuilder)
 @LowPriorityInOverloadResolution
 public fun EncoderHolonomicDrivetrain.rotateAction(
     angle: Angle,
-    pidConstants: PIDConstants = controlScheme.robotRotationPID,
+    pidConstants: PIDConstants = controlData.robotRotationPID,
     precision: Precision<AngleDimension> = Precision.AllowOvershoot
 ): Command = runSequentially {
     fun getHeading(): Angle = gyro?.heading ?: this@EncoderHolonomicDrivetrain.heading
 
     val targetAngle by getOnceDuringRun{ getHeading() + angle }
     val controller by getOnceDuringRun{
-        UnitSuperPIDController(
+        SuperPIDController(
             pidConstants,
             { getHeading() },
-            Scalar(-1.0)..Scalar(1.0),
             target = targetAngle,
+            outputRange = Scalar(-1.0)..Scalar(1.0),
             continuousInputRange = 0.degrees..360.degrees
         )
     }

@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.quantities.*
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.commandbuilder.CommandBuilder
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 
@@ -16,7 +16,7 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
  */
 context(CommandBuilder)
 @JvmName("driveDistanceWithVelocity")
-public fun EncoderDifferentialDrivetrain.driveStraight(
+public fun EncoderDifferentialDrivetrain.driveStraightAction(
     distance: Distance,
     velocity: Velocity,
     direction: Angle? = null,
@@ -29,7 +29,7 @@ public fun EncoderDifferentialDrivetrain.driveStraight(
     val initialPosition by getOnceDuringRun { distanceTraveled }
     val initialHeading by getOnceDuringRun { direction ?: getHeading() }
     val keepHeadingPID by getOnceDuringRun {
-        UnitSuperPIDController(
+        SuperPIDController(
             pidConstants = steeringPIDConstants,
             getInput = { gyro?.heading ?: this@EncoderDifferentialDrivetrain.heading },
             target = initialHeading,
@@ -43,7 +43,7 @@ public fun EncoderDifferentialDrivetrain.driveStraight(
         } else {
             { (distanceTraveled - initialPosition) <= distance }
         },
-        this@driveStraight
+        this@driveStraightAction
     ) {
         velocityDrive(velocity, Quantity(0.0), keepHeadingPID.calculateOutput())
     }
@@ -57,7 +57,7 @@ public fun EncoderDifferentialDrivetrain.driveStraight(
  */
 context(CommandBuilder)
 @JvmName("driveDistanceWithVelocity")
-public fun EncoderHolonomicDrivetrain.driveStraight(
+public fun EncoderHolonomicDrivetrain.driveStraightAction(
     distance: Distance,
     velocity: Velocity,
     direction: Angle = Angle(0.0),
@@ -71,9 +71,9 @@ public fun EncoderHolonomicDrivetrain.driveStraight(
         } else {
             { (distanceTraveled - initialPosition) <= distance }
         },
-        this@driveStraight
+        this@driveStraightAction
     ) {
-        val angularVelocity = velocity / (constants.wheelDiameter / 2)
+        val angularVelocity = velocity / (hardwareData.wheelDiameter / 2)
         if (fieldRelative){
             val fieldRelativeDelta: Angle = gyro?.heading ?: this@EncoderHolonomicDrivetrain.heading
             topLeft.setDirectionalVelocity(angularVelocity,direction - fieldRelativeDelta )

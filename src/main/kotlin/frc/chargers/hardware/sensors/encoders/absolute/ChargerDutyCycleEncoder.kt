@@ -11,6 +11,42 @@ import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 
 /**
+ * Creates a [ChargerDutyCycleEncoder] with configuration.
+ */
+public inline fun ChargerDutyCycleEncoder(
+    channel: Int,
+    configure: DutyCycleEncoderConfiguration.() -> Unit
+): ChargerDutyCycleEncoder = ChargerDutyCycleEncoder(channel).also{
+    val configuration = DutyCycleEncoderConfiguration().apply(configure)
+    it.configure(configuration)
+}
+
+/**
+ * Creates a [ChargerDutyCycleEncoder] with configuration.
+ */
+public inline fun ChargerDutyCycleEncoder(
+    source: DigitalSource,
+    configure: DutyCycleEncoderConfiguration.() -> Unit
+): ChargerDutyCycleEncoder = ChargerDutyCycleEncoder(source).also{
+    val configuration = DutyCycleEncoderConfiguration().apply(configure)
+    it.configure(configuration)
+}
+
+/**
+ * Creates a [ChargerDutyCycleEncoder] with configuration.
+ */
+public inline fun ChargerDutyCycleEncoder(
+    dutyCycle: DutyCycle,
+    configure: DutyCycleEncoderConfiguration.() -> Unit
+): ChargerDutyCycleEncoder = ChargerDutyCycleEncoder(dutyCycle).also{
+    val configuration = DutyCycleEncoderConfiguration().apply(configure)
+    it.configure(configuration)
+}
+
+
+
+
+/**
  * An Adapter of WPILib's [DutyCycleEncoder] class; consists of REV through bore encoders, CTRE mag encoders.
  */
 public class ChargerDutyCycleEncoder: DutyCycleEncoder, PositionEncoder,

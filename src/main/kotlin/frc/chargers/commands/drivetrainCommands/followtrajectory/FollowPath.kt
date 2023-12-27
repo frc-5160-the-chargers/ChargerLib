@@ -14,7 +14,7 @@ import frc.chargers.commands.commandbuilder.CommandBuilder
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
-import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveControl
+import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.pathplannerextensions.asPathPlannerConstants
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -30,7 +30,7 @@ import kotlin.math.sqrt
 context(CommandBuilder)
 public fun EncoderDifferentialDrivetrain.followPathAction(path: PathPlannerPath): Command =
     FollowPathWithEvents(
-        if (controlScheme.pathAlgorithm == DiffDriveControl.PathAlgorithm.LTV){
+        if (controlScheme.pathAlgorithm == DiffDriveControlData.PathAlgorithm.LTV){
             FollowPathLTV(
                 path,
                 { poseEstimator.robotPose.inUnit(meters) },
@@ -67,11 +67,11 @@ public fun EncoderHolonomicDrivetrain.followPathAction(path: PathPlannerPath): C
             {currentSpeeds},
             { speeds -> velocityDrive(speeds, fieldRelative = false) },
             HolonomicPathFollowerConfig(
-                controlScheme.robotTranslationPID.asPathPlannerConstants(),
-                controlScheme.robotRotationPID.asPathPlannerConstants(),
-                constants.maxModuleSpeed.inUnit(meters/seconds),
-                sqrt(constants.trackWidth.inUnit(meters).pow(2) + constants.wheelBase.inUnit(meters).pow(2)),
-                controlScheme.pathReplanConfig
+                controlData.robotTranslationPID.asPathPlannerConstants(),
+                controlData.robotRotationPID.asPathPlannerConstants(),
+                hardwareData.maxModuleSpeed.inUnit(meters/seconds),
+                sqrt(hardwareData.trackWidth.inUnit(meters).pow(2) + hardwareData.wheelBase.inUnit(meters).pow(2)),
+                controlData.pathReplanConfig
             ),
             this@EncoderHolonomicDrivetrain
         ),

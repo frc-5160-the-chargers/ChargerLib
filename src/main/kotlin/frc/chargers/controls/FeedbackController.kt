@@ -7,4 +7,9 @@ public interface FeedbackController<I, out T>: Controller<T>{
     public var target: I
 
     public val error: I
+
+    public fun calculateOutput(target: I): T{
+        this.target = target
+        return calculateOutput()
+    }
 }

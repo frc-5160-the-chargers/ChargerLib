@@ -38,11 +38,11 @@ public fun EncoderHolonomicDrivetrain.pathFindAction(
     { currentSpeeds },
     { speeds: ChassisSpeeds -> velocityDrive(speeds, fieldRelative = false) },
     HolonomicPathFollowerConfig(
-        controlScheme.robotTranslationPID.asPathPlannerConstants(),
-        controlScheme.robotRotationPID.asPathPlannerConstants(),
-        constants.maxModuleSpeed.inUnit(meters/ seconds),
-        sqrt(constants.trackWidth.inUnit(meters).pow(2) + constants.wheelBase.inUnit(meters).pow(2)),
-        controlScheme.pathReplanConfig
+        controlData.robotTranslationPID.asPathPlannerConstants(),
+        controlData.robotRotationPID.asPathPlannerConstants(),
+        hardwareData.maxModuleSpeed.inUnit(meters/ seconds),
+        sqrt(hardwareData.trackWidth.inUnit(meters).pow(2) + hardwareData.wheelBase.inUnit(meters).pow(2)),
+        controlData.pathReplanConfig
     ),
     rotationDelayDistance.inUnit(meters),
     this
@@ -65,11 +65,11 @@ public fun EncoderHolonomicDrivetrain.pathFindThenFollowPathAction(
     { currentSpeeds },
     { speeds: ChassisSpeeds -> velocityDrive(speeds, fieldRelative = false) },
     HolonomicPathFollowerConfig(
-        controlScheme.robotTranslationPID.asPathPlannerConstants(),
-        controlScheme.robotRotationPID.asPathPlannerConstants(),
-        constants.maxModuleSpeed.inUnit(meters/ seconds),
-        sqrt(constants.trackWidth.inUnit(meters).pow(2) + constants.wheelBase.inUnit(meters).pow(2)),
-        controlScheme.pathReplanConfig
+        controlData.robotTranslationPID.asPathPlannerConstants(),
+        controlData.robotRotationPID.asPathPlannerConstants(),
+        hardwareData.maxModuleSpeed.inUnit(meters/ seconds),
+        sqrt(hardwareData.trackWidth.inUnit(meters).pow(2) + hardwareData.wheelBase.inUnit(meters).pow(2)),
+        controlData.pathReplanConfig
     ),
     rotationDelayDistance.inUnit(meters),
     this

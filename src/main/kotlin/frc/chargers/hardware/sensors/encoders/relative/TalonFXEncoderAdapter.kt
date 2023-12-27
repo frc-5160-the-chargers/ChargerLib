@@ -21,10 +21,12 @@ public class TalonFXEncoderAdapter(
         motorController.setPosition(newZero.inUnit(rotations))
     }
 
+    private val positionSignal = motorController.position
+    private val velocitySignal = motorController.velocity
 
     override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
         get(){
-            val statusSignal = motorController.rotorPosition
+            val statusSignal = positionSignal.refresh(true)
             return QuantityMeasurement(
                 value = statusSignal.value.ofUnit(rotations),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds)
@@ -33,7 +35,7 @@ public class TalonFXEncoderAdapter(
 
     override val timestampedAngularVelocity: QuantityMeasurement<AngularVelocityDimension>
         get(){
-            val statusSignal = motorController.rotorVelocity
+            val statusSignal = velocitySignal.refresh()
             return QuantityMeasurement(
                 value = statusSignal.value.ofUnit(rotations / seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds)

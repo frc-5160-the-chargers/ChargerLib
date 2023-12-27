@@ -29,7 +29,7 @@ public class ChargerQuadEncoder:
     }
 
 
-    public val anglePerPulse: Angle
+    private val anglePerPulse: Angle
     /*
      * The various constructors for the Encoder wrapper.
      */
@@ -39,10 +39,12 @@ public class ChargerQuadEncoder:
         channelB: Int,
         reverseDirection: Boolean = false,
         encodingType: EncodingType = EncodingType.k4X,
-        configure: QuadEncoderConfiguration.() -> Unit = {}
+        configure: (QuadEncoderConfiguration.() -> Unit)? = null
     ) : super(channelA, channelB, reverseDirection, encodingType){
         this.anglePerPulse = anglePerPulse
-        configure(QuadEncoderConfiguration().apply(configure))
+        if (configure != null){
+            configure(QuadEncoderConfiguration().apply(configure))
+        }
     }
 
     public constructor(
@@ -51,10 +53,12 @@ public class ChargerQuadEncoder:
         channelB: Int,
         reverseDirection: Boolean = false,
         encodingType: EncodingType = EncodingType.k4X,
-        configure: QuadEncoderConfiguration.() -> Unit = {}
+        configure: (QuadEncoderConfiguration.() -> Unit)? = null
     ) : super(channelA, channelB, reverseDirection, encodingType){
         this.anglePerPulse = (1/pulsesPerRotation.toDouble()).ofUnit(rotations)
-        configure(QuadEncoderConfiguration().apply(configure))
+        if (configure != null){
+            configure(QuadEncoderConfiguration().apply(configure))
+        }
     }
 
     public constructor(
@@ -63,10 +67,12 @@ public class ChargerQuadEncoder:
         channelB: Int,
         indexChannel: Int,
         reverseDirection: Boolean = false,
-        configure: QuadEncoderConfiguration.() -> Unit = {}
+        configure: (QuadEncoderConfiguration.() -> Unit)? = null
     ): super(channelA, channelB,indexChannel, reverseDirection){
         this.anglePerPulse = anglePerPulse
-        configure(QuadEncoderConfiguration().apply(configure))
+        if (configure != null){
+            configure(QuadEncoderConfiguration().apply(configure))
+        }
     }
 
     public constructor(
@@ -75,10 +81,12 @@ public class ChargerQuadEncoder:
         channelB: Int,
         indexChannel: Int,
         reverseDirection: Boolean = false,
-        configure: QuadEncoderConfiguration.() -> Unit = {}
+        configure: (QuadEncoderConfiguration.() -> Unit)? = null
     ): super(channelA, channelB,indexChannel, reverseDirection){
         this.anglePerPulse = (1/pulsesPerRotation.toDouble()).ofUnit(rotations)
-        configure(QuadEncoderConfiguration().apply(configure))
+        if (configure != null){
+            configure(QuadEncoderConfiguration().apply(configure))
+        }
     }
 
     public constructor(
@@ -87,10 +95,12 @@ public class ChargerQuadEncoder:
         sourceB: DigitalSource,
         reverseDirection: Boolean = false,
         encodingType: EncodingType = EncodingType.k4X,
-        configure: QuadEncoderConfiguration.() -> Unit = {}
+        configure: (QuadEncoderConfiguration.() -> Unit)? = null
     ): super(sourceA, sourceB, reverseDirection, encodingType){
         this.anglePerPulse = anglePerPulse
-        configure(QuadEncoderConfiguration().apply(configure))
+        if (configure != null){
+            configure(QuadEncoderConfiguration().apply(configure))
+        }
     }
 
     public constructor(
@@ -99,10 +109,12 @@ public class ChargerQuadEncoder:
         sourceB: DigitalSource,
         reverseDirection: Boolean = false,
         encodingType: EncodingType = EncodingType.k4X,
-        configure: QuadEncoderConfiguration.() -> Unit = {}
+        configure: (QuadEncoderConfiguration.() -> Unit)? = null
     ): super(sourceA, sourceB, reverseDirection, encodingType){
         this.anglePerPulse = (1/pulsesPerRotation.toDouble()).ofUnit(rotations)
-        configure(QuadEncoderConfiguration().apply(configure))
+        if (configure != null){
+            configure(QuadEncoderConfiguration().apply(configure))
+        }
     }
 
     public constructor(
@@ -111,10 +123,12 @@ public class ChargerQuadEncoder:
         sourceB: DigitalSource,
         indexSource: DigitalSource,
         reverseDirection: Boolean,
-        configure: QuadEncoderConfiguration.() -> Unit = {}
+        configure: (QuadEncoderConfiguration.() -> Unit)? = null
     ): super(sourceA, sourceB, indexSource, reverseDirection){
         this.anglePerPulse = anglePerPulse
-        configure(QuadEncoderConfiguration().apply(configure))
+        if (configure != null){
+            configure(QuadEncoderConfiguration().apply(configure))
+        }
     }
 
     public constructor(
@@ -123,10 +137,12 @@ public class ChargerQuadEncoder:
         sourceB: DigitalSource,
         indexSource: DigitalSource,
         reverseDirection: Boolean,
-        configure: QuadEncoderConfiguration.() -> Unit = {}
+        configure: (QuadEncoderConfiguration.() -> Unit)? = null
     ): super(sourceA, sourceB, indexSource, reverseDirection){
         this.anglePerPulse = (1/pulsesPerRotation.toDouble()).ofUnit(rotations)
-        configure(QuadEncoderConfiguration().apply(configure))
+        if (configure != null){
+            configure(QuadEncoderConfiguration().apply(configure))
+        }
     }
 
 }

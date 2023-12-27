@@ -1,4 +1,4 @@
-package frc.chargers.hardware.subsystemutils.swervedrive.module
+package frc.chargers.hardware.subsystemutils.swervedrive.module.lowlevel
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
@@ -14,7 +14,7 @@ import frc.chargers.utils.math.units.Inertia
 import frc.chargers.utils.math.units.times
 
 /**
- * Represents the low level hardware of a [SwerveModule] during simulation.
+ * Represents the low level hardware of a SwerveModule during simulation.
  */
 public class ModuleIOSim(
     logInputs: LoggableInputsProvider,

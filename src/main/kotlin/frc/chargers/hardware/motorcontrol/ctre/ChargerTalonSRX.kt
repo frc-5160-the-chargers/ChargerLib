@@ -71,8 +71,7 @@ public inline fun redlineSRX(
 public open class ChargerTalonSRX(
     deviceNumber: Int,
     private val encoderTicksPerRotation: Int
-) : WPI_TalonSRX(deviceNumber), SmartEncoderMotorController, HardwareConfigurable<TalonSRXConfiguration>{
-
+) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<TalonSRXConfiguration>{
 
     final override val encoder: Encoder
         get() = TalonSRXEncoderAdapter(
@@ -155,13 +154,6 @@ public open class ChargerTalonSRX(
 
 
     }
-
-    override val appliedCurrent: Current
-        get() = supplyCurrent.ofUnit(amps)
-    override val tempCelsius: Double
-        get() = temperature
-    override val appliedVoltage: Voltage
-        get() = busVoltage.ofUnit(volts)
 }
 
 /**

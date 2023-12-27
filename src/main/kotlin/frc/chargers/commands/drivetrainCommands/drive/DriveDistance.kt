@@ -5,7 +5,7 @@ import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.Scalar
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.commandbuilder.CommandBuilder
-import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 
@@ -32,7 +32,7 @@ public fun EncoderDifferentialDrivetrain.driveStraightAction(
     val initialPosition by getOnceDuringRun { this@EncoderDifferentialDrivetrain.distanceTraveled }
     val initialHeading by getOnceDuringRun { direction ?: getHeading() }
     val pid by getOnceDuringRun {
-        UnitSuperPIDController(
+        SuperPIDController(
             pidConstants = this@EncoderDifferentialDrivetrain.controlScheme.robotRotationPID,
             getInput = { getHeading() },
             target = initialHeading,

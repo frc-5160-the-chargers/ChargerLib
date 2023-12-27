@@ -8,7 +8,7 @@ import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
 import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
 import frc.chargers.controls.pid.PIDConstants
-import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
 
@@ -94,7 +94,7 @@ public fun DifferentialDrivetrain.driveStraightAction(
     val initialHeading by getOnceDuringRun { direction }
 
     val pid by getOnceDuringRun {
-        UnitSuperPIDController(
+        SuperPIDController(
             pidConstants = steeringPIDConstants,
             getInput = { this@HeadingProvider.heading },
             target = initialHeading,

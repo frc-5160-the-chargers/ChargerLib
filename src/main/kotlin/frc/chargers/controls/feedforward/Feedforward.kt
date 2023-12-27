@@ -8,6 +8,6 @@ package frc.chargers.controls.feedforward
  *
  * See [here](https://www.controleng.com/articles/feed-forwards-augment-pid-control/) for an explanation of feedforward.
  */
-public fun interface Feedforward<O,E> {
+public fun interface Feedforward<O, E> {
     public fun calculate(value: O): E
 }

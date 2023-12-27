@@ -1,9 +1,9 @@
-package frc.chargers.hardware.subsystemutils.swervedrive.module
+package frc.chargers.hardware.subsystemutils.swervedrive.module.lowlevel
 
 import com.batterystaple.kmeasure.quantities.*
 
 /**
- * An interface representing the low level component of a [SwerveModule].
+ * An interface representing the low level component of a SwerveModule.
  *
  * There are 2 implementations of this class: one for the real robot ([ModuleIOReal])
  * and one for the sim robot ([ModuleIOSim]).

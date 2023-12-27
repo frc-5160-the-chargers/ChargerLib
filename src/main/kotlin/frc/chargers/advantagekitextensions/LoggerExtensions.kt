@@ -5,7 +5,7 @@ import com.batterystaple.kmeasure.quantities.Quantity
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
-import frc.chargers.wpilibextensions.fpgaTimestamp
+import frc.chargers.wpilibextensions.fpgaTimestampReal
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger.*
 
@@ -34,9 +34,9 @@ public fun <T: AdvantageKitLoggable<T>> recordOutput(key: String, value: T){
  * Runs a code block while logging it's latency.
  */
 public inline fun runAndLogLatency(logName: String, toRun: () -> Unit){
-    val startTime = fpgaTimestamp()
+    val startTime = fpgaTimestampReal()
     toRun()
-    recordOutput("$logName(ms)", (fpgaTimestamp() - startTime).inUnit(milli.seconds))
+    recordOutput("$logName(ms)", (fpgaTimestampReal() - startTime).inUnit(milli.seconds))
 }
 
 

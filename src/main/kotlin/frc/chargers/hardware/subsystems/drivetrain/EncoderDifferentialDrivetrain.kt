@@ -12,8 +12,9 @@ import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
-import frc.chargers.constants.drivetrain.DiffDriveConstants
-import frc.chargers.controls.pid.UnitSuperPIDController
+import frc.chargers.constants.drivetrain.DiffDriveHardwareData
+import frc.chargers.controls.SetpointSupplier
+import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
@@ -24,7 +25,7 @@ import frc.chargers.hardware.subsystems.posemonitors.DifferentialPoseMonitor
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIO
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOReal
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOSim
-import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveControl
+import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
@@ -32,8 +33,8 @@ import org.littletonrobotics.junction.Logger.recordOutput
 
 public fun simulatedDrivetrain(
     simMotors: DifferentialDrivetrainSim.KitbotMotor,
-    constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
-    controlScheme: DiffDriveControl = DiffDriveControl.None
+    constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    controlScheme: DiffDriveControlData = DiffDriveControlData.None
 ): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
     DiffDriveIOSim(logInputs = LoggableInputsProvider(namespace = "Drivetrain(Differential)"),simMotors),
     constants, controlScheme
@@ -46,8 +47,8 @@ public fun simulatedDrivetrain(
 public inline fun sparkMaxDrivetrain(
     leftMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
     rightMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
-    constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
-    controlScheme: DiffDriveControl = DiffDriveControl.None,
+    constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    controlScheme: DiffDriveControlData = DiffDriveControlData.None,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme,
@@ -60,8 +61,8 @@ public inline fun sparkMaxDrivetrain(
 public inline fun talonFXDrivetrain(
     leftMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
     rightMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
-    constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
-    controlScheme: DiffDriveControl = DiffDriveControl.None,
+    constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    controlScheme: DiffDriveControlData = DiffDriveControlData.None,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme,
@@ -74,8 +75,8 @@ public inline fun talonFXDrivetrain(
 public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
     leftMotors: EncoderMotorControllerGroup<C>,
     rightMotors: EncoderMotorControllerGroup<C>,
-    constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
-    controlScheme: DiffDriveControl = DiffDriveControl.None,
+    constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    controlScheme: DiffDriveControlData = DiffDriveControlData.None,
     configuration: C
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
@@ -91,8 +92,8 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
 
 public class EncoderDifferentialDrivetrain(
     lowLevel: DiffDriveIO,
-    public val constants: DiffDriveConstants = DiffDriveConstants.andyMark(),
-    public val controlScheme: DiffDriveControl = DiffDriveControl.None,
+    public val constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    public val controlScheme: DiffDriveControlData = DiffDriveControlData.None,
     public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
@@ -101,20 +102,24 @@ public class EncoderDifferentialDrivetrain(
 
     internal val wheelTravelPerMotorRadian = constants.gearRatio * wheelRadius
 
-    private val leftController = UnitSuperPIDController(
+    private val leftController = SuperPIDController(
         controlScheme.leftVelocityPID,
-        {leftVelocity},
+        getInput = {leftVelocity},
         target = AngularVelocity(0.0),
+        setpointSupplier = SetpointSupplier.Default(
+            feedforward = controlScheme.leftFF
+        ),
         selfSustain = true,
-        feedforward = controlScheme.leftFF,
     )
 
-    private val rightController = UnitSuperPIDController(
+    private val rightController = SuperPIDController(
         controlScheme.rightVelocityPID,
-        {rightVelocity},
+        getInput = {rightVelocity},
         target = AngularVelocity(0.0),
+        setpointSupplier = SetpointSupplier.Default(
+            feedforward = controlScheme.rightFF
+        ),
         selfSustain = true,
-        feedforward = controlScheme.rightPID
     )
 
 
@@ -166,7 +171,7 @@ public class EncoderDifferentialDrivetrain(
      *
      * This value is calculated using the encoders, not a gyroscope or accelerometer,
      * so note that it may become inaccurate if the wheels slip. If available, consider
-     * using a [frc.chargers.hardware.sensors.imu.NavX] or similar device to calculate heading instead.
+     * using a [frc.chargers.hardware.sensors.imu.ChargerNavX] or similar device to calculate heading instead.
      *
      * This value by itself is not particularly meaningful as it may be fairly large,
      * positive or negative, based on previous rotations of the motors, including

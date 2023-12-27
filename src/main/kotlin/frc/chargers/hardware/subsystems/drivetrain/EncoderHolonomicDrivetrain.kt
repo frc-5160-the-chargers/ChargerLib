@@ -10,15 +10,17 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargerlibexternal.frc4481.HeadingCorrector
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
-import frc.chargers.constants.drivetrain.SwerveConstants
+import frc.chargers.constants.drivetrain.SwerveControlData
+import frc.chargers.constants.drivetrain.SwerveHardwareData
 import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
 import frc.chargers.hardware.subsystems.posemonitors.SwervePoseMonitor
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveMotors
 import frc.chargers.hardware.subsystemutils.swervedrive.SwerveEncoders
-import frc.chargers.hardware.subsystemutils.swervedrive.SwerveControl
 import frc.chargers.hardware.subsystemutils.swervedrive.module.*
+import frc.chargers.hardware.subsystemutils.swervedrive.module.lowlevel.ModuleIOReal
+import frc.chargers.hardware.subsystemutils.swervedrive.module.lowlevel.ModuleIOSim
 import frc.chargers.utils.a
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.utils.math.units.pow
@@ -52,8 +54,8 @@ public fun EncoderHolonomicDrivetrain(
     driveMotors: SwerveMotors,
     turnGearbox: DCMotor,
     driveGearbox: DCMotor,
-    constants: SwerveConstants,
-    controlScheme: SwerveControl,
+    hardwareData: SwerveHardwareData,
+    controlData: SwerveControlData,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     realPoseSuppliers: List<RobotPoseSupplier> = listOf(),
@@ -61,34 +63,34 @@ public fun EncoderHolonomicDrivetrain(
 ): EncoderHolonomicDrivetrain{
     if (RobotBase.isSimulation()){
         return EncoderHolonomicDrivetrain(
-            topLeft = SwerveModule(
+            topLeft = RioPIDSwerveModule(
                 ModuleIOSim(
                     TOP_LEFT_MODULE_INPUTS,
-                    turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
-                ), controlScheme
+                    turnGearbox, driveGearbox, hardwareData.turnGearRatio, hardwareData.driveGearRatio, hardwareData.turnInertiaMoment, hardwareData.driveInertiaMoment
+                ), controlData
             ),
-            topRight = SwerveModule(
+            topRight = RioPIDSwerveModule(
                 ModuleIOSim(
                     TOP_RIGHT_MODULE_INPUTS,
-                    turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
-                ), controlScheme
+                    turnGearbox, driveGearbox, hardwareData.turnGearRatio, hardwareData.driveGearRatio, hardwareData.turnInertiaMoment, hardwareData.driveInertiaMoment
+                ), controlData
             ),
-            bottomLeft = SwerveModule(
+            bottomLeft = RioPIDSwerveModule(
                 ModuleIOSim(
                     BOTTOM_LEFT_MODULE_INPUTS,
-                    turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
-                ), controlScheme
+                    turnGearbox, driveGearbox, hardwareData.turnGearRatio, hardwareData.driveGearRatio, hardwareData.turnInertiaMoment, hardwareData.driveInertiaMoment
+                ), controlData
             ),
-            bottomRight = SwerveModule(
+            bottomRight = RioPIDSwerveModule(
                 ModuleIOSim(
                     BOTTOM_RIGHT_MODULE_INPUTS,
-                    turnGearbox, driveGearbox, constants.turnGearRatio, constants.driveGearRatio, constants.turnInertiaMoment, constants.driveInertiaMoment
-                ), controlScheme
+                    turnGearbox, driveGearbox, hardwareData.turnGearRatio, hardwareData.driveGearRatio, hardwareData.turnInertiaMoment, hardwareData.driveInertiaMoment
+                ), controlData
             ),
-            constants, controlScheme, gyro, startingPose, *simPoseSuppliers.toTypedArray()
+            hardwareData, controlData, gyro, startingPose, *simPoseSuppliers.toTypedArray()
         )
     }else{
-        if (constants.invertTurnMotors){
+        if (hardwareData.invertTurnMotors){
             turnMotors.apply{
                 println(topLeft.inverted)
                 println(topRight.inverted)
@@ -102,55 +104,53 @@ public fun EncoderHolonomicDrivetrain(
         }
 
 
-
-
-        val topLeft = SwerveModule(
+        val topLeft = RioPIDSwerveModule(
             ModuleIOReal(
                 TOP_LEFT_MODULE_INPUTS,
                 turnMotor = turnMotors.topLeft,
                 turnEncoder = turnEncoders.topLeft,
                 driveMotor = driveMotors.topLeft,
-                constants.driveGearRatio, constants.turnGearRatio
+                hardwareData.driveGearRatio, hardwareData.turnGearRatio
             ),
-            controlScheme
+            controlData
         )
 
-        val topRight = SwerveModule(
+        val topRight = RioPIDSwerveModule(
             ModuleIOReal(
                 TOP_RIGHT_MODULE_INPUTS,
                 turnMotor = turnMotors.topRight,
                 turnEncoder = turnEncoders.topRight,
                 driveMotor = driveMotors.topRight,
-                constants.driveGearRatio, constants.turnGearRatio
+                hardwareData.driveGearRatio, hardwareData.turnGearRatio
             ),
-            controlScheme
+            controlData
         )
 
-        val bottomLeft = SwerveModule(
+        val bottomLeft = RioPIDSwerveModule(
             ModuleIOReal(
                 BOTTOM_LEFT_MODULE_INPUTS,
                 turnMotor = turnMotors.bottomLeft,
                 turnEncoder = turnEncoders.bottomLeft,
                 driveMotor = driveMotors.bottomLeft,
-                constants.driveGearRatio,constants.turnGearRatio
+                hardwareData.driveGearRatio,hardwareData.turnGearRatio
             ),
-            controlScheme
+            controlData
         )
 
-        val bottomRight = SwerveModule(
+        val bottomRight = RioPIDSwerveModule(
             ModuleIOReal(
                 BOTTOM_RIGHT_MODULE_INPUTS,
                 turnMotor = turnMotors.bottomRight,
                 turnEncoder = turnEncoders.bottomRight,
                 driveMotor = driveMotors.bottomRight,
-                constants.driveGearRatio, constants.turnGearRatio
+                hardwareData.driveGearRatio, hardwareData.turnGearRatio
             ),
-            controlScheme
+            controlData
         )
 
         return EncoderHolonomicDrivetrain(
             topLeft, topRight, bottomLeft, bottomRight,
-            constants, controlScheme, gyro, startingPose, *realPoseSuppliers.toTypedArray()
+            hardwareData, controlData, gyro, startingPose, *realPoseSuppliers.toTypedArray()
         )
     }
 }
@@ -176,14 +176,14 @@ public class EncoderHolonomicDrivetrain(
     public val topRight: SwerveModule,
     public val bottomLeft: SwerveModule,
     public val bottomRight: SwerveModule,
-    public val constants: SwerveConstants,
-    public val controlScheme: SwerveControl,
+    public val hardwareData: SwerveHardwareData,
+    public val controlData: SwerveControlData,
     public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: RobotPoseSupplier,
-): SubsystemBase(), ZeroableHeadingProvider, DifferentialDrivetrain{
+): SubsystemBase(), ZeroableHeadingProvider, DifferentialDrivetrain {
     /* Private Implementation */
-    private val wheelRadius = constants.wheelDiameter / 2.0
+    private val wheelRadius = hardwareData.wheelDiameter / 2.0
     private val moduleArray = a[topLeft,topRight,bottomLeft,bottomRight]
     private fun averageEncoderPosition() = moduleArray.map{it.wheelTravel}.average()
 
@@ -219,7 +219,7 @@ public class EncoderHolonomicDrivetrain(
      *
      * This value is calculated using the encoders, not a gyroscope or accelerometer,
      * so note that it may become inaccurate if the wheels slip. If available, consider
-     * using a [frc.chargers.hardware.sensors.imu.NavX] or similar device to calculate heading instead.
+     * using a [frc.chargers.hardware.sensors.imu.ChargerNavX] or similar device to calculate heading instead.
      *
      * This value by itself is not particularly meaningful as it may be fairly large,
      * positive or negative, based on previous rotations of the motors, including
@@ -248,10 +248,10 @@ public class EncoderHolonomicDrivetrain(
      * the [edu.wpi.first.math.kinematics.SwerveDriveKinematics] class.
      */
     public val kinematics: SwerveDriveKinematics = SwerveDriveKinematics(
-        UnitTranslation2d(constants.trackWidth/2,constants.wheelBase/2).inUnit(meters),
-        UnitTranslation2d(constants.trackWidth/2,-constants.wheelBase/2).inUnit(meters),
-        UnitTranslation2d(-constants.trackWidth/2,constants.wheelBase/2).inUnit(meters),
-        UnitTranslation2d(-constants.trackWidth/2,-constants.wheelBase/2).inUnit(meters)
+        UnitTranslation2d(hardwareData.trackWidth/2,hardwareData.wheelBase/2).inUnit(meters),
+        UnitTranslation2d(hardwareData.trackWidth/2,-hardwareData.wheelBase/2).inUnit(meters),
+        UnitTranslation2d(-hardwareData.trackWidth/2,hardwareData.wheelBase/2).inUnit(meters),
+        UnitTranslation2d(-hardwareData.trackWidth/2,-hardwareData.wheelBase/2).inUnit(meters)
     )
 
 
@@ -294,17 +294,17 @@ public class EncoderHolonomicDrivetrain(
             recordOutput("Drivetrain(Swerve)/CurrentModuleStates",*it.toArray())
         }
         set(ms){
-            ms.desaturate(constants.maxModuleSpeed)
+            ms.desaturate(hardwareData.maxModuleSpeed)
             if (currentControlMode == ControlMode.CLOSED_LOOP){
                 topLeft.setDirectionalVelocity(ms.topLeftSpeed / wheelRadius,ms.topLeftAngle)
                 topRight.setDirectionalVelocity(ms.topRightSpeed / wheelRadius,ms.topRightAngle)
                 bottomLeft.setDirectionalVelocity(ms.bottomLeftSpeed / wheelRadius,ms.bottomLeftAngle)
                 bottomRight.setDirectionalVelocity(ms.bottomRightSpeed / wheelRadius,ms.bottomRightAngle)
             }else{
-                topLeft.setDirectionalPower((ms.topLeftSpeed/constants.maxModuleSpeed).siValue, ms.topLeftAngle)
-                topRight.setDirectionalPower((ms.topRightSpeed/constants.maxModuleSpeed).siValue, ms.topRightAngle)
-                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/constants.maxModuleSpeed).siValue, ms.bottomLeftAngle)
-                bottomRight.setDirectionalPower((ms.bottomRightSpeed/constants.maxModuleSpeed).siValue, ms.bottomRightAngle)
+                topLeft.setDirectionalPower((ms.topLeftSpeed/hardwareData.maxModuleSpeed).siValue, ms.topLeftAngle)
+                topRight.setDirectionalPower((ms.topRightSpeed/hardwareData.maxModuleSpeed).siValue, ms.topRightAngle)
+                bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/hardwareData.maxModuleSpeed).siValue, ms.bottomLeftAngle)
+                bottomRight.setDirectionalPower((ms.bottomRightSpeed/hardwareData.maxModuleSpeed).siValue, ms.bottomRightAngle)
             }
             recordOutput("Drivetrain(Swerve)/DesiredModuleStates", ms.topLeftState,ms.topRightState,ms.bottomLeftState,ms.bottomRightState)
         }
@@ -345,10 +345,10 @@ public class EncoderHolonomicDrivetrain(
      */
     public val maxLinearVelocity: Velocity = abs(kinematics.toChassisSpeeds(
         *ModuleStateGroup(
-            topLeftSpeed = constants.maxModuleSpeed,
-            topRightSpeed = constants.maxModuleSpeed,
-            bottomLeftSpeed = constants.maxModuleSpeed,
-            bottomRightSpeed = constants.maxModuleSpeed,
+            topLeftSpeed = hardwareData.maxModuleSpeed,
+            topRightSpeed = hardwareData.maxModuleSpeed,
+            bottomLeftSpeed = hardwareData.maxModuleSpeed,
+            bottomRightSpeed = hardwareData.maxModuleSpeed,
             topLeftAngle = Angle(0.0),
             topRightAngle = Angle(0.0),
             bottomLeftAngle = Angle(0.0),
@@ -364,10 +364,10 @@ public class EncoderHolonomicDrivetrain(
      */
     public val maxRotationalVelocity: AngularVelocity = abs(kinematics.toChassisSpeeds(
         *ModuleStateGroup(
-            topLeftSpeed = constants.maxModuleSpeed,
-            topRightSpeed = -constants.maxModuleSpeed,
-            bottomLeftSpeed = constants.maxModuleSpeed,
-            bottomRightSpeed = -constants.maxModuleSpeed,
+            topLeftSpeed = hardwareData.maxModuleSpeed,
+            topRightSpeed = -hardwareData.maxModuleSpeed,
+            bottomLeftSpeed = hardwareData.maxModuleSpeed,
+            bottomRightSpeed = -hardwareData.maxModuleSpeed,
             topLeftAngle = -45.degrees,
             topRightAngle = 45.degrees,
             bottomLeftAngle = 45.degrees,
@@ -500,10 +500,10 @@ public class EncoderHolonomicDrivetrain(
      */
     public fun stallForwards(){
         // subtracts 0.05 volts from the stall voltage to correct for inaccuracies with kS constant.
-        topLeft.driveVoltage = controlScheme.velocityFF.kS - 0.05.volts
-        topRight.driveVoltage = controlScheme.velocityFF.kS - 0.05.volts
-        bottomLeft.driveVoltage = controlScheme.velocityFF.kS - 0.05.volts
-        bottomRight.driveVoltage = controlScheme.velocityFF.kS - 0.05.volts
+        topLeft.driveVoltage = controlData.velocityFF.kS - 0.05.volts
+        topRight.driveVoltage = controlData.velocityFF.kS - 0.05.volts
+        bottomLeft.driveVoltage = controlData.velocityFF.kS - 0.05.volts
+        bottomRight.driveVoltage = controlData.velocityFF.kS - 0.05.volts
     }
 
 
@@ -512,10 +512,10 @@ public class EncoderHolonomicDrivetrain(
      */
     public fun stallBackwards(){
         // adds 0.05 volts from the stall voltage to correct for inaccuracies with kS constant.
-        topLeft.driveVoltage = -controlScheme.velocityFF.kS + 0.05.volts
-        topRight.driveVoltage = -controlScheme.velocityFF.kS + 0.05.volts
-        bottomLeft.driveVoltage = -controlScheme.velocityFF.kS + 0.05.volts
-        bottomRight.driveVoltage = -controlScheme.velocityFF.kS + 0.05.volts
+        topLeft.driveVoltage = -controlData.velocityFF.kS + 0.05.volts
+        topRight.driveVoltage = -controlData.velocityFF.kS + 0.05.volts
+        bottomLeft.driveVoltage = -controlData.velocityFF.kS + 0.05.volts
+        bottomRight.driveVoltage = -controlData.velocityFF.kS + 0.05.volts
     }
 
 

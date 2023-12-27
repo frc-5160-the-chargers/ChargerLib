@@ -18,7 +18,19 @@ import frc.chargers.utils.QuantityMeasurement
 
 
 /**
- * A wrapper for the CTRE's CANCoder class, with integration into chargerlib.
+ * Creates a [ChargerCANcoder] with inline configuration.
+ */
+public inline fun ChargerCANcoder(
+    deviceId: Int,
+    canBus: String = "",
+    factoryDefault: Boolean = true,
+    configure: CANcoderConfiguration.() -> Unit
+): ChargerCANcoder = ChargerCANcoder(deviceId,canBus,factoryDefault).also{
+    it.configure(CANcoderConfiguration().apply(configure))
+}
+
+/**
+ * A wrapper for the CTRE's CANcoder class, with integration into chargerlib.
  *
  * @see CTRECANcoder
  * @see CANcoderConfiguration
@@ -36,33 +48,7 @@ public class ChargerCANcoder(
         }
     }
 
-
-    public companion object{
-        public inline operator fun invoke(
-            deviceId: Int,
-            canBus: String = "",
-            factoryDefault: Boolean = true,
-            configure: CANcoderConfiguration.() -> Unit
-        ): ChargerCANcoder = ChargerCANcoder(deviceId,canBus,factoryDefault).also{
-            it.configure(CANcoderConfiguration().apply(configure))
-        }
-    }
-
     public val absolute: TimestampedEncoder = AbsoluteEncoderAdaptor()
-
-    private inner class AbsoluteEncoderAdaptor: TimestampedEncoder by this, HardwareConfigurable<CANcoderConfiguration> by this{
-        override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
-            get(){
-                val statusSignal = absolutePosition
-                return QuantityMeasurement(
-                    value = statusSignal.value.ofUnit(rotations),
-                    timestamp = statusSignal.timestamp.time.ofUnit(seconds)
-                )
-            }
-
-        override val angularPosition: Angle
-            get() = absolutePosition.value.ofUnit(rotations)
-    }
     
     override fun configure(configuration: CANcoderConfiguration) {
         val baseConfig = CTRECANcoderConfiguration()
@@ -89,12 +75,16 @@ public class ChargerCANcoder(
     }
 
     private var filterVelocity: Boolean = true
+    private val posSignal = position
+    private val velSignal = if (filterVelocity) velocity else unfilteredVelocity
+
     override fun setZero(newZero: Angle){
         setPosition(newZero.inUnit(rotations))
     }
+
     override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
         get(){
-            val statusSignal = position
+            val statusSignal = posSignal.refresh()
             return QuantityMeasurement(
                 value = statusSignal.value.ofUnit(rotations),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds)
@@ -103,12 +93,30 @@ public class ChargerCANcoder(
 
     override val timestampedAngularVelocity: QuantityMeasurement<AngularVelocityDimension>
         get(){
-            val statusSignal = if (filterVelocity) velocity else unfilteredVelocity
+            val statusSignal = velSignal.refresh(true)
             return QuantityMeasurement(
                 value = statusSignal.value.ofUnit(rotations / seconds),
                 timestamp = statusSignal.timestamp.time.ofUnit(seconds),
             )
         }
+
+
+    private inner class AbsoluteEncoderAdaptor: TimestampedEncoder by this, HardwareConfigurable<CANcoderConfiguration> by this{
+
+        private val absolutePosSignal = absolutePosition
+
+        override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
+            get(){
+                val statusSignal = absolutePosSignal.refresh(true)
+                return QuantityMeasurement(
+                    value = statusSignal.value.ofUnit(rotations),
+                    timestamp = statusSignal.timestamp.time.ofUnit(seconds)
+                )
+            }
+
+        override val angularPosition: Angle
+            get() = absolutePosSignal.refresh(true).value.ofUnit(rotations)
+    }
 }
 
 

@@ -1,4 +1,4 @@
-package frc.chargers.hardware.subsystemutils.swervedrive.module
+package frc.chargers.hardware.subsystemutils.swervedrive.module.lowlevel
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
@@ -15,7 +15,7 @@ import frc.chargers.wpilibextensions.Alert
 import frc.chargers.wpilibextensions.motorcontrol.setVoltage
 
 /**
- * Represents the low level hardware of a [SwerveModule] on the real robot.
+ * Represents the low level hardware of a SwerveModule on the real robot.
  */
 public class ModuleIOReal(
     logInputs: LoggableInputsProvider,

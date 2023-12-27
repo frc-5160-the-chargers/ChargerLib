@@ -3,12 +3,16 @@ package frc.chargers.hardware.motorcontrol.ctre
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import com.ctre.phoenix6.configs.Slot0Configs
+import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.*
+import frc.chargers.controls.feedforward.AngularMotorFF
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.*
+import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonFXEncoderAdapter
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
@@ -64,23 +68,74 @@ public inline fun falcon(
  * @see com.ctre.phoenix6.hardware.TalonFX
  * @see TalonFXConfiguration
  */
-public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : TalonFX(deviceNumber, canBus),
-    SmartEncoderMotorController, HardwareConfigurable<TalonFXConfiguration> {
+public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
+    TalonFX(deviceNumber, canBus), SmartEncoderMotorController, HardwareConfigurable<TalonFXConfiguration> {
+
+    private val voltageSignal = supplyVoltage
+    private val currentSignal = statorCurrent
+    private val tempSignal = deviceTemp
 
     final override val appliedVoltage: Voltage
-        get() = supplyVoltage.value.ofUnit(volts)
+        get() = voltageSignal.refresh(true).value.ofUnit(volts)
 
     final override val appliedCurrent: Current
-        get() = statorCurrent.value.ofUnit(amps)
+        get() = currentSignal.refresh(true).value.ofUnit(amps)
 
     final override val tempCelsius: Double
-        get() = deviceTemp.value
-
+        get() = tempSignal.refresh(true).value
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
     // and does not pass around the reference to this class.
     final override val encoder: TalonFXEncoderAdapter =
         TalonFXEncoderAdapter(this)
+
+
+    private val currentSlotConfigs = Slot0Configs()
+    private val velocityRequest = VelocityVoltage(0.0).also{ it.Slot = 0 }
+    private val positionRequest = PositionVoltage(0.0).also{it.Slot = 0 }
+
+    final override fun setAngularVelocity(
+        target: AngularVelocity,
+        pidConstants: PIDConstants,
+        feedforward: AngularMotorFF
+    ) {
+        if (currentSlotConfigs.pidConstants != pidConstants ||
+            currentSlotConfigs.kS != feedforward.kS.inUnit(volts) ||
+            currentSlotConfigs.kV != feedforward.getKV(rotations,seconds)){
+
+            currentSlotConfigs.pidConstants = pidConstants
+            currentSlotConfigs.kS = feedforward.kS.inUnit(volts)
+            currentSlotConfigs.kV = feedforward.getKV(rotations,seconds)
+            configurator.apply(currentSlotConfigs)
+        }
+        velocityRequest.Velocity = target.inUnit(rotations/seconds)
+        velocityRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.get()).inUnit(volts)
+        setControl(velocityRequest)
+    }
+
+    final override fun setAngularPosition(
+        target: Angle,
+        pidConstants: PIDConstants,
+        absoluteEncoder: PositionEncoder?,
+        extraVoltage: Voltage
+    ) {
+        if (currentSlotConfigs.pidConstants != pidConstants){
+            currentSlotConfigs.pidConstants = pidConstants
+            configurator.apply(currentSlotConfigs)
+        }
+        if (absoluteEncoder == null){
+            positionRequest.Position = target.inUnit(rotations)
+        }else{
+            positionRequest.Position = (encoder.angularPosition - absoluteEncoder.angularPosition + target).inUnit(rotations)
+        }
+        positionRequest.FeedForward = extraVoltage.inUnit(volts)
+        setControl(positionRequest)
+    }
+
+
+
+
+
 
     final override fun configure(configuration: TalonFXConfiguration){
         val baseTalonFXConfig = CTRETalonFXConfiguration()
@@ -110,8 +165,8 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio") : Ta
             }
         }
         println("TalonFX has been configured.")
-
     }
+
 }
 
 
