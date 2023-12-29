@@ -7,7 +7,7 @@ import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.*
-import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
@@ -93,23 +93,27 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
     private val currentSlotConfigs = Slot0Configs()
     private val velocityRequest = VelocityVoltage(0.0).also{ it.Slot = 0 }
     private val positionRequest = PositionVoltage(0.0).also{it.Slot = 0 }
+    private var currentPIDConstants = PIDConstants.None
+    private var currentFFConstants = AngularMotorFFConstants.None
+
 
     final override fun setAngularVelocity(
         target: AngularVelocity,
         pidConstants: PIDConstants,
-        feedforward: AngularMotorFF
+        feedforwardConstants: AngularMotorFFConstants
     ) {
-        if (currentSlotConfigs.pidConstants != pidConstants ||
-            currentSlotConfigs.kS != feedforward.kS.inUnit(volts) ||
-            currentSlotConfigs.kV != feedforward.getKV(rotations,seconds)){
-
-            currentSlotConfigs.pidConstants = pidConstants
-            currentSlotConfigs.kS = feedforward.kS.inUnit(volts)
-            currentSlotConfigs.kV = feedforward.getKV(rotations,seconds)
-            configurator.apply(currentSlotConfigs)
+        if (currentPIDConstants != pidConstants){
+            currentSlotConfigs.kP = pidConstants.kP
+            currentSlotConfigs.kI = pidConstants.kI
+            currentSlotConfigs.kD = pidConstants.kD
+            currentPIDConstants = pidConstants
+        }
+        if (currentFFConstants != feedforwardConstants){
+            currentSlotConfigs.kS = feedforwardConstants.kS.inUnit(volts)
+            currentSlotConfigs.kV = feedforwardConstants.kV.inUnit(volts * seconds / rotations)
+            currentFFConstants = feedforwardConstants
         }
         velocityRequest.Velocity = target.inUnit(rotations/seconds)
-        velocityRequest.FeedForward = (feedforward.getAccelerationVoltage() + feedforward.gravity.get()).inUnit(volts)
         setControl(velocityRequest)
     }
 
@@ -131,11 +135,6 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         positionRequest.FeedForward = extraVoltage.inUnit(volts)
         setControl(positionRequest)
     }
-
-
-
-
-
 
     final override fun configure(configuration: TalonFXConfiguration){
         val baseTalonFXConfig = CTRETalonFXConfiguration()

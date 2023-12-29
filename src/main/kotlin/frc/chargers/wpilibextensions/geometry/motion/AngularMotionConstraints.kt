@@ -15,6 +15,11 @@ public data class AngularMotionConstraints(
     val maxVelocity: AngularVelocity,
     val maxAcceleration: AngularAcceleration
 ){
+    public constructor(siValue: TrapezoidProfile.Constraints): this(
+        Quantity(siValue.maxVelocity),
+        Quantity(siValue.maxAcceleration)
+    )
+
     public fun inUnit(angleUnit: Angle, timeUnit: Time): TrapezoidProfile.Constraints =
         TrapezoidProfile.Constraints(
             maxVelocity.inUnit(angleUnit / timeUnit),

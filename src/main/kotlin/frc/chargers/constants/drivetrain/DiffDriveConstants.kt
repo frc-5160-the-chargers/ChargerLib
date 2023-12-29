@@ -4,7 +4,7 @@ import com.batterystaple.kmeasure.quantities.Distance
 import com.batterystaple.kmeasure.quantities.Length
 import com.batterystaple.kmeasure.units.inches
 import com.pathplanner.lib.util.ReplanningConfig
-import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 
 /**
@@ -32,18 +32,18 @@ public data class DiffDriveHardwareData(
  */
 public open class DiffDriveControlData(
     public val leftVelocityPID: PIDConstants,
-    public val leftFF: AngularMotorFF,
+    public val leftFF: AngularMotorFFConstants,
     public val rightVelocityPID: PIDConstants,
-    public val rightFF: AngularMotorFF,
+    public val rightFF: AngularMotorFFConstants,
     public val robotRotationPID: PIDConstants = PIDConstants(0.4,0.0,0.0),
     public val pathAlgorithm: PathAlgorithm = PathAlgorithm.LTV,
     public val pathReplanConfig: ReplanningConfig = ReplanningConfig(),
 ){
     public data object None: DiffDriveControlData(
         PIDConstants(0.0,0.0,0.0),
-        AngularMotorFF.None,
+        AngularMotorFFConstants.None,
         PIDConstants(0.0,0.0,0.0),
-        AngularMotorFF.None
+        AngularMotorFFConstants.None
     )
 
     public enum class PathAlgorithm{

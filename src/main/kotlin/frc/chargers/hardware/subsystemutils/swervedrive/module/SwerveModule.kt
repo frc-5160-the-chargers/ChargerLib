@@ -15,6 +15,8 @@ import frc.chargers.hardware.subsystemutils.swervedrive.module.lowlevel.ModuleIO
  * with low-level control, I.E setting voltage and getting encoder position.
  */
 public interface SwerveModule: ModuleIO {
+    public fun setDirection(direction: Angle)
+
     public fun setDirectionalPower(
         power: Double,
         direction: Angle
@@ -29,5 +31,8 @@ public interface SwerveModule: ModuleIO {
 
     public fun getModulePosition(wheelRadius: Length): SwerveModulePosition
 
-    public fun halt()
+    public fun halt(){
+        setDirectionalPower(0.0, Angle(0.0))
+    }
+
 }

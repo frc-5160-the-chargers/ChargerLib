@@ -15,6 +15,11 @@ public data class LinearMotionConstraints(
     val maxVelocity: Velocity,
     val maxAcceleration: Acceleration
 ){
+    public constructor(siValue: TrapezoidProfile.Constraints): this(
+        Quantity(siValue.maxVelocity),
+        Quantity(siValue.maxAcceleration)
+    )
+
     public fun inUnit(distanceUnit: Distance, timeUnit: Time): TrapezoidProfile.Constraints =
         TrapezoidProfile.Constraints(
             maxVelocity.inUnit(distanceUnit / timeUnit),

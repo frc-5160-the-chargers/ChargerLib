@@ -8,6 +8,7 @@ import frc.chargers.constants.drivetrain.SwerveControlData
 import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.SetpointSupplier
+import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.hardware.subsystemutils.swervedrive.module.lowlevel.ModuleIO
 import frc.chargers.utils.math.inputModulus
@@ -22,8 +23,10 @@ import org.littletonrobotics.junction.Logger.recordOutput
 public class RioPIDSwerveModule(
     lowLevel: ModuleIO,
     private val controlData: SwerveControlData
-): SwerveModule, ModuleIO by lowLevel{ // ModuleIO by lowLevel makes the lowLevel parameter provide implementation of the ModuleIO interface to the class, so we don't have to do that ourselves
-    private val tuner = DashboardTuner()
+): SwerveModule, ModuleIO by lowLevel{
+    // ModuleIO by lowLevel makes the lowLevel parameter provide implementation
+    // of the ModuleIO interface to the class, reducing boilerplate code
+
 
     /**
      * A function that standardizes all angles within the 0 to 360 degree range.
@@ -44,6 +47,8 @@ public class RioPIDSwerveModule(
         }
     }
 
+    private val tuner = DashboardTuner()
+
     private val turnPIDConstants by tuner.pidConstants(
         controlData.anglePID,
         "$logTab/Turning PID Constants"
@@ -59,8 +64,12 @@ public class RioPIDSwerveModule(
             drivePIDConstants,
             getInput = {speed},
             target = AngularVelocity(0.0),
+            /**
+             * Here, the setpoint supplier is set to the default,
+             * with a feedforward that directly corresponds to the input.
+             */
             setpointSupplier = SetpointSupplier.Default(
-                feedforward = controlData.velocityFF
+                feedforward = Feedforward(controlData.velocityFF)
             ),
             outputRange = -12.volts..12.volts,
             selfSustain = true
@@ -74,35 +83,16 @@ public class RioPIDSwerveModule(
                 turnPIDConstants,
                 getInput = { direction },
                 target = Angle(0.0),
+                /**
+                 * the [SetpointSupplier] allows the controller
+                 * to be a regular PID controller, trapezoid profiled PID controller or
+                 * exponential profiled PID controller, depending on user specification.
+                 */
                 setpointSupplier = controlData.angleSetpointSupplier,
                 outputRange = -12.volts..12.volts,
                 selfSustain = true
             )
         }
-
-
-    // Note: turnSpeed will only be set if the control scheme includes second order kinematics functionality.
-    public fun setDirection(direction: Angle){
-        turnController.target = direction.standardize()
-        // turnVoltage is a setter variable of ModuleIO
-        turnVoltage = if ( (turnController.error).within(controlData.modulePrecision) ){
-            0.0.volts
-        }else{
-            turnController.calculateOutput()
-        }
-        recordOutput("$logTab/controllerErrorRad", turnController.error.inUnit(radians))
-        recordOutput("$logTab/controllerOutputVolts", turnController.calculateOutput().inUnit(volts))
-    }
-
-    public fun setVelocity(velocity: AngularVelocity) {
-        velocityController.target = velocity
-        // driveVoltage is a setter variable of ModuleIO
-        driveVoltage = velocityController.calculateOutput()
-    }
-
-    public fun setPower(power: Double) {
-        driveVoltage = power * 12.volts
-    }
 
     override fun setDirectionalPower(
         power: Double,
@@ -128,6 +118,29 @@ public class RioPIDSwerveModule(
             setDirection(direction)
             setVelocity(angularVelocity * cos(turnController.error))
         }
+    }
+
+    // Note: turnSpeed will only be set if the control scheme includes second order kinematics functionality.
+    override fun setDirection(direction: Angle){
+        turnController.target = direction.standardize()
+        // turnVoltage is a setter variable of ModuleIO
+        turnVoltage = if ( (turnController.error).within(controlData.modulePrecision) ){
+            0.0.volts
+        }else{
+            turnController.calculateOutput()
+        }
+        recordOutput("$logTab/controllerErrorRad", turnController.error.inUnit(radians))
+        recordOutput("$logTab/controllerOutputVolts", turnController.calculateOutput().inUnit(volts))
+    }
+
+    private fun setVelocity(velocity: AngularVelocity) {
+        velocityController.target = velocity
+        // driveVoltage is a setter variable of ModuleIO
+        driveVoltage = velocityController.calculateOutput()
+    }
+
+    private fun setPower(power: Double) {
+        driveVoltage = power * 12.volts
     }
 
     override fun getModuleState(wheelRadius: Length): SwerveModuleState =

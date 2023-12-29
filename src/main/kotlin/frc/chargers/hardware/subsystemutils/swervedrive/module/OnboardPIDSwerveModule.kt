@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
 import frc.chargers.constants.drivetrain.SwerveControlData
+import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.hardware.motorcontrol.SmartEncoderMotorController
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.subsystemutils.swervedrive.module.lowlevel.ModuleIO
@@ -19,13 +20,15 @@ import kotlin.math.abs
 /**
  * A [SwerveModule] that uses onboard PID.
  */
-public class OnboardPIDSwerveModule private constructor(
+public class OnboardPIDSwerveModule /** Do not use this constructor. */ private constructor(
     lowLevel: ModuleIOReal,
     private val controlData: SwerveControlData,
     private val turnMotor: SmartEncoderMotorController,
     private val turnEncoder: PositionEncoder,
     private val driveMotor: SmartEncoderMotorController
 ): ModuleIO by lowLevel, SwerveModule {
+    // ModuleIO by lowLevel makes the lowLevel parameter provide implementation
+    // of the ModuleIO interface to the class, reducing boilerplate code
 
     public constructor(
         logInputs: LoggableInputsProvider,
@@ -42,29 +45,42 @@ public class OnboardPIDSwerveModule private constructor(
         controlData, turnMotor, turnEncoder, driveMotor
     )
 
+    private val tuner = DashboardTuner()
+
+    private val turnPIDConstants by tuner.pidConstants(
+        controlData.anglePID,
+        "$logTab/Turning PID Constants"
+    )
+
+    private val drivePIDConstants by tuner.pidConstants(
+        controlData.velocityPID,
+        "$logTab/Driving PID Constants"
+    )
+
     override fun setDirectionalPower(power: Double, direction: Angle) {
-        val modState = optimize(
+        val modState = optimizeOnboardPIDState(
             SwerveModuleState(power,direction.asRotation2d()),
             turnEncoder.angularPosition.asRotation2d()
         )
         driveVoltage = modState.speedMetersPerSecond * 12.volts
-        setPosition(modState)
+        setDirection(modState.angle.asAngle())
     }
 
     override fun setDirectionalVelocity(angularVelocity: AngularVelocity, direction: Angle) {
-        val modState = optimize(
+        val modState = optimizeOnboardPIDState(
             SwerveModuleState(angularVelocity.siValue, direction.asRotation2d()),
             turnEncoder.angularPosition.asRotation2d()
         )
 
         val targetVelocity = AngularVelocity(modState.speedMetersPerSecond)
+
         driveMotor.setAngularVelocity(
             targetVelocity,
-            controlData.anglePID,
+            drivePIDConstants,
             controlData.velocityFF
         )
 
-        setPosition(modState)
+        setDirection(modState.angle.asAngle())
     }
 
     override fun getModuleState(wheelRadius: Length): SwerveModuleState =
@@ -83,13 +99,13 @@ public class OnboardPIDSwerveModule private constructor(
         setDirectionalPower(0.0,direction)
     }
 
-    private fun setPosition(modState: SwerveModuleState){
+    override fun setDirection(direction: Angle) {
         val turnSetpoint =
-            controlData.angleSetpointSupplier.getSetpoint(modState.angle.asAngle())
+            controlData.angleSetpointSupplier.getSetpoint(direction)
 
         turnMotor.setAngularPosition(
             turnSetpoint.value,
-            controlData.anglePID,
+            turnPIDConstants,
             turnEncoder,
             turnSetpoint.feedforwardOutput
         )
@@ -103,10 +119,12 @@ public class OnboardPIDSwerveModule private constructor(
  * reversing the direction the wheel spins. Customized from WPILib's version to include placing
  * in appropriate scope for CTRE onboard control.
  *
+ * Credits: 364 base falcon swerve
+ *
  * @param desiredState The desired state.
  * @param currentAngle The current module angle.
  */
-private fun optimize(desiredState: SwerveModuleState, currentAngle: Rotation2d): SwerveModuleState {
+private fun optimizeOnboardPIDState(desiredState: SwerveModuleState, currentAngle: Rotation2d): SwerveModuleState {
     var targetAngle = placeInAppropriate0To360Scope(currentAngle.degrees, desiredState.angle.degrees)
     var targetSpeed = desiredState.speedMetersPerSecond
     val delta = targetAngle - currentAngle.degrees
@@ -119,6 +137,8 @@ private fun optimize(desiredState: SwerveModuleState, currentAngle: Rotation2d):
 }
 
 /**
+ * Credits: FRC 364 base falcon swerve
+ *
  * @param scopeReference Current Angle
  * @param newAngle Target Angle
  * @return Closest angle within scope

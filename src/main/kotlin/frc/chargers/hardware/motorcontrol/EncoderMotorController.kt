@@ -5,7 +5,7 @@ import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.AngularVelocity
 import com.batterystaple.kmeasure.quantities.Voltage
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
-import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.sensors.encoders.Encoder
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
@@ -34,7 +34,7 @@ public interface SmartEncoderMotorController: EncoderMotorController, Temperatur
     public fun setAngularVelocity(
         target: AngularVelocity,
         pidConstants: PIDConstants,
-        feedforward: AngularMotorFF
+        feedforwardConstants: AngularMotorFFConstants
     )
 
     /**

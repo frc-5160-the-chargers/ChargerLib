@@ -15,7 +15,7 @@ import frc.chargers.utils.math.inputModulus
  * converting them to their siValue before and after the pid equation is applied.
  *
  * This ensures that the pid constants passed in do not need to change for different units;
- * they should be tuned with the respect to the siValue of the input and output.
+ * they should be tuned with the respect to the SI unit of the input and output.
  *
  * See [here](https://www.ni.com/en-us/innovations/white-papers/06/pid-theory-explained.html) for an explanation of PID.
  */
@@ -23,7 +23,7 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
     pidConstants: PIDConstants,
     private val getInput: () -> Quantity<I>,
     override var target: Quantity<I>,
-    private val setpointSupplier: SetpointSupplier<Quantity<I>, Quantity<O>> = SetpointSupplier.Default(),
+    private val setpointSupplier: SetpointSupplier<I, O> = SetpointSupplier.Default(),
     private val continuousInputRange: ClosedRange<Quantity<I>>? = null,
     private val outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
     private val integralRange: ClosedRange<Quantity<O>> = outputRange,

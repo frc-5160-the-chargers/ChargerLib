@@ -26,6 +26,7 @@ import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIO
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOReal
 import frc.chargers.hardware.subsystemutils.differentialdrive.DiffDriveIOSim
 import frc.chargers.constants.drivetrain.DiffDriveControlData
+import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
@@ -107,7 +108,7 @@ public class EncoderDifferentialDrivetrain(
         getInput = {leftVelocity},
         target = AngularVelocity(0.0),
         setpointSupplier = SetpointSupplier.Default(
-            feedforward = controlScheme.leftFF
+            feedforward = Feedforward(controlScheme.leftFF)
         ),
         selfSustain = true,
     )
@@ -117,7 +118,7 @@ public class EncoderDifferentialDrivetrain(
         getInput = {rightVelocity},
         target = AngularVelocity(0.0),
         setpointSupplier = SetpointSupplier.Default(
-            feedforward = controlScheme.rightFF
+            feedforward = Feedforward(controlScheme.rightFF)
         ),
         selfSustain = true,
     )

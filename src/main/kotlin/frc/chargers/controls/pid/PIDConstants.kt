@@ -24,7 +24,11 @@ public data class PIDConstants(
      */
     @JvmField
     public var kD: Double
-)
+){
+    public companion object{
+        public val None: PIDConstants = PIDConstants(0.0,0.0,0.0)
+    }
+}
 
 
 /**

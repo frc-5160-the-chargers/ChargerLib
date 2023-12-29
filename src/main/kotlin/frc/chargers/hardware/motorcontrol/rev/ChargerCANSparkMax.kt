@@ -1,5 +1,7 @@
 package frc.chargers.hardware.motorcontrol.rev
 
+import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
+import com.batterystaple.kmeasure.dimensions.VoltageDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import com.revrobotics.CANSparkMax
@@ -9,7 +11,8 @@ import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
 import com.revrobotics.SparkMaxAlternateEncoder
 import edu.wpi.first.wpilibj.RobotBase
-import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.controls.feedforward.AngularMotorFFConstants
+import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
@@ -177,24 +180,35 @@ public open class ChargerCANSparkMax(
 
     // equivalent to SparkMax.getPIDController() (uses property access syntax)
     private val innerController = pidController
-    private var currentConstants = PIDConstants(0.0,0.0,0.0)
+    private var currentPIDConstants = PIDConstants(0.0,0.0,0.0)
+    private var currentFFConstants = AngularMotorFFConstants.None
+    private var currentFF = Feedforward<AngularVelocityDimension, VoltageDimension>{ Voltage(0.0) }
 
     private fun updateControllerConstants(newConstants: PIDConstants){
-        if (currentConstants != newConstants){
+        if (currentPIDConstants != newConstants){
             innerController.setP(newConstants.kP,0)
             innerController.setI(newConstants.kI,0)
             innerController.setD(newConstants.kD,0)
-            currentConstants = newConstants
+            currentPIDConstants = newConstants
         }
     }
 
     override fun setAngularVelocity(
         target: AngularVelocity,
         pidConstants: PIDConstants,
-        feedforward: AngularMotorFF
+        feedforwardConstants: AngularMotorFFConstants
     ) {
         updateControllerConstants(pidConstants)
-        innerController.setReference(target.siValue, ControlType.kVelocity,0,feedforward.calculate(target).inUnit(volts))
+        if (currentFFConstants != feedforwardConstants){
+            currentFFConstants = feedforwardConstants
+            currentFF = Feedforward(currentFFConstants)
+        }
+        innerController.setReference(
+            target.siValue,
+            ControlType.kVelocity,
+            0,
+            currentFF.calculate(target).inUnit(volts)
+        )
     }
 
     public override fun setAngularPosition(

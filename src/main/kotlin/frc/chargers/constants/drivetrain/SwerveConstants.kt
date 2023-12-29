@@ -1,11 +1,12 @@
 package frc.chargers.constants.drivetrain
 
 import com.batterystaple.kmeasure.dimensions.AngleDimension
+import com.batterystaple.kmeasure.dimensions.VoltageDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.inches
 import com.pathplanner.lib.util.ReplanningConfig
 import frc.chargers.controls.SetpointSupplier
-import frc.chargers.controls.feedforward.AngularMotorFF
+import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.Inertia
@@ -13,10 +14,10 @@ import frc.chargers.utils.math.units.Inertia
 public data class SwerveControlData(
     val invertTurnMotors: Boolean = false,
     val anglePID: PIDConstants,
-    val angleSetpointSupplier: SetpointSupplier<Angle, Voltage>,
+    val angleSetpointSupplier: SetpointSupplier<AngleDimension, VoltageDimension>,
     val modulePrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     val velocityPID: PIDConstants,
-    val velocityFF: AngularMotorFF,
+    val velocityFF: AngularMotorFFConstants,
     val robotRotationPID: PIDConstants = PIDConstants(0.3,0.0,0.0),
     val robotTranslationPID: PIDConstants = PIDConstants(0.3,0.0,0.0),
     val pathReplanConfig: ReplanningConfig = ReplanningConfig()
