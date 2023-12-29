@@ -12,7 +12,25 @@ import kotlin.internal.LowPriorityInOverloadResolution
 /**
  * Constructs an instance of [SwerveEncoders] with CTRE CANcoders.
  */
-public fun swerveCANcoders(
+public inline fun swerveCANcoders(
+    topLeftId: Int,
+    topRightId: Int,
+    bottomLeftId: Int,
+    bottomRightId: Int,
+    useAbsoluteSensor: Boolean,
+    configure: CANcoderConfiguration.() -> Unit = {}
+): SwerveEncoders = swerveCANcoders(
+    ChargerCANcoder(topLeftId),
+    ChargerCANcoder(topRightId),
+    ChargerCANcoder(bottomLeftId),
+    ChargerCANcoder(bottomRightId),
+    useAbsoluteSensor, configure
+)
+
+/**
+ * Constructs an instance of [SwerveEncoders] with CTRE CANcoders.
+ */
+public inline fun swerveCANcoders(
     topLeft: ChargerCANcoder,
     topRight: ChargerCANcoder,
     bottomLeft: ChargerCANcoder,

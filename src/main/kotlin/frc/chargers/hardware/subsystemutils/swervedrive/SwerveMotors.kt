@@ -1,5 +1,6 @@
 package frc.chargers.hardware.subsystemutils.swervedrive
 
+import com.revrobotics.CANSparkMaxLowLevel
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
@@ -11,10 +12,47 @@ import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
 
+
 /**
  * Constructs an instance of [SwerveMotors] with Spark Max motor controllers.
  */
-public fun sparkMaxSwerveMotors(
+public inline fun sparkMaxSwerveMotors(
+    topLeftId: Int,
+    topRightId: Int,
+    bottomLeftId: Int,
+    bottomRightId: Int,
+    type: CANSparkMaxLowLevel.MotorType = CANSparkMaxLowLevel.MotorType.kBrushless,
+    configure: SparkMaxConfiguration.() -> Unit = {}
+): SwerveMotors = sparkMaxSwerveMotors(
+    ChargerCANSparkMax(topLeftId, type),
+    ChargerCANSparkMax(topRightId,type),
+    ChargerCANSparkMax(bottomLeftId,type),
+    ChargerCANSparkMax(bottomRightId,type),
+    configure
+)
+
+
+/**
+ * Constructs an instance of [SwerveMotors] with Spark Max motor controllers.
+ */
+public inline fun talonFXSwerveMotors(
+    topLeftId: Int,
+    topRightId: Int,
+    bottomLeftId: Int,
+    bottomRightId: Int,
+    configure: TalonFXConfiguration.() -> Unit = {}
+): SwerveMotors = talonFXSwerveMotors(
+    ChargerTalonFX(topLeftId),
+    ChargerTalonFX(topRightId),
+    ChargerTalonFX(bottomLeftId),
+    ChargerTalonFX(bottomRightId),
+    configure
+)
+
+/**
+ * Constructs an instance of [SwerveMotors] with Spark Max motor controllers.
+ */
+public inline fun sparkMaxSwerveMotors(
     topLeft: ChargerCANSparkMax,
     topRight: ChargerCANSparkMax,
     bottomLeft: ChargerCANSparkMax,
@@ -24,10 +62,11 @@ public fun sparkMaxSwerveMotors(
     topLeft, topRight, bottomLeft, bottomRight, SparkMaxConfiguration().apply(configure)
 )
 
+
 /**
  * Constructs an instance of [SwerveMotors] with TalonFX motor controllers.
  */
-public fun talonFXSwerveMotors(
+public inline fun talonFXSwerveMotors(
     topLeft: ChargerTalonFX,
     topRight: ChargerTalonFX,
     bottomLeft: ChargerTalonFX,
@@ -102,7 +141,10 @@ public fun <M, C: HardwareConfiguration> SwerveMotors(
         }
     )
 
-
+/**
+ * A Helper class to store a group of motors needed for an [EncoderHolonomicDrivetrain],
+ * which can run onboard PID control.
+ */
 public class OnboardPIDSwerveMotors(
     override val topLeft: SmartEncoderMotorController,
     override val topRight: SmartEncoderMotorController,

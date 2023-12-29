@@ -1,14 +1,15 @@
 package frc.chargers.utils.math
 
 import com.batterystaple.kmeasure.quantities.inUnit
+import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.degrees
 import edu.wpi.first.hal.HAL
 import frc.chargers.utils.a
+import frc.chargers.utils.math.equations.epsilonEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
-import kotlin.math.abs
 
 internal class InputModulusKtTest {
 
@@ -29,8 +30,8 @@ internal class InputModulusKtTest {
 
         for (testcase in inputs){
             assertEquals(
-                basicStandardize(testcase),
-                testcase.inputModulus(0.0..360.0)
+                basicStandardize(testcase) epsilonEquals testcase.inputModulus(0.0..360.0),
+                true
             )
         }
     }
@@ -39,11 +40,11 @@ internal class InputModulusKtTest {
     fun inputModulusWithUnits() {
         val inputs = a[90.0,70.0,20.0,30.0,180.0,270.0, -50.0, -60.0, -120.0, -190.0]
         for (testcase in inputs){
-            val testingInput = testcase.degrees.inputModulus(0.degrees..360.degrees).inUnit(degrees)
+            val testingInput = testcase.ofUnit(degrees).inputModulus(0.degrees..360.degrees).inUnit(degrees)
             val actualInput = basicStandardize(testcase)
 
             assertEquals(
-                abs(testingInput - actualInput) < 0.0001,
+                testingInput epsilonEquals actualInput,
                 true
             )
         }

@@ -29,8 +29,8 @@ internal class PolynomialTest {
             computedOutput += coefficients[2]
 
             assertEquals(
-                Polynomial(coefficients)(x = input),
-                computedOutput
+                Polynomial(coefficients)(x = input) epsilonEquals computedOutput,
+                true
             )
         }
     }

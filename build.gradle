@@ -1,11 +1,10 @@
 plugins {
     id("java")
     id("edu.wpi.first.GradleRIO") version "2024.1.1-beta-4"
-    id("org.jetbrains.kotlin.jvm") version "1.9.20-Beta"
+    id("org.jetbrains.kotlin.jvm") version "1.9.20"
     id("maven-publish")
     id("org.jetbrains.dokka") version "1.8.10"
     id ("com.peterabeles.gversion") version "1.10.2"
-
 }
 
 project.compileJava.dependsOn(createVersionFile)

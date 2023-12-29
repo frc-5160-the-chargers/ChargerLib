@@ -15,12 +15,18 @@ import frc.chargers.wpilibextensions.timeSinceMatchStart
 public fun InstantCommand(vararg subsystems: Subsystem, toRun: () -> Unit): InstantCommand =
     InstantCommand(toRun, *subsystems)
 
+public fun runOnceCommand(vararg subsystems: Subsystem, toRun: () -> Unit): InstantCommand =
+    InstantCommand(toRun, *subsystems)
+
 
 
 /**
  * A utility function for creating [RunCommand]s in a more kotlin-friendly way.
  */
 public fun RunCommand(vararg subsystems: Subsystem, toRun: () -> Unit): RunCommand =
+    RunCommand(toRun, *subsystems)
+
+public fun loopForeverCommand(vararg subsystems: Subsystem, toRun: () -> Unit): RunCommand =
     RunCommand(toRun, *subsystems)
 
 /**
@@ -85,7 +91,7 @@ public infix fun Command.then(other: Command): Command =
 /**
  * Makes a command repeat for a certain amount of time
  */
-public fun Command.repeatedlyFor(time: Time): Command =
+public fun Command.repeatFor(time: Time): Command =
     ParallelRaceGroup(
         repeatedly(),
         WaitCommand(time.inUnit(seconds))
@@ -94,7 +100,7 @@ public fun Command.repeatedlyFor(time: Time): Command =
 /**
  * Makes the command repeat over and over while a condition is true.
  */
-public fun Command.repeatedlyWhile(condition: () -> Boolean): Command = ParallelRaceGroup(
+public fun Command.repeatWhile(condition: () -> Boolean): Command = ParallelRaceGroup(
     repeatedly(),
     object: Command(){
         override fun isFinished(): Boolean = !condition()
@@ -104,9 +110,9 @@ public fun Command.repeatedlyWhile(condition: () -> Boolean): Command = Parallel
 /**
  * Makes a command repeat for a certain amount of times.
  */
-public fun Command.repeatFor(numTimes: Int): Command = buildCommand{
+public fun Command.repeat(numTimes: Int): Command = buildCommand{
     for (i in 1..numTimes){
-        +this@repeatFor
+        +this@repeat
     }
 }
 
