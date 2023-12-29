@@ -24,29 +24,35 @@ public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, Read
 
 
 /**
- * A wrapper around AdvantageKit which manages logging and replaying loggable inputs automatically,
- * without extra work.
+ * A wrapper around AdvantageKit which manages logging and replaying loggable inputs
+ * in a clean and descriptive way.
  *
  * Usage example:
  *
  * ```
  * // have 1 LoggableInputsProvider per subsystem/log category
- * val ArmLog = LoggableInputsProvider("Arm")
+ * val ArmLog = LoggableInputsProvider(namespace = "Arm")
+ *
+ * // you can selectively choose whether or not to update inputs;
+ * // this is useful for subsystems that don't use sim and want replay functionality
+ * // with 1 IO impl.
+ * val IntakeLog = LoggableInputsProvider("Intake", updateInputs = RobotBase.isReal())
  *
  * public interface ArmIO{
  *      public fun lowLevelFunction(input: Angle){}
  *
- *      // instead of a seperate "ArmIOInputs" class, low-level inputs are now part of
+ *      // instead of a separate "ArmIOInputs" class, low-level inputs are now part of
  *      // the io interface instead and are overriden by implementing classes
  *      public val current: Current
  *      public var appliedVoltage: Voltage
  *      public val otherProperty: Double
+ *      public val nullableProperty: Double?
  * }
  *
  * public class ArmIOReal: ArmIO{
  *      // this value is now automatically logged under
  *      // "Arm/current(SI value)" and replayed from the same field.
- *      // no need for a processInputs or updateInputs function at all!
+ *      // no need to call processInputs or updateInputs periodically at all!
  *      override val current by ArmLog.quantity{...}
  *
  *      // kotlin custom getters and setters are also supported!
@@ -58,7 +64,13 @@ public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, Read
  *      // logged under "Arm/otherProperty"
  *      // always use lowercase version of class name for delegates, for example:
  *      // Quantity<D> - LoggableInputsProvider.quantity{...}
+ *      // Int - LoggableInputsProvider.int{...}
  *      override val otherProperty by ArmLog.double{...}
+ *
+ *      // native support for kotlin nullables;
+ *      // value logged under "Arm/nullableProperty",
+ *      // and "Arm/nullablePropertyIsValid" logs whether or not the value is null or not.
+ *      override val nullableProperty: Double? by ArmLog.nullableDouble{...}
  *      ...
  * }
  * ```
@@ -80,7 +92,7 @@ public class LoggableInputsProvider(
      * val logInputsProviderOne = LoggableInputsProvider("Hello")
      *
      * // will now log under "Hello/goodbye"
-     * val logInputsProviderTwo = logInputsProviderONe.subgroup("goodbye")
+     * val logInputsProviderTwo = logInputsProviderOne.subgroup("goodbye")
      *
      * ```
      */
@@ -162,15 +174,19 @@ public class LoggableInputsProvider(
         default: T,
         crossinline getValue: () -> T
     ): ReadOnlyLoggableInput<T> =
-        PropertyDelegateProvider{_, variable -> loggedGenericValuePrivateImpl(variable.name, default, getValue)}
+        PropertyDelegateProvider{_, variable -> loggedGenericValuePrivateImpl(variable.name, default, getValue) }
 
     public inline fun <T: AdvantageKitLoggable<T>> nullableValue(
         default: T,
         crossinline getValue: () -> T?
     ): ReadOnlyLoggableInput<T?> =
-        PropertyDelegateProvider{_, variable -> loggedGenericNullableValuePrivateImpl(variable.name,default, getValue)}
+        PropertyDelegateProvider{_, variable -> loggedGenericNullableValuePrivateImpl(variable.name,default, getValue) }
 
-
+    public inline fun <T: AdvantageKitLoggable<T>> valueList(
+        default: T,
+        crossinline getValue: () -> List<T>
+    ): ReadOnlyLoggableInput<List<T>> =
+        PropertyDelegateProvider{ _, variable -> loggedGenericValueListPrivateImpl(variable.name, default, getValue) }
 
 
 
@@ -268,7 +284,12 @@ public class LoggableInputsProvider(
     ): ReadWriteLoggableInput<T?> =
         PropertyDelegateProvider{_, variable -> loggedGenericNullableValuePrivateImpl(variable.name,default, getValue, setValue)}
 
-
+    public inline fun <T: AdvantageKitLoggable<T>> valueList(
+        default: T,
+        crossinline getValue: () -> List<T>,
+        crossinline setValue: (List<T>) -> Unit
+    ): ReadWriteLoggableInput<List<T>> =
+        PropertyDelegateProvider{ _, variable -> loggedGenericValueListPrivateImpl(variable.name, default, getValue, setValue) }
 
 
 
@@ -796,6 +817,53 @@ public class LoggableInputsProvider(
         override fun getValue(thisRef: Any?, property: KProperty<*>): T? = field
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+            set(value)
+        }
+    }
+
+    @PublishedApi
+    internal inline fun <T: AdvantageKitLoggable<T>> loggedGenericValueListPrivateImpl(
+        name: String,
+        default: T,
+        crossinline get: () -> List<T>,
+        crossinline set: (List<T>) -> Unit = {}
+    ): ReadWriteProperty<Any?,List<T>> = object: ReadWriteProperty<Any?,List<T>>, LoggableInputImpl{
+        private var field: List<T> = listOf(default)
+
+        private val dummyInputs = object: LoggableInputs{
+            override fun toLog(table: LogTable) {
+                var counter = 1
+                table.put("$name/totalItems", field.size.toLong())
+                for (item in field){
+                    item.pushToLog(table, "$name/Item#$counter")
+                    counter++
+                }
+            }
+
+            override fun fromLog(table: LogTable) {
+                val totalItems = table.get("$name/totalItems", 0L)
+                val newField = mutableListOf<T>()
+                for (i in 1..totalItems){
+                    newField.add(
+                        default.getFromLog(table, "$name/Item#$i")
+                    )
+                }
+                field = newField
+            }
+        }
+
+        init{
+            allLogInputs.add(this)
+        }
+
+        override fun updateAndProcess() {
+            if (shouldUpdateInputs) field = get()
+            Logger.processInputs(namespace, dummyInputs)
+        }
+
+        override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> = field
+
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
             set(value)
         }
     }
