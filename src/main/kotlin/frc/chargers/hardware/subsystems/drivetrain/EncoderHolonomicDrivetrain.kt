@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargerlibexternal.frc4481.HeadingCorrector
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
-import frc.chargers.advantagekitextensions.runAndLogLatency
+import frc.chargers.advantagekitextensions.recordLatency
 import frc.chargers.constants.drivetrain.SwerveControlData
 import frc.chargers.constants.drivetrain.SwerveHardwareData
 import frc.chargers.hardware.sensors.RobotPoseSupplier
@@ -456,12 +456,13 @@ public class EncoderHolonomicDrivetrain(
         currentControlMode = ControlMode.OPEN_LOOP
         var speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
         if (fieldRelative) speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
-        speeds = speeds.correctForDynamics(driftRate = 1.6)
+        // extension function defined in chargerlib
+        speeds = speeds.discretize(driftRate = controlData.openLoopDiscretizationRate)
         // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
-        speeds = headingCorrector.correctHeading(speeds,-mostReliableHeading.asRotation2d())
+        speeds = headingCorrector.correctHeading(speeds,mostReliableHeading.asRotation2d())
         val stateArray = kinematics.toSwerveModuleStates(speeds)
 
-        runAndLogLatency("Drivetrain(Swerve)/moduleStateProcessingTime"){
+        recordLatency("Drivetrain(Swerve)/moduleStateProcessingTime"){
             currentModuleStates = ModuleStateGroup(
                 topLeftState = stateArray[0],
                 topRightState = stateArray[1],
@@ -504,7 +505,8 @@ public class EncoderHolonomicDrivetrain(
         currentControlMode = ControlMode.CLOSED_LOOP
         var newSpeeds: ChassisSpeeds =
             if (fieldRelative) ChassisSpeeds.fromFieldRelativeSpeeds(speeds,mostReliableHeading.asRotation2d()) else speeds
-        newSpeeds = newSpeeds.correctForDynamics(driftRate = if (RobotBase.isReal()) 1.3 else 1.0)
+        // extension function defined in chargerlib
+        newSpeeds = newSpeeds.discretize(driftRate = controlData.closedLoopDiscretizationRate)
         // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
         newSpeeds = headingCorrector.correctHeading(newSpeeds,-mostReliableHeading.asRotation2d())
         val stateArray = kinematics.toSwerveModuleStates(newSpeeds)

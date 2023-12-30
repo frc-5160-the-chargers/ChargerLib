@@ -203,8 +203,8 @@ public open class ChargerRobot(
      */
     override fun robotPeriodic() {
         try{
-            runAndLogLatency("TotalLoopTimeMeasured"){
-                runAndLogLatency("LoggedRobot/PeriodicRunnableLoopTime/RegularPriority"){
+            recordLatency("TotalLoopTimeMeasured"){
+                recordLatency("LoggedRobot/PeriodicRunnableLoopTime/RegularPriority"){
                     periodicRunnables.forEach{
                         it()
                     }
@@ -215,7 +215,7 @@ public open class ChargerRobot(
                 // block in order for anything in the Command-based framework to work.
                 CommandScheduler.getInstance().run()
                 recordOutput("RemainingRamMB", Runtime.getRuntime().freeMemory() / 1024 / 1024)
-                runAndLogLatency("LoggedRobot/PeriodicRunnableLoopTime/LowPriority"){
+                recordLatency("LoggedRobot/PeriodicRunnableLoopTime/LowPriority"){
                     lowPriorityPeriodicRunnables.forEach{
                         it()
                     }

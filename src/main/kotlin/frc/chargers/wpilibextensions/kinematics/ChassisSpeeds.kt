@@ -35,11 +35,11 @@ public val ChassisSpeeds.rotationSpeed: AngularVelocity
 /**
  * A function used to correct for drift on swerve drive when simultaneously rotating and driving in a singular direction.
  *
- * Credits: [254](https://github.com/Team254/FRC-2022-Public), [5727](https://github.com/FRC5727/SwervyBoi/tree/THOR2023) repositories
+ * This function also allows you to customize the rate of correction, in addition to the loop period.
  */
-public fun ChassisSpeeds.correctForDynamics(loopPeriod: Time? = null, driftRate: Double = 1.0): ChassisSpeeds {
+public fun ChassisSpeeds.discretize(dt: Time? = null, driftRate: Double = 1.0): ChassisSpeeds {
 
-    val period = loopPeriod ?: ChargerRobot.LOOP_PERIOD
+    val period = dt ?: ChargerRobot.LOOP_PERIOD
 
     val futureRobotPose = Pose2d(
         vxMetersPerSecond * period.inUnit(seconds),

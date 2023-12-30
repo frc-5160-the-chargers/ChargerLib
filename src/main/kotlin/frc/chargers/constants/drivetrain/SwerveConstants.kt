@@ -13,7 +13,7 @@ import frc.chargers.utils.math.units.Inertia
 
 /**
  * A class that holds Control data for a [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
- * This includes PID constants, feedforward, and path replanning configs.
+ * This includes PID constants, feedforward, and path re-planning configs.
  */
 public data class SwerveControlData(
     val anglePID: PIDConstants,
@@ -21,6 +21,8 @@ public data class SwerveControlData(
     val modulePrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     val velocityPID: PIDConstants,
     val velocityFF: AngularMotorFFConstants,
+    val openLoopDiscretizationRate: Double = 2.0,
+    val closedLoopDiscretizationRate: Double = 1.0,
     val robotRotationPID: PIDConstants = PIDConstants(0.3,0.0,0.0),
     val robotTranslationPID: PIDConstants = PIDConstants(0.3,0.0,0.0),
     val pathReplanConfig: ReplanningConfig = ReplanningConfig()
@@ -28,7 +30,7 @@ public data class SwerveControlData(
 
 /**
  * A class that holds Hardware constants for a [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
- * This includes trackwidth, wheelbase, inertia, turn motor inversion, and max speed.
+ * This includes Track width, wheelbase, inertia, turn motor inversion, and max speed.
  */
 public data class SwerveHardwareData(
     val invertTurnMotors: Boolean = false,
@@ -44,7 +46,7 @@ public data class SwerveHardwareData(
     public companion object{
         /**
          * Creates a [SwerveHardwareData] instance with auto-completed constants
-         * related to Mk4i L2 swerve modules.
+         * related to MK4i L2 swerve modules.
          */
         public fun mk4iL2(
             maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
@@ -66,7 +68,7 @@ public data class SwerveHardwareData(
 
         /**
          * Creates a [SwerveHardwareData] instance with auto-completed constants
-         * related to Mk4i L3 swerve modules.
+         * related to MK4i L3 swerve modules.
          */
         public fun mk4iL3(
             maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
@@ -88,7 +90,7 @@ public data class SwerveHardwareData(
 
         /**
          * Creates a [SwerveHardwareData] instance with auto-completed constants
-         * related to Mk4i L1 swerve modules.
+         * related to MK4i L1 swerve modules.
          */
         public fun mk4iL1(
             maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,

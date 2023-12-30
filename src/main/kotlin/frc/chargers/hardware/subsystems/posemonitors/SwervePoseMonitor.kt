@@ -15,7 +15,7 @@ import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
 import frc.chargers.utils.Measurement
 import frc.chargerlibexternal.frc6328.PoseEstimator
 import frc.chargerlibexternal.frc6328.PoseEstimator.TimestampedVisionUpdate
-import frc.chargers.advantagekitextensions.runAndLogLatency
+import frc.chargers.advantagekitextensions.recordLatency
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
@@ -92,7 +92,7 @@ public class SwervePoseMonitor(
         Calculates the pose and heading from the data from the swerve modules; results in a Twist2d object.
          */
 
-        runAndLogLatency("SwervePoseMonitorLoopTime"){
+        recordLatency("SwervePoseMonitorLoopTime"){
             val currentMPs = currentModulePositions
             wheelDeltas.apply{
                 topLeftDistance = currentMPs.topLeftDistance - previousDistances[0]

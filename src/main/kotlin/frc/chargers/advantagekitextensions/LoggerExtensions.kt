@@ -2,6 +2,7 @@ package frc.chargers.advantagekitextensions
 
 import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
+import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.micro
@@ -10,8 +11,12 @@ import com.batterystaple.kmeasure.units.seconds
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger.*
 
+// These are set when ChargerRobot is initialized
 internal var AK_LOGGABLE_REPLAY_TABLE: LogTable? = null
 internal var AK_LOGGABLE_REAL_TABLE: LogTable? = null
+
+private const val warningMsg =
+    "Hmm... Values are attempting to be logged, but the log table has not been initialized. Are you using the ChargerRobot class?"
 
 /**
  * Records the output of a generic [Quantity].
@@ -25,19 +30,23 @@ public fun <D: AnyDimension> recordOutput(key: String, value: Quantity<D>){
  */
 public fun <T: AdvantageKitLoggable<T>> recordOutput(key: String, value: T){
     if (hasReplaySource()){
-        AK_LOGGABLE_REPLAY_TABLE?.let { value.pushToLog(it, key) }
+        AK_LOGGABLE_REPLAY_TABLE?.let { value.pushToLog(it, key) } ?: println(warningMsg)
     }else{
-        AK_LOGGABLE_REAL_TABLE?.let { value.pushToLog(it, key) }
+        AK_LOGGABLE_REAL_TABLE?.let { value.pushToLog(it, key) } ?: println(warningMsg)
     }
 }
 
 /**
- * Runs a code block while logging it's latency.
+ * Runs a code block while logging & returning its latency.
  */
-public inline fun runAndLogLatency(logName: String, toRun: () -> Unit){
+public inline fun recordLatency(logName: String? = null, toRun: () -> Unit): Time{
     val startTime = getRealTimestamp().ofUnit(micro.seconds)
     toRun()
-    recordOutput("$logName(ms)", (getRealTimestamp().ofUnit(micro.seconds) - startTime).inUnit(milli.seconds))
+    val dt = (getRealTimestamp().ofUnit(micro.seconds) - startTime)
+    if (logName != null){
+        recordOutput("$logName(ms)", dt.inUnit(milli.seconds))
+    }
+    return dt
 }
 
 

@@ -20,13 +20,37 @@ import frc.chargers.utils.math.inputModulus
  * See [here](https://www.ni.com/en-us/innovations/white-papers/06/pid-theory-explained.html) for an explanation of PID.
  */
 public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
+    /**
+     * The PID constants of the controller.
+     */
     pidConstants: PIDConstants,
+    /**
+     * A function that fetches the controller input.
+     */
     private val getInput: () -> Quantity<I>,
+    /**
+     * The target is the value the PID controller is attempting to achieve.
+     */
     override var target: Quantity<I>,
+    /**
+     * The setpoint supplier converts a target into one or multiple setpoints
+     * for the pid controller to run to.
+     *
+     * This can include trapezoidal or exponential motion profiles.
+     */
     private val setpointSupplier: SetpointSupplier<I, O> = SetpointSupplier.Default(),
+    /**
+     * If this value is not null, enables continuous input within a certain [ClosedRange],
+     * and wraps all target values/input values within the range.
+     *
+     * see [here](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html#setting-continuous-input)
+     * for an explanation on continuous input.
+     */
     private val continuousInputRange: ClosedRange<Quantity<I>>? = null,
+    /**
+     * Optionally clamps the output of the controller within a certain [ClosedRange].
+     */
     private val outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
-    private val integralRange: ClosedRange<Quantity<O>> = outputRange,
     /**
      * Determines if the [SuperPIDController] should call calculateOutput()
      * during every loop of the command scheduler. Normal PID controllers require the user to do this.
@@ -46,7 +70,6 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
     private val pidController = PIDController(0.0, 0.0, 0.0)
         .apply {
             constants = pidConstants
-            setIntegratorRange(integralRange.start.siValue, integralRange.endInclusive.siValue)
             if (continuousInputRange != null){
                 enableContinuousInput(
                     continuousInputRange.start.siValue,
@@ -56,6 +79,9 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
         }
 
 
+    /**
+     * Calculates the output of the PID controller, using the calculated error.
+     */
     override fun calculateOutput(): Quantity<O> {
         val setpoint = setpointSupplier.getSetpoint(target)
         val pidOutput = Quantity<O>(
@@ -69,7 +95,25 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
     }
 
 
+    /**
+     * The error is a signed value representing how far the PID system currently is from the target value.
+     */
     override val error: Quantity<I>
         get() = Quantity(pidController.positionError)
+
+
+    /**
+     * A variable that holds the [PIDConstants] of the controller.
+     */
+    public var constants: PIDConstants
+        get() = PIDConstants(pidController.p, pidController.i, pidController.d)
+        set(value){
+            if (value != constants){
+                pidController.reset()
+                pidController.p = value.kP
+                pidController.i = value.kI
+                pidController.d = value.kD
+            }
+        }
 
 }
