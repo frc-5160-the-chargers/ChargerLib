@@ -49,7 +49,7 @@ public fun interface SetpointSupplier<S: AnyDimension, O: AnyDimension>{
         private val feedforward: Feedforward<I, O> = Feedforward{ Quantity(0.0) }
     ): SetpointSupplier<I,O>{
         override fun getSetpoint(target: Quantity<I>): Setpoint<I,O> =
-            Setpoint(Quantity(0.0),feedforward.calculate(target))
+            Setpoint(target,feedforward.calculate(target))
     }
 
 

@@ -90,6 +90,7 @@ public class RioPIDSwerveModule(
                  */
                 setpointSupplier = controlData.angleSetpointSupplier,
                 outputRange = -12.volts..12.volts,
+                continuousInputRange = 0.degrees..360.degrees,
                 selfSustain = true
             )
         }
@@ -98,7 +99,7 @@ public class RioPIDSwerveModule(
         power: Double,
         direction: Angle
     ){
-        if (angleDeltaBetween(direction,direction) > 90.0.degrees){
+        if (angleDeltaBetween(this.direction, direction) > 90.0.degrees){
             setDirection(direction + 180.degrees)
             setPower(-power * cos(turnController.error))
         }else{
@@ -111,7 +112,7 @@ public class RioPIDSwerveModule(
         angularVelocity: AngularVelocity,
         direction: Angle
     ){
-        if (angleDeltaBetween(direction,direction) > 90.0.degrees){
+        if (angleDeltaBetween(this.direction, direction) > 90.0.degrees){
             setDirection(direction + 180.degrees)
             setVelocity(-angularVelocity * cos(turnController.error))
         }else{
@@ -129,6 +130,7 @@ public class RioPIDSwerveModule(
         }else{
             turnController.calculateOutput()
         }
+        recordOutput("$logTab/target", turnController.target.siValue)
         recordOutput("$logTab/controllerErrorRad", turnController.error.inUnit(radians))
         recordOutput("$logTab/controllerOutputVolts", turnController.calculateOutput().inUnit(volts))
     }

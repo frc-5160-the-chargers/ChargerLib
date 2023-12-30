@@ -3,9 +3,10 @@ package frc.chargers.advantagekitextensions
 import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import com.batterystaple.kmeasure.quantities.inUnit
+import com.batterystaple.kmeasure.quantities.ofUnit
+import com.batterystaple.kmeasure.units.micro
 import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
-import frc.chargers.wpilibextensions.fpgaTimestampReal
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger.*
 
@@ -34,9 +35,9 @@ public fun <T: AdvantageKitLoggable<T>> recordOutput(key: String, value: T){
  * Runs a code block while logging it's latency.
  */
 public inline fun runAndLogLatency(logName: String, toRun: () -> Unit){
-    val startTime = fpgaTimestampReal()
+    val startTime = getRealTimestamp().ofUnit(micro.seconds)
     toRun()
-    recordOutput("$logName(ms)", (fpgaTimestampReal() - startTime).inUnit(milli.seconds))
+    recordOutput("$logName(ms)", (getRealTimestamp().ofUnit(micro.seconds) - startTime).inUnit(milli.seconds))
 }
 
 

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargerlibexternal.frc4481.HeadingCorrector
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
+import frc.chargers.advantagekitextensions.runAndLogLatency
 import frc.chargers.constants.drivetrain.SwerveControlData
 import frc.chargers.constants.drivetrain.SwerveHardwareData
 import frc.chargers.hardware.sensors.RobotPoseSupplier
@@ -376,17 +377,7 @@ public class EncoderHolonomicDrivetrain(
             topRightAngle = topRight.direction,
             bottomLeftAngle = bottomLeft.direction,
             bottomRightAngle = bottomRight.direction
-        ).also{
-            recordOutput("ModulePositions/topLeft/DistanceMeters", it.topLeftDistance.inUnit(meters))
-            recordOutput("ModulePositions/topRight/DistanceMeters", it.topRightDistance.inUnit(meters))
-            recordOutput("ModulePositions/bottomLeft/DistanceMeters", it.bottomLeftDistance.inUnit(meters))
-            recordOutput("ModulePositions/bottomRight/DistanceMeters", it.bottomRightDistance.inUnit(meters))
-
-            recordOutput("ModulePositions/topLeft/AngleDeg",it.topLeftAngle.inUnit(degrees))
-            recordOutput("ModulePositions/topRight/AngleDeg",it.topRightAngle.inUnit(degrees))
-            recordOutput("ModulePositions/bottomLeft/AngleDeg",it.bottomLeftAngle.inUnit(degrees))
-            recordOutput("ModulePositions/bottomRight/AngleDeg",it.bottomRightAngle.inUnit(degrees))
-        }
+        )
 
 
     /**
@@ -455,6 +446,13 @@ public class EncoderHolonomicDrivetrain(
         powers: ChassisPowers,
         fieldRelative: Boolean = RobotBase.isSimulation() || gyro != null
     ){
+        if (powers.xPower == 0.0 && powers.yPower == 0.0 && powers.rotationPower == 0.0){
+            topLeft.halt()
+            topRight.halt()
+            bottomLeft.halt()
+            bottomRight.halt()
+            return
+        }
         currentControlMode = ControlMode.OPEN_LOOP
         var speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
         if (fieldRelative) speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
@@ -462,12 +460,15 @@ public class EncoderHolonomicDrivetrain(
         // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
         speeds = headingCorrector.correctHeading(speeds,-mostReliableHeading.asRotation2d())
         val stateArray = kinematics.toSwerveModuleStates(speeds)
-        currentModuleStates = ModuleStateGroup(
-            topLeftState = stateArray[0],
-            topRightState = stateArray[1],
-            bottomLeftState = stateArray[2],
-            bottomRightState = stateArray[3]
-        )
+
+        runAndLogLatency("Drivetrain(Swerve)/moduleStateProcessingTime"){
+            currentModuleStates = ModuleStateGroup(
+                topLeftState = stateArray[0],
+                topRightState = stateArray[1],
+                bottomLeftState = stateArray[2],
+                bottomRightState = stateArray[3]
+            )
+        }
         currentControlMode = ControlMode.CLOSED_LOOP
     }
 

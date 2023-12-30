@@ -11,10 +11,13 @@ import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.Inertia
 
+/**
+ * A class that holds Control data for a [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
+ * This includes PID constants, feedforward, and path replanning configs.
+ */
 public data class SwerveControlData(
-    val invertTurnMotors: Boolean = false,
     val anglePID: PIDConstants,
-    val angleSetpointSupplier: SetpointSupplier<AngleDimension, VoltageDimension>,
+    val angleSetpointSupplier: SetpointSupplier<AngleDimension, VoltageDimension> = SetpointSupplier.Default(),
     val modulePrecision: Precision<AngleDimension> = Precision.AllowOvershoot,
     val velocityPID: PIDConstants,
     val velocityFF: AngularMotorFFConstants,
@@ -23,6 +26,10 @@ public data class SwerveControlData(
     val pathReplanConfig: ReplanningConfig = ReplanningConfig()
 )
 
+/**
+ * A class that holds Hardware constants for a [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
+ * This includes trackwidth, wheelbase, inertia, turn motor inversion, and max speed.
+ */
 public data class SwerveHardwareData(
     val invertTurnMotors: Boolean = false,
     val turnGearRatio: Double = DEFAULT_GEAR_RATIO,

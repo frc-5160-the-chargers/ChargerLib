@@ -61,7 +61,7 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
         val pidOutput = Quantity<O>(
             pidController.calculate(
                 getInput().standardize().siValue,
-                setpoint.value.siValue
+                setpoint.value.standardize().siValue
             )
         )
         val ffOutput = setpoint.feedforwardOutput
