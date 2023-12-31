@@ -14,7 +14,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.commandbuilder.CommandBuilder
-import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
+import frc.chargers.hardware.subsystems.swervedrive.EncoderHolonomicDrivetrain
 import frc.chargers.pathplannerextensions.asPathPlannerConstants
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import kotlin.math.pow

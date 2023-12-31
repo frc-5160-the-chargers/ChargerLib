@@ -5,11 +5,11 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.commandbuilder.CommandBuilder
 import frc.chargers.commands.commandbuilder.CommandBuilderMarker
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
-import frc.chargers.hardware.subsystems.drivetrain.DifferentialDrivetrain
-import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
+import frc.chargers.hardware.subsystems.differentialdrive.DifferentialDrivetrain
+import frc.chargers.hardware.subsystems.differentialdrive.EncoderDifferentialDrivetrain
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.controls.pid.SuperPIDController
-import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
+import frc.chargers.hardware.subsystems.swervedrive.EncoderHolonomicDrivetrain
 import kotlin.internal.LowPriorityInOverloadResolution
 
 

@@ -12,8 +12,8 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.commandbuilder.CommandBuilder
 import frc.chargers.framework.ChargerRobot
-import frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain
-import frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain
+import frc.chargers.hardware.subsystems.differentialdrive.EncoderDifferentialDrivetrain
+import frc.chargers.hardware.subsystems.swervedrive.EncoderHolonomicDrivetrain
 import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.pathplannerextensions.asPathPlannerConstants
 import kotlin.math.pow

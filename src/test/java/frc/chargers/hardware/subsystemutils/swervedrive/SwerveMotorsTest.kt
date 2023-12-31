@@ -2,6 +2,7 @@ package frc.chargers.hardware.subsystemutils.swervedrive
 
 import edu.wpi.first.hal.HAL
 import frc.chargers.hardware.motorcontrol.rev.neoSparkMax
+import frc.chargers.hardware.subsystems.swervedrive.sparkMaxSwerveMotors
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
