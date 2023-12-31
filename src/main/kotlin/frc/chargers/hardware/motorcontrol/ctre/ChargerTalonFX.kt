@@ -191,9 +191,6 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
             }
             return@safeConfigure configAppliedProperly
         }
-
-
-        println("ChargerTalonFX(id = $deviceID) has been configured.")
     }
 
 }
