@@ -2,6 +2,7 @@ package frc.chargers.hardware.motorcontrol.ctre
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
+import com.ctre.phoenix6.StatusCode
 import com.ctre.phoenix6.configs.Slot0Configs
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityVoltage
@@ -11,6 +12,7 @@ import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
+import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.relative.TalonFXEncoderAdapter
@@ -117,6 +119,14 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         setControl(velocityRequest)
     }
 
+    private var Slot0Configs.pidConstants: PIDConstants
+        get() = PIDConstants(kP,kI,kD)
+        set(newConstants){
+            kP = newConstants.kP
+            kI = newConstants.kI
+            kD = newConstants.kD
+        }
+
     final override fun setAngularPosition(
         target: Angle,
         pidConstants: PIDConstants,
@@ -136,34 +146,54 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         setControl(positionRequest)
     }
 
-    final override fun configure(configuration: TalonFXConfiguration){
-        val baseTalonFXConfig = CTRETalonFXConfiguration()
-        configurator.refresh(baseTalonFXConfig)
-        baseTalonFXConfig.applyChanges(configuration)
-        configurator.apply(baseTalonFXConfig,0.050)
-
-
-        configuration.apply{
-            positionUpdateFrequency?.let{
-                position.setUpdateFrequency(it.inUnit(hertz))
-            }
-
-            velocityUpdateFrequency?.let{
-                velocity.setUpdateFrequency(it.inUnit(hertz))
-            }
-
-            motorOutputUpdateFrequency?.let{
-                supplyVoltage.setUpdateFrequency(it.inUnit(hertz))
-                dutyCycle.setUpdateFrequency(it.inUnit(hertz))
-            }
-
-            currentUpdateFrequency?.let{
-                torqueCurrent.setUpdateFrequency(it.inUnit(hertz))
-                supplyCurrent.setUpdateFrequency(it.inUnit(hertz))
-                statorCurrent.setUpdateFrequency(it.inUnit(hertz))
-            }
+    private val allConfigErrors: LinkedHashSet<StatusCode> = linkedSetOf()
+    private var configAppliedProperly = true
+    private fun StatusCode.updateConfigStatus(): StatusCode {
+        if (this != StatusCode.OK){
+            allConfigErrors.add(this)
+            configAppliedProperly = false
         }
-        println("TalonFX has been configured.")
+        return this
+    }
+
+
+    final override fun configure(configuration: TalonFXConfiguration){
+        configAppliedProperly = true
+        safeConfigure(
+            deviceName = "ChargerTalonFX(id = $deviceID)",
+            getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
+        ){
+            allConfigErrors.clear()
+            val baseTalonFXConfig = CTRETalonFXConfiguration()
+            configurator.refresh(baseTalonFXConfig)
+            applyChanges(baseTalonFXConfig, configuration)
+            configurator.apply(baseTalonFXConfig,0.050).updateConfigStatus()
+
+            configuration.apply{
+                positionUpdateFrequency?.let{
+                    position.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                }
+
+                velocityUpdateFrequency?.let{
+                    velocity.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                }
+
+                motorOutputUpdateFrequency?.let{
+                    supplyVoltage.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                    dutyCycle.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                }
+
+                currentUpdateFrequency?.let{
+                    torqueCurrent.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                    supplyCurrent.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                    statorCurrent.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                }
+            }
+            return@safeConfigure configAppliedProperly
+        }
+
+
+        println("ChargerTalonFX(id = $deviceID) has been configured.")
     }
 
 }
@@ -269,99 +299,92 @@ public data class TalonFXConfiguration(
 
 ): HardwareConfiguration
 
-public fun CTRETalonFXConfiguration.applyChanges(chargerConfig: TalonFXConfiguration): CTRETalonFXConfiguration{
-    chargerConfig.beepOnBoot?.let{
-        Audio.BeepOnBoot = it
-    }
+internal fun applyChanges(ctreConfig: CTRETalonFXConfiguration, chargerConfig: TalonFXConfiguration): CTRETalonFXConfiguration{
+    ctreConfig.apply{
+        chargerConfig.beepOnBoot?.let{
+            Audio.BeepOnBoot = it
+        }
 
-    chargerConfig.closedLoopContinuousWrap?.let{
-        ClosedLoopGeneral.ContinuousWrap = it
-    }
+        chargerConfig.closedLoopContinuousWrap?.let{
+            ClosedLoopGeneral.ContinuousWrap = it
+        }
 
-    CurrentLimits.apply{
-        chargerConfig.statorCurrentLimitEnable?.let{ StatorCurrentLimitEnable = it }
-        chargerConfig.statorCurrentLimit?.let{ StatorCurrentLimit = it.inUnit(amps) }
-        chargerConfig.supplyCurrentLimit?.let{ SupplyCurrentLimit = it.inUnit(amps) }
-        chargerConfig.supplyCurrentLimitEnable?.let{ SupplyCurrentLimitEnable = it }
-        chargerConfig.supplyCurrentThreshold?.let{ SupplyCurrentThreshold = it.inUnit(amps) }
-        chargerConfig.supplyTimeThreshold?.let{ SupplyTimeThreshold = it.inUnit(seconds) }
-    }
+        CurrentLimits.apply{
+            chargerConfig.statorCurrentLimitEnable?.let{ StatorCurrentLimitEnable = it }
+            chargerConfig.statorCurrentLimit?.let{ StatorCurrentLimit = it.inUnit(amps) }
+            chargerConfig.supplyCurrentLimit?.let{ SupplyCurrentLimit = it.inUnit(amps) }
+            chargerConfig.supplyCurrentLimitEnable?.let{ SupplyCurrentLimitEnable = it }
+            chargerConfig.supplyCurrentThreshold?.let{ SupplyCurrentThreshold = it.inUnit(amps) }
+            chargerConfig.supplyTimeThreshold?.let{ SupplyTimeThreshold = it.inUnit(seconds) }
+        }
 
-    ClosedLoopRamps.apply{
-        chargerConfig.dutyCycleClosedLoopRampPeriod?.let{ DutyCycleClosedLoopRampPeriod = it.inUnit(seconds) }
-        chargerConfig.torqueClosedLoopRampPeriod?.let{ TorqueClosedLoopRampPeriod = it.inUnit(seconds) }
-        chargerConfig.voltageClosedLoopRampPeriod?.let{ VoltageClosedLoopRampPeriod = it.inUnit(seconds) }
-    }
-    OpenLoopRamps.apply{
-        chargerConfig.dutyCycleOpenLoopRampPeriod?.let{ DutyCycleOpenLoopRampPeriod = it.inUnit(seconds) }
-        chargerConfig.torqueOpenLoopRampPeriod?.let{ TorqueOpenLoopRampPeriod = it.inUnit(seconds) }
-        chargerConfig.voltageOpenLoopRampPeriod?.let{ VoltageOpenLoopRampPeriod = it.inUnit(seconds) }
-    }
+        ClosedLoopRamps.apply{
+            chargerConfig.dutyCycleClosedLoopRampPeriod?.let{ DutyCycleClosedLoopRampPeriod = it.inUnit(seconds) }
+            chargerConfig.torqueClosedLoopRampPeriod?.let{ TorqueClosedLoopRampPeriod = it.inUnit(seconds) }
+            chargerConfig.voltageClosedLoopRampPeriod?.let{ VoltageClosedLoopRampPeriod = it.inUnit(seconds) }
+        }
+        OpenLoopRamps.apply{
+            chargerConfig.dutyCycleOpenLoopRampPeriod?.let{ DutyCycleOpenLoopRampPeriod = it.inUnit(seconds) }
+            chargerConfig.torqueOpenLoopRampPeriod?.let{ TorqueOpenLoopRampPeriod = it.inUnit(seconds) }
+            chargerConfig.voltageOpenLoopRampPeriod?.let{ VoltageOpenLoopRampPeriod = it.inUnit(seconds) }
+        }
 
-    Feedback.apply{
-        chargerConfig.feedbackRemoteSensorID?.let{ FeedbackRemoteSensorID = it }
-        chargerConfig.feedbackRotorOffset?.let{ FeedbackRotorOffset = it.inUnit(rotations) }
-        chargerConfig.feedbackSensorSource?.let{ FeedbackSensorSource = it }
-        chargerConfig.rotorToSensorRatio?.let{ RotorToSensorRatio = it }
-        chargerConfig.sensorToMechanismRatio?.let{ SensorToMechanismRatio = it }
+        Feedback.apply{
+            chargerConfig.feedbackRemoteSensorID?.let{ FeedbackRemoteSensorID = it }
+            chargerConfig.feedbackRotorOffset?.let{ FeedbackRotorOffset = it.inUnit(rotations) }
+            chargerConfig.feedbackSensorSource?.let{ FeedbackSensorSource = it }
+            chargerConfig.rotorToSensorRatio?.let{ RotorToSensorRatio = it }
+            chargerConfig.sensorToMechanismRatio?.let{ SensorToMechanismRatio = it }
+        }
+
+        HardwareLimitSwitch.apply{
+            chargerConfig.forwardLimitEnable?.let{ ForwardLimitEnable = it }
+            chargerConfig.forwardLimitAutosetPositionEnable?.let{ ForwardLimitAutosetPositionEnable = it }
+            chargerConfig.forwardLimitAutosetPositionValue?.let{ ForwardLimitAutosetPositionValue = it.inUnit(rotations) }
+            chargerConfig.forwardLimitRemoteSensorID?.let{ForwardLimitRemoteSensorID = it}
+            chargerConfig.forwardLimitSource?.let{ ForwardLimitSource = it }
+            chargerConfig.forwardLimitType?.let{ ForwardLimitType = it }
+
+
+            chargerConfig.reverseLimitEnable?.let{ ReverseLimitEnable = it }
+            chargerConfig.reverseLimitAutosetPositionEnable?.let{ ReverseLimitAutosetPositionEnable = it }
+            chargerConfig.reverseLimitAutosetPositionValue?.let{ ReverseLimitAutosetPositionValue = it.inUnit(rotations) }
+            chargerConfig.reverseLimitRemoteSensorID?.let{ReverseLimitRemoteSensorID = it}
+            chargerConfig.reverseLimitSource?.let{ ReverseLimitSource = it }
+            chargerConfig.reverseLimitType?.let{ ReverseLimitType = it }
+        }
+
+        MotorOutput.apply{
+            chargerConfig.inverted?.let{ Inverted = if (it) InvertedValue.Clockwise_Positive else InvertedValue.CounterClockwise_Positive }
+            chargerConfig.neutralMode?.let{ NeutralMode = it }
+            chargerConfig.dutyCycleNeutralDeadband?.let{ DutyCycleNeutralDeadband = it}
+            chargerConfig.peakForwardDutyCycle?.let{PeakForwardDutyCycle = it}
+            chargerConfig.peakReverseDutyCycle?.let{ PeakReverseDutyCycle = it }
+        }
+
+        SoftwareLimitSwitch.apply{
+            chargerConfig.forwardSoftLimitEnable?.let{ ForwardSoftLimitEnable = it }
+            chargerConfig.forwardSoftLimitThreshold?.let{ ForwardSoftLimitThreshold = it.inUnit(rotations) }
+            chargerConfig.reverseSoftLimitEnable?.let{ ReverseSoftLimitEnable = it }
+            chargerConfig.reverseSoftLimitThreshold?.let{ ReverseSoftLimitThreshold = it.inUnit(rotations) }
+        }
+
+        TorqueCurrent.apply{
+            chargerConfig.peakForwardTorqueCurrent?.let{ PeakForwardTorqueCurrent = it.inUnit(amps) }
+            chargerConfig.peakReverseTorqueCurrent?.let{ PeakReverseTorqueCurrent = it.inUnit(amps) }
+            chargerConfig.torqueNeutralDeadband?.let{ TorqueNeutralDeadband = it.inUnit(amps) }
+        }
+
+        Voltage.apply{
+            chargerConfig.peakForwardVoltage?.let{ PeakForwardVoltage = it.inUnit(volts) }
+            chargerConfig.peakReverseVoltage?.let{ PeakReverseVoltage = it.inUnit(volts) }
+            chargerConfig.supplyVoltageTimeConstant?.let{ SupplyVoltageTimeConstant = it.inUnit(seconds) }
+        }
     }
-    
-    HardwareLimitSwitch.apply{
-        chargerConfig.forwardLimitEnable?.let{ ForwardLimitEnable = it }
-        chargerConfig.forwardLimitAutosetPositionEnable?.let{ ForwardLimitAutosetPositionEnable = it }
-        chargerConfig.forwardLimitAutosetPositionValue?.let{ ForwardLimitAutosetPositionValue = it.inUnit(rotations) }
-        chargerConfig.forwardLimitRemoteSensorID?.let{ForwardLimitRemoteSensorID = it}
-        chargerConfig.forwardLimitSource?.let{ ForwardLimitSource = it }
-        chargerConfig.forwardLimitType?.let{ ForwardLimitType = it }
-
-
-        chargerConfig.reverseLimitEnable?.let{ ReverseLimitEnable = it }
-        chargerConfig.reverseLimitAutosetPositionEnable?.let{ ReverseLimitAutosetPositionEnable = it }
-        chargerConfig.reverseLimitAutosetPositionValue?.let{ ReverseLimitAutosetPositionValue = it.inUnit(rotations) }
-        chargerConfig.reverseLimitRemoteSensorID?.let{ReverseLimitRemoteSensorID = it}
-        chargerConfig.reverseLimitSource?.let{ ReverseLimitSource = it }
-        chargerConfig.reverseLimitType?.let{ ReverseLimitType = it }
-    }
-
-    MotorOutput.apply{
-        chargerConfig.inverted?.let{ Inverted = if (it) InvertedValue.Clockwise_Positive else InvertedValue.CounterClockwise_Positive }
-        chargerConfig.neutralMode?.let{ NeutralMode = it }
-        chargerConfig.dutyCycleNeutralDeadband?.let{ DutyCycleNeutralDeadband = it}
-        chargerConfig.peakForwardDutyCycle?.let{PeakForwardDutyCycle = it}
-        chargerConfig.peakReverseDutyCycle?.let{ PeakReverseDutyCycle = it }
-    }
-
-    SoftwareLimitSwitch.apply{
-        chargerConfig.forwardSoftLimitEnable?.let{ ForwardSoftLimitEnable = it }
-        chargerConfig.forwardSoftLimitThreshold?.let{ ForwardSoftLimitThreshold = it.inUnit(rotations) }
-        chargerConfig.reverseSoftLimitEnable?.let{ ReverseSoftLimitEnable = it }
-        chargerConfig.reverseSoftLimitThreshold?.let{ ReverseSoftLimitThreshold = it.inUnit(rotations) }
-    }
-
-    TorqueCurrent.apply{
-        chargerConfig.peakForwardTorqueCurrent?.let{ PeakForwardTorqueCurrent = it.inUnit(amps) }
-        chargerConfig.peakReverseTorqueCurrent?.let{ PeakReverseTorqueCurrent = it.inUnit(amps) }
-        chargerConfig.torqueNeutralDeadband?.let{ TorqueNeutralDeadband = it.inUnit(amps) }
-    }
-
-    Voltage.apply{
-        chargerConfig.peakForwardVoltage?.let{ PeakForwardVoltage = it.inUnit(volts) }
-        chargerConfig.peakReverseVoltage?.let{ PeakReverseVoltage = it.inUnit(volts) }
-        chargerConfig.supplyVoltageTimeConstant?.let{ SupplyVoltageTimeConstant = it.inUnit(seconds) }
-    }
-
-    return this
+    return ctreConfig
 }
 
 
-
-public var Slot0Configs.pidConstants: PIDConstants
-    get() = PIDConstants(kP,kI,kD)
-    set(newConstants){
-        kP = newConstants.kP
-        kI = newConstants.kI
-        kD = newConstants.kD
-    }
 
 
 

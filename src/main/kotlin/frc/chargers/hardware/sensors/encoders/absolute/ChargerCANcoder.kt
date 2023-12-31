@@ -6,12 +6,14 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.hertz
 import com.batterystaple.kmeasure.units.rotations
 import com.batterystaple.kmeasure.units.seconds
+import com.ctre.phoenix6.StatusCode
 import com.ctre.phoenix6.configs.CANcoderConfiguration as CTRECANcoderConfiguration
 import com.ctre.phoenix6.hardware.CANcoder as CTRECANcoder
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
+import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
 import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
 import frc.chargers.utils.QuantityMeasurement
@@ -49,29 +51,43 @@ public class ChargerCANcoder(
     }
 
     public val absolute: TimestampedEncoder = AbsoluteEncoderAdaptor()
+
+    private val allConfigErrors: LinkedHashSet<StatusCode> = linkedSetOf()
+    private var configAppliedProperly = true
+    private fun StatusCode.updateConfigStatus(): StatusCode {
+        if (this != StatusCode.OK){
+            allConfigErrors.add(this)
+            configAppliedProperly = false
+        }
+        return this
+    }
     
-    override fun configure(configuration: CANcoderConfiguration) {
-        val baseConfig = CTRECANcoderConfiguration()
-        configurator.refresh(baseConfig)
+    override fun configure(configuration: CANcoderConfiguration){
+        configAppliedProperly = true
+        safeConfigure(
+            deviceName = "ChargerCANcoder(id = $deviceID)",
+            getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
+        ) {
+            allConfigErrors.clear()
+            val baseConfig = CTRECANcoderConfiguration()
+            configurator.refresh(baseConfig)
+            applyChanges(baseConfig,configuration)
+            configurator.apply(baseConfig,0.050).updateConfigStatus()
 
-        baseConfig.applyChanges(configuration)
-        configurator.apply(baseConfig,0.050)
 
+            configuration.positionUpdateFrequency?.let{
+                position.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                absolutePosition.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+            }
 
-        configuration.positionUpdateFrequency?.let{
-            position.setUpdateFrequency(it.inUnit(hertz))
-            absolutePosition.setUpdateFrequency(it.inUnit(hertz))
+            configuration.velocityUpdateFrequency?.let{
+                velocity.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+                unfilteredVelocity.setUpdateFrequency(it.inUnit(hertz)).updateConfigStatus()
+            }
+
+            configuration.filterVelocity?.let{ filterVelocity = it }
+            return@safeConfigure configAppliedProperly
         }
-
-        configuration.velocityUpdateFrequency?.let{
-            velocity.setUpdateFrequency(it.inUnit(hertz))
-            unfilteredVelocity.setUpdateFrequency(it.inUnit(hertz))
-        }
-
-        configuration.filterVelocity?.let{ filterVelocity = it }
-
-        println("CANcoder has been configured.")
-
     }
 
     private var filterVelocity: Boolean = true
@@ -131,15 +147,17 @@ public data class CANcoderConfiguration(
     var velocityUpdateFrequency: Frequency? = null
 ): HardwareConfiguration
 
-public fun CTRECANcoderConfiguration.applyChanges(chargerConfig: CANcoderConfiguration): CTRECANcoderConfiguration{
-    chargerConfig.futureProofConfigs?.let{
-        FutureProofConfigs = it
-    }
+internal fun applyChanges(ctreConfig: CTRECANcoderConfiguration, chargerConfig: CANcoderConfiguration): CTRECANcoderConfiguration{
+    ctreConfig.apply{
+        chargerConfig.futureProofConfigs?.let{
+            FutureProofConfigs = it
+        }
 
-    MagnetSensor.apply{
-        chargerConfig.sensorDirection?.let{SensorDirection = it}
-        chargerConfig.absoluteSensorRange?.let{AbsoluteSensorRange = it}
-        chargerConfig.magnetOffset?.let{MagnetOffset = it.inUnit(rotations)}
+        MagnetSensor.apply{
+            chargerConfig.sensorDirection?.let{SensorDirection = it}
+            chargerConfig.absoluteSensorRange?.let{AbsoluteSensorRange = it}
+            chargerConfig.magnetOffset?.let{MagnetOffset = it.inUnit(rotations)}
+        }
     }
-    return this
+    return ctreConfig
 }

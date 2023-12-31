@@ -8,12 +8,9 @@ import com.batterystaple.kmeasure.quantities.ofUnit
 import com.batterystaple.kmeasure.units.micro
 import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
-import org.littletonrobotics.junction.LogTable
+import frc.chargers.framework.ChargerRobot
 import org.littletonrobotics.junction.Logger.*
 
-// These are set when ChargerRobot is initialized
-internal var AK_LOGGABLE_REPLAY_TABLE: LogTable? = null
-internal var AK_LOGGABLE_REAL_TABLE: LogTable? = null
 
 private const val warningMsg =
     "Hmm... Values are attempting to be logged, but the log table has not been initialized. Are you using the ChargerRobot class?"
@@ -30,9 +27,9 @@ public fun <D: AnyDimension> recordOutput(key: String, value: Quantity<D>){
  */
 public fun <T: AdvantageKitLoggable<T>> recordOutput(key: String, value: T){
     if (hasReplaySource()){
-        AK_LOGGABLE_REPLAY_TABLE?.let { value.pushToLog(it, key) } ?: println(warningMsg)
+        ChargerRobot.AK_LOGGABLE_REPLAY_TABLE?.let { value.pushToLog(it, key) } ?: println(warningMsg)
     }else{
-        AK_LOGGABLE_REAL_TABLE?.let { value.pushToLog(it, key) } ?: println(warningMsg)
+        ChargerRobot.AK_LOGGABLE_REAL_TABLE?.let { value.pushToLog(it, key) } ?: println(warningMsg)
     }
 }
 

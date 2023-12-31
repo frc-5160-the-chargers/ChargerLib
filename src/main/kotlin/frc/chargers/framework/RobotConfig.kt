@@ -6,6 +6,7 @@ import com.batterystaple.kmeasure.units.seconds
 public data class RobotConfig(
     val tuningMode: Boolean,
     val isReplay: Boolean,
+    val hardwareConfigRetryLimit: Int = 3,
     val extraLoggerConfig: () -> Unit = {},
     val onError: (Throwable) -> Unit = {},
     val loopPeriod: Time = 0.02.seconds,

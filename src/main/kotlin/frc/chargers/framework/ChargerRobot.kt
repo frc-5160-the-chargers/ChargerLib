@@ -73,6 +73,11 @@ public open class ChargerRobot(
         public var LOOP_PERIOD: Time = 0.02.seconds
             private set
 
+        internal var AK_LOGGABLE_REPLAY_TABLE: LogTable? = null
+        internal var AK_LOGGABLE_REAL_TABLE: LogTable? = null
+        @PublishedApi
+        internal var motorConfigRetryLimit: Int = 1
+
 
 
 

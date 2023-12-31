@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMax.SoftLimitDirection
 import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
+import com.revrobotics.REVLibError
 import com.revrobotics.SparkMaxAlternateEncoder
 import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.controls.feedforward.AngularMotorFFConstants
@@ -16,6 +17,7 @@ import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
+import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
@@ -40,6 +42,7 @@ public fun neoSparkMax(
         .also {
             if (factoryDefault) {
                 it.restoreFactoryDefaults()
+                delay(200.milli.seconds)
                 println("SparkMax has been factory defaulted.")
             }
         }
@@ -61,6 +64,7 @@ public fun brushedSparkMax(
         .also {
             if (factoryDefault) {
                 it.restoreFactoryDefaults()
+                delay(200.milli.seconds)
                 println("SparkMax has been factory defaulted.")
             }
         }
@@ -227,52 +231,69 @@ public open class ChargerCANSparkMax(
     }
 
 
+    private val allConfigErrors: LinkedHashSet<REVLibError> = linkedSetOf()
+    private var configAppliedProperly = true
+    private fun REVLibError.updateConfigStatus(): REVLibError{
+        if (this != REVLibError.kOk){
+            allConfigErrors.add(this)
+            configAppliedProperly = false
+        }
+        return this
+    }
+
+
+
+
     override fun configure(configuration: SparkMaxConfiguration) {
-        configuration.idleMode?.let(::setIdleMode)
-        configuration.inverted?.let(::setInverted)
-        configuration.voltageCompensationNominalVoltage?.let { enableVoltageCompensation(it.inUnit(volts)) }
-        configuration.canTimeout?.let { timeout -> setCANTimeout(timeout.inUnit(milli.seconds).roundToInt()) }
-        configuration.closedLoopRampRate?.let(::setClosedLoopRampRate)
-        configuration.openLoopRampRate?.let(::setOpenLoopRampRate)
-        configuration.controlFramePeriod?.let { period -> setControlFramePeriodMs(period.inUnit(milli.seconds).roundToInt()) }
-        for ((frame, period) in configuration.periodicFramePeriods) {
-            setPeriodicFramePeriod(frame, period.inUnit(milli.seconds).roundToInt())
-        }
-        configuration.smartCurrentLimit?.let { (stallLimit, freeLimit, limitSpeed) ->
-            when {
-                limitSpeed != null && freeLimit != null ->
-                    setSmartCurrentLimit(
+        configAppliedProperly = true
+        // chargerlib defined function used for safe configuration.
+        safeConfigure(
+            deviceName = "ChargerCANSparkMax(id = $deviceId)",
+            getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
+        ){
+            allConfigErrors.clear()
+            configuration.idleMode?.let(::setIdleMode)?.updateConfigStatus()
+            configuration.inverted?.let(::setInverted)
+            configuration.voltageCompensationNominalVoltage?.let { enableVoltageCompensation(it.inUnit(volts)) }?.updateConfigStatus()
+            configuration.canTimeout?.let { timeout -> setCANTimeout(timeout.inUnit(milli.seconds).roundToInt()) }?.updateConfigStatus()
+            configuration.closedLoopRampRate?.let(::setClosedLoopRampRate)?.updateConfigStatus()
+            configuration.openLoopRampRate?.let(::setOpenLoopRampRate)?.updateConfigStatus()
+            configuration.controlFramePeriod?.let { period -> setControlFramePeriodMs(period.inUnit(milli.seconds).roundToInt()) }
+            for ((frame, period) in configuration.periodicFramePeriods) {
+                setPeriodicFramePeriod(frame, period.inUnit(milli.seconds).roundToInt())?.updateConfigStatus()
+            }
+            configuration.smartCurrentLimit?.let { (stallLimit, freeLimit, limitSpeed) ->
+                when {
+                    limitSpeed != null && freeLimit != null ->
+                        setSmartCurrentLimit(
+                            stallLimit.inUnit(amps).roundToInt(),
+                            freeLimit.inUnit(amps).roundToInt(),
+                            limitSpeed.inUnit(rotations/minutes).roundToInt()
+                        )
+                    freeLimit != null -> setSmartCurrentLimit(
                         stallLimit.inUnit(amps).roundToInt(),
-                        freeLimit.inUnit(amps).roundToInt(),
-                        limitSpeed.inUnit(rotations/minutes).roundToInt()
+                        freeLimit.inUnit(amps).roundToInt()
                     )
-                freeLimit != null -> setSmartCurrentLimit(
-                    stallLimit.inUnit(amps).roundToInt(),
-                    freeLimit.inUnit(amps).roundToInt()
-                )
-                else -> setSmartCurrentLimit(
-                    stallLimit.inUnit(amps).roundToInt()
-                )
+                    else -> setSmartCurrentLimit(
+                        stallLimit.inUnit(amps).roundToInt()
+                    )
+                }
+            }?.updateConfigStatus()
+            configuration.secondaryCurrentLimit?.let { (limit, chopCycles) ->
+                when {
+                    chopCycles != null -> setSecondaryCurrentLimit(limit.inUnit(amperes), chopCycles)
+                    else -> setSecondaryCurrentLimit(limit.inUnit(amperes))
+                }
+            }?.updateConfigStatus()
+            for ((limitDirection, limit) in configuration.softLimits) {
+                setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())?.updateConfigStatus()
             }
+            return@safeConfigure configAppliedProperly
         }
-        configuration.secondaryCurrentLimit?.let { (limit, chopCycles) ->
-            when {
-                chopCycles != null -> setSecondaryCurrentLimit(limit.inUnit(amperes), chopCycles)
-                else -> setSecondaryCurrentLimit(limit.inUnit(amperes))
-            }
-        }
-        for ((limitDirection, limit) in configuration.softLimits) {
-            setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())
-        }
-
-
 
         if (RobotBase.isReal()) delay(200.milli.seconds)
         burnFlash()
-        if (RobotBase.isReal()) delay(200.milli.seconds)
-
         println("SparkMax has been configured.")
-
     }
 
 

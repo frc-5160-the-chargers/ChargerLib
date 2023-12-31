@@ -60,16 +60,10 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
     private fun Quantity<I>.standardize(): Quantity<I> =
         if (continuousInputRange == null) this else this.inputModulus(continuousInputRange)
 
-    init{
-        if(selfSustain){
-            ChargerRobot.runPeriodically(runnable = ::calculateOutput)
-        }
-    }
-
 
     private val pidController = PIDController(0.0, 0.0, 0.0)
         .apply {
-            constants = pidConstants
+            setPID(pidConstants.kP, pidConstants.kI, pidConstants.kD)
             if (continuousInputRange != null){
                 enableContinuousInput(
                     continuousInputRange.start.siValue,
@@ -77,6 +71,12 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
                 )
             }
         }
+
+    init{
+        if(selfSustain){
+            ChargerRobot.runPeriodically(runnable = ::calculateOutput)
+        }
+    }
 
 
     /**

@@ -3,11 +3,13 @@ package frc.chargers.hardware.sensors.imu
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.seconds
+import com.ctre.phoenix6.StatusCode
 import com.ctre.phoenix6.hardware.Pigeon2
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
+import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
 import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
@@ -59,11 +61,30 @@ public class ChargerPigeon2(
      */
     override fun zeroHeading() { reset() }
 
-    override fun configure(configuration: Pigeon2Configuration) {
-        val ctreConfig = CTREPigeon2Configuration()
-        configurator.refresh(ctreConfig)
-        ctreConfig.applyChanges(configuration)
-        configurator.apply(ctreConfig)
+
+    private val allConfigErrors: LinkedHashSet<StatusCode> = linkedSetOf()
+    private var configAppliedProperly = true
+    private fun StatusCode.updateConfigStatus(): StatusCode {
+        if (this != StatusCode.OK){
+            allConfigErrors.add(this)
+            configAppliedProperly = false
+        }
+        return this
+    }
+
+    override fun configure(configuration: Pigeon2Configuration){
+        configAppliedProperly = true
+        safeConfigure(
+            deviceName = "ChargerCANcoder(id = $deviceID)",
+            getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
+        ) {
+            allConfigErrors.clear()
+            val ctreConfig = CTREPigeon2Configuration()
+            configurator.refresh(ctreConfig)
+            applyChanges(ctreConfig, configuration)
+            configurator.apply(ctreConfig).updateConfigStatus()
+            return@safeConfigure configAppliedProperly
+        }
     }
 
     public inner class Gyroscope internal constructor(): ThreeAxisGyroscope {
@@ -146,25 +167,26 @@ public data class Pigeon2Configuration(
     var enableCompass: Boolean? = null
 ): HardwareConfiguration
 
-public fun CTREPigeon2Configuration.applyChanges(config: Pigeon2Configuration): CTREPigeon2Configuration{
-    config.futureProofConfigs?.let{ FutureProofConfigs = it }
-    GyroTrim.apply{
-        config.gyroScalarX?.let{ GyroScalarX = it.inUnit(degrees) }
-        config.gyroScalarY?.let{ GyroScalarY = it.inUnit(degrees) }
-        config.gyroScalarZ?.let{ GyroScalarZ = it.inUnit(degrees) }
-    }
+internal fun applyChanges(ctreConfig: CTREPigeon2Configuration, configuration: Pigeon2Configuration): CTREPigeon2Configuration{
+    ctreConfig.apply{
+        configuration.futureProofConfigs?.let{ FutureProofConfigs = it }
+        GyroTrim.apply{
+            configuration.gyroScalarX?.let{ GyroScalarX = it.inUnit(degrees) }
+            configuration.gyroScalarY?.let{ GyroScalarY = it.inUnit(degrees) }
+            configuration.gyroScalarZ?.let{ GyroScalarZ = it.inUnit(degrees) }
+        }
 
-    MountPose.apply{
-        config.mountPosePitch?.let{ MountPosePitch = it.inUnit(degrees) }
-        config.mountPoseYaw?.let{ MountPoseYaw = it.inUnit(degrees) }
-        config.mountPoseRoll?.let{ MountPoseRoll = it.inUnit(degrees) }
-    }
+        MountPose.apply{
+            configuration.mountPosePitch?.let{ MountPosePitch = it.inUnit(degrees) }
+            configuration.mountPoseYaw?.let{ MountPoseYaw = it.inUnit(degrees) }
+            configuration.mountPoseRoll?.let{ MountPoseRoll = it.inUnit(degrees) }
+        }
 
-    Pigeon2Features.apply{
-        config.disableTemperatureCompensation?.let{DisableTemperatureCompensation = it}
-        config.disableNoMotionCalibration?.let{DisableNoMotionCalibration = it}
-        config.enableCompass?.let{EnableCompass = it}
+        Pigeon2Features.apply{
+            configuration.disableTemperatureCompensation?.let{DisableTemperatureCompensation = it}
+            configuration.disableNoMotionCalibration?.let{DisableNoMotionCalibration = it}
+            configuration.enableCompass?.let{EnableCompass = it}
+        }
     }
-
-    return this
+    return ctreConfig
 }

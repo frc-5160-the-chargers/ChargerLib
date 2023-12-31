@@ -150,9 +150,7 @@ public open class ChargerTalonSRX(
             configSetCustomParam(customParameter, i, TIMEOUT_MILLIS)
         }
 
-        println("TalonSRX has been configured.")
-
-
+        println("ChargerTalonSRX(id = $deviceID) has been configured.")
     }
 }
 
