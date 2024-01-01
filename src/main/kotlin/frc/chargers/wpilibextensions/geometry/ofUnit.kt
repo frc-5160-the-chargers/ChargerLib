@@ -8,7 +8,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import frc.chargers.utils.math.units.KmeasureUnit
 import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
 import frc.chargers.wpilibextensions.geometry.motion.LinearMotionConstraints
-import frc.chargers.wpilibextensions.geometry.rotation.asAngle
+import frc.chargers.wpilibextensions.geometry.twodimensional.asAngle
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTranslation3d

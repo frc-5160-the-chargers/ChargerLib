@@ -1,4 +1,4 @@
-package frc.chargers.wpilibextensions.geometry.rotation
+package frc.chargers.wpilibextensions.geometry.threedimensional
 
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.inUnit
@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Rotation3d
 
 
 /**
- * Since [Rotation3d] is not unit-agnostic(its roll+pitch+yaw constructor requires radians as the unit),
+ * Since Rotation3d is not unit-agnostic(its roll+pitch+yaw constructor requires radians as the unit),
  * there is no UnitRotation3d class.
  */
 
@@ -28,6 +28,5 @@ public val Rotation3d.yAngle: Angle
 public val Rotation3d.zAngle: Angle
     get() = z.ofUnit(radians)
 
-public fun Rotation3d.as2dAngle(): Angle = toRotation2d().asAngle()
 
 

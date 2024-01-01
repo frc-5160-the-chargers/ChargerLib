@@ -10,7 +10,6 @@ import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.configuration.safeConfigure
-import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
 import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
 import frc.chargers.utils.math.units.g
@@ -51,6 +50,9 @@ public class ChargerPigeon2(
      */
     public val accelerometer: Accelerometer = Accelerometer()
 
+
+
+
     /**
      * The heading of the Pigeon; equivalent to yaw.
      */
@@ -62,30 +64,11 @@ public class ChargerPigeon2(
     override fun zeroHeading() { reset() }
 
 
-    private val allConfigErrors: LinkedHashSet<StatusCode> = linkedSetOf()
-    private var configAppliedProperly = true
-    private fun StatusCode.updateConfigStatus(): StatusCode {
-        if (this != StatusCode.OK){
-            allConfigErrors.add(this)
-            configAppliedProperly = false
-        }
-        return this
-    }
+    /*
+    Internal constructor makes it so that the inner class can be accepted as a type argument,
+    but can't be instantiated.
+     */
 
-    override fun configure(configuration: Pigeon2Configuration){
-        configAppliedProperly = true
-        safeConfigure(
-            deviceName = "ChargerCANcoder(id = $deviceID)",
-            getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
-        ) {
-            allConfigErrors.clear()
-            val ctreConfig = CTREPigeon2Configuration()
-            configurator.refresh(ctreConfig)
-            applyChanges(ctreConfig, configuration)
-            configurator.apply(ctreConfig).updateConfigStatus()
-            return@safeConfigure configAppliedProperly
-        }
-    }
 
     public inner class Gyroscope internal constructor(): ThreeAxisGyroscope {
         private val yawSignal = getYaw()
@@ -131,6 +114,8 @@ public class ChargerPigeon2(
 
     }
 
+
+
     public inner class Accelerometer internal constructor(): ThreeAxisAccelerometer {
         private val xAccelSignal = accelerationX
         private val yAccelSignal = accelerationY
@@ -146,6 +131,32 @@ public class ChargerPigeon2(
 
         override val zAcceleration: Acceleration by AccelerometerLog.quantity{
             if (isReal()) zAccelSignal.refresh(true).value.ofUnit(g) else Acceleration(0.0)
+        }
+    }
+
+    private val allConfigErrors: LinkedHashSet<StatusCode> = linkedSetOf()
+    private var configAppliedProperly = true
+
+    private fun StatusCode.updateConfigStatus(): StatusCode {
+        if (this != StatusCode.OK){
+            allConfigErrors.add(this)
+            configAppliedProperly = false
+        }
+        return this
+    }
+
+    override fun configure(configuration: Pigeon2Configuration){
+        configAppliedProperly = true
+        safeConfigure(
+            deviceName = "ChargerCANcoder(id = $deviceID)",
+            getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
+        ) {
+            allConfigErrors.clear()
+            val ctreConfig = CTREPigeon2Configuration()
+            configurator.refresh(ctreConfig)
+            applyChanges(ctreConfig, configuration)
+            configurator.apply(ctreConfig).updateConfigStatus()
+            return@safeConfigure configAppliedProperly
         }
     }
 

@@ -7,15 +7,13 @@ import edu.wpi.first.wpilibj.RobotBase.*
 import frc.chargerlibexternal.limelight.LimelightHelpers.*
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.framework.ChargerRobot
-import frc.chargers.hardware.sensors.RobotPoseSupplier
+import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.hardware.sensors.vision.*
 import frc.chargers.utils.Measurement
-import frc.chargers.wpilibextensions.StandardDeviation
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
-
 
 
 /**
@@ -102,7 +100,7 @@ public class ChargerLimelight(
          * @see LoggableInputsProvider
          */
         private val logInputs: LoggableInputsProvider
-    ): VisionPipeline<VisionResult.AprilTag> {
+    ): VisionPipeline<VisionTarget.AprilTag> {
         init{
             if (index < 0 || index > 9){
                 error("Your pipeline's ID is out of range.")
@@ -115,7 +113,7 @@ public class ChargerLimelight(
             println("Limelight with name $name has had it's pipeline reset to $index")
         }
 
-        override val visionData: VisionData<VisionResult.AprilTag>?
+        override val visionData: VisionData<VisionTarget.AprilTag>?
             by logInputs.nullableValue(default = emptyAprilTagVisionData()){
                 if (isSimulation() || !hasTargets()) {
                     return@nullableValue null
@@ -124,7 +122,7 @@ public class ChargerLimelight(
                     return@nullableValue null
                 }
 
-                val allTargets: MutableList<VisionResult.AprilTag>
+                val allTargets: MutableList<VisionTarget.AprilTag>
                 val timestamp: Time
 
                 if (useJsonDump){
@@ -132,7 +130,7 @@ public class ChargerLimelight(
                     timestamp = (getLatency_Capture(name) + getLatency_Pipeline(name)).ofUnit(milli.seconds)
                 }else{
                     allTargets = mutableListOf(
-                        VisionResult.AprilTag(
+                        VisionTarget.AprilTag(
                             getTX(name),
                             getTY(name),
                             getTA(name),
@@ -169,11 +167,12 @@ public class ChargerLimelight(
             required = false
         }
 
-        public inner class PoseEstimator: RobotPoseSupplier {
-            override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
+        public inner class PoseEstimator(
+            override val cameraYaw: Angle
+        ): VisionPoseSupplier {
 
-            override val robotPoseMeasurement: Measurement<UnitPose2d>?
-                by logInputs.nullableValue(default = Measurement(UnitPose2d(), 0.0.seconds)){
+            override val robotPoseEstimate: Measurement<UnitPose2d>?
+                by logInputs.nullableValue(default = Measurement(UnitPose2d(), fpgaTimestamp())){
                     if (isSimulation() || !hasTargets() || getCurrentPipelineIndex(name).toInt() != index) {
                         return@nullableValue null
                     }
@@ -212,9 +211,9 @@ public class ChargerLimelight(
                 }
         }
 
-        private fun Array<LimelightTarget_Fiducial>.toVisionTargets(): MutableList<VisionResult.AprilTag> =
+        private fun Array<LimelightTarget_Fiducial>.toVisionTargets(): MutableList<VisionTarget.AprilTag> =
             this.map{
-                VisionResult.AprilTag(
+                VisionTarget.AprilTag(
                     tx = it.tx,
                     ty = it.ty,
                     areaPercent = it.ta,
@@ -233,9 +232,9 @@ public class ChargerLimelight(
          * @see LoggableInputsProvider
          */
         logInputs: LoggableInputsProvider
-    ): MLClassifierPipeline(index,logInputs), VisionPipeline<VisionResult.ML> {
+    ): MLClassifierPipeline(index,logInputs), VisionPipeline<VisionTarget.ML> {
 
-        override val visionData: VisionData<VisionResult.ML>?
+        override val visionData: VisionData<VisionTarget.ML>?
             by logInputs.nullableValue(default = emptyMLVisionData()){
                 if (isSimulation() || !hasTargets()) {
                     return@nullableValue null
@@ -248,7 +247,7 @@ public class ChargerLimelight(
                     latestResults.targets_Detector.toVisionTargets()
                 }else{
                     mutableListOf(
-                        VisionResult.ML(
+                        VisionTarget.ML(
                             getTX(name),
                             getTY(name),
                             getTA(name),
@@ -269,9 +268,9 @@ public class ChargerLimelight(
 
         override val mountAngle: Angle = this@ChargerLimelight.mountAngle
 
-        private fun Array<LimelightTarget_Detector>.toVisionTargets(): MutableList<VisionResult.ML> =
+        private fun Array<LimelightTarget_Detector>.toVisionTargets(): MutableList<VisionTarget.ML> =
             this.map{
-                VisionResult.ML(
+                VisionTarget.ML(
                     tx = it.tx,
                     ty = it.ty,
                     areaPercent = it.ta,

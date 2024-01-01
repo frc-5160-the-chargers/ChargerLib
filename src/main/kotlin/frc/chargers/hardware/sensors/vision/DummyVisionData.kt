@@ -11,24 +11,24 @@ import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
     Since data must be logged every loop, these values are fallen back to when nessecary.
  */
 
-public fun emptyAprilTagVisionData(): VisionData<VisionResult.AprilTag> =
+public fun emptyAprilTagVisionData(): VisionData<VisionTarget.AprilTag> =
     VisionData(
         timestamp = fpgaTimestamp(),
-        bestTarget = VisionResult.AprilTag(
+        bestTarget = VisionTarget.AprilTag(
             0.0,0.0,0.0,0, UnitTransform3d()
         )
     )
 
-public fun emptyMLVisionData(): VisionData<VisionResult.ML> =
+public fun emptyMLVisionData(): VisionData<VisionTarget.ML> =
     VisionData(
         timestamp = fpgaTimestamp(),
-        bestTarget = VisionResult.ML(
+        bestTarget = VisionTarget.ML(
             0.0,0.0,0.0,0
         )
     )
 
-public fun emptyGenericVisionData(): VisionData<VisionResult.Generic> =
+public fun emptyGenericVisionData(): VisionData<VisionTarget.Generic> =
     VisionData(
         timestamp = fpgaTimestamp(),
-        bestTarget = VisionResult.Generic(0.0,0.0,0.0)
+        bestTarget = VisionTarget.Generic(0.0,0.0,0.0)
     )

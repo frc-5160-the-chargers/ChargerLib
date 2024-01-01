@@ -3,6 +3,7 @@ package frc.chargers.utils.math.equations
 import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.*
 import frc.chargers.utils.math.units.KmeasureUnit
+import frc.chargers.utils.math.units.siUnit
 import kotlin.math.pow
 
 /**
@@ -18,7 +19,7 @@ import kotlin.math.pow
  * @see Polynomial
  */
 public data class UnitPolynomial<I: AnyDimension, O: AnyDimension>(
-    val units: Pair<KmeasureUnit<I>, KmeasureUnit<O>> = KmeasureUnit<I>(1.0) to KmeasureUnit<O>(1.0),
+    val units: Pair<KmeasureUnit<I>, KmeasureUnit<O>> = siUnit<I>() to siUnit<O>(),
     val coefficients: List<Double>
 ) : (Quantity<I>) -> Quantity<O> {
     public constructor(

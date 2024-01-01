@@ -3,10 +3,12 @@ package frc.chargers.advantagekitextensions
 
 import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
+import edu.wpi.first.util.function.BooleanConsumer
 import frc.chargers.framework.ChargerRobot
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.inputs.LoggableInputs
+import java.util.function.*
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -137,16 +139,31 @@ public class LoggableInputsProvider(
 
 
 
+    /*
+    These are no boxing overhead suppliers for Kmeasure Quantities.
 
+    Note: For primitive type values, there is less overhead
+    to using functional interfaces over function types; this is because when
+    a type is passed in as a generic, it is automatically boxed, while functional interfaces
+    are not boxed at all. Thus, for primitive types/value class types, we use
+    functional interfaces to reduce the latency of this class.
+     */
 
+    private fun interface QuantitySupplier<D: AnyDimension>{
+        fun asQuantity(): Quantity<D>
+    }
+
+    private fun interface QuantityConsumer<D: AnyDimension>{
+        fun accept(value: Quantity<D>)
+    }
 
 
     private inner class AutoLoggedInt(
         val name: String,
-        val get: () -> Int,
-        val set: (Int) -> Unit = {},
+        val get: IntSupplier,
+        val set: IntConsumer = IntConsumer{},
     ): ReadWriteProperty<Any?, Int>{
-        private var field = get()
+        private var field = get.asInt
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.toLong())
@@ -157,13 +174,13 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get()
+                field = get.asInt
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
-            set(value)
+            set.accept(value)
         }
 
     }
@@ -171,10 +188,10 @@ public class LoggableInputsProvider(
 
     private inner class AutoLoggedDouble(
         val name: String,
-        val get: () -> Double,
-        val set: (Double) -> Unit = {}
+        val get: DoubleSupplier,
+        val set: DoubleConsumer = DoubleConsumer{}
     ): ReadWriteProperty<Any?, Double>{
-        private var field = get()
+        private var field = get.asDouble
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field)
@@ -186,24 +203,23 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get()
+                field = get.asDouble
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Double) {
-            set(value)
+            set.accept(value)
         }
     }
 
 
     private inner class AutoLoggedQuantity<D: AnyDimension>(
         val name: String,
-        val get: () -> Quantity<D>,
-        val set: (Quantity<D>) -> Unit = {}
+        val get: QuantitySupplier<D>,
+        val set: QuantityConsumer<D> = QuantityConsumer{}
     ): ReadWriteProperty<Any?, Quantity<D>>{
-        private var field = get()
-
+        private var field = get.asQuantity()
 
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field.siValue)
@@ -213,22 +229,22 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get()
+                field = get.asQuantity()
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Quantity<D>) {
-            set(value)
+            set.accept(value)
         }
     }
 
     private inner class AutoLoggedBoolean(
         val name: String,
-        val get: () -> Boolean,
-        val set: (Boolean) -> Unit = {}
+        val get: BooleanSupplier,
+        val set: BooleanConsumer = BooleanConsumer{}
     ): ReadWriteProperty<Any?,Boolean>{
-        private var field = get()
+        private var field = get.asBoolean
         private val dummyInputs = object: LoggableInputs{
             override fun toLog(table: LogTable) = table.put(name,field)
             override fun fromLog(table: LogTable) { field = table.get(name,false) }
@@ -237,13 +253,13 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get()
+                field = get.asBoolean
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
-            set(value)
+            set.accept(value)
         }
 
     }

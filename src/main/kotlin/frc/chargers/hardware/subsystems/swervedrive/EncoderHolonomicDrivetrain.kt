@@ -12,7 +12,7 @@ import frc.chargerlibexternal.frc4481.HeadingCorrector
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.advantagekitextensions.recordLatency
 import frc.chargers.constants.drivetrain.*
-import frc.chargers.hardware.sensors.RobotPoseSupplier
+import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.*
 import frc.chargers.hardware.subsystems.differentialdrive.DifferentialDrivetrain
 import frc.chargers.hardware.subsystems.swervedrive.module.*
@@ -22,9 +22,8 @@ import frc.chargers.utils.math.units.pow
 import frc.chargers.utils.math.units.sqrt
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
-import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
-import frc.chargers.wpilibextensions.kinematics.swerve.*
 import org.littletonrobotics.junction.Logger.*
 
 @PublishedApi
@@ -54,8 +53,8 @@ public fun EncoderHolonomicDrivetrain(
     useOnboardPID: Boolean = false,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
-    realPoseSuppliers: List<RobotPoseSupplier> = listOf(),
-    simPoseSuppliers: List<RobotPoseSupplier> = listOf()
+    realPoseSuppliers: List<VisionPoseSupplier> = listOf(),
+    simPoseSuppliers: List<VisionPoseSupplier> = listOf()
 ): EncoderHolonomicDrivetrain {
     if (RobotBase.isSimulation()){
         return EncoderHolonomicDrivetrain(
@@ -227,7 +226,7 @@ public class EncoderHolonomicDrivetrain(
     public val controlData: SwerveControlData,
     public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
-    vararg poseSuppliers: RobotPoseSupplier,
+    vararg poseSuppliers: VisionPoseSupplier,
 ): SubsystemBase(), ZeroableHeadingProvider, DifferentialDrivetrain {
     /* Private Implementation */
     private val wheelRadius = hardwareData.wheelDiameter / 2.0
@@ -358,7 +357,7 @@ public class EncoderHolonomicDrivetrain(
     /**
      * Gets the current module positions of each swerve module.
      * Returns a [ModulePositionGroup] object,
-     * a wrapper around 4 [SwerveModulePosition] objects with units support.
+     * a wrapper around 4 SwerveModulePosition objects with units support.
      */
     public val currentModulePositions: ModulePositionGroup
         get() = ModulePositionGroup(

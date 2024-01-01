@@ -5,6 +5,7 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.commands.commandbuilder.CommandBuilder
+import frc.chargers.constants.drivetrain.DEFAULT_MAX_STEERING_POWER
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.differentialdrive.DifferentialDrivetrain
 import frc.chargers.utils.Precision
@@ -26,7 +27,8 @@ context(CommandBuilder, HeadingProvider)
 public fun DifferentialDrivetrain.rotateAction(
     angle: Angle,
     pidConstants: PIDConstants,
-    precision: Precision<AngleDimension> = Precision.AllowOvershoot
+    precision: Precision<AngleDimension> = Precision.AllowOvershoot,
+    maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER
 ): Command = runSequentially {
     val targetAngle by getOnceDuringRun{ this@HeadingProvider.heading + angle }
     val controller by getOnceDuringRun{
@@ -34,7 +36,7 @@ public fun DifferentialDrivetrain.rotateAction(
             pidConstants,
             { this@HeadingProvider.heading },
             target = targetAngle,
-            outputRange = Scalar(-1.0)..Scalar(1.0),
+            outputRange = Scalar(-maxSteeringPower)..Scalar(maxSteeringPower),
             continuousInputRange = 0.degrees..360.degrees
         )
     }
@@ -70,9 +72,10 @@ context(CommandBuilder)
 public fun EncoderDifferentialDrivetrain.rotateAction(
     angle: Angle,
     pidConstants: PIDConstants = controlScheme.robotRotationPID,
-    precision: Precision<AngleDimension> = Precision.AllowOvershoot
+    precision: Precision<AngleDimension> = Precision.AllowOvershoot,
+    maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER
 ): Command = with (gyro ?: this as HeadingProvider) {
-    rotateAction(angle,pidConstants,precision)
+    rotateAction(angle,pidConstants,precision, maxSteeringPower)
 }
 
 /**
@@ -87,7 +90,8 @@ context(CommandBuilder)
 public fun EncoderHolonomicDrivetrain.rotateAction(
     angle: Angle,
     pidConstants: PIDConstants = controlData.robotRotationPID,
-    precision: Precision<AngleDimension> = Precision.AllowOvershoot
+    precision: Precision<AngleDimension> = Precision.AllowOvershoot,
+    maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER
 ): Command = runSequentially {
     fun getHeading(): Angle = gyro?.heading ?: this@EncoderHolonomicDrivetrain.heading
 
@@ -97,7 +101,7 @@ public fun EncoderHolonomicDrivetrain.rotateAction(
             pidConstants,
             { getHeading() },
             target = targetAngle,
-            outputRange = Scalar(-1.0)..Scalar(1.0),
+            outputRange = Scalar(-maxSteeringPower)..Scalar(maxSteeringPower),
             continuousInputRange = 0.degrees..360.degrees
         )
     }

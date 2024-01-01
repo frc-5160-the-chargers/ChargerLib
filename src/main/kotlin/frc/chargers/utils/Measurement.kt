@@ -12,6 +12,10 @@ import org.littletonrobotics.junction.LogTable
 
 /**
  * A [Double] accompanied by a timestamp.
+ *
+ * @see BasicMeasurement
+ * @see QuantityMeasurement
+ * @see Measurement
  */
 public data class DoubleMeasurement(
     val value: Double,
@@ -31,6 +35,10 @@ public data class DoubleMeasurement(
 
 /**
  * A [Quantity] accompanied by a timestamp.
+ *
+ * @see BasicMeasurement
+ * @see Measurement
+ * @see DoubleMeasurement
  */
 public data class QuantityMeasurement<D: AnyDimension>(
     val value: Quantity<D>,
@@ -51,6 +59,10 @@ public data class QuantityMeasurement<D: AnyDimension>(
 
 /**
  * Represents a Loggable value accompanied by a timestamp.
+ *
+ * @see BasicMeasurement
+ * @see QuantityMeasurement
+ * @see DoubleMeasurement
  */
 public data class Measurement<T: AdvantageKitLoggable<T>>(
     override val value: T,
@@ -70,6 +82,10 @@ public data class Measurement<T: AdvantageKitLoggable<T>>(
 /**
  * Represents a simple value accompanied by a timestamp,
  * without any logging capabilities.
+ *
+ * @see Measurement
+ * @see DoubleMeasurement
+ * @see QuantityMeasurement
  */
 public open class BasicMeasurement<T>(
     public open val value: T,

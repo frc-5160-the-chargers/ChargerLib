@@ -19,13 +19,13 @@ import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
-import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIO
 import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOReal
 import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOSim
 import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.controls.feedforward.Feedforward
+import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
@@ -49,9 +49,12 @@ public inline fun sparkMaxDrivetrain(
     rightMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
     constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
     controlScheme: DiffDriveControlData = DiffDriveControlData.None,
+    gyro: HeadingProvider? = null,
+    startingPose: UnitPose2d = UnitPose2d(),
+    vararg poseSuppliers: VisionPoseSupplier,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme,
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme, gyro, startingPose, *poseSuppliers,
         configuration = SparkMaxConfiguration().apply(configure))
 
 /**
@@ -63,9 +66,12 @@ public inline fun talonFXDrivetrain(
     rightMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
     constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
     controlScheme: DiffDriveControlData = DiffDriveControlData.None,
+    gyro: HeadingProvider? = null,
+    startingPose: UnitPose2d = UnitPose2d(),
+    vararg poseSuppliers: VisionPoseSupplier,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme,
+    EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme, gyro, startingPose, *poseSuppliers,
         configuration = TalonFXConfiguration().apply(configure))
 
 /**
@@ -77,6 +83,9 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
     rightMotors: EncoderMotorControllerGroup<C>,
     constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
     controlScheme: DiffDriveControlData = DiffDriveControlData.None,
+    gyro: HeadingProvider? = null,
+    startingPose: UnitPose2d = UnitPose2d(),
+    vararg poseSuppliers: VisionPoseSupplier,
     configuration: C
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
@@ -85,7 +94,7 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
             leftMotors = leftMotors.apply { configure(configuration) },
             rightMotors = rightMotors.apply { configure(configuration) }
         ),
-        constants, controlScheme
+        constants, controlScheme, gyro, startingPose, *poseSuppliers
     )
 
 
@@ -96,7 +105,7 @@ public class EncoderDifferentialDrivetrain(
     public val controlScheme: DiffDriveControlData = DiffDriveControlData.None,
     public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
-    vararg poseSuppliers: RobotPoseSupplier,
+    vararg poseSuppliers: VisionPoseSupplier,
 ): SubsystemBase(), DifferentialDrivetrain, HeadingProvider, DiffDriveIO by lowLevel {
     private val wheelRadius = constants.wheelDiameter / 2
 

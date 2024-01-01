@@ -1,4 +1,4 @@
-package frc.chargers.hardware.sensors
+package frc.chargers.hardware.sensors.imu
 
 import com.batterystaple.kmeasure.quantities.Acceleration
 
@@ -19,7 +19,7 @@ public interface ThreeAxisAccelerometer {
             crossinline getXAccel: () -> Acceleration,
             crossinline getYAccel: () -> Acceleration,
             crossinline getZAccel: () -> Acceleration
-        ): ThreeAxisAccelerometer = object: ThreeAxisAccelerometer{
+        ): ThreeAxisAccelerometer = object: ThreeAxisAccelerometer {
             override val xAcceleration: Acceleration get() = getXAccel()
             override val yAcceleration: Acceleration get() = getYAccel()
             override val zAcceleration: Acceleration get() = getZAccel()

@@ -13,7 +13,7 @@ import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.hardware.subsystems.swervedrive.module.lowlevel.ModuleIO
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.utils.within
-import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
 import org.littletonrobotics.junction.Logger.recordOutput
 
 /**

@@ -8,14 +8,15 @@ import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
-import frc.chargers.utils.Measurement
 import frc.chargerlibexternal.frc6328.PoseEstimator
-import frc.chargers.wpilibextensions.StandardDeviation
+import frc.chargerlibexternal.frc6995.NomadApriltagUtil
+import frc.chargers.hardware.sensors.RobotPoseEstimator
+import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
+import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
 import org.littletonrobotics.junction.Logger.recordOutput
 
 /**
@@ -28,23 +29,16 @@ import org.littletonrobotics.junction.Logger.recordOutput
 context(EncoderDifferentialDrivetrain)
 public class DifferentialPoseMonitor(
     private val gyro: HeadingProvider? = null,
-    private val poseSuppliers: List<RobotPoseSupplier> = listOf(),
+    private val poseSuppliers: List<VisionPoseSupplier> = listOf(),
     startingPose: UnitPose2d = UnitPose2d()
-): SubsystemBase(), RobotPoseSupplier {
+): SubsystemBase(), RobotPoseEstimator {
 
-    override val poseStandardDeviation: StandardDeviation
-        get() = StandardDeviation.Default
 
-    override val robotPoseMeasurement: Measurement<UnitPose2d>
-        get() = Measurement(
-            poseEstimator.latestPose.ofUnit(meters),
-            fpgaTimestamp()
-        )
-
-    override val robotPose: UnitPose2d get() = robotPoseMeasurement.value
+    override val robotPose: UnitPose2d
+        get() = poseEstimator.latestPose.ofUnit(meters)
 
     public constructor(
-        vararg poseSuppliers: RobotPoseSupplier,
+        vararg poseSuppliers: VisionPoseSupplier,
         gyro: HeadingProvider? = null,
         startingPose: UnitPose2d = UnitPose2d()
     ): this(
@@ -72,6 +66,7 @@ public class DifferentialPoseMonitor(
 
     private var previousDistanceL = Distance(0.0)
     private var previousDistanceR = Distance(0.0)
+    private val visionUpdates: MutableList<PoseEstimator.TimestampedVisionUpdate> = mutableListOf()
 
     override fun periodic(){
         val distanceL = leftWheelTravel * wheelTravelPerMotorRadian
@@ -91,27 +86,27 @@ public class DifferentialPoseMonitor(
 
         poseEstimator.addDriveData(fpgaTimestamp().inUnit(seconds),twist)
 
-        val visionUpdates: MutableList<PoseEstimator.TimestampedVisionUpdate> = mutableListOf()
-        poseSuppliers.forEach{
-            val measurement = it.robotPoseMeasurement
-
-            if (measurement != null){
-                val stdDevVector = when(val deviation = it.poseStandardDeviation){
-                    is StandardDeviation.Of -> deviation.getVector()
-
-                    is StandardDeviation.Default -> VecBuilder.fill(0.9, 0.9, 0.9)
-                }
-
-                visionUpdates.add(
-                    PoseEstimator.TimestampedVisionUpdate(
-                        measurement.timestamp.inUnit(seconds),
-                        measurement.value.inUnit(meters),
-                        stdDevVector
+        if (poseSuppliers.size > 0){
+            visionUpdates.clear()
+            poseSuppliers.forEach{
+                val measurement = it.robotPoseEstimate
+                if (measurement != null){
+                    val stdDevVector = NomadApriltagUtil.calculateVisionUncertainty(
+                        measurement.value.x.siValue,
+                        heading.asRotation2d(),
+                        it.cameraYaw.asRotation2d(),
                     )
-                )
+                    visionUpdates.add(
+                        PoseEstimator.TimestampedVisionUpdate(
+                            measurement.timestamp.inUnit(seconds),
+                            measurement.value.inUnit(meters),
+                            stdDevVector
+                        )
+                    )
+                }
             }
+            if (visionUpdates.size != 0) poseEstimator.addVisionData(visionUpdates)
         }
-        if (visionUpdates.size != 0) poseEstimator.addVisionData(visionUpdates)
 
 
         field.robotPose = poseEstimator.latestPose

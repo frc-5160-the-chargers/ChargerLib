@@ -8,10 +8,10 @@ import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.wpilibj.RobotBase.*
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
-import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.vision.*
+import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.utils.Measurement
-import frc.chargers.wpilibextensions.StandardDeviation
+import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitTransform3d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import org.photonvision.EstimatedRobotPose
@@ -38,7 +38,7 @@ public class ChargerPhotonCam(
          * @see LoggableInputsProvider
          */
         private val logInputs: LoggableInputsProvider
-    ): VisionPipeline<VisionResult.AprilTag> {
+    ): VisionPipeline<VisionTarget.AprilTag> {
 
         init{ reset() }
 
@@ -50,7 +50,7 @@ public class ChargerPhotonCam(
         override val lensHeight: Distance = this@ChargerPhotonCam.lensHeight
         override val mountAngle: Angle = this@ChargerPhotonCam.mountAngle
 
-        override val visionData: VisionData<VisionResult.AprilTag>?
+        override val visionData: VisionData<VisionTarget.AprilTag>?
             by logInputs.nullableValue(default = emptyAprilTagVisionData()){
                 val data = latestResult
                 if (!data.hasTargets() || isSimulation()){
@@ -88,30 +88,36 @@ public class ChargerPhotonCam(
             robotToCamera: UnitTransform3d,
             fieldTags: AprilTagFieldLayout,
             strategy: PoseStrategy = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-        ): RobotPoseSupplier, PhotonPoseEstimator(
+        ): VisionPoseSupplier, PhotonPoseEstimator(
             fieldTags,
             strategy,
             this@ChargerPhotonCam,
             robotToCamera.inUnit(meters)
         ){
 
+            override val cameraYaw: Angle
+                get() = Angle(robotToCameraTransform.rotation.z)
+
             init{
                 setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY)
             }
 
-            override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
 
-            override val robotPoseMeasurement: Measurement<UnitPose2d>?
-                by logInputs.nullableValue(default = Measurement(UnitPose2d(), 0.0.seconds)){
-                    if (isSimulation()) return@nullableValue null
+            override val robotPoseEstimate: Measurement<UnitPose2d>?
+                by logInputs.nullableValue(
+                    default = Measurement(UnitPose2d(), fpgaTimestamp())
+                ){
+                    if (isSimulation()) {
+                        null
+                    }else{
+                        when(val signal = update()){
+                            Optional.empty<EstimatedRobotPose>() -> null
 
-                    return@nullableValue when(val signal = update()){
-                        Optional.empty<EstimatedRobotPose>() -> null
-
-                        else -> Measurement(
-                            UnitPose2d(signal.get().estimatedPose.toPose2d()),
-                            signal.get().timestampSeconds.ofUnit(seconds)
-                        )
+                            else -> Measurement(
+                                value = UnitPose2d(signal.get().estimatedPose.toPose2d()),
+                                timestamp = signal.get().timestampSeconds.ofUnit(seconds)
+                            )
+                        }
                     }
                 }
         }
@@ -125,7 +131,7 @@ public class ChargerPhotonCam(
          * @see LoggableInputsProvider
          */
         logInputs: LoggableInputsProvider
-    ): VisionPipeline<VisionResult.Generic> {
+    ): VisionPipeline<VisionTarget.Generic> {
 
         init{ reset() }
 
@@ -134,7 +140,7 @@ public class ChargerPhotonCam(
             println("Photon Camera with name $name has had it's pipeline reset to $index")
         }
 
-        override val visionData: VisionData<VisionResult.Generic>?
+        override val visionData: VisionData<VisionTarget.Generic>?
             by logInputs.nullableValue(default = emptyGenericVisionData()){
                 val data = latestResult
                 if (!data.hasTargets() || isSimulation()){
@@ -175,7 +181,7 @@ public class ChargerPhotonCam(
 
 
     private fun toAprilTagTarget(target: PhotonTrackedTarget) =
-        VisionResult.AprilTag(
+        VisionTarget.AprilTag(
             tx = target.yaw,
             ty = target.pitch,
             areaPercent = target.area,
@@ -184,7 +190,7 @@ public class ChargerPhotonCam(
         )
 
     private fun toGenericTarget(target: PhotonTrackedTarget) =
-        VisionResult.Generic(
+        VisionTarget.Generic(
             tx = target.yaw,
             ty = target.pitch,
             areaPercent = target.area

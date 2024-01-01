@@ -13,7 +13,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter
  */
 public class AngularVelocityRateLimiter{
 
-
     private val rateLimiter: SlewRateLimiter
     private val onlyLimitPositiveAccel: Boolean
     private var previousInput: AngularVelocity = AngularVelocity(0.0)

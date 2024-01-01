@@ -1,4 +1,4 @@
-package frc.chargers.utils.math.equations
+package frc.chargers.utils.math.equations.ejml
 
 import org.ejml.equation.Equation
 import org.ejml.equation.ParseError

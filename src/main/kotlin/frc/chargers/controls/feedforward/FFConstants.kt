@@ -4,8 +4,6 @@ import com.batterystaple.kmeasure.quantities.*
 import frc.chargers.utils.math.units.*
 
 
-public class AngularMotorFF
-
 
 /**
  * Represents constants for Feedforward control

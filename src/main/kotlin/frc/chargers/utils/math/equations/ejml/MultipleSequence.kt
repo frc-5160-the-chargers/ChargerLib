@@ -1,4 +1,4 @@
-package frc.chargers.utils.math.equations
+package frc.chargers.utils.math.equations.ejml
 
 import org.ejml.equation.Operation
 import org.ejml.equation.Sequence

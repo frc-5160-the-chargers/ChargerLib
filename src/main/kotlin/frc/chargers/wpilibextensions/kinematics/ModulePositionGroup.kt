@@ -1,10 +1,11 @@
-package frc.chargers.wpilibextensions.kinematics.swerve
+package frc.chargers.wpilibextensions.kinematics
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import frc.chargers.utils.a
-import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.asAngle
+import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
 
 /**
  * A helper class that stores [SwerveModulePosition]s in a more clear way.
@@ -27,15 +28,16 @@ public data class ModulePositionGroup(
         bottomLeftPosition: SwerveModulePosition,
         bottomRightPosition: SwerveModulePosition,
     ): this(
-        topLeftPosition.distance,
-        topRightPosition.distance,
-        bottomLeftPosition.distance,
-        bottomRightPosition.distance,
+        topLeftPosition.distanceMeters.ofUnit(meters),
+        topRightPosition.distanceMeters.ofUnit(meters),
+        bottomLeftPosition.distanceMeters.ofUnit(meters),
+        bottomRightPosition.distanceMeters.ofUnit(meters),
 
-        topLeftPosition.direction,
-        topRightPosition.direction,
-        bottomLeftPosition.direction,
-        bottomRightPosition.direction
+        // asAngle converts a Rotation2d to the Kmeasure angle class
+        topLeftPosition.angle.asAngle(),
+        topRightPosition.angle.asAngle(),
+        bottomLeftPosition.angle.asAngle(),
+        bottomRightPosition.angle.asAngle()
     )
 
     public fun toArray(): Array<SwerveModulePosition> = a[topLeftPosition,topRightPosition,bottomLeftPosition,bottomRightPosition]

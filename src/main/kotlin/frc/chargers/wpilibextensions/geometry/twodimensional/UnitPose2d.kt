@@ -7,8 +7,6 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
 import frc.chargers.advantagekitextensions.AdvantageKitLoggable
 import frc.chargers.utils.math.units.KmeasureUnit
-import frc.chargers.wpilibextensions.geometry.rotation.asAngle
-import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import frc.chargers.wpilibextensions.geometry.threedimensional.UnitPose3d
 import org.littletonrobotics.junction.LogTable
 

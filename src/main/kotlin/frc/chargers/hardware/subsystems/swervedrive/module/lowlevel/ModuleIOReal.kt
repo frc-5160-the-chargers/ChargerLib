@@ -12,7 +12,7 @@ import frc.chargers.hardware.motorcontrol.TemperatureProvider
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.Alert
-import frc.chargers.wpilibextensions.motorcontrol.setVoltage
+import frc.chargers.hardware.motorcontrol.setVoltage
 
 /**
  * Represents the low level hardware of a SwerveModule on the real robot.

@@ -20,7 +20,7 @@ public class VisionData<out R>(
     bestTarget: R,
     otherTargets: List<R>
 ): NonLoggableVisionData<R>(timestamp, bestTarget, otherTargets), AdvantageKitLoggable<VisionData<R>>
-    where R : VisionResult, R: AdvantageKitLoggable<R>{
+    where R : VisionTarget, R: AdvantageKitLoggable<R>{
 
     public constructor(
         timestamp: Time,
@@ -53,7 +53,7 @@ public class VisionData<out R>(
  * Represents Vision Data without logging functionality.
  * Contains data about the timestamp, best target, and other targets fetched.
  */
-public open class NonLoggableVisionData<out R: VisionResult>(
+public open class NonLoggableVisionData<out R: VisionTarget>(
     public val timestamp: Time,
     public val bestTarget: R,
     public val otherTargets: List<R>
@@ -71,7 +71,7 @@ public open class NonLoggableVisionData<out R: VisionResult>(
 /**
  * Represents a Vision Result, which contains all the data that is applicable to a single vision target.
  */
-public sealed interface VisionResult{
+public sealed interface VisionTarget{
 
     public val tx: Double
     public val ty: Double
@@ -81,7 +81,7 @@ public sealed interface VisionResult{
         override val tx: Double,
         override val ty: Double,
         override val areaPercent: Double
-    ): VisionResult, AdvantageKitLoggable<Generic>{
+    ): VisionTarget, AdvantageKitLoggable<Generic>{
         override fun pushToLog(table: LogTable, category: String) {
             table.apply{
                 put("$category/tx", tx)
@@ -107,7 +107,7 @@ public sealed interface VisionResult{
         override val areaPercent: Double,
         public val id: Int,
         public val targetTransformFromCam: UnitTransform3d
-    ): VisionResult, AdvantageKitLoggable<AprilTag>{
+    ): VisionTarget, AdvantageKitLoggable<AprilTag>{
         override fun pushToLog(table: LogTable, category: String) {
             table.apply{
                 put("$category/tx", tx)
@@ -134,7 +134,7 @@ public sealed interface VisionResult{
         override val ty: Double,
         override val areaPercent: Double,
         public val id: Int
-    ): VisionResult, AdvantageKitLoggable<ML>{
+    ): VisionTarget, AdvantageKitLoggable<ML>{
         override fun pushToLog(table: LogTable, category: String) {
             table.apply{
                 put("$category/tx", tx)

@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.DriverStation
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
-import frc.chargers.wpilibextensions.geometry.rotation.asAngle
+import frc.chargers.wpilibextensions.geometry.twodimensional.asAngle
 
 /*
 Credits go to 6328 & 4099 for all of the code below;

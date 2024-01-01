@@ -13,8 +13,8 @@ import frc.chargers.hardware.motorcontrol.SmartEncoderMotorController
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.subsystems.swervedrive.module.lowlevel.ModuleIO
 import frc.chargers.hardware.subsystems.swervedrive.module.lowlevel.ModuleIOReal
-import frc.chargers.wpilibextensions.geometry.rotation.asAngle
-import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.asAngle
+import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
 import kotlin.math.abs
 
 /**

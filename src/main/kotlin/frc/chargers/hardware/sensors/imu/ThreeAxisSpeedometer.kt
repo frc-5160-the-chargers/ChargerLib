@@ -1,4 +1,4 @@
-package frc.chargers.hardware.sensors
+package frc.chargers.hardware.sensors.imu
 
 import com.batterystaple.kmeasure.quantities.Velocity
 
@@ -18,7 +18,7 @@ public interface ThreeAxisSpeedometer {
             crossinline getXSpeed: () -> Velocity,
             crossinline getYSpeed: () -> Velocity,
             crossinline getZSpeed: () -> Velocity
-        ): ThreeAxisSpeedometer = object: ThreeAxisSpeedometer{
+        ): ThreeAxisSpeedometer = object: ThreeAxisSpeedometer {
             override val xVelocity: Velocity get() = getXSpeed()
             override val yVelocity: Velocity get() = getYSpeed()
             override val zVelocity: Velocity get() = getZSpeed()

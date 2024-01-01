@@ -5,7 +5,6 @@ import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.units.seconds
 import com.pathplanner.lib.pathfinding.Pathfinding
 import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.livewindow.LiveWindow
 import edu.wpi.first.wpilibj2.command.Command
 import frc.chargers.advantagekitextensions.*
 import org.littletonrobotics.junction.LogFileUtil
@@ -29,6 +28,7 @@ import java.nio.file.Path
  *
  * This is intended to be used within the command-based framework.
  */
+@Suppress("KotlinConstantConditions") // suppresses unwanted warnings
 public open class ChargerRobot(
     private val getRobotContainer: () -> ChargerRobotContainer,
     private val gitData: GitData,
@@ -107,10 +107,7 @@ public open class ChargerRobot(
     override fun robotInit() {
         try{
             LOOP_PERIOD = config.loopPeriod
-            // inits the ConsoleLogger
-            ConsoleLogger
             configureAdvantageKit()
-            LiveWindow.disableAllTelemetry()
 
             DashboardTuner.tuningMode = config.tuningMode
 
@@ -161,6 +158,7 @@ public open class ChargerRobot(
         recordMetadata("ChargerLibBuildDate", ChargerLibBuildConstants.BUILD_DATE)
         recordMetadata("ChargerLibGitSHA", ChargerLibBuildConstants.GIT_SHA)
         recordMetadata("ChargerLibGitBranch", ChargerLibBuildConstants.GIT_BRANCH)
+
         when(ChargerLibBuildConstants.DIRTY){
             0 -> recordMetadata("ChargerLibGitDirty", "All changes committed")
             1 -> recordMetadata("ChargerLibGitDirty", "Uncommitted changes")

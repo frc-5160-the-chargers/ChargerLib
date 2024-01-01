@@ -5,7 +5,9 @@ package frc.chargerlibexternal.frc6328;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-/** Tracker that activates only when a button is pressed twice quickly. */
+/**
+ * Credits: 6328 repository: <a name = "6328 repository" href="https://github.com/Mechanical-Advantage/RobotCode2023/">(Repository Here)</a>
+ */
 public class DoublePressTracker {
     private double maxLengthSecs = 0.4;
 

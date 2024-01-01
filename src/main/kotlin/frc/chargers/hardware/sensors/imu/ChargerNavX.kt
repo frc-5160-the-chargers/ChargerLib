@@ -7,8 +7,6 @@ import com.batterystaple.kmeasure.units.seconds
 import com.kauailabs.navx.frc.AHRS
 import edu.wpi.first.wpilibj.RobotBase.isReal
 import frc.chargers.framework.ChargerRobot
-import frc.chargers.hardware.sensors.ThreeAxisAccelerometer
-import frc.chargers.hardware.sensors.ThreeAxisSpeedometer
 import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
 import frc.chargers.utils.math.inputModulus

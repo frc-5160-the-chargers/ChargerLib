@@ -9,18 +9,19 @@ import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.hardware.sensors.RobotPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
-import frc.chargers.utils.Measurement
 import frc.chargerlibexternal.frc6328.PoseEstimator
 import frc.chargerlibexternal.frc6328.PoseEstimator.TimestampedVisionUpdate
+import frc.chargerlibexternal.frc6995.NomadApriltagUtil
 import frc.chargers.advantagekitextensions.recordLatency
 import frc.chargers.utils.math.inputModulus
-import frc.chargers.wpilibextensions.StandardDeviation
+import frc.chargers.hardware.sensors.RobotPoseEstimator
+import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.kinematics.swerve.ModulePositionGroup
+import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
+import frc.chargers.wpilibextensions.kinematics.ModulePositionGroup
 import org.littletonrobotics.junction.Logger.*
 
 /**
@@ -34,14 +35,14 @@ import org.littletonrobotics.junction.Logger.*
 context(EncoderHolonomicDrivetrain)
 public class SwervePoseMonitor(
     private val gyro: HeadingProvider? = null,
-    poseSuppliers: List<RobotPoseSupplier>,
+    poseSuppliers: List<VisionPoseSupplier>,
     startingPose: UnitPose2d = UnitPose2d()
-): SubsystemBase(), RobotPoseSupplier{
+): SubsystemBase(), RobotPoseEstimator{
 
     /* Public API */
 
     public constructor(
-        vararg poseSuppliers: RobotPoseSupplier,
+        vararg poseSuppliers: VisionPoseSupplier,
         gyro: HeadingProvider? = null,
         startingPose: UnitPose2d = UnitPose2d()
     ): this(
@@ -51,14 +52,9 @@ public class SwervePoseMonitor(
     )
     public val field: Field2d = Field2d().also{ SmartDashboard.putData("Field",it) }
 
-    override val poseStandardDeviation: StandardDeviation = StandardDeviation.Default
-    override val robotPoseMeasurement: Measurement<UnitPose2d>
-        get() = Measurement(
-            poseEstimator.latestPose.ofUnit(meters),
-            fpgaTimestamp()
-        )
 
-    override val robotPose: UnitPose2d get() = robotPoseMeasurement.value
+    override val robotPose: UnitPose2d get() = poseEstimator.latestPose.ofUnit(meters)
+
     public val heading: Angle get() = calculatedHeading
 
     public fun resetPose(pose: UnitPose2d){
@@ -66,7 +62,7 @@ public class SwervePoseMonitor(
         calculatedHeading = pose.rotation
     }
 
-    public fun addPoseSuppliers(vararg suppliers: RobotPoseSupplier){
+    public fun addPoseSuppliers(vararg suppliers: VisionPoseSupplier){
         this.poseSuppliers.addAll(suppliers)
     }
 
@@ -84,14 +80,14 @@ public class SwervePoseMonitor(
     private val previousDistances = Array(4){Distance(0.0)}
     private var lastGyroHeading = Angle(0.0)
     private var wheelDeltas = ModulePositionGroup()
+    private val visionUpdates: MutableList<TimestampedVisionUpdate> = mutableListOf()
 
 
     override fun periodic(){
-        /*
-        Calculates the pose and heading from the data from the swerve modules; results in a Twist2d object.
-         */
-
         recordLatency("SwervePoseMonitorLoopTime"){
+            /*
+            Calculates the pose and heading from the data from the swerve modules; results in a Twist2d object.
+             */
             val currentMPs = currentModulePositions
             wheelDeltas.apply{
                 topLeftDistance = currentMPs.topLeftDistance - previousDistances[0]
@@ -130,17 +126,16 @@ public class SwervePoseMonitor(
             /*
             Sends all pose data to the pose estimator.
              */
-            val visionUpdates: MutableList<TimestampedVisionUpdate> = mutableListOf()
             if (poseSuppliers.size > 0){
+                visionUpdates.clear()
                 poseSuppliers.forEach{
-                    val measurement = it.robotPoseMeasurement
+                    val measurement = it.robotPoseEstimate
                     if (measurement != null){
-                        val stdDevVector = when(val deviation = it.poseStandardDeviation){
-                            is StandardDeviation.Of -> deviation.getVector()
-
-                            is StandardDeviation.Default -> VecBuilder.fill(0.9, 0.9, 0.9)
-                        }
-
+                        val stdDevVector = NomadApriltagUtil.calculateVisionUncertainty(
+                            measurement.value.x.siValue,
+                            heading.asRotation2d(),
+                            it.cameraYaw.asRotation2d(),
+                        )
                         visionUpdates.add(
                             TimestampedVisionUpdate(
                                 measurement.timestamp.inUnit(seconds),

@@ -1,11 +1,12 @@
-package frc.chargers.wpilibextensions.kinematics.swerve
+package frc.chargers.wpilibextensions.kinematics
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import frc.chargers.utils.a
-import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
+import frc.chargers.wpilibextensions.geometry.twodimensional.asAngle
+import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
 
 
 /**
@@ -31,15 +32,15 @@ public open class ModuleStateGroup(
         bottomLeftState: SwerveModuleState,
         bottomRightState: SwerveModuleState
     ): this(
-        topLeftState.speed,
-        topRightState.speed,
-        bottomLeftState.speed,
-        bottomRightState.speed,
+        topLeftState.speedMetersPerSecond.ofUnit(meters/seconds),
+        topRightState.speedMetersPerSecond.ofUnit(meters/seconds),
+        bottomLeftState.speedMetersPerSecond.ofUnit(meters/seconds),
+        bottomRightState.speedMetersPerSecond.ofUnit(meters/seconds),
         
-        topLeftState.direction,
-        topRightState.direction,
-        bottomLeftState.direction,
-        bottomRightState.direction
+        topLeftState.angle.asAngle(),
+        topRightState.angle.asAngle(),
+        bottomLeftState.angle.asAngle(),
+        bottomRightState.angle.asAngle()
     )
 
     public fun toArray(): Array<SwerveModuleState> = a[topLeftState,topRightState,bottomLeftState,bottomRightState]
@@ -64,26 +65,26 @@ public open class ModuleStateGroup(
     
     public val topLeftState: SwerveModuleState
         get() = SwerveModuleState(
-        topLeftSpeed.inUnit(meters/seconds),
-        topLeftAngle.asRotation2d()
-    )
+            topLeftSpeed.inUnit(meters/seconds),
+            topLeftAngle.asRotation2d()
+        )
 
     public val topRightState: SwerveModuleState
         get() = SwerveModuleState(
-        topRightSpeed.inUnit(meters/seconds),
-        topRightAngle.asRotation2d()
-    )
+            topRightSpeed.inUnit(meters/seconds),
+            topRightAngle.asRotation2d()
+        )
 
     public val bottomLeftState: SwerveModuleState
         get() = SwerveModuleState(
-        bottomLeftSpeed.inUnit(meters/seconds),
-        bottomLeftAngle.asRotation2d()
-    )
+            bottomLeftSpeed.inUnit(meters/seconds),
+            bottomLeftAngle.asRotation2d()
+        )
 
     public val bottomRightState: SwerveModuleState
         get() = SwerveModuleState(
-        bottomRightSpeed.inUnit(meters/seconds),
-        bottomRightAngle.asRotation2d()
-    )
+            bottomRightSpeed.inUnit(meters/seconds),
+            bottomRightAngle.asRotation2d()
+        )
 }
 

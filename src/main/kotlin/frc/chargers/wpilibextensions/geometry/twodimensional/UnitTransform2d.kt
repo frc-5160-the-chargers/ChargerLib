@@ -6,8 +6,6 @@ import com.batterystaple.kmeasure.units.meters
 import edu.wpi.first.math.geometry.Transform2d
 import frc.chargers.advantagekitextensions.AdvantageKitLoggable
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.geometry.rotation.asAngle
-import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import org.littletonrobotics.junction.LogTable
 
 /**

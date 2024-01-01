@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.interpolation.Interpolatable
 import frc.chargers.advantagekitextensions.AdvantageKitLoggable
 import frc.chargers.wpilibextensions.geometry.ofUnit
-import frc.chargers.wpilibextensions.geometry.rotation.asRotation2d
 import org.littletonrobotics.junction.LogTable
 
 // A function must be used here, as a second constructor would cause a platform declaration crash.

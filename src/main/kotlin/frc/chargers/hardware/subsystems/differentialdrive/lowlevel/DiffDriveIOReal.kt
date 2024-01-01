@@ -3,7 +3,7 @@ package frc.chargers.hardware.subsystems.differentialdrive.lowlevel
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
 import com.batterystaple.kmeasure.quantities.*
-import frc.chargers.wpilibextensions.motorcontrol.setVoltage
+import frc.chargers.hardware.motorcontrol.setVoltage
 
 public class DiffDriveIOReal(
     logInputs: LoggableInputsProvider,

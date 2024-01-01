@@ -12,7 +12,7 @@ import kotlin.math.sqrt
  *
  * In a multi-pipeline vision system, this interface should represent 1 pipeline.
  */
-public interface VisionPipeline<R: VisionResult> {
+public interface VisionPipeline<R: VisionTarget> {
 
     /**
      * Fetches the full vision data of the [VisionPipeline]; These are all from the exact same timestamp.
