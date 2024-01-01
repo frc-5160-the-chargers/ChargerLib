@@ -15,7 +15,10 @@ public data class ChassisPowers(
     var yPower: Double = 0.0,
     var rotationPower: Double = 0.0
 ){
-    public fun toChassisSpeeds(maxLinearVelocity: Velocity, maxRotationalVelocity: AngularVelocity): ChassisSpeeds = ChassisSpeeds(
+    public fun toChassisSpeeds(
+        maxLinearVelocity: Velocity,
+        maxRotationalVelocity: AngularVelocity
+    ): ChassisSpeeds = ChassisSpeeds(
         xPower * maxLinearVelocity,
         yPower * maxLinearVelocity,
         rotationPower * maxRotationalVelocity
@@ -24,7 +27,7 @@ public data class ChassisPowers(
     /**
      * Measures whether 2 [ChassisPowers] are roughly equal.
      */
-    public fun roughlyEquals(other: ChassisPowers): Boolean =
+    public infix fun roughlyEquals(other: ChassisPowers): Boolean =
         abs(xPower - other.xPower) <= 0.01
             && abs(yPower - other.yPower) <= 0.01
             && abs(rotationPower - other.rotationPower) <= 0.01

@@ -293,7 +293,6 @@ public open class ChargerCANSparkMax(
 
         if (RobotBase.isReal()) delay(200.milli.seconds)
         burnFlash()
-        println("SparkMax has been configured.")
     }
 
 

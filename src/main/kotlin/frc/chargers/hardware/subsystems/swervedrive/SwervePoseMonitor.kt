@@ -62,6 +62,10 @@ public class SwervePoseMonitor(
         calculatedHeading = pose.rotation
     }
 
+    public fun zeroPose(){
+        resetPose(UnitPose2d())
+    }
+
     public fun addPoseSuppliers(vararg suppliers: VisionPoseSupplier){
         this.poseSuppliers.addAll(suppliers)
     }

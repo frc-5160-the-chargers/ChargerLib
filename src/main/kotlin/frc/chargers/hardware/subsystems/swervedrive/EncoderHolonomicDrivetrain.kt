@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargerlibexternal.frc4481.HeadingCorrector
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
-import frc.chargers.advantagekitextensions.recordLatency
 import frc.chargers.constants.drivetrain.*
 import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.hardware.sensors.imu.gyroscopes.*
@@ -252,6 +251,7 @@ public class EncoderHolonomicDrivetrain(
 
     /* PUBLIC API */
 
+
     /**
      * The pose estimator of the [EncoderHolonomicDrivetrain].
      */
@@ -454,14 +454,13 @@ public class EncoderHolonomicDrivetrain(
         speeds = headingCorrector.correctHeading(speeds,mostReliableHeading.asRotation2d())
         val stateArray = kinematics.toSwerveModuleStates(speeds)
 
-        recordLatency("Drivetrain(Swerve)/moduleStateProcessingTime"){
-            currentModuleStates = ModuleStateGroup(
-                topLeftState = stateArray[0],
-                topRightState = stateArray[1],
-                bottomLeftState = stateArray[2],
-                bottomRightState = stateArray[3]
-            )
-        }
+        currentModuleStates = ModuleStateGroup(
+            topLeftState = stateArray[0],
+            topRightState = stateArray[1],
+            bottomLeftState = stateArray[2],
+            bottomRightState = stateArray[3]
+        )
+
         currentControlMode = ControlMode.CLOSED_LOOP
     }
 
