@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ofUnit</title>
+    <link href="../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../index.html">
+                    <span>ChargerLib</span>
+            </a>
+    </div>
+    <div>
+1.0.0-SNAPSHOT    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageIds="ChargerLib::frc.chargers.wpilibextensions.geometry//ofUnit/edu.wpi.first.math.geometry.Pose2d#com.batterystaple.kmeasure.quantities.Quantity[com.batterystaple.kmeasure.dimensions.Dimension[com.batterystaple.kmeasure.dimensions.Mass0,com.batterystaple.kmeasure.dimensions.Length1,com.batterystaple.kmeasure.dimensions.Time0,com.batterystaple.kmeasure.dimensions.Current0]]/PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../index.html">ChargerLib</a><span class="delimiter">/</span><a href="index.html">frc.chargers.wpilibextensions.geometry</a><span class="delimiter">/</span><span class="current">ofUnit</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>of</span><wbr></wbr><span><span>Unit</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.math.geometry/Pose2d///PointingToDeclaration/">Pose2d</span><span class="token punctuation">.</span><a href="of-unit.html"><span class="token function">ofUnit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">unit<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-pose2d/index.html">UnitPose2d</a></div><p class="paragraph">Converts WPILib's <span data-unresolved-link="edu.wpi.first.math.geometry/Pose2d///PointingToDeclaration/">Pose2d</span> into a <a href="../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-pose2d/index.html">UnitPose2d</a>.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.math.geometry/Translation2d///PointingToDeclaration/">Translation2d</span><span class="token punctuation">.</span><a href="of-unit.html"><span class="token function">ofUnit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">unit<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-translation2d/index.html">UnitTranslation2d</a></div><p class="paragraph">Converts WPILib's <span data-unresolved-link="edu.wpi.first.math.geometry/Translation2d///PointingToDeclaration/">Translation2d</span> into a <a href="../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-translation2d/index.html">UnitTranslation2d</a>.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.math.geometry/Transform2d///PointingToDeclaration/">Transform2d</span><span class="token punctuation">.</span><a href="of-unit.html"><span class="token function">ofUnit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">unit<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-transform2d/index.html">UnitTransform2d</a></div><p class="paragraph">Converts WPILib's <span data-unresolved-link="edu.wpi.first.math.geometry/Transform2d///PointingToDeclaration/">Transform2d</span> into a <a href="../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-transform2d/index.html">UnitTransform2d</a>.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.math.geometry/Translation3d///PointingToDeclaration/">Translation3d</span><span class="token punctuation">.</span><a href="of-unit.html"><span class="token function">ofUnit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">unit<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.threedimensional/-unit-translation3d/index.html">UnitTranslation3d</a></div><p class="paragraph">Converts WPILib's <span data-unresolved-link="edu.wpi.first.math.geometry/Translation3d///PointingToDeclaration/">Translation3d</span> into a <a href="../frc.chargers.wpilibextensions.geometry.threedimensional/-unit-translation3d/index.html">UnitTranslation3d</a>.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.math.geometry/Transform3d///PointingToDeclaration/">Transform3d</span><span class="token punctuation">.</span><a href="of-unit.html"><span class="token function">ofUnit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">unit<span class="token operator">: </span><a href="../frc.chargers.utils.math.units/index.html#1892377491%2FClasslikes%2F769193423">KmeasureUnit</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/DistanceDimension///PointingToDeclaration/">DistanceDimension</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.threedimensional/-unit-transform3d/index.html">UnitTransform3d</a></div><p class="paragraph">Converts WPILib's <span data-unresolved-link="edu.wpi.first.math.geometry/Transform3d///PointingToDeclaration/">Transform3d</span> into a <a href="../frc.chargers.wpilibextensions.geometry.threedimensional/-unit-transform3d/index.html">UnitTransform3d</a>.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.math.geometry/Pose3d///PointingToDeclaration/">Pose3d</span><span class="token punctuation">.</span><a href="of-unit.html"><span class="token function">ofUnit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">unit<span class="token operator">: </span><a href="../frc.chargers.utils.math.units/index.html#1892377491%2FClasslikes%2F769193423">KmeasureUnit</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/DistanceDimension///PointingToDeclaration/">DistanceDimension</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.threedimensional/-unit-pose3d/index.html">UnitPose3d</a></div><p class="paragraph">Converts WPILib's <span data-unresolved-link="edu.wpi.first.math.geometry/Pose3d///PointingToDeclaration/">Pose3d</span> into a <a href="../frc.chargers.wpilibextensions.geometry.threedimensional/-unit-pose3d/index.html">UnitPose3d</a>.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile.Constraints///PointingToDeclaration/">TrapezoidProfile.Constraints</span><span class="token punctuation">.</span><a href="of-unit.html"><span class="token function">ofUnit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">angleUnit<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token punctuation">, </span></span><span class="parameter ">timeUnit<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Time///PointingToDeclaration/">Time</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.motion/-angular-motion-constraints/index.html">AngularMotionConstraints</a></div><p class="paragraph">Converts WPILib's <span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile.Constraints///PointingToDeclaration/">TrapezoidProfile.Constraints</span> into an <a href="../frc.chargers.wpilibextensions.geometry.motion/-angular-motion-constraints/index.html">AngularMotionConstraints</a>.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile.Constraints///PointingToDeclaration/">TrapezoidProfile.Constraints</span><span class="token punctuation">.</span><a href="of-unit.html"><span class="token function">ofUnit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">distanceUnit<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span><span class="token punctuation">, </span></span><span class="parameter ">timeUnit<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Time///PointingToDeclaration/">Time</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.motion/-linear-motion-constraints/index.html">LinearMotionConstraints</a></div><p class="paragraph">Converts WPILib's <span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile.Constraints///PointingToDeclaration/">TrapezoidProfile.Constraints</span> into a <a href="../frc.chargers.wpilibextensions.geometry.motion/-linear-motion-constraints/index.html">LinearMotionConstraints</a>.</p></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

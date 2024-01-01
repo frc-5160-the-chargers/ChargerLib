@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>PoseEstimator</title>
+    <link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../../../index.html">
+                    <span>ChargerLib</span>
+            </a>
+    </div>
+    <div>
+1.0.0-SNAPSHOT    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="ChargerLib::frc.chargers.hardware.sensors.vision.photonvision/ChargerPhotonCam.ApriltagPipeline.PoseEstimator///PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../../../../index.html">ChargerLib</a><span class="delimiter">/</span><a href="../../../index.html">frc.chargers.hardware.sensors.vision.photonvision</a><span class="delimiter">/</span><a href="../../index.html">ChargerPhotonCam</a><span class="delimiter">/</span><a href="../index.html">ApriltagPipeline</a><span class="delimiter">/</span><span class="current">PoseEstimator</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Pose</span><wbr></wbr><span><span>Estimator</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">inner </span><span class="token keyword">class </span><a href="index.html">PoseEstimator</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">robotToCamera<span class="token operator">: </span><a href="../../../../frc.chargers.wpilibextensions.geometry.threedimensional/-unit-transform3d/index.html">UnitTransform3d</a><span class="token punctuation">, </span></span><span class="parameter ">fieldTags<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.apriltag/AprilTagFieldLayout///PointingToDeclaration/">AprilTagFieldLayout</span><span class="token punctuation">, </span></span><span class="parameter ">strategy<span class="token operator">: </span><span data-unresolved-link="org.photonvision/PhotonPoseEstimator.PoseStrategy///PointingToDeclaration/">PhotonPoseEstimator.PoseStrategy</span><span class="token operator"> = </span>PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR</span></span><span class="token punctuation">)</span> : <span data-unresolved-link="org.photonvision/PhotonPoseEstimator///PointingToDeclaration/">PhotonPoseEstimator</span>, <a href="../../../../frc.chargers.hardware.sensors/-vision-pose-supplier/index.html">VisionPoseSupplier</a></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1836833817%2FConstructors%2F769193423" anchor-label="PoseEstimator" id="1836833817%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-pose-estimator.html"><span>Pose</span><wbr></wbr><span><span>Estimator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1836833817%2FConstructors%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">robotToCamera<span class="token operator">: </span><a href="../../../../frc.chargers.wpilibextensions.geometry.threedimensional/-unit-transform3d/index.html">UnitTransform3d</a><span class="token punctuation">, </span></span><span class="parameter ">fieldTags<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.apriltag/AprilTagFieldLayout///PointingToDeclaration/">AprilTagFieldLayout</span><span class="token punctuation">, </span></span><span class="parameter ">strategy<span class="token operator">: </span><span data-unresolved-link="org.photonvision/PhotonPoseEstimator.PoseStrategy///PointingToDeclaration/">PhotonPoseEstimator.PoseStrategy</span><span class="token operator"> = </span>PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="2140192034%2FFunctions%2F769193423" anchor-label="getRobotToCameraTransform" id="2140192034%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2140192034%2FFunctions%2F769193423"><span>get</span><wbr></wbr><span>Robot</span><wbr></wbr><span>To</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Transform</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2140192034%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#2140192034%2FFunctions%2F769193423"><span class="token function">getRobotToCameraTransform</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.geometry/Transform3d///PointingToDeclaration/">Transform3d</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="809564557%2FFunctions%2F769193423" anchor-label="setLastPose" id="809564557%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-30039964%2FFunctions%2F769193423"><span>set</span><wbr></wbr><span>Last</span><wbr></wbr><span><span>Pose</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="809564557%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-30039964%2FFunctions%2F769193423"><span class="token function">setLastPose</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.geometry/Pose2d///PointingToDeclaration/">Pose2d</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-2107249307%2FFunctions%2F769193423"><span class="token function">setLastPose</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.geometry/Pose3d///PointingToDeclaration/">Pose3d</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-537446303%2FFunctions%2F769193423" anchor-label="setMultiTagFallbackStrategy" id="-537446303%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-537446303%2FFunctions%2F769193423"><span>set</span><wbr></wbr><span>Multi</span><wbr></wbr><span>Tag</span><wbr></wbr><span>Fallback</span><wbr></wbr><span><span>Strategy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-537446303%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-537446303%2FFunctions%2F769193423"><span class="token function">setMultiTagFallbackStrategy</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="org.photonvision/PhotonPoseEstimator.PoseStrategy///PointingToDeclaration/">PhotonPoseEstimator.PoseStrategy</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1658576569%2FFunctions%2F769193423" anchor-label="setReferencePose" id="1658576569%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1658576569%2FFunctions%2F769193423"><span>set</span><wbr></wbr><span>Reference</span><wbr></wbr><span><span>Pose</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1658576569%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#1658576569%2FFunctions%2F769193423"><span class="token function">setReferencePose</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.geometry/Pose2d///PointingToDeclaration/">Pose2d</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-368095431%2FFunctions%2F769193423" anchor-label="setRobotToCameraTransform" id="-368095431%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-368095431%2FFunctions%2F769193423"><span>set</span><wbr></wbr><span>Robot</span><wbr></wbr><span>To</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Transform</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-368095431%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-368095431%2FFunctions%2F769193423"><span class="token function">setRobotToCameraTransform</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.geometry/Transform3d///PointingToDeclaration/">Transform3d</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1949526409%2FFunctions%2F769193423" anchor-label="update" id="-1949526409%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#90027095%2FFunctions%2F769193423"><span><span>update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1949526409%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#90027095%2FFunctions%2F769193423"><span class="token function">update</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="org.photonvision/EstimatedRobotPose///PointingToDeclaration/">EstimatedRobotPose</span><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#185460243%2FFunctions%2F769193423"><span class="token function">update</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="org.photonvision.targeting/PhotonPipelineResult///PointingToDeclaration/">PhotonPipelineResult</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="org.photonvision/EstimatedRobotPose///PointingToDeclaration/">EstimatedRobotPose</span><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1892236717%2FFunctions%2F769193423"><span class="token function">update</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="org.photonvision.targeting/PhotonPipelineResult///PointingToDeclaration/">PhotonPipelineResult</span><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="edu.wpi.first.math/Matrix///PointingToDeclaration/">Matrix</span><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="edu.wpi.first.math.numbers/N3///PointingToDeclaration/">N3</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="edu.wpi.first.math.numbers/N3///PointingToDeclaration/">N3</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">p2<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="edu.wpi.first.math/Matrix///PointingToDeclaration/">Matrix</span><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="edu.wpi.first.math.numbers/N5///PointingToDeclaration/">N5</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="edu.wpi.first.math.numbers/N1///PointingToDeclaration/">N1</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="org.photonvision/EstimatedRobotPose///PointingToDeclaration/">EstimatedRobotPose</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-1662178736%2FProperties%2F769193423" anchor-label="cameraYaw" id="-1662178736%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="camera-yaw.html"><span>camera</span><wbr></wbr><span><span>Yaw</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1662178736%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="camera-yaw.html">cameraYaw</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1830500665%2FProperties%2F769193423" anchor-label="fieldTags" id="-1830500665%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1830500665%2FProperties%2F769193423"><span>field</span><wbr></wbr><span><span>Tags</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1830500665%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">var </span><a href="index.html#-1830500665%2FProperties%2F769193423">fieldTags</a><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.apriltag/AprilTagFieldLayout///PointingToDeclaration/">AprilTagFieldLayout</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-881612827%2FProperties%2F769193423" anchor-label="primaryStrategy" id="-881612827%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-881612827%2FProperties%2F769193423"><span>primary</span><wbr></wbr><span><span>Strategy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-881612827%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">var </span><a href="index.html#-881612827%2FProperties%2F769193423">primaryStrategy</a><span class="token operator">: </span><span data-unresolved-link="org.photonvision/PhotonPoseEstimator.PoseStrategy///PointingToDeclaration/">PhotonPoseEstimator.PoseStrategy</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="636162590%2FProperties%2F769193423" anchor-label="referencePose" id="636162590%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#636162590%2FProperties%2F769193423"><span>reference</span><wbr></wbr><span><span>Pose</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="636162590%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">var </span><a href="index.html#636162590%2FProperties%2F769193423">referencePose</a><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.geometry/Pose3d///PointingToDeclaration/">Pose3d</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1400546281%2FProperties%2F769193423" anchor-label="robotPoseEstimate" id="-1400546281%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="robot-pose-estimate.html"><span>robot</span><wbr></wbr><span>Pose</span><wbr></wbr><span><span>Estimate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1400546281%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="robot-pose-estimate.html">robotPoseEstimate</a><span class="token operator">: </span><a href="../../../../frc.chargers.utils/-measurement/index.html">Measurement</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../../../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-pose2d/index.html">UnitPose2d</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1711826063%2FProperties%2F769193423" anchor-label="tagModel" id="-1711826063%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1711826063%2FProperties%2F769193423"><span>tag</span><wbr></wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1711826063%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">var </span><a href="index.html#-1711826063%2FProperties%2F769193423">tagModel</a><span class="token operator">: </span><span data-unresolved-link="org.photonvision.estimation/TargetModel///PointingToDeclaration/">TargetModel</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

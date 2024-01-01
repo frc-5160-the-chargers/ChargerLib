@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>EncoderDifferentialDrivetrain</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>ChargerLib</span>
+            </a>
+    </div>
+    <div>
+1.0.0-SNAPSHOT    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="ChargerLib::frc.chargers.hardware.subsystems.differentialdrive/EncoderDifferentialDrivetrain///PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../../index.html">ChargerLib</a><span class="delimiter">/</span><a href="../index.html">frc.chargers.hardware.subsystems.differentialdrive</a><span class="delimiter">/</span><span class="current">EncoderDifferentialDrivetrain</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Encoder</span><wbr></wbr><span>Differential</span><wbr></wbr><span><span>Drivetrain</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">EncoderDifferentialDrivetrain</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lowLevel<span class="token operator">: </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/index.html">DiffDriveIO</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>constants<span class="token operator">: </span><a href="../../frc.chargers.constants.drivetrain/-diff-drive-hardware-data/index.html">DiffDriveHardwareData</a><span class="token operator"> = </span>DiffDriveHardwareData.andyMark()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>controlScheme<span class="token operator">: </span><a href="../../frc.chargers.constants.drivetrain/-diff-drive-control-data/index.html">DiffDriveControlData</a><span class="token operator"> = </span>DiffDriveControlData.None<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>gyro<span class="token operator">: </span><a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">startingPose<span class="token operator">: </span><a href="../../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-pose2d/index.html">UnitPose2d</a><span class="token operator"> = </span>UnitPose2d()<span class="token punctuation">, </span></span><span class="parameter ">poseSuppliers<span class="token operator">: </span><a href="../../frc.chargers.hardware.sensors/-vision-pose-supplier/index.html">VisionPoseSupplier</a></span></span><span class="token punctuation">)</span> : <span data-unresolved-link="edu.wpi.first.wpilibj2.command/SubsystemBase///PointingToDeclaration/">SubsystemBase</span>, <a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a>, <a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a>, <a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/index.html">DiffDriveIO</a></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-530453697%2FConstructors%2F769193423" anchor-label="EncoderDifferentialDrivetrain" id="-530453697%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-encoder-differential-drivetrain.html"><span>Encoder</span><wbr></wbr><span>Differential</span><wbr></wbr><span><span>Drivetrain</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-530453697%2FConstructors%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">lowLevel<span class="token operator">: </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/index.html">DiffDriveIO</a><span class="token punctuation">, </span></span><span class="parameter ">constants<span class="token operator">: </span><a href="../../frc.chargers.constants.drivetrain/-diff-drive-hardware-data/index.html">DiffDriveHardwareData</a><span class="token operator"> = </span>DiffDriveHardwareData.andyMark()<span class="token punctuation">, </span></span><span class="parameter ">controlScheme<span class="token operator">: </span><a href="../../frc.chargers.constants.drivetrain/-diff-drive-control-data/index.html">DiffDriveControlData</a><span class="token operator"> = </span>DiffDriveControlData.None<span class="token punctuation">, </span></span><span class="parameter ">gyro<span class="token operator">: </span><a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">startingPose<span class="token operator">: </span><a href="../../frc.chargers.wpilibextensions.geometry.twodimensional/-unit-pose2d/index.html">UnitPose2d</a><span class="token operator"> = </span>UnitPose2d()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>poseSuppliers<span class="token operator">: </span><a href="../../frc.chargers.hardware.sensors/-vision-pose-supplier/index.html">VisionPoseSupplier</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="627992471%2FFunctions%2F769193423" anchor-label="addChild" id="627992471%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#627992471%2FFunctions%2F769193423"><span>add</span><wbr></wbr><span><span>Child</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="627992471%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#627992471%2FFunctions%2F769193423"><span class="token function">addChild</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.util.sendable/Sendable///PointingToDeclaration/">Sendable</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1795015626%2FFunctions%2F769193423" anchor-label="arcadeDrive" id="-1795015626%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-differential-drivetrain/arcade-drive.html"><span>arcade</span><wbr></wbr><span><span>Drive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1795015626%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/arcade-drive.html"><span class="token function">arcadeDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">power<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">rotation<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span><span class="token constant">0.0</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Drives the robot at a certain power forward and with a certain amount of rotation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-188777090%2FFunctions%2F769193423" anchor-label="arcadeDrive" id="-188777090%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../arcade-drive.html"><span>arcade</span><wbr></wbr><span><span>Drive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-188777090%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../arcade-drive.html"><span class="token function">arcadeDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">chassisPowers<span class="token operator">: </span><a href="../../frc.chargers.wpilibextensions.kinematics/-chassis-powers/index.html">ChassisPowers</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../arcade-drive.html"><span class="token function">arcadeDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">power<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">rotation<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">squareInputs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="715971363%2FFunctions%2F769193423" anchor-label="characterize" id="715971363%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.commands/characterize.html"><span><span>characterize</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="715971363%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">EncoderDifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands/characterize.html"><span class="token function">characterize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">forwards<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>requirements<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Subsystem///PointingToDeclaration/">Subsystem</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../frc.chargerlibexternal.frc6328.characterization/-feed-forward-characterization/index.html">FeedForwardCharacterization</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1651100761%2FFunctions%2F769193423" anchor-label="curvatureDrive" id="-1651100761%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-differential-drivetrain/curvature-drive.html"><span>curvature</span><wbr></wbr><span><span>Drive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1651100761%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/curvature-drive.html"><span class="token function">curvatureDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">power<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">steering<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Drives the robot at a certain power forward and with a certain amount of steering. This method makes turning easier at high speeds.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1092290566%2FFunctions%2F769193423" anchor-label="curvatureDrive" id="-1092290566%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../curvature-drive.html"><span>curvature</span><wbr></wbr><span><span>Drive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1092290566%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../curvature-drive.html"><span class="token function">curvatureDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">chassisPowers<span class="token operator">: </span><a href="../../frc.chargers.wpilibextensions.kinematics/-chassis-powers/index.html">ChassisPowers</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../curvature-drive.html"><span class="token function">curvatureDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">power<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">steering<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">squareInputs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1006749987%2FFunctions%2F769193423" anchor-label="defer" id="-1006749987%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1006749987%2FFunctions%2F769193423"><span><span>defer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1006749987%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1006749987%2FFunctions%2F769193423"><span class="token function">defer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html">Supplier</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="698172527%2FFunctions%2F769193423" anchor-label="driveStraightAction" id="698172527%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html"><span>drive</span><wbr></wbr><span>Straight</span><wbr></wbr><span><span>Action</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="698172527%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html"><span class="token function">driveStraightAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">time<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Time///PointingToDeclaration/">Time</span><span class="token punctuation">, </span></span><span class="parameter ">power<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div><div class="brief "><p class="paragraph">Adds a command to the command builder driving the robot for a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">time</a> with a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">power</a>.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-name/index.html"><span class="token annotation builtin">JvmName</span></a><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">&quot;driveDistance&quot;</span></span></span><wbr></wbr><span class="token punctuation">)</span></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">EncoderDifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html"><span class="token function">driveStraightAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">distance<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span><span class="token punctuation">, </span></span><span class="parameter ">power<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">direction<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">maxSteeringPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_MAX_STEERING_POWER</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div><div class="brief "><p class="paragraph">Adds a command to the command builder driving an <a href="index.html">EncoderDifferentialDrivetrain</a> for a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">distance</a> with a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">power</a>, using PID to ensure a straight drive without deviation, while using the best available heading provider given to the drivetrain.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-name/index.html"><span class="token annotation builtin">JvmName</span></a><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">&quot;driveTime&quot;</span></span></span><wbr></wbr><span class="token punctuation">)</span></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html"><span class="token function">driveStraightAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">time<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Time///PointingToDeclaration/">Time</span><span class="token punctuation">, </span></span><span class="parameter ">power<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">steeringPIDConstants<span class="token operator">: </span><a href="../../frc.chargers.controls.pid/-p-i-d-constants/index.html">PIDConstants</a><span class="token punctuation">, </span></span><span class="parameter ">direction<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token operator"> = </span>heading<span class="token punctuation">, </span></span><span class="parameter ">maxSteeringPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_MAX_STEERING_POWER</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div><div class="brief "><p class="paragraph">Adds a command to the command builder driving the robot for a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">time</a> with a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">power</a>, using PID and an external <a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a> to ensure a straight drive without deviation.</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">EncoderDifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html"><span class="token function">driveStraightAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">time<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Time///PointingToDeclaration/">Time</span><span class="token punctuation">, </span></span><span class="parameter ">power<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">steeringPIDConstants<span class="token operator">: </span><a href="../../frc.chargers.controls.pid/-p-i-d-constants/index.html">PIDConstants</a><span class="token punctuation">, </span></span><span class="parameter ">direction<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token operator"> = </span>heading<span class="token punctuation">, </span></span><span class="parameter ">maxSteeringPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_MAX_STEERING_POWER</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div><div class="brief "><p class="paragraph">Adds a command to the command builder driving the robot for a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">time</a> with a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">power</a>, using PID and calculated heading to ensure a straight drive without deviation.</p></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-name/index.html"><span class="token annotation builtin">JvmName</span></a><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">&quot;driveDistanceWithVelocity&quot;</span></span></span><wbr></wbr><span class="token punctuation">)</span></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">EncoderDifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html"><span class="token function">driveStraightAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">distance<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span><span class="token punctuation">, </span></span><span class="parameter ">velocity<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span><span class="token punctuation">, </span></span><span class="parameter ">direction<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">steeringPIDConstants<span class="token operator">: </span><a href="../../frc.chargers.controls.pid/-p-i-d-constants/index.html">PIDConstants</a><span class="token punctuation">, </span></span><span class="parameter ">maxSteeringVelocity<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/AngularVelocity///PointingToDeclaration/">AngularVelocity</span><span class="token operator"> = </span>DEFAULT_MAX_STEERING_VELOCITY</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div><div class="brief "><p class="paragraph">Adds a command to the command builder driving an <a href="index.html">EncoderDifferentialDrivetrain</a> for a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">distance</a> with a specified <a href="../../frc.chargers.commands.drivetrainCommands.drive/drive-straight-action.html">velocity</a>, using PID to ensure a straight drive without deviation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2065836859%2FFunctions%2F769193423" anchor-label="followPathAction" id="-2065836859%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.commands.drivetrainCommands.followtrajectory/follow-path-action.html"><span>follow</span><wbr></wbr><span>Path</span><wbr></wbr><span><span>Action</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2065836859%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">EncoderDifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands.drivetrainCommands.followtrajectory/follow-path-action.html"><span class="token function">followPathAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><span data-unresolved-link="com.pathplanner.lib.path/PathPlannerPath///PointingToDeclaration/">PathPlannerPath</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div><div class="brief "><p class="paragraph">Adds a command to the <a href="../../frc.chargers.commands.commandbuilder/-command-builder/index.html">CommandBuilder</a> which makes an <a href="index.html">EncoderDifferentialDrivetrain</a> follow a designated path, utilizing a <span data-unresolved-link="com.pathplanner.lib.path/PathPlannerPath///PointingToDeclaration/">PathPlannerPath</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1235276726%2FFunctions%2F769193423" anchor-label="getCurrentCommand" id="1235276726%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1235276726%2FFunctions%2F769193423"><span>get</span><wbr></wbr><span>Current</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1235276726%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1235276726%2FFunctions%2F769193423"><span class="token function">getCurrentCommand</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1286851710%2FFunctions%2F769193423" anchor-label="getDefaultCommand" id="1286851710%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1286851710%2FFunctions%2F769193423"><span>get</span><wbr></wbr><span>Default</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1286851710%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1286851710%2FFunctions%2F769193423"><span class="token function">getDefaultCommand</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1891636%2FFunctions%2F769193423" anchor-label="getName" id="-1891636%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1891636%2FFunctions%2F769193423"><span>get</span><wbr></wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1891636%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1891636%2FFunctions%2F769193423"><span class="token function">getName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1520044852%2FFunctions%2F769193423" anchor-label="getSubsystem" id="1520044852%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1520044852%2FFunctions%2F769193423"><span>get</span><wbr></wbr><span><span>Subsystem</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1520044852%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1520044852%2FFunctions%2F769193423"><span class="token function">getSubsystem</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="69797602%2FFunctions%2F769193423" anchor-label="initSendable" id="69797602%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#69797602%2FFunctions%2F769193423"><span>init</span><wbr></wbr><span><span>Sendable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="69797602%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#69797602%2FFunctions%2F769193423"><span class="token function">initSendable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.util.sendable/SendableBuilder///PointingToDeclaration/">SendableBuilder</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1664910654%2FFunctions%2F769193423" anchor-label="periodic" id="-1664910654%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="periodic.html"><span><span>periodic</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1664910654%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="periodic.html"><span class="token function">periodic</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1455577561%2FFunctions%2F769193423" anchor-label="register" id="1455577561%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1455577561%2FFunctions%2F769193423"><span><span>register</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1455577561%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1455577561%2FFunctions%2F769193423"><span class="token function">register</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1585706770%2FFunctions%2F769193423" anchor-label="removeDefaultCommand" id="-1585706770%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1585706770%2FFunctions%2F769193423"><span>remove</span><wbr></wbr><span>Default</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1585706770%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1585706770%2FFunctions%2F769193423"><span class="token function">removeDefaultCommand</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1196015320%2FFunctions%2F769193423" anchor-label="rotateAction" id="1196015320%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.commands.drivetrainCommands.turn/rotate-action.html"><span>rotate</span><wbr></wbr><span><span>Action</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1196015320%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands.drivetrainCommands.turn/rotate-action.html"><span class="token function">rotateAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">angle<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token punctuation">, </span></span><span class="parameter ">pidConstants<span class="token operator">: </span><a href="../../frc.chargers.controls.pid/-p-i-d-constants/index.html">PIDConstants</a><span class="token punctuation">, </span></span><span class="parameter ">precision<span class="token operator">: </span><a href="../../frc.chargers.utils/-precision/index.html">Precision</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/AngleDimension///PointingToDeclaration/">AngleDimension</span><span class="token operator">&gt;</span><span class="token operator"> = </span>Precision.AllowOvershoot<span class="token punctuation">, </span></span><span class="parameter ">maxSteeringPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_MAX_STEERING_POWER</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div><div class="brief "><p class="paragraph">Adds a command to the command builder turning the robot to a specified <a href="../../frc.chargers.commands.drivetrainCommands.turn/rotate-action.html">angle</a> (with a specified <a href="../../frc.chargers.commands.drivetrainCommands.turn/rotate-action.html">precision</a>) using PID and an external <a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a>.</p></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">EncoderDifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../../frc.chargers.commands.drivetrainCommands.turn/rotate-action.html"><span class="token function">rotateAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">angle<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span><span class="token punctuation">, </span></span><span class="parameter ">pidConstants<span class="token operator">: </span><a href="../../frc.chargers.controls.pid/-p-i-d-constants/index.html">PIDConstants</a><span class="token operator"> = </span>controlScheme.robotRotationPID<span class="token punctuation">, </span></span><span class="parameter ">precision<span class="token operator">: </span><a href="../../frc.chargers.utils/-precision/index.html">Precision</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/AngleDimension///PointingToDeclaration/">AngleDimension</span><span class="token operator">&gt;</span><span class="token operator"> = </span>Precision.AllowOvershoot<span class="token punctuation">, </span></span><span class="parameter ">maxSteeringPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_MAX_STEERING_POWER</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div><div class="brief "><p class="paragraph">Adds a command to the command builder turning the robot to a specified <a href="../../frc.chargers.commands.drivetrainCommands.turn/rotate-action.html">angle</a> (with a specified <a href="../../frc.chargers.commands.drivetrainCommands.turn/rotate-action.html">precision</a>) using PID and the <a href="index.html">EncoderDifferentialDrivetrain</a>'s best available <a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1947011902%2FFunctions%2F769193423" anchor-label="run" id="-1947011902%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1947011902%2FFunctions%2F769193423"><span><span>run</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1947011902%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1947011902%2FFunctions%2F769193423"><span class="token function">run</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1632400045%2FFunctions%2F769193423" anchor-label="runEnd" id="-1632400045%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1632400045%2FFunctions%2F769193423"><span>run</span><wbr></wbr><span><span>End</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1632400045%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-1632400045%2FFunctions%2F769193423"><span class="token function">runEnd</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1598205057%2FFunctions%2F769193423" anchor-label="runOnce" id="1598205057%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1598205057%2FFunctions%2F769193423"><span>run</span><wbr></wbr><span><span>Once</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1598205057%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1598205057%2FFunctions%2F769193423"><span class="token function">runOnce</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1143925223%2FFunctions%2F769193423" anchor-label="setDefaultCommand" id="1143925223%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1143925223%2FFunctions%2F769193423"><span>set</span><wbr></wbr><span>Default</span><wbr></wbr><span><span>Command</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1143925223%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1143925223%2FFunctions%2F769193423"><span class="token function">setDefaultCommand</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1898313668%2FFunctions%2F769193423" anchor-label="setName" id="1898313668%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1898313668%2FFunctions%2F769193423"><span>set</span><wbr></wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1898313668%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#1898313668%2FFunctions%2F769193423"><span class="token function">setName</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2090032188%2FFunctions%2F769193423" anchor-label="setSubsystem" id="-2090032188%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-2090032188%2FFunctions%2F769193423"><span>set</span><wbr></wbr><span><span>Subsystem</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2090032188%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#-2090032188%2FFunctions%2F769193423"><span class="token function">setSubsystem</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="433848977%2FFunctions%2F769193423" anchor-label="setVoltages" id="433848977%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/set-voltages.html"><span>set</span><wbr></wbr><span><span>Voltages</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="433848977%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/set-voltages.html"><span class="token function">setVoltages</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">left<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Voltage///PointingToDeclaration/">Voltage</span><span class="token punctuation">, </span></span><span class="parameter ">right<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Voltage///PointingToDeclaration/">Voltage</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="200533210%2FFunctions%2F769193423" anchor-label="simulationPeriodic" id="200533210%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#200533210%2FFunctions%2F769193423"><span>simulation</span><wbr></wbr><span><span>Periodic</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="200533210%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#200533210%2FFunctions%2F769193423"><span class="token function">simulationPeriodic</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="695921180%2FFunctions%2F769193423" anchor-label="startEnd" id="695921180%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#695921180%2FFunctions%2F769193423"><span>start</span><wbr></wbr><span><span>End</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="695921180%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.subsystems.swervedrive/-swerve-pose-monitor/index.html#695921180%2FFunctions%2F769193423"><span class="token function">startEnd</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html">Runnable</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.wpilibj2.command/Command///PointingToDeclaration/">Command</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1768428725%2FFunctions%2F769193423" anchor-label="stop" id="-1768428725%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-differential-drivetrain/stop.html"><span><span>stop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1768428725%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/stop.html"><span class="token function">stop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Stops the robot.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1655161228%2FFunctions%2F769193423" anchor-label="tankDrive" id="1655161228%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tank-drive.html"><span>tank</span><wbr></wbr><span><span>Drive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1655161228%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="tank-drive.html"><span class="token function">tankDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">leftPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">rightPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Drives using &quot;tank controls&quot;, a system by which each side of the drivetrain is controlled independently.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1063070801%2FFunctions%2F769193423" anchor-label="tankDrive" id="-1063070801%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../tank-drive.html"><span>tank</span><wbr></wbr><span><span>Drive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1063070801%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-differential-drivetrain/index.html">DifferentialDrivetrain</a><span class="token punctuation">.</span><a href="../tank-drive.html"><span class="token function">tankDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">leftPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">rightPower<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">squareInputs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1360977067%2FFunctions%2F769193423" anchor-label="velocityDrive" id="1360977067%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="velocity-drive.html"><span>velocity</span><wbr></wbr><span><span>Drive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1360977067%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="velocity-drive.html"><span class="token function">velocityDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">speeds<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.kinematics/ChassisSpeeds///PointingToDeclaration/">ChassisSpeeds</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="velocity-drive.html"><span class="token function">velocityDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">leftSpeed<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span><span class="token punctuation">, </span></span><span class="parameter ">rightSpeed<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="velocity-drive.html"><span class="token function">velocityDrive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">xVelocity<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span><span class="token punctuation">, </span></span><span class="parameter ">yVelocity<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span><span class="token punctuation">, </span></span><span class="parameter ">rotationSpeed<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/AngularVelocity///PointingToDeclaration/">AngularVelocity</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1115952363%2FFunctions%2F769193423" anchor-label="withOffset" id="1115952363%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.sensors/with-offset.html"><span>with</span><wbr></wbr><span><span>Offset</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1115952363%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a><span class="token punctuation">.</span><a href="../../frc.chargers.hardware.sensors/with-offset.html"><span class="token function">withOffset</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zeroOffset<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="286458851%2FFunctions%2F769193423" anchor-label="withZero" id="286458851%2FFunctions%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.sensors/with-zero.html"><span>with</span><wbr></wbr><span><span>Zero</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="286458851%2FFunctions%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a><span class="token punctuation">.</span><a href="../../frc.chargers.hardware.sensors/with-zero.html"><span class="token function">withZero</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-485152754%2FProperties%2F769193423" anchor-label="constants" id="-485152754%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="constants.html"><span><span>constants</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-485152754%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="constants.html">constants</a><span class="token operator">: </span><a href="../../frc.chargers.constants.drivetrain/-diff-drive-hardware-data/index.html">DiffDriveHardwareData</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="865056603%2FProperties%2F769193423" anchor-label="controlScheme" id="865056603%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="control-scheme.html"><span>control</span><wbr></wbr><span><span>Scheme</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="865056603%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="control-scheme.html">controlScheme</a><span class="token operator">: </span><a href="../../frc.chargers.constants.drivetrain/-diff-drive-control-data/index.html">DiffDriveControlData</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-122332616%2FProperties%2F769193423" anchor-label="currentSpeeds" id="-122332616%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="current-speeds.html"><span>current</span><wbr></wbr><span><span>Speeds</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-122332616%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="current-speeds.html">currentSpeeds</a><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.kinematics/ChassisSpeeds///PointingToDeclaration/">ChassisSpeeds</span></div><div class="brief "><p class="paragraph">Gets the current <span data-unresolved-link="edu.wpi.first.math.kinematics/ChassisSpeeds///PointingToDeclaration/">ChassisSpeeds</span> of the robot.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1947125649%2FProperties%2F769193423" anchor-label="distanceTraveled" id="-1947125649%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="distance-traveled.html"><span>distance</span><wbr></wbr><span><span>Traveled</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1947125649%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="distance-traveled.html">distanceTraveled</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></div><div class="brief "><p class="paragraph">The total linear distance traveled from the zero point of the encoders.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="258672942%2FProperties%2F769193423" anchor-label="gyro" id="258672942%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="gyro.html"><span><span>gyro</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="258672942%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="gyro.html">gyro</a><span class="token operator">: </span><a href="../../frc.chargers.hardware.sensors.imu.gyroscopes/-heading-provider/index.html">HeadingProvider</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-828536133%2FProperties%2F769193423" anchor-label="heading" id="-828536133%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="heading.html"><span><span>heading</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-828536133%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="heading.html">heading</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></div><div class="brief "><p class="paragraph">The current heading (the direction the robot is facing).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1101867030%2FProperties%2F769193423" anchor-label="inverted" id="-1101867030%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/inverted.html"><span><span>inverted</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1101867030%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/inverted.html">inverted</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1446745169%2FProperties%2F769193423" anchor-label="kinematics" id="-1446745169%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="kinematics.html"><span><span>kinematics</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1446745169%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="kinematics.html">kinematics</a><span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.kinematics/DifferentialDriveKinematics///PointingToDeclaration/">DifferentialDriveKinematics</span></div><div class="brief "><p class="paragraph">The kinematics of the drivetrain.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1483486533%2FProperties%2F769193423" anchor-label="leftVelocity" id="-1483486533%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/left-velocity.html"><span>left</span><wbr></wbr><span><span>Velocity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1483486533%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/left-velocity.html">leftVelocity</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/AngularVelocity///PointingToDeclaration/">AngularVelocity</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="695105924%2FProperties%2F769193423" anchor-label="leftVoltage" id="695105924%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/left-voltage.html"><span>left</span><wbr></wbr><span><span>Voltage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="695105924%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/left-voltage.html">leftVoltage</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Voltage///PointingToDeclaration/">Voltage</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="765073389%2FProperties%2F769193423" anchor-label="leftWheelTravel" id="765073389%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/left-wheel-travel.html"><span>left</span><wbr></wbr><span>Wheel</span><wbr></wbr><span><span>Travel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="765073389%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/left-wheel-travel.html">leftWheelTravel</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="907112814%2FProperties%2F769193423" anchor-label="poseEstimator" id="907112814%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="pose-estimator.html"><span>pose</span><wbr></wbr><span><span>Estimator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="907112814%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="pose-estimator.html">poseEstimator</a><span class="token operator">: </span><a href="../-differential-pose-monitor/index.html">DifferentialPoseMonitor</a></div><div class="brief "><p class="paragraph">The pose estimator of the differential drivetrain.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1454294658%2FProperties%2F769193423" anchor-label="rightVelocity" id="1454294658%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/right-velocity.html"><span>right</span><wbr></wbr><span><span>Velocity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1454294658%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/right-velocity.html">rightVelocity</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/AngularVelocity///PointingToDeclaration/">AngularVelocity</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1565431587%2FProperties%2F769193423" anchor-label="rightVoltage" id="-1565431587%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/right-voltage.html"><span>right</span><wbr></wbr><span><span>Voltage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1565431587%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/right-voltage.html">rightVoltage</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Voltage///PointingToDeclaration/">Voltage</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1655943878%2FProperties%2F769193423" anchor-label="rightWheelTravel" id="1655943878%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/right-wheel-travel.html"><span>right</span><wbr></wbr><span>Wheel</span><wbr></wbr><span><span>Travel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1655943878%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../frc.chargers.hardware.subsystems.differentialdrive.lowlevel/-diff-drive-i-o/right-wheel-travel.html">rightWheelTravel</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Angle///PointingToDeclaration/">Angle</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2045280960%2FProperties%2F769193423" anchor-label="velocity" id="2045280960%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="velocity.html"><span><span>velocity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2045280960%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="velocity.html">velocity</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span></div><div class="brief "><p class="paragraph">The current linear velocity of the robot.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

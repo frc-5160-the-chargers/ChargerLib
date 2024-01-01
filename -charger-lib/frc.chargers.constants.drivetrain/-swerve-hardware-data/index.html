@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SwerveHardwareData</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>ChargerLib</span>
+            </a>
+    </div>
+    <div>
+1.0.0-SNAPSHOT    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="ChargerLib::frc.chargers.constants.drivetrain/SwerveHardwareData///PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../../index.html">ChargerLib</a><span class="delimiter">/</span><a href="../index.html">frc.chargers.constants.drivetrain</a><span class="delimiter">/</span><span class="current">SwerveHardwareData</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Swerve</span><wbr></wbr><span>Hardware</span><wbr></wbr><span><span>Data</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">SwerveHardwareData</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>invertTurnMotors<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>turnGearRatio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_GEAR_RATIO<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>driveGearRatio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_GEAR_RATIO<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>turnInertiaMoment<span class="token operator">: </span><a href="../../frc.chargers.utils.math.units/index.html#-978604834%2FClasslikes%2F769193423">Inertia</a><span class="token operator"> = </span>DEFAULT_SWERVE_TURN_INERTIA<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>driveInertiaMoment<span class="token operator">: </span><a href="../../frc.chargers.utils.math.units/index.html#-978604834%2FClasslikes%2F769193423">Inertia</a><span class="token operator"> = </span>DEFAULT_SWERVE_DRIVE_INERTIA<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>maxModuleSpeed<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span><span class="token operator"> = </span>DEFAULT_MAX_MODULE_SPEED<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>wheelDiameter<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Length///PointingToDeclaration/">Length</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>trackWidth<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>wheelBase<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></span></span><span class="token punctuation">)</span></div><p class="paragraph">A class that holds Hardware constants for a frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain. This includes Track width, wheelbase, inertia, turn motor inversion, and max speed.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1041964968%2FConstructors%2F769193423" anchor-label="SwerveHardwareData" id="1041964968%2FConstructors%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-swerve-hardware-data.html"><span>Swerve</span><wbr></wbr><span>Hardware</span><wbr></wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1041964968%2FConstructors%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">invertTurnMotors<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">turnGearRatio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_GEAR_RATIO<span class="token punctuation">, </span></span><span class="parameter ">driveGearRatio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a><span class="token operator"> = </span>DEFAULT_GEAR_RATIO<span class="token punctuation">, </span></span><span class="parameter ">turnInertiaMoment<span class="token operator">: </span><a href="../../frc.chargers.utils.math.units/index.html#-978604834%2FClasslikes%2F769193423">Inertia</a><span class="token operator"> = </span>DEFAULT_SWERVE_TURN_INERTIA<span class="token punctuation">, </span></span><span class="parameter ">driveInertiaMoment<span class="token operator">: </span><a href="../../frc.chargers.utils.math.units/index.html#-978604834%2FClasslikes%2F769193423">Inertia</a><span class="token operator"> = </span>DEFAULT_SWERVE_DRIVE_INERTIA<span class="token punctuation">, </span></span><span class="parameter ">maxModuleSpeed<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span><span class="token operator"> = </span>DEFAULT_MAX_MODULE_SPEED<span class="token punctuation">, </span></span><span class="parameter ">wheelDiameter<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Length///PointingToDeclaration/">Length</span><span class="token punctuation">, </span></span><span class="parameter ">trackWidth<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span><span class="token punctuation">, </span></span><span class="parameter ">wheelBase<span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="1160864305%2FClasslikes%2F769193423" anchor-label="Companion" id="1160864305%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1160864305%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="236806558%2FProperties%2F769193423" anchor-label="driveGearRatio" id="236806558%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="drive-gear-ratio.html"><span>drive</span><wbr></wbr><span>Gear</span><wbr></wbr><span><span>Ratio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="236806558%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="drive-gear-ratio.html">driveGearRatio</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-728208576%2FProperties%2F769193423" anchor-label="driveInertiaMoment" id="-728208576%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="drive-inertia-moment.html"><span>drive</span><wbr></wbr><span>Inertia</span><wbr></wbr><span><span>Moment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-728208576%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="drive-inertia-moment.html">driveInertiaMoment</a><span class="token operator">: </span><a href="../../frc.chargers.utils.math.units/index.html#-978604834%2FClasslikes%2F769193423">Inertia</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-159874785%2FProperties%2F769193423" anchor-label="invertTurnMotors" id="-159874785%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invert-turn-motors.html"><span>invert</span><wbr></wbr><span>Turn</span><wbr></wbr><span><span>Motors</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-159874785%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="invert-turn-motors.html">invertTurnMotors</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="548199769%2FProperties%2F769193423" anchor-label="maxModuleSpeed" id="548199769%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="max-module-speed.html"><span>max</span><wbr></wbr><span>Module</span><wbr></wbr><span><span>Speed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="548199769%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="max-module-speed.html">maxModuleSpeed</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Velocity///PointingToDeclaration/">Velocity</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1120305493%2FProperties%2F769193423" anchor-label="trackWidth" id="1120305493%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="track-width.html"><span>track</span><wbr></wbr><span><span>Width</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1120305493%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="track-width.html">trackWidth</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-671018101%2FProperties%2F769193423" anchor-label="turnGearRatio" id="-671018101%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="turn-gear-ratio.html"><span>turn</span><wbr></wbr><span>Gear</span><wbr></wbr><span><span>Ratio</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-671018101%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="turn-gear-ratio.html">turnGearRatio</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1069064531%2FProperties%2F769193423" anchor-label="turnInertiaMoment" id="-1069064531%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="turn-inertia-moment.html"><span>turn</span><wbr></wbr><span>Inertia</span><wbr></wbr><span><span>Moment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1069064531%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="turn-inertia-moment.html">turnInertiaMoment</a><span class="token operator">: </span><a href="../../frc.chargers.utils.math.units/index.html#-978604834%2FClasslikes%2F769193423">Inertia</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-372589154%2FProperties%2F769193423" anchor-label="wheelBase" id="-372589154%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="wheel-base.html"><span>wheel</span><wbr></wbr><span><span>Base</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-372589154%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="wheel-base.html">wheelBase</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-902774174%2FProperties%2F769193423" anchor-label="wheelDiameter" id="-902774174%2FProperties%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="wheel-diameter.html"><span>wheel</span><wbr></wbr><span><span>Diameter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-902774174%2FProperties%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="wheel-diameter.html">wheelDiameter</a><span class="token operator">: </span><span data-unresolved-link="com.batterystaple.kmeasure.quantities/Length///PointingToDeclaration/">Length</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
