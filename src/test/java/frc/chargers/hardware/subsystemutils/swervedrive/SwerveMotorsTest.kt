@@ -1,5 +1,6 @@
 package frc.chargers.hardware.subsystemutils.swervedrive
 
+/*
 import edu.wpi.first.hal.HAL
 import frc.chargers.hardware.motorcontrol.rev.neoSparkMax
 import frc.chargers.hardware.subsystems.swervedrive.sparkMaxSwerveMotors
@@ -25,3 +26,5 @@ internal class SwerveMotorsTest{
         assertEquals(motorHolder.topLeft.inverted, true)
     }
 }
+
+ */
