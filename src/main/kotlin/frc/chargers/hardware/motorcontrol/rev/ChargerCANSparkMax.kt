@@ -4,13 +4,10 @@ import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
 import com.batterystaple.kmeasure.dimensions.VoltageDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
-import com.revrobotics.CANSparkMax
+import com.revrobotics.*
 import com.revrobotics.CANSparkMax.IdleMode
 import com.revrobotics.CANSparkMax.SoftLimitDirection
-import com.revrobotics.CANSparkMaxLowLevel
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame
-import com.revrobotics.REVLibError
-import com.revrobotics.SparkMaxAlternateEncoder
 import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.feedforward.Feedforward
@@ -20,7 +17,7 @@ import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
-import frc.chargers.hardware.sensors.encoders.relative.SparkMaxEncoderAdapter
+import frc.chargers.hardware.sensors.encoders.ResettableEncoder
 import frc.chargers.utils.revertIfInvalid
 import frc.chargers.wpilibextensions.delay
 import kotlin.math.roundToInt
@@ -112,6 +109,24 @@ public inline fun brushedSparkMax(
         .also {
             it.configure(SparkMaxConfiguration().apply(configure))
         }
+
+public class SparkMaxEncoderAdapter(private val revEncoder: RelativeEncoder) : ResettableEncoder, RelativeEncoder by revEncoder {
+    private var previousPosition = revEncoder.position.ofUnit(rotations)
+    private var previousVelocity = AngularVelocity(0.0)
+
+    override fun setZero(newZero: Angle){
+        position = newZero.inUnit(rotations)
+    }
+    override val angularPosition: Angle
+        get() = revEncoder.position.ofUnit(rotations)
+            .revertIfInvalid(previousPosition)
+            .also{ previousPosition = it }
+
+    override val angularVelocity: AngularVelocity
+        get() = revEncoder.velocity.ofUnit(rotations / minutes)
+            .revertIfInvalid(previousVelocity)
+            .also{ previousVelocity = it }
+}
 
 /**
  * Represents a Spark Max motor controller.
@@ -251,6 +266,10 @@ public open class ChargerCANSparkMax(
             deviceName = "ChargerCANSparkMax(id = $deviceId)",
             getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
         ){
+            // ?.let only calls the function(with it as the receiver)
+            // if the configuration is not null.
+            // thus, it also returns a RevlibError, which will be processed
+            // by the motor to determine if all configurations have gone through or not.
             allConfigErrors.clear()
             configuration.idleMode?.let(::setIdleMode)?.updateConfigStatus()
             configuration.inverted?.let(::setInverted)
@@ -294,7 +313,6 @@ public open class ChargerCANSparkMax(
         if (RobotBase.isReal()) delay(200.milli.seconds)
         burnFlash()
     }
-
 
 }
 

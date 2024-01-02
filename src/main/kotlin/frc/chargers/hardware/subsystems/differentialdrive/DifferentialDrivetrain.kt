@@ -53,36 +53,18 @@ public fun interface DifferentialDrivetrain : Subsystem {
     public fun stop(){
         tankDrive(0.0,0.0)
     }
-}
 
-public fun DifferentialDrivetrain.tankDrive(leftPower: Double, rightPower: Double, squareInputs: Boolean) {
-    if (squareInputs) {
-        tankDrive(leftPower = leftPower * leftPower, rightPower = rightPower * rightPower)
-    } else {
-        tankDrive(leftPower = leftPower, rightPower = rightPower)
+    /**
+     * Calls [arcadeDrive] with a [ChassisPowers].
+     */
+    public fun arcadeDrive(chassisPowers: ChassisPowers) {
+        arcadeDrive(power = chassisPowers.xPower, rotation = chassisPowers.rotationPower)
     }
-}
 
-public fun DifferentialDrivetrain.arcadeDrive(power: Double, rotation: Double, squareInputs: Boolean) {
-    if (squareInputs) {
-        arcadeDrive(power = power * power, rotation = rotation * rotation)
-    } else {
-        arcadeDrive(power = power, rotation = rotation)
+    /**
+     * Calls [curvatureDrive] with a [ChassisPowers].
+     */
+    public fun curvatureDrive(chassisPowers: ChassisPowers) {
+        curvatureDrive(power = chassisPowers.xPower, steering = chassisPowers.rotationPower)
     }
-}
-
-public fun DifferentialDrivetrain.curvatureDrive(power: Double, steering: Double, squareInputs: Boolean) {
-    if (squareInputs) {
-        curvatureDrive(power = power * power, steering = steering * steering)
-    } else {
-        curvatureDrive(power = power, steering = steering)
-    }
-}
-
-public fun DifferentialDrivetrain.arcadeDrive(chassisPowers: ChassisPowers) {
-    arcadeDrive(power = chassisPowers.xPower, rotation = chassisPowers.rotationPower)
-}
-
-public fun DifferentialDrivetrain.curvatureDrive(chassisPowers: ChassisPowers) {
-    curvatureDrive(power = chassisPowers.xPower, steering = chassisPowers.rotationPower)
 }

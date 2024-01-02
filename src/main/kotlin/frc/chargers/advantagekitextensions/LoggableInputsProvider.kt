@@ -24,9 +24,60 @@ public typealias ReadOnlyLoggableInput<T> = PropertyDelegateProvider<Any?, ReadO
 public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, ReadWriteProperty<Any?, T>>
 
 
-
+/**
+ * A wrapper around AdvantageKit which manages logging and replaying loggable inputs
+ * in a clean and descriptive way.
+ *
+ * Usage example:
+ *
+ * ```
+ * // have 1 LoggableInputsProvider per subsystem/log category
+ * val ArmLog = LoggableInputsProvider(namespace = "Arm")
+ *
+ * // you can selectively choose whether or not to update inputs;
+ * // this is useful for subsystems that don't use sim and want replay functionality
+ * // with 1 IO impl.
+ * val IntakeLog = LoggableInputsProvider("Intake", updateInputs = RobotBase.isReal())
+ *
+ * public interface ArmIO{
+ *      public fun lowLevelFunction(input: Angle){}
+ *
+ *      // instead of a separate "ArmIOInputs" class, low-level inputs are now part of
+ *      // the io interface instead and are overriden by implementing classes
+ *      public val current: Current
+ *      public var appliedVoltage: Voltage
+ *      public val otherProperty: Double
+ *      public val nullableProperty: Double?
+ * }
+ *
+ * public class ArmIOReal: ArmIO{
+ *      // this value is now automatically logged under
+ *      // "Arm/current(SI value)" and replayed from the same field.
+ *      // no need to call processInputs or updateInputs periodically at all!
+ *      override val current by ArmLog.quantity{...}
+ *
+ *      // kotlin custom getters and setters are also supported!
+ *      override var appliedVoltage by ArmLog.quantity(
+ *          getValue = {...},
+ *          setValue = {...}
+ *       )
+ *
+ *      // logged under "Arm/otherProperty"
+ *      // always use lowercase version of class name for delegates, for example:
+ *      // Quantity<D> - LoggableInputsProvider.quantity{...}
+ *      // Int - LoggableInputsProvider.int{...}
+ *      override val otherProperty by ArmLog.double{...}
+ *
+ *      // native support for kotlin nullables;
+ *      // value logged under "Arm/nullableProperty",
+ *      // and "Arm/nullablePropertyIsValid" logs whether or not the value is null or not.
+ *      override val nullableProperty: Double? by ArmLog.nullableDouble{...}
+ *      ...
+ * }
+ */
 public class LoggableInputsProvider(
-    public val namespace: String
+    public val namespace: String,
+    public val updateInputs: Boolean = true
 ){
     public fun subgroup(group: String): LoggableInputsProvider =
         LoggableInputsProvider("$namespace/$group")
@@ -70,8 +121,11 @@ public class LoggableInputsProvider(
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericValue(variable.name,getValue)}
     public fun <T: AdvantageKitLoggable<T>> nullableValue(default: T, getValue: () -> T?): ReadOnlyLoggableInput<T?> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,default, getValue)}
-
-
+    public fun <T: AdvantageKitLoggable<T>> valueList(
+        default: T,
+        getValue: () -> List<T>
+    ): ReadOnlyLoggableInput<List<T>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValueList(variable.name, default, getValue) }
 
 
 
@@ -136,6 +190,12 @@ public class LoggableInputsProvider(
     ): ReadWriteLoggableInput<T?> =
         PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,default, getValue, setValue)}
 
+    public fun <T: AdvantageKitLoggable<T>> valueList(
+        default: T,
+        getValue: () -> List<T>,
+        setValue: (List<T>) -> Unit
+    ): ReadWriteLoggableInput<List<T>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValueList(variable.name, default, getValue, setValue) }
 
 
 
@@ -174,7 +234,7 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get.asInt
+                if (updateInputs) field = get.asInt
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
@@ -203,7 +263,7 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get.asDouble
+                if (updateInputs) field = get.asDouble
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
@@ -229,7 +289,7 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get.asQuantity()
+                if (updateInputs) field = get.asQuantity()
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
@@ -253,7 +313,7 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get.asBoolean
+                if (updateInputs) field = get.asBoolean
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
@@ -279,7 +339,7 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get()
+                if (updateInputs) field = get()
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
@@ -314,7 +374,7 @@ public class LoggableInputsProvider(
 
         init{
             ChargerRobot.runPeriodically{
-                field = get()
+                if (updateInputs) field = get()
                 Logger.processInputs(namespace, dummyInputs)
             }
         }
@@ -602,6 +662,51 @@ public class LoggableInputsProvider(
         override fun getValue(thisRef: Any?, property: KProperty<*>): T? = field
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+            set(value)
+        }
+    }
+
+
+    private inner class AutoLoggedGenericValueList<T: AdvantageKitLoggable<T>>(
+        val name: String,
+        val default: T,
+        val get: () -> List<T>,
+        val set: (List<T>) -> Unit = {}
+    ): ReadWriteProperty<Any?,List<T>>{
+        private var field: List<T> = listOf(default)
+
+        private val dummyInputs = object: LoggableInputs{
+            override fun toLog(table: LogTable) {
+                var counter = 1
+                table.put("$name/totalItems", field.size.toLong())
+                for (item in field){
+                    item.pushToLog(table, "$name/Item#$counter")
+                    counter++
+                }
+            }
+
+            override fun fromLog(table: LogTable) {
+                val totalItems = table.get("$name/totalItems", 0L)
+                val newField = mutableListOf<T>()
+                for (i in 1..totalItems){
+                    newField.add(
+                        default.getFromLog(table, "$name/Item#$i")
+                    )
+                }
+                field = newField
+            }
+        }
+
+        init{
+            ChargerRobot.runPeriodically{
+                field = get()
+                Logger.processInputs(namespace, dummyInputs)
+            }
+        }
+
+        override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> = field
+
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<T>) {
             set(value)
         }
     }

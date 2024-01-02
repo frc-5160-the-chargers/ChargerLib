@@ -3,6 +3,9 @@ package frc.chargers.framework
 import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.units.seconds
 
+/**
+ * A generic data class that configures a [ChargerRobot].
+ */
 public data class RobotConfig(
     val tuningMode: Boolean,
     val isReplay: Boolean,

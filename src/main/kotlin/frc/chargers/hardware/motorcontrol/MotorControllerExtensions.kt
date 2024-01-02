@@ -3,8 +3,6 @@ package frc.chargers.hardware.motorcontrol
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
-import frc.chargers.utils.math.equations.stallTorqueToVoltage
-import frc.chargers.utils.math.units.Torque
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
@@ -45,13 +43,5 @@ public fun MotorController.setVoltage(voltage: Voltage){
     setVoltage(voltage.inUnit(volts))
 }
 
-/**
- * Sets the stall torque of a [MotorController] using the kmeasure torque unit.
- */
-public fun MotorController.setStallTorque(torque: Torque) {
-    setVoltage(
-        stallTorqueToVoltage(torque)
-    )
-}
 
 

@@ -15,10 +15,5 @@ public fun delay(time: Time){
     Timer.delay(time.inUnit(seconds))
 }
 
-public val Timer.time: Time
-    get() = get().ofUnit(seconds)
-@JvmName("advanceIfElapsedKmeasure")
-public fun Timer.advanceIfElapsed(time: Time): Boolean =
-    advanceIfElapsed(time.inUnit(seconds))
 
 

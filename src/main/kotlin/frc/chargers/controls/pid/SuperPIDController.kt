@@ -83,10 +83,19 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
      * Calculates the output of the PID controller, using the calculated error.
      */
     override fun calculateOutput(): Quantity<O> {
-        val setpoint = setpointSupplier.getSetpoint(target)
+        val input = getInput()
+        val setpoint = if (continuousInputRange == null){
+            setpointSupplier.calculateSetpoint(target)
+        }else{
+            setpointSupplier.calculateSetpoint(
+                target.standardize(),
+                continuousInputRange,
+                input.standardize()
+            )
+        }
         val pidOutput = Quantity<O>(
             pidController.calculate(
-                getInput().standardize().siValue,
+                input.standardize().siValue,
                 setpoint.value.standardize().siValue
             )
         )

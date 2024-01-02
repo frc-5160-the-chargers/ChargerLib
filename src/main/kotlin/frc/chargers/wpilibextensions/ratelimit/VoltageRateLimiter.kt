@@ -1,6 +1,8 @@
 package frc.chargers.wpilibextensions.ratelimit
 
+import com.batterystaple.kmeasure.quantities.Quantity
 import com.batterystaple.kmeasure.quantities.Voltage
+import com.batterystaple.kmeasure.quantities.abs
 import edu.wpi.first.math.filter.SlewRateLimiter
 import frc.chargers.utils.math.units.VoltageRate
 
@@ -12,9 +14,12 @@ public class VoltageRateLimiter{
 
 
     private val rateLimiter: SlewRateLimiter
+    private val onlyLimitPositiveAccel: Boolean
+    private var previousInput = Voltage(0.0)
 
-    public constructor(rateLimit: VoltageRate){
+    public constructor(rateLimit: VoltageRate, onlyLimitPositiveAccel: Boolean = false){
         rateLimiter = SlewRateLimiter(rateLimit.siValue)
+        this.onlyLimitPositiveAccel = onlyLimitPositiveAccel
     }
 
     public constructor(
@@ -24,7 +29,7 @@ public class VoltageRateLimiter{
     ){
         require(positiveLimit.siValue > 0.0){"Positive Rate Limit must be a positive value."}
         require(negativeLimit.siValue < 0.0){"Negative Rate Limit must be a negative value."}
-
+        this.onlyLimitPositiveAccel = false
         rateLimiter = SlewRateLimiter(
             positiveLimit.siValue,
             negativeLimit.siValue,
@@ -34,7 +39,14 @@ public class VoltageRateLimiter{
 
 
     public fun calculate(input: Voltage): Voltage =
-        Voltage(rateLimiter.calculate(input.siValue))
+        if (onlyLimitPositiveAccel && abs(input) < abs(previousInput)){
+            previousInput = input
+            rateLimiter.reset(input.siValue)
+            input
+        }else{
+            previousInput = input
+            Quantity(rateLimiter.calculate(input.siValue))
+        }
 
     public fun reset(value: Voltage): Unit =
         rateLimiter.reset(value.siValue)

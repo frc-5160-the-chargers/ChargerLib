@@ -97,7 +97,7 @@ public class OnboardPIDSwerveModule private constructor( // Do not use this cons
 
     override fun setDirection(direction: Angle) {
         val turnSetpoint =
-            controlData.angleSetpointSupplier.getSetpoint(direction)
+            controlData.angleSetpointSupplier.calculateSetpoint(direction)
 
         turnMotor.setAngularPosition(
             turnSetpoint.value,

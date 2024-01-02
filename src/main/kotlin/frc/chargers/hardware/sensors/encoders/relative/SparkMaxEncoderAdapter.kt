@@ -26,5 +26,4 @@ public class SparkMaxEncoderAdapter(private val revEncoder: RelativeEncoder) : R
         get() = revEncoder.velocity.ofUnit(rotations / minutes)
             .revertIfInvalid(previousVelocity)
             .also{ previousVelocity = it }
-
 }
