@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>frc.chargers.controls.motionprofiling</title>
+    <link href="../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../index.html">
+                    <span>ChargerLib</span>
+            </a>
+    </div>
+    <div>
+1.0.0    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="package" id="content" pageIds="ChargerLib::frc.chargers.controls.motionprofiling////PointingToDeclaration//769193423">
+  <div class="breadcrumbs"><a href="../../index.html">ChargerLib</a><span class="delimiter">/</span><span class="current">frc.chargers.controls.motionprofiling</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="1634339935%2FClasslikes%2F769193423" anchor-label="AngularExponentialSetpointSupplier" id="1634339935%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-angular-exponential-setpoint-supplier/index.html"><span>Angular</span><wbr></wbr><span>Exponential</span><wbr></wbr><span>Setpoint</span><wbr></wbr><span><span>Supplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1634339935%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-angular-exponential-setpoint-supplier/index.html">AngularExponentialSetpointSupplier</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">profileConstraints<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.trajectory/ExponentialProfile.Constraints///PointingToDeclaration/">ExponentialProfile.Constraints</span><span class="token punctuation">, </span></span><span class="parameter ">velocityTargetFF<span class="token operator">: </span><a href="../frc.chargers.controls.feedforward/-feedforward/index.html">Feedforward</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/AngularVelocityDimension///PointingToDeclaration/">AngularVelocityDimension</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VoltageDimension///PointingToDeclaration/">VoltageDimension</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">startingState<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.trajectory/ExponentialProfile.State///PointingToDeclaration/">ExponentialProfile.State</span><span class="token operator"> = </span>State(0.0,0.0)</span></span><span class="token punctuation">)</span> : <span data-unresolved-link="edu.wpi.first.math.trajectory/ExponentialProfile///PointingToDeclaration/">ExponentialProfile</span>, <a href="../frc.chargers.controls/-setpoint-supplier/index.html">SetpointSupplier</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/AngleDimension///PointingToDeclaration/">AngleDimension</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VoltageDimension///PointingToDeclaration/">VoltageDimension</span><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A <a href="../frc.chargers.controls/-setpoint-supplier/index.html">SetpointSupplier</a> instance which derives Angular <a href="../frc.chargers.controls/-setpoint/index.html">Setpoint</a>s (consisting of the setpoint(Angle) and a feedforward value(Voltage)) from an <span data-unresolved-link="edu.wpi.first.math.trajectory/ExponentialProfile///PointingToDeclaration/">ExponentialProfile</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="860346705%2FClasslikes%2F769193423" anchor-label="AngularTrapezoidalSetpointSupplier" id="860346705%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-angular-trapezoidal-setpoint-supplier/index.html"><span>Angular</span><wbr></wbr><span>Trapezoidal</span><wbr></wbr><span>Setpoint</span><wbr></wbr><span><span>Supplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="860346705%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-angular-trapezoidal-setpoint-supplier/index.html">AngularTrapezoidalSetpointSupplier</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">profileConstraints<span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.motion/-angular-motion-constraints/index.html">AngularMotionConstraints</a><span class="token punctuation">, </span></span><span class="parameter ">velocityTargetFF<span class="token operator">: </span><a href="../frc.chargers.controls.feedforward/-feedforward/index.html">Feedforward</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/AngularVelocityDimension///PointingToDeclaration/">AngularVelocityDimension</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VoltageDimension///PointingToDeclaration/">VoltageDimension</span><span class="token operator">&gt;</span><span class="token operator"> = </span>Feedforward{ Voltage(0.0) }<span class="token punctuation">, </span></span><span class="parameter ">startingState<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile.State///PointingToDeclaration/">TrapezoidProfile.State</span><span class="token operator"> = </span>State()</span></span><span class="token punctuation">)</span> : <span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile///PointingToDeclaration/">TrapezoidProfile</span>, <a href="../frc.chargers.controls/-setpoint-supplier/index.html">SetpointSupplier</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/AngleDimension///PointingToDeclaration/">AngleDimension</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VoltageDimension///PointingToDeclaration/">VoltageDimension</span><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A <a href="../frc.chargers.controls/-setpoint-supplier/index.html">SetpointSupplier</a> instance which derives Angular <a href="../frc.chargers.controls/-setpoint/index.html">Setpoint</a>s (consisting of the setpoint(Angle) and a feedforward value(Voltage)) from a <span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile///PointingToDeclaration/">TrapezoidProfile</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="123889836%2FClasslikes%2F769193423" anchor-label="LinearExponentialSetpointSupplier" id="123889836%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-linear-exponential-setpoint-supplier/index.html"><span>Linear</span><wbr></wbr><span>Exponential</span><wbr></wbr><span>Setpoint</span><wbr></wbr><span><span>Supplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="123889836%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-linear-exponential-setpoint-supplier/index.html">LinearExponentialSetpointSupplier</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">profileConstraints<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.trajectory/ExponentialProfile.Constraints///PointingToDeclaration/">ExponentialProfile.Constraints</span><span class="token punctuation">, </span></span><span class="parameter ">velocityTargetFF<span class="token operator">: </span><a href="../frc.chargers.controls.feedforward/-feedforward/index.html">Feedforward</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VelocityDimension///PointingToDeclaration/">VelocityDimension</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VoltageDimension///PointingToDeclaration/">VoltageDimension</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">startingState<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.trajectory/ExponentialProfile.State///PointingToDeclaration/">ExponentialProfile.State</span><span class="token operator"> = </span>State(0.0,0.0)</span></span><span class="token punctuation">)</span> : <span data-unresolved-link="edu.wpi.first.math.trajectory/ExponentialProfile///PointingToDeclaration/">ExponentialProfile</span>, <a href="../frc.chargers.controls/-setpoint-supplier/index.html">SetpointSupplier</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/DistanceDimension///PointingToDeclaration/">DistanceDimension</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VoltageDimension///PointingToDeclaration/">VoltageDimension</span><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A <a href="../frc.chargers.controls/-setpoint-supplier/index.html">SetpointSupplier</a> instance which derives Linear <a href="../frc.chargers.controls/-setpoint/index.html">Setpoint</a>s (consisting of the setpoint(Distance) and a feedforward value(Voltage)) from an <span data-unresolved-link="edu.wpi.first.math.trajectory/ExponentialProfile///PointingToDeclaration/">ExponentialProfile</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-650103394%2FClasslikes%2F769193423" anchor-label="LinearTrapezoidalSetpointSupplier" id="-650103394%2FClasslikes%2F769193423" data-filterable-set=":dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":dokkaHtml/main" data-filterable-set=":dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-linear-trapezoidal-setpoint-supplier/index.html"><span>Linear</span><wbr></wbr><span>Trapezoidal</span><wbr></wbr><span>Setpoint</span><wbr></wbr><span><span>Supplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-650103394%2FClasslikes%2F769193423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-linear-trapezoidal-setpoint-supplier/index.html">LinearTrapezoidalSetpointSupplier</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">profileConstraints<span class="token operator">: </span><a href="../frc.chargers.wpilibextensions.geometry.motion/-linear-motion-constraints/index.html">LinearMotionConstraints</a><span class="token punctuation">, </span></span><span class="parameter ">velocityTargetFF<span class="token operator">: </span><a href="../frc.chargers.controls.feedforward/-feedforward/index.html">Feedforward</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VelocityDimension///PointingToDeclaration/">VelocityDimension</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VoltageDimension///PointingToDeclaration/">VoltageDimension</span><span class="token operator">&gt;</span><span class="token operator"> = </span>Feedforward{ Voltage(0.0) }<span class="token punctuation">, </span></span><span class="parameter ">startingState<span class="token operator">: </span><span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile.State///PointingToDeclaration/">TrapezoidProfile.State</span><span class="token operator"> = </span>State()</span></span><span class="token punctuation">)</span> : <span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile///PointingToDeclaration/">TrapezoidProfile</span>, <a href="../frc.chargers.controls/-setpoint-supplier/index.html">SetpointSupplier</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/DistanceDimension///PointingToDeclaration/">DistanceDimension</span><span class="token punctuation">, </span><span class="token keyword"></span><span data-unresolved-link="com.batterystaple.kmeasure.dimensions/VoltageDimension///PointingToDeclaration/">VoltageDimension</span><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A <a href="../frc.chargers.controls/-setpoint-supplier/index.html">SetpointSupplier</a> instance which derives Linear <a href="../frc.chargers.controls/-setpoint/index.html">Setpoint</a>s (consisting of the setpoint(<span data-unresolved-link="com.batterystaple.kmeasure.quantities/Distance///PointingToDeclaration/">Distance</span>) and a feedforward value(<span data-unresolved-link="com.batterystaple.kmeasure.quantities/Voltage///PointingToDeclaration/">Voltage</span>)) from a <span data-unresolved-link="edu.wpi.first.math.trajectory/TrapezoidProfile///PointingToDeclaration/">TrapezoidProfile</span>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
