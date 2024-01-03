@@ -2,14 +2,14 @@ package frc.chargers.hardware.subsystems.swervedrive
 
 import com.revrobotics.CANSparkMaxLowLevel
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
-import frc.chargers.hardware.configuration.HardwareConfigurable
-import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.SmartEncoderMotorController
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
+import frc.chargers.hardware.motorcontrol.ctre.falcon
 import frc.chargers.hardware.motorcontrol.rev.ChargerCANSparkMax
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
-import kotlin.internal.LowPriorityInOverloadResolution
+import frc.chargers.hardware.motorcontrol.rev.brushedSparkMax
+import frc.chargers.hardware.motorcontrol.rev.neoSparkMax
 
 
 /**
@@ -22,13 +22,22 @@ public inline fun sparkMaxSwerveMotors(
     bottomRightId: Int,
     type: CANSparkMaxLowLevel.MotorType = CANSparkMaxLowLevel.MotorType.kBrushless,
     configure: SparkMaxConfiguration.() -> Unit = {}
-): SwerveMotors = sparkMaxSwerveMotors(
-    ChargerCANSparkMax(topLeftId, type),
-    ChargerCANSparkMax(topRightId,type),
-    ChargerCANSparkMax(bottomLeftId,type),
-    ChargerCANSparkMax(bottomRightId,type),
-    configure
-)
+): SwerveMotors = when (type){
+    CANSparkMaxLowLevel.MotorType.kBrushless -> sparkMaxSwerveMotors(
+        neoSparkMax(topLeftId),
+        neoSparkMax(topRightId),
+        neoSparkMax(bottomLeftId),
+        neoSparkMax(bottomRightId),
+        configure
+    )
+    CANSparkMaxLowLevel.MotorType.kBrushed -> sparkMaxSwerveMotors(
+        brushedSparkMax(topLeftId),
+        brushedSparkMax(topRightId),
+        brushedSparkMax(bottomLeftId),
+        brushedSparkMax(bottomRightId),
+        configure
+    )
+}
 
 
 /**
@@ -41,10 +50,10 @@ public inline fun talonFXSwerveMotors(
     bottomRightId: Int,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): SwerveMotors = talonFXSwerveMotors(
-    ChargerTalonFX(topLeftId),
-    ChargerTalonFX(topRightId),
-    ChargerTalonFX(bottomLeftId),
-    ChargerTalonFX(bottomRightId),
+    falcon(topLeftId),
+    falcon(topRightId),
+    falcon(bottomLeftId),
+    falcon(bottomRightId),
     configure
 )
 
@@ -57,9 +66,18 @@ public inline fun sparkMaxSwerveMotors(
     bottomLeft: ChargerCANSparkMax,
     bottomRight: ChargerCANSparkMax,
     configure: SparkMaxConfiguration.() -> Unit = {}
-): SwerveMotors = OnboardPIDSwerveMotors(
-    topLeft, topRight, bottomLeft, bottomRight, SparkMaxConfiguration().apply(configure)
-)
+): SwerveMotors{
+    val config = SparkMaxConfiguration().apply(configure)
+
+    topLeft.configure(config)
+    topRight.configure(config)
+    bottomLeft.configure(config)
+    bottomRight.configure(config)
+
+    return OnboardPIDSwerveMotors(
+        topLeft, topRight, bottomLeft, bottomRight,
+    )
+}
 
 
 /**
@@ -71,74 +89,18 @@ public inline fun talonFXSwerveMotors(
     bottomLeft: ChargerTalonFX,
     bottomRight: ChargerTalonFX,
     configure: TalonFXConfiguration.() -> Unit = {}
-): SwerveMotors = OnboardPIDSwerveMotors(
-    topLeft, topRight, bottomLeft, bottomRight, TalonFXConfiguration().apply(configure)
-)
+): SwerveMotors{
+    val config = TalonFXConfiguration().apply(configure)
 
+    topLeft.configure(config)
+    topRight.configure(config)
+    bottomLeft.configure(config)
+    bottomRight.configure(config)
 
-@LowPriorityInOverloadResolution
-public fun <M, C: HardwareConfiguration> OnboardPIDSwerveMotors(
-    topLeft: M,
-    topRight: M,
-    bottomLeft: M,
-    bottomRight: M,
-    configuration: C? = null
-): OnboardPIDSwerveMotors where M: SmartEncoderMotorController, M: HardwareConfigurable<C> =
-    OnboardPIDSwerveMotors(
-        topLeft = topLeft.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        topRight.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        bottomLeft.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        bottomRight.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        }
+    return OnboardPIDSwerveMotors(
+        topLeft, topRight, bottomLeft, bottomRight,
     )
-
-
-
-@LowPriorityInOverloadResolution
-public fun <M, C: HardwareConfiguration> SwerveMotors(
-    topLeft: M,
-    topRight: M,
-    bottomLeft: M,
-    bottomRight: M,
-    configuration: C? = null
-): SwerveMotors where M: EncoderMotorController, M: HardwareConfigurable<C> =
-    SwerveMotors(
-        topLeft = topLeft.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        topRight.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        bottomLeft.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        bottomRight.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        }
-    )
+}
 
 /**
  * A Helper class to store a group of motors needed for an [EncoderHolonomicDrivetrain],

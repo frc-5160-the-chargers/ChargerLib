@@ -35,7 +35,7 @@ public fun falcon(
     // Example Usage: falcon(6){ beepOnBoot = true; neutralMode = NeutralModeValue.Brake }
     configure: TalonFXConfiguration.() -> Unit = {}
 ): ChargerTalonFX = ChargerTalonFX(canId, canBus).apply {
-    // factory defaults configs on startup is factoryDefault = true
+    // factory defaults configs on startup when factoryDefault = true
     if (factoryDefault) {
         configurator.apply(CTRETalonFXConfiguration(), 0.02)
     }
@@ -133,6 +133,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         }
         if (configHasChanged){
             configurator.apply(currentSlotConfigs)
+            println("PID status has been updated.")
         }
         velocityRequest.Velocity = target.inUnit(rotations/seconds)
         setControl(velocityRequest)
@@ -147,6 +148,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         if (currentPIDConstants() != pidConstants){
             setPIDConstants(pidConstants)
             configurator.apply(currentSlotConfigs)
+            println("PID status has been updated.")
         }
         if (absoluteEncoder == null){
             positionRequest.Position = target.inUnit(rotations)
@@ -180,7 +182,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
             val baseTalonFXConfig = CTRETalonFXConfiguration()
             configurator.refresh(baseTalonFXConfig)
             applyChanges(baseTalonFXConfig, configuration)
-            configurator.apply(baseTalonFXConfig,0.050).updateConfigStatus()
+            configurator.apply(baseTalonFXConfig,0.02).updateConfigStatus()
 
             configuration.apply{
                 positionUpdateFrequency?.let{

@@ -1,13 +1,10 @@
 package frc.chargers.hardware.subsystems.swervedrive
 
 import com.batterystaple.kmeasure.quantities.Angle
-import frc.chargers.hardware.configuration.HardwareConfigurable
-import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.absolute.CANcoderConfiguration
 import frc.chargers.hardware.sensors.encoders.absolute.ChargerCANcoder
 import frc.chargers.hardware.sensors.withOffset
-import kotlin.internal.LowPriorityInOverloadResolution
 
 /**
  * Constructs an instance of [SwerveEncoders] with CTRE CANcoders.
@@ -38,12 +35,13 @@ public inline fun swerveCANcoders(
     useAbsoluteSensor: Boolean,
     configure: CANcoderConfiguration.() -> Unit = {}
 ): SwerveEncoders {
-    topLeft.configure(CANcoderConfiguration().apply(configure))
-    topRight.configure(CANcoderConfiguration().apply(configure))
-    bottomLeft.configure(CANcoderConfiguration().apply(configure))
-    bottomRight.configure(CANcoderConfiguration().apply(configure))
+    val config = CANcoderConfiguration().apply(configure)
+    topLeft.configure(config)
+    topRight.configure(config)
+    bottomLeft.configure(config)
+    bottomRight.configure(config)
 
-    return if(useAbsoluteSensor){
+    return if (useAbsoluteSensor){
         SwerveEncoders(
             topLeft.absolute,
             topRight.absolute,
@@ -58,39 +56,7 @@ public inline fun swerveCANcoders(
             bottomRight
         )
     }
-
 }
-
-@LowPriorityInOverloadResolution
-public fun <E, C: HardwareConfiguration> SwerveEncoders(
-    topLeft: E,
-    topRight: E,
-    bottomLeft: E,
-    bottomRight: E,
-    configuration: C? = null
-): SwerveEncoders where E: PositionEncoder, E: HardwareConfigurable<C> =
-    SwerveEncoders(
-        topLeft.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        topRight.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        bottomLeft.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        },
-        bottomRight.apply{
-            if(configuration != null){
-                configure(configuration)
-            }
-        }
-    )
 
 
 public data class SwerveEncoders(
