@@ -42,15 +42,15 @@ private val standardLogInputs = LoggableInputsProvider(namespace = "Drivetrain(D
 public inline fun sparkMaxDrivetrain(
     leftMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
     rightMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
-    constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
-    controlScheme: DiffDriveControlData = DiffDriveControlData.None,
+    hardwareData: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    controlData: DiffDriveControlData = DiffDriveControlData.None,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
-        leftMotors, rightMotors, constants, controlScheme,
+        leftMotors, rightMotors, hardwareData, controlData,
         DifferentialDrivetrainSim.KitbotMotor.kDoubleNEOPerSide,
         gyro, startingPose, *poseSuppliers,
         configuration = SparkMaxConfiguration().apply(configure)
@@ -64,15 +64,15 @@ public inline fun sparkMaxDrivetrain(
 public inline fun talonFXDrivetrain(
     leftMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
     rightMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
-    constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
-    controlScheme: DiffDriveControlData = DiffDriveControlData.None,
+    hardwareData: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    controlData: DiffDriveControlData = DiffDriveControlData.None,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
-        leftMotors, rightMotors, constants, controlScheme,
+        leftMotors, rightMotors, hardwareData, controlData,
         DifferentialDrivetrainSim.KitbotMotor.kDoubleFalcon500PerSide,
         gyro, startingPose, *poseSuppliers,
         configuration = TalonFXConfiguration().apply(configure)
@@ -85,8 +85,8 @@ public inline fun talonFXDrivetrain(
 public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
     leftMotors: EncoderMotorControllerGroup<C>,
     rightMotors: EncoderMotorControllerGroup<C>,
-    constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
-    controlScheme: DiffDriveControlData = DiffDriveControlData.None,
+    hardwareData: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    controlData: DiffDriveControlData = DiffDriveControlData.None,
     simMotors: DifferentialDrivetrainSim.KitbotMotor = DifferentialDrivetrainSim.KitbotMotor.kDualCIMPerSide,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
@@ -103,39 +103,39 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
         DiffDriveIOSim(standardLogInputs, simMotors)
     }
 
-    return EncoderDifferentialDrivetrain(lowLevel, constants, controlScheme, gyro, startingPose, *poseSuppliers)
+    return EncoderDifferentialDrivetrain(lowLevel, hardwareData, controlData, gyro, startingPose, *poseSuppliers)
 }
 
 
 
 public class EncoderDifferentialDrivetrain(
     lowLevel: DiffDriveIO,
-    public val constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
-    public val controlScheme: DiffDriveControlData = DiffDriveControlData.None,
+    public val hardwareData: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
+    public val controlData: DiffDriveControlData = DiffDriveControlData.None,
     public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
 ): SubsystemBase(), DifferentialDrivetrain, HeadingProvider, DiffDriveIO by lowLevel {
-    private val wheelRadius = constants.wheelDiameter / 2
+    private val wheelRadius = hardwareData.wheelDiameter / 2
 
-    internal val wheelTravelPerMotorRadian = constants.gearRatio * wheelRadius
+    internal val wheelTravelPerMotorRadian = hardwareData.gearRatio * wheelRadius
 
     private val leftController = SuperPIDController(
-        controlScheme.leftVelocityPID,
+        controlData.leftVelocityPID,
         getInput = {leftVelocity},
         target = AngularVelocity(0.0),
         setpointSupplier = SetpointSupplier.Default(
-            feedforward = Feedforward(controlScheme.leftFF)
+            feedforward = Feedforward(controlData.leftFF)
         ),
         selfSustain = true,
     )
 
     private val rightController = SuperPIDController(
-        controlScheme.rightVelocityPID,
+        controlData.rightVelocityPID,
         getInput = {rightVelocity},
         target = AngularVelocity(0.0),
         setpointSupplier = SetpointSupplier.Default(
-            feedforward = Feedforward(controlScheme.rightFF)
+            feedforward = Feedforward(controlData.rightFF)
         ),
         selfSustain = true,
     )
@@ -143,7 +143,9 @@ public class EncoderDifferentialDrivetrain(
 
 
     init{
-        inverted = constants.invertMotors
+        inverted = hardwareData.invertMotors
+
+
     }
 
     /**
@@ -160,7 +162,7 @@ public class EncoderDifferentialDrivetrain(
      * @see DifferentialDriveKinematics
      */
     public val kinematics: DifferentialDriveKinematics = DifferentialDriveKinematics(
-        constants.width.inUnit(meters)
+        hardwareData.width.inUnit(meters)
     )
 
     /**
@@ -203,7 +205,7 @@ public class EncoderDifferentialDrivetrain(
      * @see HeadingProvider
      */
     public override val heading: Angle
-        get() = wheelTravelPerMotorRadian * (rightWheelTravel - leftWheelTravel) / constants.width
+        get() = wheelTravelPerMotorRadian * (rightWheelTravel - leftWheelTravel) / hardwareData.width
 
     /**
      * Gets the current [ChassisSpeeds] of the robot.
@@ -234,8 +236,8 @@ public class EncoderDifferentialDrivetrain(
     }
 
     public fun velocityDrive(leftSpeed: Velocity, rightSpeed: Velocity){
-        leftController.target = leftSpeed / (constants.gearRatio * constants.wheelDiameter)
-        rightController.target = rightSpeed / (constants.gearRatio * constants.wheelDiameter)
+        leftController.target = leftSpeed / (hardwareData.gearRatio * hardwareData.wheelDiameter)
+        rightController.target = rightSpeed / (hardwareData.gearRatio * hardwareData.wheelDiameter)
         setVoltages(
             left = leftController.calculateOutput(),
             right = rightController.calculateOutput()

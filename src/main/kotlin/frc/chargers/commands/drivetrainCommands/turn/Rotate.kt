@@ -71,7 +71,7 @@ context(CommandBuilder)
 @LowPriorityInOverloadResolution
 public fun EncoderDifferentialDrivetrain.rotateAction(
     angle: Angle,
-    pidConstants: PIDConstants = controlScheme.robotRotationPID,
+    pidConstants: PIDConstants = controlData.robotRotationPID,
     precision: Precision<AngleDimension> = Precision.AllowOvershoot,
     maxSteeringPower: Double = DEFAULT_MAX_STEERING_POWER
 ): Command = with (gyro ?: this as HeadingProvider) {

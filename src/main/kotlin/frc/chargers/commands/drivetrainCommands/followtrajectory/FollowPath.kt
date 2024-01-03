@@ -30,14 +30,14 @@ import kotlin.math.sqrt
 context(CommandBuilder)
 public fun EncoderDifferentialDrivetrain.followPathAction(path: PathPlannerPath): Command =
     FollowPathWithEvents(
-        if (controlScheme.pathAlgorithm == DiffDriveControlData.PathAlgorithm.LTV){
+        if (controlData.pathAlgorithm == DiffDriveControlData.PathAlgorithm.LTV){
             FollowPathLTV(
                 path,
                 { poseEstimator.robotPose.inUnit(meters) },
                 { currentSpeeds },
                 { speeds -> velocityDrive(speeds) },
                 ChargerRobot.LOOP_PERIOD.inUnit(seconds),
-                controlScheme.pathReplanConfig,
+                controlData.pathReplanConfig,
                 this@EncoderDifferentialDrivetrain
             )
         }else{
@@ -46,7 +46,7 @@ public fun EncoderDifferentialDrivetrain.followPathAction(path: PathPlannerPath)
                 { poseEstimator.robotPose.inUnit(meters) },
                 { currentSpeeds },
                 { speeds -> velocityDrive(speeds) },
-                controlScheme.pathReplanConfig,
+                controlData.pathReplanConfig,
                 this@EncoderDifferentialDrivetrain
             )
         },

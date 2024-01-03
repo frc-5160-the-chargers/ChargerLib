@@ -34,7 +34,7 @@ public fun EncoderDifferentialDrivetrain.driveStraightAction(
     val initialHeading by getOnceDuringRun { direction ?: getHeading() }
     val pid by getOnceDuringRun {
         SuperPIDController(
-            pidConstants = this@EncoderDifferentialDrivetrain.controlScheme.robotRotationPID,
+            pidConstants = this@EncoderDifferentialDrivetrain.controlData.robotRotationPID,
             getInput = { getHeading() },
             target = initialHeading,
             outputRange = -Scalar(maxSteeringPower)..Scalar(maxSteeringPower)
