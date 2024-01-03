@@ -4,7 +4,6 @@ import com.batterystaple.kmeasure.quantities.*
 import frc.chargers.utils.math.units.*
 
 
-
 /**
  * Represents constants for Feedforward control
  * of an angular velocity targeting mechanism with no gravity.

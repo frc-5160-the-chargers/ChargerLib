@@ -8,7 +8,7 @@ import edu.wpi.first.hal.HAL
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.wpilibj.simulation.SimHooks
-import frc.chargers.controls.SetpointSupplier
+import frc.chargers.controls.motionprofiling.AngularTrapezoidalSetpointSupplier
 import frc.chargers.utils.math.equations.epsilonEquals
 import frc.chargers.wpilibextensions.geometry.motion.AngularMotionConstraints
 import org.junit.jupiter.api.Assertions.*
@@ -69,11 +69,11 @@ internal class SuperPIDControllerTest{
 
         val wpiController = ProfiledPIDController(kP,kI,kD, constraints.siValue)
         wpiController.enableContinuousInput(0.0.degrees.siValue,360.degrees.siValue)
-        val chargerController = SuperPIDController<AngleDimension, VoltageDimension>(
+        val chargerController = SuperPIDController(
             PIDConstants(kP,kI,kD),
             ::getInput,
             target,
-            SetpointSupplier.AngularTrapezoidal(constraints),
+            AngularTrapezoidalSetpointSupplier(constraints),
             continuousInputRange = 0.degrees..360.degrees
         )
 

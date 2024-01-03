@@ -9,6 +9,7 @@ import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
@@ -31,14 +32,8 @@ import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
 import org.littletonrobotics.junction.Logger.recordOutput
 
-public fun simulatedDrivetrain(
-    simMotors: DifferentialDrivetrainSim.KitbotMotor,
-    constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
-    controlScheme: DiffDriveControlData = DiffDriveControlData.None
-): EncoderDifferentialDrivetrain = EncoderDifferentialDrivetrain(
-    DiffDriveIOSim(logInputs = LoggableInputsProvider(namespace = "Drivetrain(Differential)"),simMotors),
-    constants, controlScheme
-)
+private val standardLogInputs = LoggableInputsProvider(namespace = "Drivetrain(Differential)")
+
 
 /**
  * A convenience function to create a [EncoderDifferentialDrivetrain]
@@ -54,8 +49,13 @@ public inline fun sparkMaxDrivetrain(
     vararg poseSuppliers: VisionPoseSupplier,
     configure: SparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme, gyro, startingPose, *poseSuppliers,
-        configuration = SparkMaxConfiguration().apply(configure))
+    EncoderDifferentialDrivetrain(
+        leftMotors, rightMotors, constants, controlScheme,
+        DifferentialDrivetrainSim.KitbotMotor.kDoubleNEOPerSide,
+        gyro, startingPose, *poseSuppliers,
+        configuration = SparkMaxConfiguration().apply(configure)
+    )
+
 
 /**
  * A convenience function to create a [EncoderDifferentialDrivetrain]
@@ -71,8 +71,12 @@ public inline fun talonFXDrivetrain(
     vararg poseSuppliers: VisionPoseSupplier,
     configure: TalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(leftMotors, rightMotors, constants, controlScheme, gyro, startingPose, *poseSuppliers,
-        configuration = TalonFXConfiguration().apply(configure))
+    EncoderDifferentialDrivetrain(
+        leftMotors, rightMotors, constants, controlScheme,
+        DifferentialDrivetrainSim.KitbotMotor.kDoubleFalcon500PerSide,
+        gyro, startingPose, *poseSuppliers,
+        configuration = TalonFXConfiguration().apply(configure)
+    )
 
 /**
  * A convenience function to create an [EncoderDifferentialDrivetrain]
@@ -83,19 +87,24 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
     rightMotors: EncoderMotorControllerGroup<C>,
     constants: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
     controlScheme: DiffDriveControlData = DiffDriveControlData.None,
+    simMotors: DifferentialDrivetrainSim.KitbotMotor = DifferentialDrivetrainSim.KitbotMotor.kDualCIMPerSide,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
     configuration: C
-): EncoderDifferentialDrivetrain =
-    EncoderDifferentialDrivetrain(
-        lowLevel = DiffDriveIOReal(
-            logInputs = LoggableInputsProvider(namespace = "Drivetrain(Differential)"),
-            leftMotors = leftMotors.apply { configure(configuration) },
-            rightMotors = rightMotors.apply { configure(configuration) }
-        ),
-        constants, controlScheme, gyro, startingPose, *poseSuppliers
-    )
+): EncoderDifferentialDrivetrain{
+    val lowLevel = if (RobotBase.isReal()){
+        DiffDriveIOReal(
+            standardLogInputs,
+            leftMotors.apply { configure(configuration) },
+            rightMotors.apply { configure(configuration) }
+        )
+    }else{
+        DiffDriveIOSim(standardLogInputs, simMotors)
+    }
+
+    return EncoderDifferentialDrivetrain(lowLevel, constants, controlScheme, gyro, startingPose, *poseSuppliers)
+}
 
 
 
@@ -207,6 +216,8 @@ public class EncoderDifferentialDrivetrain(
             )
         )
 
+    // arcade drive and curvature drive implementations
+    // are provided in the DifferentialDrivetrain interface
     override fun tankDrive(leftPower: Double, rightPower: Double) {
         setVoltages(leftPower * 12.volts, rightPower * 12.volts)
     }

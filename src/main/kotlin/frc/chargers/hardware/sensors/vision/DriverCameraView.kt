@@ -4,6 +4,9 @@ import edu.wpi.first.networktables.NetworkTableEntry
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.cameraserver.CameraServer
 
+/**
+ * Wraps WPILib's [CameraServer]; being used to handle driver cameras.
+ */
 public class DriverCameraView(
     totalDriverCams: Int = 1,
     private val defaultResWidth: Int,

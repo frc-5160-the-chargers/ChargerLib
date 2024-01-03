@@ -1,7 +1,5 @@
 package frc.chargers.hardware.sensors.encoders.absolute
 
-import com.batterystaple.kmeasure.dimensions.AngleDimension
-import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.hertz
 import com.batterystaple.kmeasure.units.rotations
@@ -14,9 +12,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.configuration.safeConfigure
-import frc.chargers.hardware.sensors.encoders.ResettableTimestampedEncoder
-import frc.chargers.hardware.sensors.encoders.TimestampedEncoder
-import frc.chargers.utils.QuantityMeasurement
+import frc.chargers.hardware.sensors.encoders.ResettableEncoder
 
 
 /**
@@ -41,7 +37,7 @@ public class ChargerCANcoder(
     deviceId: Int,
     canBus: String = "",
     factoryDefault: Boolean = true
-): CTRECANcoder(deviceId, canBus), ResettableTimestampedEncoder, HardwareConfigurable<CANcoderConfiguration> {
+): CTRECANcoder(deviceId, canBus), ResettableEncoder, HardwareConfigurable<CANcoderConfiguration> {
 
     init{
         if (factoryDefault){
@@ -50,7 +46,40 @@ public class ChargerCANcoder(
         }
     }
 
-    public val absolute: TimestampedEncoder = AbsoluteEncoderAdaptor()
+    /**
+     * Represents the absolute encoder of the CANcoder.
+     */
+    public val absolute: ResettableEncoder = AbsoluteEncoderAdaptor()
+
+    private inner class AbsoluteEncoderAdaptor: ResettableEncoder by this, HardwareConfigurable<CANcoderConfiguration> by this{
+        private val absolutePosSignal = absolutePosition
+
+        override val angularPosition: Angle
+            get() = absolutePosSignal.refresh(true).value.ofUnit(rotations)
+    }
+
+
+    private var filterVelocity: Boolean = true
+    private val posSignal = position
+    private val velSignal = if (filterVelocity) velocity else unfilteredVelocity
+
+    override fun setZero(newZero: Angle){
+        setPosition(newZero.inUnit(rotations))
+    }
+
+    /**
+     * Obtains the relative position from the CANcoder.
+     */
+    override val angularPosition: Angle
+        get() = posSignal.refresh(true).value.ofUnit(rotations)
+
+    /**
+     * Obtains the velocity of the CANcoder.
+     */
+    override val angularVelocity: AngularVelocity
+        get() = velSignal.refresh(true).value.ofUnit(rotations/seconds)
+
+
 
     private val allConfigErrors: LinkedHashSet<StatusCode> = linkedSetOf()
     private var configAppliedProperly = true
@@ -88,50 +117,6 @@ public class ChargerCANcoder(
             configuration.filterVelocity?.let{ filterVelocity = it }
             return@safeConfigure configAppliedProperly
         }
-    }
-
-    private var filterVelocity: Boolean = true
-    private val posSignal = position
-    private val velSignal = if (filterVelocity) velocity else unfilteredVelocity
-
-    override fun setZero(newZero: Angle){
-        setPosition(newZero.inUnit(rotations))
-    }
-
-    override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
-        get(){
-            val statusSignal = posSignal.refresh()
-            return QuantityMeasurement(
-                value = statusSignal.value.ofUnit(rotations),
-                timestamp = statusSignal.timestamp.time.ofUnit(seconds)
-            )
-        }
-
-    override val timestampedAngularVelocity: QuantityMeasurement<AngularVelocityDimension>
-        get(){
-            val statusSignal = velSignal.refresh(true)
-            return QuantityMeasurement(
-                value = statusSignal.value.ofUnit(rotations / seconds),
-                timestamp = statusSignal.timestamp.time.ofUnit(seconds),
-            )
-        }
-
-
-    private inner class AbsoluteEncoderAdaptor: TimestampedEncoder by this, HardwareConfigurable<CANcoderConfiguration> by this{
-
-        private val absolutePosSignal = absolutePosition
-
-        override val timestampedAngularPosition: QuantityMeasurement<AngleDimension>
-            get(){
-                val statusSignal = absolutePosSignal.refresh(true)
-                return QuantityMeasurement(
-                    value = statusSignal.value.ofUnit(rotations),
-                    timestamp = statusSignal.timestamp.time.ofUnit(seconds)
-                )
-            }
-
-        override val angularPosition: Angle
-            get() = absolutePosSignal.refresh(true).value.ofUnit(rotations)
     }
 }
 

@@ -23,50 +23,28 @@ import frc.chargers.wpilibextensions.delay
 import kotlin.math.roundToInt
 
 
-/**
- * A convenience function to create a [ChargerCANSparkMax]
- * specifically to drive a Neo motor.
- *
- * You do not need to manually factory default this motor, as it is factory defaulted on startup.
- * This setting can be changed by setting factoryDefault = false.
- */
-public fun neoSparkMax(
-    canBusId: Int,
-    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
-    factoryDefault: Boolean = true,
-): ChargerCANSparkMax =
-    ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushless, alternateEncoderConfiguration)
-        .also {
-            if (factoryDefault) {
-                it.restoreFactoryDefaults()
-                delay(200.milli.seconds)
-                println("SparkMax has been factory defaulted.")
-            }
-        }
+public sealed class SparkMaxEncoderType{
+    /**
+     * Represents a regular spark max encoder.
+     */
+    public data object Regular: SparkMaxEncoderType()
 
+    /**
+     * Represents a Spark Max Alternate encoder.
+     */
+    public data class Alternate(
+        val countsPerRev: Int,
+        val encoderMeasurementPeriod: Time? = null,
+        val type: SparkMaxAlternateEncoder.Type = SparkMaxAlternateEncoder.Type.kQuadrature
+    ): SparkMaxEncoderType()
 
-/**
- * A convenience function to create a [ChargerCANSparkMax]
- * specifically to drive a brushed motor, such as a CIM.
- *
- * You do not need to manually factory default this motor, as it is factory defaulted on startup.
- * This setting can be changed by setting factoryDefault = false.
- */
-public fun brushedSparkMax(
-    canBusId: Int,
-    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
-    factoryDefault: Boolean = true,
-): ChargerCANSparkMax =
-    ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushed, alternateEncoderConfiguration)
-        .also {
-            if (factoryDefault) {
-                it.restoreFactoryDefaults()
-                delay(200.milli.seconds)
-                println("SparkMax has been factory defaulted.")
-            }
-        }
-
-
+    /**
+     * Represents an absolute encoder connected to a spark max.
+     */
+    public data class Absolute(
+        val type: SparkMaxAbsoluteEncoder.Type = SparkMaxAbsoluteEncoder.Type.kDutyCycle
+    ): SparkMaxEncoderType()
+}
 
 /**
  * A convenience function to create a [ChargerCANSparkMax]
@@ -80,14 +58,20 @@ public fun brushedSparkMax(
  */
 public inline fun neoSparkMax(
     canBusId: Int,
-    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
     factoryDefault: Boolean = true,
-    configure: SparkMaxConfiguration.() -> Unit
+    encoderType: SparkMaxEncoderType = SparkMaxEncoderType.Regular,
+    configure: SparkMaxConfiguration.() -> Unit = {}
 ): ChargerCANSparkMax =
-    neoSparkMax(canBusId, alternateEncoderConfiguration, factoryDefault)
+    ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushless, encoderType)
         .also {
+            if (factoryDefault) {
+                it.restoreFactoryDefaults()
+                delay(200.milli.seconds)
+                println("SparkMax has been factory defaulted.")
+            }
             it.configure(SparkMaxConfiguration().apply(configure))
         }
+
 
 /**
  * A convenience function to create a [ChargerCANSparkMax]
@@ -101,29 +85,73 @@ public inline fun neoSparkMax(
  */
 public inline fun brushedSparkMax(
     canBusId: Int,
-    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null,
     factoryDefault: Boolean = true,
-    configure: SparkMaxConfiguration.() -> Unit
+    encoderType: SparkMaxEncoderType = SparkMaxEncoderType.Regular,
+    configure: SparkMaxConfiguration.() -> Unit = {}
 ): ChargerCANSparkMax =
-    brushedSparkMax(canBusId, alternateEncoderConfiguration, factoryDefault)
+    ChargerCANSparkMax(canBusId, CANSparkMaxLowLevel.MotorType.kBrushed, encoderType)
         .also {
+            if (factoryDefault) {
+                it.restoreFactoryDefaults()
+                delay(200.milli.seconds)
+                println("SparkMax has been factory defaulted.")
+            }
             it.configure(SparkMaxConfiguration().apply(configure))
         }
 
-public class SparkMaxEncoderAdapter(private val revEncoder: RelativeEncoder) : ResettableEncoder, RelativeEncoder by revEncoder {
-    private var previousPosition = revEncoder.position.ofUnit(rotations)
+
+
+public class SparkMaxEncoderAdaptor(
+    private val revEncoder: MotorFeedbackSensor
+) : ResettableEncoder{
+
+    init{
+        require (
+            revEncoder is AbsoluteEncoder || revEncoder is RelativeEncoder
+        ){"Encoder type of spark max is invalid: internal error."}
+    }
+
+    private fun getPosition(): Angle = when (revEncoder){
+        is AbsoluteEncoder -> revEncoder.position.ofUnit(rotations)
+        is RelativeEncoder -> revEncoder.position.ofUnit(rotations)
+        else -> error("Invalid encoder type for spark max")
+    }
+
+    private fun getVelocity(): AngularVelocity = when (revEncoder){
+        is AbsoluteEncoder -> revEncoder.velocity.ofUnit(rotations / seconds)
+        is RelativeEncoder -> revEncoder.velocity.ofUnit(rotations / minutes)
+        else -> error("Invalid encoder type for spark max")
+    }
+
+    internal fun setInverted(value: Boolean): REVLibError = when (revEncoder){
+        is AbsoluteEncoder -> revEncoder.setInverted(value)
+        is RelativeEncoder -> revEncoder.setInverted(value)
+        else -> error("Invalid encoder type for spark max")
+    }
+
+    internal fun setAverageDepth(depth: Int): REVLibError = when(revEncoder){
+        is AbsoluteEncoder -> revEncoder.setAverageDepth(depth)
+        is RelativeEncoder -> revEncoder.setAverageDepth(depth)
+        else -> error("Invalid encoder type for spark max")
+    }
+
+
+    private var previousPosition = getPosition()
     private var previousVelocity = AngularVelocity(0.0)
 
     override fun setZero(newZero: Angle){
-        position = newZero.inUnit(rotations)
+        when (revEncoder){
+            is AbsoluteEncoder -> revEncoder.setZeroOffset(newZero.inUnit(rotations))
+            is RelativeEncoder -> revEncoder.setPosition(newZero.inUnit(rotations))
+        }
     }
     override val angularPosition: Angle
-        get() = revEncoder.position.ofUnit(rotations)
+        get() = getPosition()
             .revertIfInvalid(previousPosition)
             .also{ previousPosition = it }
 
     override val angularVelocity: AngularVelocity
-        get() = revEncoder.velocity.ofUnit(rotations / minutes)
+        get() = getVelocity()
             .revertIfInvalid(previousVelocity)
             .also{ previousVelocity = it }
 }
@@ -140,46 +168,31 @@ public class SparkMaxEncoderAdapter(private val revEncoder: RelativeEncoder) : R
 public open class ChargerCANSparkMax(
     deviceId: Int,
     type: MotorType,
-    alternateEncoderConfiguration: AlternateEncoderConfiguration? = null
+    encoderType: SparkMaxEncoderType = SparkMaxEncoderType.Regular
 ) : CANSparkMax(deviceId, type), SmartEncoderMotorController, HardwareConfigurable<SparkMaxConfiguration>{
+    final override val encoder: SparkMaxEncoderAdaptor = when (encoderType){
+        SparkMaxEncoderType.Regular -> SparkMaxEncoderAdaptor(
+            super.getEncoder()
+        )
+
+        is SparkMaxEncoderType.Alternate -> SparkMaxEncoderAdaptor(
+            super.getAlternateEncoder(encoderType.type, encoderType.countsPerRev).also{
+                if (encoderType.encoderMeasurementPeriod != null){
+                    it.measurementPeriod = encoderType.encoderMeasurementPeriod.inUnit(milli.seconds).toInt()
+                }
+            }
+        )
+
+        is SparkMaxEncoderType.Absolute -> SparkMaxEncoderAdaptor(
+            super.getAbsoluteEncoder(encoderType.type)
+        )
+    }
 
 
-    private inner class EncoderConfiguration(
-        var averageDepth: Int? = null,
-        var inverted: Boolean? = null,
-        var measurementPeriod: Time? = null,
-        var positionConversionFactor: Double? = null,
-        var velocityConversionFactor: Double? = null,
-    )
-
-    private var encoderConfig = EncoderConfiguration()
 
     private var previousCurrent = Current(0.0)
     private var previousTemp = 0.0
     private var previousVoltage = Voltage(0.0)
-
-
-    /*
-    CANSparkMax throws some exception if this is initialized on motor creation,
-    so by lazy here delays the initialization until the encoder is accessed.
-     */
-    override val encoder: SparkMaxEncoderAdapter by lazy {
-        (alternateEncoderConfiguration?.let { (countsPerRev, encoderType) ->
-            if (encoderType == null) {
-                SparkMaxEncoderAdapter(super.getAlternateEncoder(countsPerRev))
-            } else {
-                SparkMaxEncoderAdapter(super.getAlternateEncoder(encoderType, countsPerRev))
-            }
-        }
-            ?: SparkMaxEncoderAdapter(super.getEncoder())
-        ).apply{
-            encoderConfig.averageDepth?.let{averageDepth = it}
-            encoderConfig.inverted?.let{inverted = it}
-            encoderConfig.measurementPeriod?.let{measurementPeriod = (it.inUnit(seconds) * 1000).toInt()}
-            encoderConfig.positionConversionFactor?.let{positionConversionFactor = it}
-            encoderConfig.velocityConversionFactor?.let{velocityConversionFactor = it}
-        }
-    }
 
     override val appliedCurrent: Current
         get() = outputCurrent.ofUnit(amps)
@@ -307,6 +320,9 @@ public open class ChargerCANSparkMax(
             for ((limitDirection, limit) in configuration.softLimits) {
                 setSoftLimit(limitDirection, limit.inUnit(rotations).toFloat())?.updateConfigStatus()
             }
+            configuration.encoderAverageDepth?.let{ encoder.setAverageDepth(it) }?.updateConfigStatus()
+            configuration.encoderInverted?.let{ encoder.setInverted(it) }?.updateConfigStatus()
+
             return@safeConfigure configAppliedProperly
         }
 
@@ -339,12 +355,8 @@ public data class SparkMaxConfiguration(
     var secondaryCurrentLimit: SecondaryCurrentLimit? = null,
     val softLimits: MutableMap<SoftLimitDirection, Angle> = mutableMapOf(),
 
-    // encoder configs
     var encoderAverageDepth: Int? = null,
     var encoderInverted: Boolean? = null,
-    var encoderMeasurementPeriod: Time? = null,
-    var encoderPositionConversionFactor: Double? = null,
-    var encoderVelocityConversionFactor: Double? = null,
 
     // sparkMaxPIDController configs; not used by ChargerLib
     var feedbackDFilter: Double? = null,
@@ -354,11 +366,5 @@ public data class SparkMaxConfiguration(
     var positionPIDWrappingInputRange: ClosedRange<Double>? = null,
 ) : HardwareConfiguration
 
-public data class AlternateEncoderConfiguration(val countsPerRev: Int, val encoderType: SparkMaxAlternateEncoder.Type? = null) {
-    public companion object {
-        public val SRXMagnetic1X: AlternateEncoderConfiguration = AlternateEncoderConfiguration(1024)
-        public val SRXMagnetic4X: AlternateEncoderConfiguration = AlternateEncoderConfiguration(4096)
-    }
-}
 public data class SmartCurrentLimit(val stallLimit: Current, val freeLimit: Current? = null, val limitSpeed: AngularVelocity? = null)
 public data class SecondaryCurrentLimit(val limit: Current, val chopCycles: Int? = null)

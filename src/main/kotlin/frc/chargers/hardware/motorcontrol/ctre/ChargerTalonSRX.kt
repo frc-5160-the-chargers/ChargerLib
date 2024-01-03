@@ -2,15 +2,14 @@ package frc.chargers.hardware.motorcontrol.ctre
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
+import com.ctre.phoenix.ErrorCode
 import com.ctre.phoenix.motorcontrol.*
-import com.ctre.phoenix.motorcontrol.can.BaseTalon
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
-import com.ctre.phoenix.sensors.CANCoder
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.Encoder
-import frc.chargers.hardware.sensors.encoders.relative.TalonSRXEncoderAdapter
+import frc.chargers.hardware.sensors.encoders.ResettableEncoder
 import kotlin.math.roundToInt
 
 private const val TALON_SRX_ENCODER_UNITS_PER_ROTATION = 2048 // From https://docs.ctre-phoenix.com/en/latest/ch14_MCSensor.html#sensor-resolution
@@ -57,6 +56,36 @@ public inline fun redlineSRX(
     redlineSRX(deviceNumber,encoderTicksPerRotation, factoryDefault).also{
         it.configure(TalonSRXConfiguration().apply(configure))
     }
+
+public class TalonSRXEncoderAdapter(
+    private val ctreMotorController: IMotorController,
+    private val pidIndex: Int,
+    private val anglePerPulse: Angle
+) : ResettableEncoder, IMotorController by ctreMotorController {
+    public constructor(
+        ctreMotorController: IMotorController,
+        pidIndex: Int,
+        pulsesPerRotation: Int /* Can't use Double here or both constructors will have the same JVM signature */
+    ) : this(ctreMotorController, pidIndex, (1/pulsesPerRotation.toDouble()).ofUnit(rotations))
+
+    override fun setZero(newZero: Angle) {
+        val errorCode = ctreMotorController.setSelectedSensorPosition((newZero/anglePerPulse).siValue, pidIndex, DEFAULT_TIMEOUT_MS)
+        if (errorCode != ErrorCode.OK){
+            error("When setting the zero of a talon srx's encoder, an error ocurred: $errorCode")
+        }
+    }
+
+    override val angularPosition: Angle
+        get() = ctreMotorController.getSelectedSensorPosition(pidIndex) * anglePerPulse
+
+    override val angularVelocity: AngularVelocity
+        get() = ctreMotorController.getSelectedSensorVelocity(pidIndex) * anglePerPulse / timeBetweenPulses
+
+    public companion object {
+        private const val DEFAULT_TIMEOUT_MS = 500
+        private val timeBetweenPulses = 100.milli.seconds
+    }
+}
 
 /**
  * Represents a TalonSRX motor controller.
@@ -106,19 +135,6 @@ public open class ChargerTalonSRX(
         }
         configuration.selectedFeedbackCoefficients.forEach { (pidIndex, coefficient) ->
             configSelectedFeedbackCoefficient(coefficient, pidIndex, TIMEOUT_MILLIS)
-        }
-        configuration.remoteFeedbackFilter?.let {
-            when(it) {
-                is BaseTalonRemoteFeedbackFilterDevice -> configRemoteFeedbackFilter(it.talon, it.remoteOrdinal,
-                    TIMEOUT_MILLIS
-                )
-                is CANCoderRemoteFeedbackFilterDevice -> configRemoteFeedbackFilter(it.canCoder, it.remoteOrdinal,
-                    TIMEOUT_MILLIS
-                )
-                is OtherRemoteFeedbackFilterDevice -> configRemoteFeedbackFilter(it.deviceId, it.remoteSensorSource, it.remoteOrdinal,
-                    TIMEOUT_MILLIS
-                )
-            }
         }
         configuration.sensorTermFeedbackDevices.forEach { (sensorTerm, feedbackDevice) ->
             configSensorTerm(sensorTerm, feedbackDevice, TIMEOUT_MILLIS)
@@ -177,7 +193,6 @@ public data class TalonSRXConfiguration(
     var voltageCompensationEnabled: Boolean? = null,
     val selectedFeedbackSensors: MutableMap<PIDIndex, FeedbackDevice> = mutableMapOf(),
     val selectedFeedbackCoefficients: MutableMap<PIDIndex, Double> = mutableMapOf(),
-    var remoteFeedbackFilter: RemoteFeedbackFilterDevice? = null,
     val sensorTermFeedbackDevices: MutableMap<SensorTerm, FeedbackDevice> = mutableMapOf(),
     val controlFramePeriods: MutableMap<ControlFrame, Time> = mutableMapOf(),
     val statusFramePeriods: MutableMap<StatusFrame, Time> = mutableMapOf(),
@@ -192,12 +207,5 @@ public data class TalonSRXConfiguration(
     val customParameters: MutableMap<CustomParameterIndex, CustomParameterValue> = mutableMapOf()
 ): HardwareConfiguration
 
-public sealed interface RemoteFeedbackFilterDevice
-public data class CANCoderRemoteFeedbackFilterDevice(val canCoder: CANCoder, val remoteOrdinal: Int) :
-    RemoteFeedbackFilterDevice
-public data class BaseTalonRemoteFeedbackFilterDevice(val talon: BaseTalon, val remoteOrdinal: Int) :
-    RemoteFeedbackFilterDevice
-public data class OtherRemoteFeedbackFilterDevice(val deviceId: Int, val remoteSensorSource: RemoteSensorSource, val remoteOrdinal: Int) :
-    RemoteFeedbackFilterDevice
 
 public data class LimitSwitchConfig(val type: RemoteLimitSwitchSource, val normalOpenOrClose: LimitSwitchNormal, val deviceId: Int)

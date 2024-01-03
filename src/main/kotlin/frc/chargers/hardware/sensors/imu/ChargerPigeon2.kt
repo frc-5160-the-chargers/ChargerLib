@@ -37,7 +37,7 @@ public fun ChargerPigeon2(
 public class ChargerPigeon2(
     canId: Int,
     canBus: String = "rio"
-): Pigeon2(canId, canBus), ZeroableHeadingProvider, HardwareConfigurable<Pigeon2Configuration>{
+): Pigeon2(canId, canBus), ZeroableHeadingProvider, HardwareConfigurable<Pigeon2Configuration> {
 
     /**
      * The gyroscope of the Pigeon; contains yaw, pitch, and roll data
