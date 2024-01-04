@@ -76,7 +76,7 @@ public open class ChargerRobot(
         internal var AK_LOGGABLE_REPLAY_TABLE: LogTable? = null
         internal var AK_LOGGABLE_REAL_TABLE: LogTable? = null
         @PublishedApi
-        internal var motorConfigRetryLimit: Int = 1
+        internal var hardwareConfigRetryLimit: Int = 1
 
 
 
@@ -106,6 +106,7 @@ public open class ChargerRobot(
      */
     override fun robotInit() {
         try{
+            hardwareConfigRetryLimit = config.hardwareConfigRetryLimit
             LOOP_PERIOD = config.loopPeriod
             configureAdvantageKit()
 

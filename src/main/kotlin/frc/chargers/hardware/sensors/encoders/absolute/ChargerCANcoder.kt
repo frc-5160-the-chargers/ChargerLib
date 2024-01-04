@@ -2,6 +2,7 @@ package frc.chargers.hardware.sensors.encoders.absolute
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.hertz
+import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.rotations
 import com.batterystaple.kmeasure.units.seconds
 import com.ctre.phoenix6.StatusCode
@@ -9,10 +10,12 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration as CTRECANcoderConfigurat
 import com.ctre.phoenix6.hardware.CANcoder as CTRECANcoder
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
+import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.sensors.encoders.ResettableEncoder
+import frc.chargers.wpilibextensions.delay
 
 
 /**
@@ -85,8 +88,13 @@ public class ChargerCANcoder(
     private var configAppliedProperly = true
     private fun StatusCode.updateConfigStatus(): StatusCode {
         if (this != StatusCode.OK){
-            allConfigErrors.add(this)
-            configAppliedProperly = false
+            if (RobotBase.isSimulation()){
+                println("A Phoenix Device did not configure properly; however, this was ignored because the code is running in simulation.")
+            }else{
+                delay(200.milli.seconds)
+                allConfigErrors.add(this)
+                configAppliedProperly = false
+            }
         }
         return this
     }
@@ -101,7 +109,7 @@ public class ChargerCANcoder(
             val baseConfig = CTRECANcoderConfiguration()
             configurator.refresh(baseConfig)
             applyChanges(baseConfig,configuration)
-            configurator.apply(baseConfig,0.050).updateConfigStatus()
+            configurator.apply(baseConfig,0.02).updateConfigStatus()
 
 
             configuration.positionUpdateFrequency?.let{

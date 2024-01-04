@@ -2,7 +2,6 @@ package frc.chargers.hardware.subsystems.swervedrive
 
 import com.revrobotics.CANSparkMaxLowLevel
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
-import frc.chargers.hardware.motorcontrol.SmartEncoderMotorController
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.falcon
@@ -10,6 +9,7 @@ import frc.chargers.hardware.motorcontrol.rev.ChargerCANSparkMax
 import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.motorcontrol.rev.brushedSparkMax
 import frc.chargers.hardware.motorcontrol.rev.neoSparkMax
+import frc.chargers.hardware.sensors.encoders.Encoder
 
 
 /**
@@ -22,7 +22,7 @@ public inline fun sparkMaxSwerveMotors(
     bottomRightId: Int,
     type: CANSparkMaxLowLevel.MotorType = CANSparkMaxLowLevel.MotorType.kBrushless,
     configure: SparkMaxConfiguration.() -> Unit = {}
-): SwerveMotors = when (type){
+): SwerveMotors<ChargerCANSparkMax> = when (type){
     CANSparkMaxLowLevel.MotorType.kBrushless -> sparkMaxSwerveMotors(
         neoSparkMax(topLeftId),
         neoSparkMax(topRightId),
@@ -49,7 +49,7 @@ public inline fun talonFXSwerveMotors(
     bottomLeftId: Int,
     bottomRightId: Int,
     configure: TalonFXConfiguration.() -> Unit = {}
-): SwerveMotors = talonFXSwerveMotors(
+): SwerveMotors<ChargerTalonFX> = talonFXSwerveMotors(
     falcon(topLeftId),
     falcon(topRightId),
     falcon(bottomLeftId),
@@ -66,7 +66,7 @@ public inline fun sparkMaxSwerveMotors(
     bottomLeft: ChargerCANSparkMax,
     bottomRight: ChargerCANSparkMax,
     configure: SparkMaxConfiguration.() -> Unit = {}
-): SwerveMotors{
+): SwerveMotors<ChargerCANSparkMax> {
     val config = SparkMaxConfiguration().apply(configure)
 
     topLeft.configure(config)
@@ -74,7 +74,7 @@ public inline fun sparkMaxSwerveMotors(
     bottomLeft.configure(config)
     bottomRight.configure(config)
 
-    return OnboardPIDSwerveMotors(
+    return SwerveMotors(
         topLeft, topRight, bottomLeft, bottomRight,
     )
 }
@@ -89,7 +89,7 @@ public inline fun talonFXSwerveMotors(
     bottomLeft: ChargerTalonFX,
     bottomRight: ChargerTalonFX,
     configure: TalonFXConfiguration.() -> Unit = {}
-): SwerveMotors{
+): SwerveMotors<ChargerTalonFX>{
     val config = TalonFXConfiguration().apply(configure)
 
     topLeft.configure(config)
@@ -97,29 +97,32 @@ public inline fun talonFXSwerveMotors(
     bottomLeft.configure(config)
     bottomRight.configure(config)
 
-    return OnboardPIDSwerveMotors(
+    return SwerveMotors(
         topLeft, topRight, bottomLeft, bottomRight,
     )
 }
 
 /**
- * A Helper class to store a group of motors needed for an [EncoderHolonomicDrivetrain],
- * which can run onboard PID control.
- */
-public class OnboardPIDSwerveMotors(
-    override val topLeft: SmartEncoderMotorController,
-    override val topRight: SmartEncoderMotorController,
-    override val bottomLeft: SmartEncoderMotorController,
-    override val bottomRight: SmartEncoderMotorController
-): SwerveMotors(topLeft,topRight,bottomLeft,bottomRight)
-
-/**
  * A Helper class to store a group of motors needed for an [EncoderHolonomicDrivetrain];
  * these can be either for turning or driving.
  */
-public open class SwerveMotors(
-    public open val topLeft: EncoderMotorController,
-    public open val topRight: EncoderMotorController,
-    public open val bottomLeft: EncoderMotorController,
-    public open val bottomRight: EncoderMotorController
-)
+public data class SwerveMotors<out M: EncoderMotorController>(
+    val topLeft: M,
+    val topRight: M,
+    val bottomLeft: M,
+    val bottomRight: M
+){
+    // inline reified allows for runtime checks of whether or not the motors
+    // are a specified type.
+    public inline fun <reified T: EncoderMotorController> containsMotors(): Boolean =
+        topLeft is T && topRight is T && bottomLeft is T && bottomRight is T
+
+
+    public fun getEncoders(): SwerveEncoders<Encoder> =
+        SwerveEncoders(
+            topLeft.encoder,
+            topRight.encoder,
+            bottomLeft.encoder,
+            bottomRight.encoder
+        )
+}

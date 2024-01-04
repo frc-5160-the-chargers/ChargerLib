@@ -8,10 +8,9 @@ import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
-import frc.chargerlibexternal.frc6328.PoseEstimator
+import frc.chargerlibexternal.frc6328.MechanicalAdvantagePoseEstimator
 import frc.chargerlibexternal.frc6995.NomadApriltagUtil
-import frc.chargers.hardware.sensors.RobotPoseEstimator
+import frc.chargers.hardware.sensors.RobotPoseMonitor
 import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
@@ -26,53 +25,50 @@ import org.littletonrobotics.junction.Logger.recordOutput
  * instead, call drivetrainInstance.poseEstimator to access the built-in pose estimator
  * of the drivetrain.
  */
-context(EncoderDifferentialDrivetrain)
 public class DifferentialPoseMonitor(
-    private val gyro: HeadingProvider? = null,
-    private val poseSuppliers: List<VisionPoseSupplier> = listOf(),
+    private val drivetrain: EncoderDifferentialDrivetrain,
+    private val poseSuppliers: MutableList<VisionPoseSupplier> = mutableListOf(),
     startingPose: UnitPose2d = UnitPose2d()
-): SubsystemBase(), RobotPoseEstimator {
-
-
-    override val robotPose: UnitPose2d
-        get() = poseEstimator.latestPose.ofUnit(meters)
-
+): SubsystemBase(), RobotPoseMonitor {
     public constructor(
+        drivetrain: EncoderDifferentialDrivetrain,
+        startingPose: UnitPose2d = UnitPose2d(),
         vararg poseSuppliers: VisionPoseSupplier,
-        gyro: HeadingProvider? = null,
-        startingPose: UnitPose2d = UnitPose2d()
     ): this(
-        gyro,
-        poseSuppliers.toList(),
+        drivetrain,
+        poseSuppliers.toMutableList(),
         startingPose
     )
 
+    public val field: Field2d = Field2d().also{ SmartDashboard.putData("Field",it) }
 
+    override val robotPose: UnitPose2d get() = poseEstimator.latestPose.ofUnit(meters)
 
-
-    private val poseEstimator = PoseEstimator(
-        VecBuilder.fill(0.003, 0.003, 0.00001)
-    ).also{
-        it.resetPose(startingPose.inUnit(meters))
+    override fun addPoseSuppliers(vararg visionSystems: VisionPoseSupplier) {
+        poseSuppliers.addAll(visionSystems)
     }
 
-    private val field = Field2d().also{
-        SmartDashboard.putData("Field",it)
-    }
-
-    public fun resetPose(pose: UnitPose2d){
+    override fun resetPose(pose: UnitPose2d){
         poseEstimator.resetPose(pose.inUnit(meters))
     }
 
-    private var previousDistanceL = Distance(0.0)
-    private var previousDistanceR = Distance(0.0)
-    private val visionUpdates: MutableList<PoseEstimator.TimestampedVisionUpdate> = mutableListOf()
+
+
+    /* Private Implementation */
+    private val poseEstimator = MechanicalAdvantagePoseEstimator(
+        VecBuilder.fill(0.003, 0.003, 0.00001)
+    ).also{ it.resetPose(startingPose.inUnit(meters)) }
+    private var previousDistanceL = drivetrain.leftWheelTravel * drivetrain.wheelTravelPerMotorRadian
+    private var previousDistanceR = drivetrain.leftWheelTravel * drivetrain.wheelTravelPerMotorRadian
+    private var previousGyroHeading = drivetrain.gyro?.heading ?: Angle(0.0)
+    private val visionUpdates: MutableList<MechanicalAdvantagePoseEstimator.TimestampedVisionUpdate> = mutableListOf()
+
 
     override fun periodic(){
-        val distanceL = leftWheelTravel * wheelTravelPerMotorRadian
-        val distanceR = rightWheelTravel * wheelTravelPerMotorRadian
+        val distanceL = drivetrain.leftWheelTravel * drivetrain.wheelTravelPerMotorRadian
+        val distanceR = drivetrain.leftWheelTravel * drivetrain.wheelTravelPerMotorRadian
 
-        val twist = kinematics.toTwist2d(
+        val twist = drivetrain.kinematics.toTwist2d(
             (distanceL-previousDistanceL).inUnit(meters),
             (distanceR-previousDistanceR).inUnit(meters)
         )
@@ -80,8 +76,15 @@ public class DifferentialPoseMonitor(
         previousDistanceL = distanceL
         previousDistanceR = distanceR
 
-        if (gyro != null){
-            twist.dtheta = gyro.heading.inUnit(radians)
+        recordOutput("Drivetrain(Differential)/calculatedHeadingRad", poseEstimator.latestPose.rotation.rotations + twist.dtheta)
+
+        if (drivetrain.gyro != null){
+            val currentHeading = drivetrain.gyro.heading
+            twist.dtheta = (currentHeading - previousGyroHeading).inUnit(radians)
+            previousGyroHeading = currentHeading
+            recordOutput("Drivetrain(Differential)/calculatedHeadingUsed", false)
+        }else{
+            recordOutput("Drivetrain(Differential)/calculatedHeadingUsed", false)
         }
 
         poseEstimator.addDriveData(fpgaTimestamp().inUnit(seconds),twist)
@@ -97,7 +100,7 @@ public class DifferentialPoseMonitor(
                         it.cameraYaw.asRotation2d(),
                     )
                     visionUpdates.add(
-                        PoseEstimator.TimestampedVisionUpdate(
+                        MechanicalAdvantagePoseEstimator.TimestampedVisionUpdate(
                             measurement.timestamp.inUnit(seconds),
                             measurement.value.inUnit(meters),
                             stdDevVector
@@ -111,7 +114,7 @@ public class DifferentialPoseMonitor(
 
         field.robotPose = poseEstimator.latestPose
         recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
-        recordOutput("Drivetrain(Differential)/realGyroUsedInPoseEstimation", gyro != null)
-        recordOutput("Drivetrain(Differential)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
+        recordOutput("Drivetrain(Differential)/realGyroUsedInPoseEstimation", drivetrain.gyro != null)
+        recordOutput("Drivetrain(Differential)/realGyroHeadingRad", drivetrain.gyro?.heading?.inUnit(radians) ?: 0.0)
     }
 }

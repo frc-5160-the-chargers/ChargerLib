@@ -6,6 +6,7 @@ import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import com.batterystaple.kmeasure.units.volts
+import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
@@ -26,8 +27,11 @@ import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIORe
 import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOSim
 import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.controls.feedforward.Feedforward
+import frc.chargers.framework.ChargerRobot
+import frc.chargers.hardware.sensors.RobotPoseMonitor
 import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.utils.a
+import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
 import org.littletonrobotics.junction.Logger.recordOutput
@@ -116,6 +120,8 @@ public class EncoderDifferentialDrivetrain(
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
 ): SubsystemBase(), DifferentialDrivetrain, HeadingProvider, DiffDriveIO by lowLevel {
+
+    /* Private implementation */
     private val wheelRadius = hardwareData.wheelDiameter / 2
 
     internal val wheelTravelPerMotorRadian = hardwareData.gearRatio * wheelRadius
@@ -141,19 +147,41 @@ public class EncoderDifferentialDrivetrain(
     )
 
 
+    /* Public API */
 
     init{
         inverted = hardwareData.invertMotors
+        when (controlData.pathAlgorithm){
+            DiffDriveControlData.PathAlgorithm.LTV -> {
+                AutoBuilder.configureLTV(
+                    { poseEstimator.robotPose.inUnit(meters) },
+                    { poseEstimator.resetPose(it.ofUnit(meters)) },
+                    { currentSpeeds },
+                    { speeds: ChassisSpeeds -> velocityDrive(speeds) },
+                    ChargerRobot.LOOP_PERIOD.inUnit(seconds),
+                    controlData.pathReplanConfig,
+                    this
+                )
+            }
 
-
+            DiffDriveControlData.PathAlgorithm.RAMSETE -> {
+                AutoBuilder.configureRamsete(
+                    { poseEstimator.robotPose.inUnit(meters) },
+                    { poseEstimator.resetPose(it.ofUnit(meters)) },
+                    { currentSpeeds },
+                    { speeds: ChassisSpeeds -> velocityDrive(speeds) },
+                    controlData.pathReplanConfig,
+                    this
+                )
+            }
+        }
     }
 
     /**
      * The pose estimator of the differential drivetrain.
      */
-    public val poseEstimator: DifferentialPoseMonitor = DifferentialPoseMonitor(
-        *poseSuppliers,
-        gyro = gyro, startingPose = startingPose
+    public var poseEstimator: RobotPoseMonitor = DifferentialPoseMonitor(
+        this, startingPose = startingPose, *poseSuppliers
     )
 
     /**

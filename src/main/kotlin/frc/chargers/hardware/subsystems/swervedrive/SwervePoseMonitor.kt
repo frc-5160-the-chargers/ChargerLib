@@ -1,7 +1,6 @@
 package frc.chargers.hardware.subsystems.swervedrive
 
 import com.batterystaple.kmeasure.quantities.*
-import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
@@ -9,13 +8,11 @@ import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
-import frc.chargerlibexternal.frc6328.PoseEstimator
-import frc.chargerlibexternal.frc6328.PoseEstimator.TimestampedVisionUpdate
+import frc.chargerlibexternal.frc6328.MechanicalAdvantagePoseEstimator
+import frc.chargerlibexternal.frc6328.MechanicalAdvantagePoseEstimator.TimestampedVisionUpdate
 import frc.chargerlibexternal.frc6995.NomadApriltagUtil
 import frc.chargers.advantagekitextensions.recordLatency
-import frc.chargers.utils.math.inputModulus
-import frc.chargers.hardware.sensors.RobotPoseEstimator
+import frc.chargers.hardware.sensors.RobotPoseMonitor
 import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.wpilibextensions.fpgaTimestamp
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
@@ -32,97 +29,96 @@ import org.littletonrobotics.junction.Logger.*
  * instead, call drivetrainInstance.poseEstimator to access the built-in pose estimator
  * of the drivetrain.
  */
-context(EncoderHolonomicDrivetrain)
 public class SwervePoseMonitor(
-    private val gyro: HeadingProvider? = null,
+    private val drivetrain: EncoderHolonomicDrivetrain,
     poseSuppliers: List<VisionPoseSupplier>,
     startingPose: UnitPose2d = UnitPose2d()
-): SubsystemBase(), RobotPoseEstimator{
+): SubsystemBase(), RobotPoseMonitor {
 
     /* Public API */
-
     public constructor(
+        drivetrain: EncoderHolonomicDrivetrain,
+        startingPose: UnitPose2d = UnitPose2d(),
         vararg poseSuppliers: VisionPoseSupplier,
-        gyro: HeadingProvider? = null,
-        startingPose: UnitPose2d = UnitPose2d()
     ): this(
-        gyro,
+        drivetrain,
         poseSuppliers.toList(),
         startingPose
     )
-    public val field: Field2d = Field2d().also{ SmartDashboard.putData("Field",it) }
 
+    public val field: Field2d = Field2d().also{ SmartDashboard.putData("Field",it) }
 
     override val robotPose: UnitPose2d get() = poseEstimator.latestPose.ofUnit(meters)
 
-    public val heading: Angle get() = calculatedHeading
-
-    public fun resetPose(pose: UnitPose2d){
+    override fun resetPose(pose: UnitPose2d){
         poseEstimator.resetPose(pose.inUnit(meters))
-        calculatedHeading = pose.rotation
     }
 
-    public fun zeroPose(){
-        resetPose(UnitPose2d())
-    }
-
-    public fun addPoseSuppliers(vararg suppliers: VisionPoseSupplier){
-        this.poseSuppliers.addAll(suppliers)
+    override fun addPoseSuppliers(vararg visionSystems: VisionPoseSupplier){
+        this.poseSuppliers.addAll(visionSystems)
     }
 
 
     /* Private Implementation */
-
-
-    private val poseEstimator: PoseEstimator = PoseEstimator(
+    private val poseEstimator = MechanicalAdvantagePoseEstimator(
         VecBuilder.fill(0.003, 0.003, 0.00001),
-    ).also{
-        it.resetPose(startingPose.inUnit(meters))
-    }
+    ).also{ it.resetPose(startingPose.inUnit(meters)) }
     private val poseSuppliers = poseSuppliers.toMutableList()
-    private var calculatedHeading = Angle(0.0)
-    private val previousDistances = Array(4){Distance(0.0)}
+    private val previousDistances: Array<Distance>
     private var lastGyroHeading = Angle(0.0)
     private var wheelDeltas = ModulePositionGroup()
     private val visionUpdates: MutableList<TimestampedVisionUpdate> = mutableListOf()
 
+
+    init{
+        // zeroes the previous module positions; this accounts for previous wheel travel
+        // detected from the relative encoders of the swerve mod motors.
+        val currentPositions = drivetrain.currentModulePositions // uses getter variable; thus, value must be fetched once
+        previousDistances = arrayOf(
+            currentPositions.topLeftDistance,
+            currentPositions.topRightDistance,
+            currentPositions.bottomLeftDistance,
+            currentPositions.bottomRightDistance
+        )
+    }
 
     override fun periodic(){
         recordLatency("SwervePoseMonitorLoopTime"){
             /*
             Calculates the pose and heading from the data from the swerve modules; results in a Twist2d object.
              */
-            val currentMPs = currentModulePositions
+            val currentPositions = drivetrain.currentModulePositions // uses getter variable; thus, value must be fetched once
             wheelDeltas.apply{
-                topLeftDistance = currentMPs.topLeftDistance - previousDistances[0]
-                previousDistances[0] = currentMPs.topLeftDistance
+                topLeftDistance = currentPositions.topLeftDistance - previousDistances[0]
+                previousDistances[0] = currentPositions.topLeftDistance
 
-                topRightDistance = currentMPs.topRightDistance - previousDistances[1]
-                previousDistances[1] = currentMPs.topRightDistance
+                topRightDistance = currentPositions.topRightDistance - previousDistances[1]
+                previousDistances[1] = currentPositions.topRightDistance
 
-                bottomLeftDistance = currentMPs.bottomLeftDistance - previousDistances[2]
-                previousDistances[2] = currentMPs.bottomLeftDistance
+                bottomLeftDistance = currentPositions.bottomLeftDistance - previousDistances[2]
+                previousDistances[2] = currentPositions.bottomLeftDistance
 
-                bottomRightDistance = currentMPs.bottomRightDistance - previousDistances[3]
-                previousDistances[3] = currentMPs.bottomRightDistance
+                bottomRightDistance = currentPositions.bottomRightDistance - previousDistances[3]
+                previousDistances[3] = currentPositions.bottomRightDistance
 
-                topLeftAngle = currentMPs.topLeftAngle
-                topRightAngle = currentMPs.topRightAngle
-                bottomLeftAngle = currentMPs.bottomLeftAngle
-                bottomRightAngle = currentMPs.bottomRightAngle
+                topLeftAngle = currentPositions.topLeftAngle
+                topRightAngle = currentPositions.topRightAngle
+                bottomLeftAngle = currentPositions.bottomLeftAngle
+                bottomRightAngle = currentPositions.bottomRightAngle
             }
-            val twist = kinematics.toTwist2d(*wheelDeltas.toArray())
-            calculatedHeading += twist.dtheta.ofUnit(radians)
-            calculatedHeading = calculatedHeading.inputModulus(0.0.degrees..360.degrees)
-
+            val twist = drivetrain.kinematics.toTwist2d(*wheelDeltas.toArray())
+            recordOutput("calculatedHeadingRad",poseEstimator.latestPose.rotation.radians + twist.dtheta)
 
             /*
             If a gyro is given, replace the calculated heading with the gyro's heading before adding the twist to the pose estimator.
              */
-            if (gyro != null){
-                val currentGyroHeading = gyro.heading
+            if (drivetrain.gyro != null){
+                val currentGyroHeading = drivetrain.gyro.heading
                 twist.dtheta = (currentGyroHeading - lastGyroHeading).inUnit(radians)
                 lastGyroHeading = currentGyroHeading
+                recordOutput("Drivetrain(Swerve)/calculatedHeadingUsed", false)
+            }else{
+                recordOutput("Drivetrain(Swerve)/calculatedHeadingUsed", true)
             }
             poseEstimator.addDriveData(fpgaTimestamp().inUnit(seconds),twist)
 
@@ -152,21 +148,13 @@ public class SwervePoseMonitor(
                 if (visionUpdates.size != 0) poseEstimator.addVisionData(visionUpdates)
             }
 
-
-
             /*
             Records the robot's pose on the field and in AdvantageScope.
              */
             field.robotPose = poseEstimator.latestPose
             recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
-            recordOutput("Drivetrain(Swerve)/calculatedHeadingRad",calculatedHeading.inUnit(radians))
-            recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", gyro != null)
-            recordOutput("Drivetrain(Swerve)/realGyroHeadingRad",gyro?.heading?.inUnit(radians) ?: 0.0)
+            recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", drivetrain.gyro != null)
+            recordOutput("Drivetrain(Swerve)/realGyroHeadingRad", drivetrain.gyro?.heading?.inUnit(radians) ?: 0.0)
         }
     }
-
-
-
-
-
 }

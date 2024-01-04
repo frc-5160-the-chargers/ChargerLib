@@ -21,7 +21,7 @@ import java.util.TreeMap;
 /**
  * Credits: 6328 repository: <a name = "6328 repository" href="https://github.com/Mechanical-Advantage/RobotCode2023/">(Repository Here)</a>
  */
-public class PoseEstimator {
+public class MechanicalAdvantagePoseEstimator {
     private static final double historyLengthSecs = 0.3;
 
     private Pose2d basePose = new Pose2d();
@@ -29,7 +29,7 @@ public class PoseEstimator {
     private final NavigableMap<Double, PoseUpdate> updates = new TreeMap<>();
     private final Matrix<N3, N1> q = new Matrix<>(Nat.N3(), Nat.N1());
 
-    public PoseEstimator(Matrix<N3, N1> stateStdDevs) {
+    public MechanicalAdvantagePoseEstimator(Matrix<N3, N1> stateStdDevs) {
         for (int i = 0; i < 3; ++i) {
             q.set(i, 0, stateStdDevs.get(i, 0) * stateStdDevs.get(i, 0));
         }
@@ -123,7 +123,7 @@ public class PoseEstimator {
      * Represents a sequential update to a pose estimate, with a twist (drive movement) and list of
      * vision updates.
      */
-    private static record PoseUpdate(Twist2d twist, ArrayList<VisionUpdate> visionUpdates) {
+    private record PoseUpdate(Twist2d twist, ArrayList<VisionUpdate> visionUpdates) {
         public Pose2d apply(Pose2d lastPose, Matrix<N3, N1> q) {
             // Apply drive twist
             var pose = lastPose.exp(twist);
@@ -164,16 +164,14 @@ public class PoseEstimator {
     }
 
     /** Represents a single vision pose with associated standard deviations. */
-    public static record VisionUpdate(Pose2d pose, Matrix<N3, N1> stdDevs) {
+    public record VisionUpdate(Pose2d pose, Matrix<N3, N1> stdDevs) {
         public static final Comparator<VisionUpdate> compareDescStdDev =
-                (VisionUpdate a, VisionUpdate b) -> {
-                    return -Double.compare(
-                            a.stdDevs().get(0, 0) + a.stdDevs().get(1, 0),
-                            b.stdDevs().get(0, 0) + b.stdDevs().get(1, 0));
-                };
+                (VisionUpdate a, VisionUpdate b) -> -Double.compare(
+                        a.stdDevs().get(0, 0) + a.stdDevs().get(1, 0),
+                        b.stdDevs().get(0, 0) + b.stdDevs().get(1, 0));
     }
 
     /** Represents a single vision pose with a timestamp and associated standard deviations. */
-    public static record TimestampedVisionUpdate(
+    public record TimestampedVisionUpdate(
             double timestamp, Pose2d pose, Matrix<N3, N1> stdDevs) {}
 }

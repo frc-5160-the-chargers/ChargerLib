@@ -3,26 +3,36 @@ package frc.chargers.hardware.subsystems.swervedrive
 import com.batterystaple.kmeasure.interop.average
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.chargerlibexternal.frc4481.HeadingCorrector
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.*
+import frc.chargers.hardware.motorcontrol.EncoderMotorController
+import frc.chargers.hardware.motorcontrol.SmartEncoderMotorController
+import frc.chargers.hardware.sensors.RobotPoseMonitor
 import frc.chargers.hardware.sensors.VisionPoseSupplier
+import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.imu.gyroscopes.*
 import frc.chargers.hardware.subsystems.differentialdrive.DifferentialDrivetrain
 import frc.chargers.hardware.subsystems.swervedrive.module.*
 import frc.chargers.hardware.subsystems.swervedrive.module.lowlevel.*
+import frc.chargers.pathplannerextensions.asPathPlannerConstants
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.utils.math.units.pow
 import frc.chargers.utils.math.units.sqrt
+import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import org.littletonrobotics.junction.Logger.*
+import kotlin.math.pow
 
 
 private val topLeftModInputs: LoggableInputsProvider = LoggableInputsProvider("Drivetrain(Swerve)/TopLeftModule")
@@ -38,9 +48,9 @@ private val bottomRightModInputs: LoggableInputsProvider = LoggableInputsProvide
  * that automatically constructs real/sim versions depending on [RobotBase.isReal].
  */
 public fun EncoderHolonomicDrivetrain(
-    turnMotors: SwerveMotors,
-    turnEncoders: SwerveEncoders,
-    driveMotors: SwerveMotors,
+    turnMotors: SwerveMotors<EncoderMotorController>,
+    turnEncoders: SwerveEncoders<PositionEncoder> = turnMotors.getEncoders(),
+    driveMotors: SwerveMotors<EncoderMotorController>,
     turnGearbox: DCMotor,
     driveGearbox: DCMotor,
     hardwareData: SwerveHardwareData,
@@ -100,12 +110,25 @@ public fun EncoderHolonomicDrivetrain(
 
 
         if (useOnboardPID){
-            if (turnMotors !is OnboardPIDSwerveMotors){
-                error("the turning motors of the drivetrain do not support onboard PID control; however, onboard PID control was requested.")
+            // SmartEncoderMotorController is a variant of EncoderMotorController
+            // that allows for closed loop control
+            require(turnMotors.containsMotors<SmartEncoderMotorController>()){
+                "the turning motors of the drivetrain do not support onboard PID control; however, onboard PID control was requested."
             }
-            if (driveMotors !is OnboardPIDSwerveMotors){
-                error("the driving motors of the drivetrain do not support onboard PID control; however, onboard PID control was requested.")
+
+            require(driveMotors.containsMotors<SmartEncoderMotorController>()){
+                "the driving motors of the drivetrain do not support onboard PID control; however, onboard PID control was requested."
             }
+
+            // casts are safe, as code will error
+            // if motors are not SmartEncoderMotorControllers
+
+            @Suppress("Unchecked_Cast")
+            turnMotors as SwerveMotors<SmartEncoderMotorController>
+
+            @Suppress("Unchecked_Cast")
+            driveMotors as SwerveMotors<SmartEncoderMotorController>
+
 
             topLeft = OnboardPIDSwerveModule(
                 topLeftModInputs,
@@ -222,18 +245,15 @@ public class EncoderHolonomicDrivetrain(
     public val gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
-): SubsystemBase(), ZeroableHeadingProvider, DifferentialDrivetrain {
+): SubsystemBase(), HeadingProvider, DifferentialDrivetrain {
     /* Private Implementation */
     private val wheelRadius = hardwareData.wheelDiameter / 2.0
     private val moduleArray = arrayOf(topLeft,topRight,bottomLeft,bottomRight)
     private fun averageEncoderPosition() = moduleArray.map{it.wheelTravel}.average()
 
     private val distanceOffset: Distance = averageEncoderPosition() * wheelRadius
-    private var angleOffset = Angle(0.0)
 
-    //private val headingCorrector = HeadingCorrector()
-    private val mostReliableHeading: Angle
-        get() = (gyro?.heading ?: this.heading).inputModulus(0.0.degrees..360.degrees)
+    private val headingCorrector = HeadingCorrector()
     /*
     OPEN_LOOP indicates percent-out(power) based drive,
     while CLOSED_LOOP uses PID and feedforward for velocity-based driving.
@@ -243,29 +263,48 @@ public class EncoderHolonomicDrivetrain(
     }
     private var currentControlMode: ControlMode = ControlMode.CLOSED_LOOP
 
+    init{
+        AutoBuilder.configureHolonomic(
+            { poseEstimator.robotPose.inUnit(meters) },
+            { poseEstimator.resetPose(it.ofUnit(meters)) },
+            { currentSpeeds },
+            { speeds -> velocityDrive(speeds, fieldRelative = false) },
+            HolonomicPathFollowerConfig(
+                controlData.robotTranslationPID.asPathPlannerConstants(),
+                controlData.robotRotationPID.asPathPlannerConstants(),
+                hardwareData.maxModuleSpeed.siValue,
+                kotlin.math.sqrt(hardwareData.trackWidth.inUnit(meters).pow(2) + hardwareData.wheelBase.inUnit(meters).pow(2)),
+                controlData.pathReplanConfig
+            ),
+            this
+        )
+    }
+
 
 
     /* PUBLIC API */
 
-
     /**
      * The pose estimator of the [EncoderHolonomicDrivetrain].
+     *
+     * This can be changed to a different pose monitor if nessecary.
      */
-    public val poseEstimator: SwervePoseMonitor = SwervePoseMonitor(
+    public var poseEstimator: RobotPoseMonitor = SwervePoseMonitor(
+        drivetrain = this,
+        startingPose = startingPose,
         *poseSuppliers,
-        gyro = gyro, startingPose = startingPose
     )
 
     /**
      * The current heading (the direction the robot is facing).
+     * This is equivalent to the gyro heading if a gyro is specified; otherwise, the pose estimator
+     * will calculate the robot's heading using encoders and odometry.
      *
-     * This value is calculated using the encoders, not a gyroscope or accelerometer,
-     * so note that it may become inaccurate if the wheels slip. If available, consider
-     * using a [frc.chargers.hardware.sensors.imu.ChargerNavX] or similar device to calculate heading instead.
+     * If possible, specify a gyro, like a [frc.chargers.hardware.sensors.imu.ChargerNavX],
+     * in order to get the best possible results.
      *
-     * This value by itself is not particularly meaningful as it may be fairly large,
-     * positive or negative, based on previous rotations of the motors, including
-     * from previous times the robot has been enabled.
+     * This value is automatically standardized to a 0 to 360 degree range; however,
+     * the calculated heading
      *
      * Thus, it's more common to use this property to determine *change* in heading.
      * If the initial value of this property is stored, the amount of rotation since
@@ -274,14 +313,7 @@ public class EncoderHolonomicDrivetrain(
      *
      * @see HeadingProvider
      */
-    override val heading: Angle get() = (poseEstimator.heading - angleOffset).inputModulus(0.degrees..360.degrees)
-
-    /**
-     * Zeroes the drivetrain's calculated heading.
-     */
-    override fun zeroHeading(){
-        angleOffset = heading
-    }
+    override val heading: Angle get() = poseEstimator.heading.inputModulus(0.degrees..360.degrees)
 
 
     /**
@@ -295,7 +327,7 @@ public class EncoderHolonomicDrivetrain(
     )
 
 
-    /**
+    /**g
      * The distance the robot has traveled in total.
      */
     public val distanceTraveled: Distance get() =
@@ -331,7 +363,7 @@ public class EncoderHolonomicDrivetrain(
             bottomLeftState = bottomLeft.getModuleState(wheelRadius),
             bottomRightState = bottomRight.getModuleState(wheelRadius)
         ).also{
-            recordOutput("Drivetrain(Swerve)/CurrentModuleStates",*it.toArray())
+            recordOutput("Drivetrain(Swerve)/CurrentModuleStates", it.topLeftState, it.topRightState, it.bottomLeftState, it.bottomRightState)
         }
         set(ms){
             ms.desaturate(hardwareData.maxModuleSpeed)
@@ -443,11 +475,11 @@ public class EncoderHolonomicDrivetrain(
         }
         currentControlMode = ControlMode.OPEN_LOOP
         var speeds = powers.toChassisSpeeds(maxLinearVelocity,maxRotationalVelocity)
-        if (fieldRelative) speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, mostReliableHeading.asRotation2d())
+        if (fieldRelative) speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, heading.asRotation2d())
         // extension function defined in chargerlib
         speeds = speeds.discretize(driftRate = controlData.openLoopDiscretizationRate)
         // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
-        //speeds = headingCorrector.correctHeading(speeds,mostReliableHeading.asRotation2d())
+        speeds = headingCorrector.correctHeading(speeds,heading.asRotation2d())
         val stateArray = kinematics.toSwerveModuleStates(speeds)
 
         currentModuleStates = ModuleStateGroup(
@@ -491,11 +523,11 @@ public class EncoderHolonomicDrivetrain(
     ){
         currentControlMode = ControlMode.CLOSED_LOOP
         var newSpeeds: ChassisSpeeds =
-            if (fieldRelative) ChassisSpeeds.fromFieldRelativeSpeeds(speeds,mostReliableHeading.asRotation2d()) else speeds
+            if (fieldRelative) ChassisSpeeds.fromFieldRelativeSpeeds(speeds,heading.asRotation2d()) else speeds
         // extension function defined in chargerlib
         newSpeeds = newSpeeds.discretize(driftRate = controlData.closedLoopDiscretizationRate)
         // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
-        //newSpeeds = headingCorrector.correctHeading(newSpeeds,-mostReliableHeading.asRotation2d())
+        newSpeeds = headingCorrector.correctHeading(newSpeeds,heading.asRotation2d())
         val stateArray = kinematics.toSwerveModuleStates(newSpeeds)
         currentModuleStates = ModuleStateGroup(
             topLeftState = stateArray[0],

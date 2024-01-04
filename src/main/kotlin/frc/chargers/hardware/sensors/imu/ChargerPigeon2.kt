@@ -2,10 +2,12 @@ package frc.chargers.hardware.sensors.imu
 
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
+import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
 import com.ctre.phoenix6.StatusCode
 import com.ctre.phoenix6.hardware.Pigeon2
 import edu.wpi.first.wpilibj.RobotBase.isReal
+import edu.wpi.first.wpilibj.RobotBase.isSimulation
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
@@ -13,6 +15,7 @@ import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.sensors.imu.gyroscopes.ThreeAxisGyroscope
 import frc.chargers.hardware.sensors.imu.gyroscopes.ZeroableHeadingProvider
 import frc.chargers.utils.math.units.g
+import frc.chargers.wpilibextensions.delay
 import com.ctre.phoenix6.configs.Pigeon2Configuration as CTREPigeon2Configuration
 
 /**
@@ -49,9 +52,6 @@ public class ChargerPigeon2(
      * The accelerometer of the Pigeon; contains x, y, and z acceleration.
      */
     public val accelerometer: Accelerometer = Accelerometer()
-
-
-
 
     /**
      * The heading of the Pigeon; equivalent to yaw.
@@ -139,8 +139,13 @@ public class ChargerPigeon2(
 
     private fun StatusCode.updateConfigStatus(): StatusCode {
         if (this != StatusCode.OK){
-            allConfigErrors.add(this)
-            configAppliedProperly = false
+            if (isSimulation()){
+                println("A Phoenix Device did not configure properly; however, this was ignored because the code is running in simulation.")
+            }else{
+                delay(200.milli.seconds)
+                allConfigErrors.add(this)
+                configAppliedProperly = false
+            }
         }
         return this
     }

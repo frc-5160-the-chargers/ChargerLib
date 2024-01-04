@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.*
+import edu.wpi.first.wpilibj.RobotBase
 import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.configuration.HardwareConfigurable
@@ -16,6 +17,7 @@ import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.ResettableEncoder
+import frc.chargers.wpilibextensions.delay
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
 /**
@@ -165,8 +167,13 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
     private var configAppliedProperly = true
     private fun StatusCode.updateConfigStatus(): StatusCode {
         if (this != StatusCode.OK){
-            allConfigErrors.add(this)
-            configAppliedProperly = false
+            if (RobotBase.isSimulation()){
+                println("A Phoenix Device did not configure properly; however, this was ignored because the code is running in simulation.")
+            }else{
+                delay(200.milli.seconds)
+                allConfigErrors.add(this)
+                configAppliedProperly = false
+            }
         }
         return this
     }
