@@ -60,7 +60,7 @@ public inline fun swerveCANcoders(
 }
 
 
-public data class SwerveEncoders<out E: PositionEncoder>(
+public data class SwerveEncoders <out E: PositionEncoder> (
     val topLeft: E,
     val topRight: E,
     val bottomLeft: E,
@@ -78,6 +78,13 @@ public data class SwerveEncoders<out E: PositionEncoder>(
         bottomLeft = bottomLeft.withOffset(bottomLeftZero),
         bottomRight = bottomRight.withOffset(bottomRightZero),
     )
+
+    public fun forEach(predicate: (E) -> Unit){
+        predicate(topLeft)
+        predicate(topRight)
+        predicate(bottomLeft)
+        predicate(bottomRight)
+    }
 
     public inline fun <reified T: PositionEncoder> containsEncoders(): Boolean =
         topLeft is T && topRight is T && bottomLeft is T && bottomRight is T

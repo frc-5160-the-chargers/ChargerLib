@@ -392,8 +392,15 @@ public class LoggableInputsProvider(
 
         override val inputsProcessor = object: LoggableInputs{
             override fun toLog(table: LogTable){
-                table.put("$name/value", field ?: 0)
-                table.put("$name/isValid", field != null)
+                // must store as value in order to pass null checks
+                val currentValue = field
+                if (currentValue == null){
+                    table.put("$name/value", 0)
+                    table.put("$name/isValid", false)
+                }else{
+                    table.put("$name/value", currentValue)
+                    table.put("$name/isValid", true)
+                }
             }
             override fun fromLog(table: LogTable) {
                 field = if (table.get("$name/isValid", false)){
@@ -426,8 +433,15 @@ public class LoggableInputsProvider(
 
         override val inputsProcessor = object: LoggableInputs{
             override fun toLog(table: LogTable){
-                table.put("$name/value", field ?: 0.0)
-                table.put("$name/isValid", field != null)
+                // must store as value in order to pass null checks
+                val currentValue = field
+                if (currentValue == null){
+                    table.put("$name/value", 0.0)
+                    table.put("$name/isValid", false)
+                }else{
+                    table.put("$name/value", currentValue)
+                    table.put("$name/isValid", true)
+                }
             }
             override fun fromLog(table: LogTable) {
                 field = if (table.get("$name/isValid", false)){
@@ -460,8 +474,15 @@ public class LoggableInputsProvider(
 
         override val inputsProcessor = object: LoggableInputs{
             override fun toLog(table: LogTable){
-                table.put("$name/value", field?.siValue ?: 0)
-                table.put("$name/isValid", field != null)
+                // must store as value in order to pass null checks
+                val currentValue = field
+                if (currentValue == null){
+                    table.put("$name/value", 0.0)
+                    table.put("$name/isValid", false)
+                }else{
+                    table.put("$name/value", currentValue.siValue)
+                    table.put("$name/isValid", true)
+                }
             }
             override fun fromLog(table: LogTable) {
                 field = if (table.get("$name/isValid", false)){

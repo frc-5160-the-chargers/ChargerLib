@@ -12,7 +12,7 @@ import frc.chargers.utils.Precision
 import frc.chargers.utils.math.units.Inertia
 
 /**
- * A class that holds Control data for a [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
+ * A class that holds Control data for a [frc.chargers.hardware.subsystems.swervedrive.EncoderHolonomicDrivetrain].
  * This includes PID constants, feedforward, and path re-planning configs.
  */
 public data class SwerveControlData(
@@ -29,7 +29,7 @@ public data class SwerveControlData(
 )
 
 /**
- * A class that holds Hardware constants for a [frc.chargers.hardware.subsystems.drivetrain.EncoderHolonomicDrivetrain].
+ * A class that holds Hardware constants for a [frc.chargers.hardware.subsystems.swervedrive.EncoderHolonomicDrivetrain].
  * This includes Track width, wheelbase, inertia, turn motor inversion, and max speed.
  */
 public data class SwerveHardwareData(
@@ -56,8 +56,8 @@ public data class SwerveHardwareData(
             driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
         ): SwerveHardwareData = SwerveHardwareData(
             invertTurnMotors = true,
-            7.0 / 150.0,
-            1.0 / 6.75,
+            150.0 / 7.0,
+            6.75,
             turnInertiaMoment,
             driveInertiaMoment,
             maxModuleSpeed,
@@ -78,8 +78,8 @@ public data class SwerveHardwareData(
             driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
         ): SwerveHardwareData = SwerveHardwareData(
             invertTurnMotors = true,
-            7.0 / 150.0,
-            1.0 / 6.12,
+            150.0 / 7.0,
+            6.12,
             turnInertiaMoment,
             driveInertiaMoment,
             maxModuleSpeed,
@@ -100,8 +100,8 @@ public data class SwerveHardwareData(
             wheelBase: Distance
         ): SwerveHardwareData = SwerveHardwareData(
             invertTurnMotors = true,
-            7.0 / 150.0,
-            1.0 / 8.14,
+            150.0 / 7.0,
+            8.14,
             turnInertiaMoment,
             driveInertiaMoment,
             maxModuleSpeed,

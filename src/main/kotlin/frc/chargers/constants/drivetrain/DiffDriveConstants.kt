@@ -8,7 +8,7 @@ import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 
 /**
- * A class used to hold constants for an [frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain].
+ * A class used to hold constants for an [frc.chargers.hardware.subsystems.differentialdrive.EncoderDifferentialDrivetrain].
  */
 public data class DiffDriveHardwareData(
     val invertMotors: Boolean = false,
@@ -20,7 +20,7 @@ public data class DiffDriveHardwareData(
         public fun andyMark(invertMotors: Boolean = false): DiffDriveHardwareData =
             DiffDriveHardwareData(
                 invertMotors,
-                1.0 / 10.71,
+                10.71,
                 6.inches,
                 27.inches
             )
@@ -28,7 +28,7 @@ public data class DiffDriveHardwareData(
 }
 
 /**
- * A convenience class for holding control parameters of an [frc.chargers.hardware.subsystems.drivetrain.EncoderDifferentialDrivetrain].
+ * A convenience class for holding control parameters of an [frc.chargers.hardware.subsystems.differentialdrive.EncoderDifferentialDrivetrain].
  */
 public open class DiffDriveControlData(
     public val leftVelocityPID: PIDConstants,

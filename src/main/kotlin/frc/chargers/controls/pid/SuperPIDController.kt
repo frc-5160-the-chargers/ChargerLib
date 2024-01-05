@@ -61,20 +61,18 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
         if (continuousInputRange == null) this else this.inputModulus(continuousInputRange)
 
 
-    private val pidController = PIDController(0.0, 0.0, 0.0)
-        .apply {
-            setPID(pidConstants.kP, pidConstants.kI, pidConstants.kD)
-            if (continuousInputRange != null){
-                enableContinuousInput(
-                    continuousInputRange.start.siValue,
-                    continuousInputRange.endInclusive.siValue
-                )
-            }
-        }
+    private val pidController = PIDController(pidConstants.kP, pidConstants.kI, pidConstants.kD)
 
     init{
-        if(selfSustain){
+        if (selfSustain){
             ChargerRobot.runPeriodically(runnable = ::calculateOutput)
+        }
+
+        if (continuousInputRange != null){
+            pidController.enableContinuousInput(
+                continuousInputRange.start.siValue,
+                continuousInputRange.endInclusive.siValue
+            )
         }
     }
 

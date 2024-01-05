@@ -125,4 +125,11 @@ public data class SwerveMotors<out M: EncoderMotorController>(
             bottomLeft.encoder,
             bottomRight.encoder
         )
+
+    public fun forEach(predicate: (M) -> Unit){
+        predicate(topLeft)
+        predicate(topRight)
+        predicate(bottomLeft)
+        predicate(bottomRight)
+    }
 }

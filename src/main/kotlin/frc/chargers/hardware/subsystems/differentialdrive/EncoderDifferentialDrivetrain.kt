@@ -124,7 +124,7 @@ public class EncoderDifferentialDrivetrain(
     /* Private implementation */
     private val wheelRadius = hardwareData.wheelDiameter / 2
 
-    internal val wheelTravelPerMotorRadian = hardwareData.gearRatio * wheelRadius
+    internal val wheelTravelPerMotorRadian = wheelRadius / hardwareData.gearRatio
 
     private val leftController = SuperPIDController(
         controlData.leftVelocityPID,
@@ -264,8 +264,9 @@ public class EncoderDifferentialDrivetrain(
     }
 
     public fun velocityDrive(leftSpeed: Velocity, rightSpeed: Velocity){
-        leftController.target = leftSpeed / (hardwareData.gearRatio * hardwareData.wheelDiameter)
-        rightController.target = rightSpeed / (hardwareData.gearRatio * hardwareData.wheelDiameter)
+        leftController.target = leftSpeed / wheelTravelPerMotorRadian
+        rightController.target = rightSpeed / wheelTravelPerMotorRadian
+
         setVoltages(
             left = leftController.calculateOutput(),
             right = rightController.calculateOutput()

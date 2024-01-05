@@ -3,7 +3,7 @@ package frc.chargers.hardware.subsystems.swervedrive.module.lowlevel
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import edu.wpi.first.math.system.plant.DCMotor
-import edu.wpi.first.wpilibj.simulation.FlywheelSim
+import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
 import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_DRIVE_INERTIA
@@ -25,21 +25,17 @@ public class ModuleIOSim(
     turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
     driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
 ): ModuleIO {
-    private val turnMotorSim = FlywheelSim(
+    private val turnMotorSim = DCMotorSim(
         turnGearbox,
-        1 / turnGearRatio,
+        turnGearRatio,
         turnInertiaMoment.inUnit(kilo.grams * meters * meters)
     )
 
-    private val driveMotorSim = FlywheelSim(
+    private val driveMotorSim = DCMotorSim(
         driveGearbox,
-        1 / driveGearRatio,
+        driveGearRatio,
         driveInertiaMoment.inUnit(kilo.grams * meters * meters)
     )
-
-    private var currentDirection = Angle(0.0)
-
-    private var currentWheelPosition = Angle(0.0)
 
     private var turnAppliedVoltage = Voltage(0.0)
 
@@ -49,17 +45,13 @@ public class ModuleIOSim(
         ChargerRobot.runPeriodically(addToFront = true /* Makes this block run before everything else */ ){
             turnMotorSim.update(ChargerRobot.LOOP_PERIOD.inUnit(seconds))
             driveMotorSim.update(ChargerRobot.LOOP_PERIOD.inUnit(seconds))
-            currentDirection += turnMotorSim.angularVelocityRadPerSec.ofUnit(radians / seconds) * ChargerRobot.LOOP_PERIOD
-            currentWheelPosition += driveMotorSim.angularVelocityRadPerSec.ofUnit(radians / seconds) * ChargerRobot.LOOP_PERIOD
         }
     }
-
-
 
     override val logTab: String = logInputs.namespace
 
     override val direction: Angle by logInputs.quantity{
-        currentDirection.inputModulus(0.degrees..360.degrees)
+        turnMotorSim.angularPositionRad.ofUnit(radians).inputModulus(0.degrees..360.degrees)
     }
 
     override val turnSpeed: AngularVelocity by logInputs.quantity{
@@ -70,7 +62,7 @@ public class ModuleIOSim(
         driveMotorSim.angularVelocityRadPerSec.ofUnit(radians / seconds)
     }
 
-    override val wheelTravel: Angle by logInputs.quantity{currentWheelPosition}
+    override val wheelTravel: Angle by logInputs.quantity{ driveMotorSim.angularPositionRad.ofUnit(radians) }
 
     override var turnVoltage: Voltage by logInputs.quantity(
         getValue = {turnAppliedVoltage},

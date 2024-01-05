@@ -63,15 +63,15 @@ public class ModuleIOReal(
     }
 
     override val turnSpeed: AngularVelocity by logInputs.quantity{
-        turnMotor.encoder.angularVelocity * turnGearRatio
+        turnMotor.encoder.angularVelocity / turnGearRatio
     }
 
     override val speed: AngularVelocity by logInputs.quantity{
-        driveMotor.encoder.angularVelocity * driveGearRatio
+        driveMotor.encoder.angularVelocity / driveGearRatio
     }
 
     override val wheelTravel: Angle by logInputs.quantity{
-        (driveMotor.encoder.angularPosition - startingWheelTravel) * driveGearRatio
+        (driveMotor.encoder.angularPosition - startingWheelTravel) / driveGearRatio
     }
 
     override val driveCurrent: Current by logInputs.quantity{

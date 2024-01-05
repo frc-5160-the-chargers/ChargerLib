@@ -17,7 +17,7 @@ import frc.chargers.wpilibextensions.kinematics.yVelocity
 
 public class ChargerNavX(
     private val useFusedHeading: Boolean = true,
-    private val ahrs: AHRS = AHRS(),
+    public val ahrs: AHRS = AHRS(),
 ): ZeroableHeadingProvider {
 
     /**

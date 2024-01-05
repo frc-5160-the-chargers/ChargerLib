@@ -195,7 +195,7 @@ public fun EncoderHolonomicDrivetrain(
                     turnMotor = turnMotors.bottomLeft,
                     turnEncoder = turnEncoders.bottomLeft,
                     driveMotor = driveMotors.bottomLeft,
-                    hardwareData.driveGearRatio,hardwareData.turnGearRatio
+                    hardwareData.driveGearRatio, hardwareData.turnGearRatio
                 ),
                 controlData
             )
