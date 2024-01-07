@@ -20,41 +20,33 @@ public typealias SlotIndex = Int
 public typealias CustomParameterIndex = Int
 public typealias CustomParameterValue = Int
 
-/**
- * Represents a TalonSRX powering a redline/ CIM motor.
- *
- * You do not need to manually factory default this motor, as it is factory defaulted on startup.
- * This setting can be changed by setting factoryDefault = false.
- */
-public fun redlineSRX(
-    deviceNumber: Int,
-    encoderTicksPerRotation: Int = 1024,
-    factoryDefault: Boolean = true
-): ChargerTalonSRX = ChargerTalonSRX(deviceNumber, encoderTicksPerRotation).also {
-    if (factoryDefault) {
-        it.configFactoryDefault()
-        println("TalonSRX has been factory defaulted.")
-    }
-}
-
 
 /**
  * Represents a TalonSRX powering a redline/ CIM motor.
  *
- * This function supports inline configuration using the configure lambda function,
+ * This function supports inline configuration using the "[configure]" lambda function,
  * which has the context of a [TalonSRXConfiguration].
  *
  * You do not need to manually factory default this motor, as it is factory defaulted on startup,
  * before configuration. This setting can be changed by setting factoryDefault = false.
+ *
+ * ```
+ * // example
+ * val motor = redlineSRX(canId = 6){ inverted = false }
  */
 public inline fun redlineSRX(
     deviceNumber: Int,
     encoderTicksPerRotation: Int = 1024,
     factoryDefault: Boolean = true,
-    configure: TalonSRXConfiguration.() -> Unit
+    configure: TalonSRXConfiguration.() -> Unit = {}
 ): ChargerTalonSRX =
-    redlineSRX(deviceNumber,encoderTicksPerRotation, factoryDefault).also{
-        it.configure(TalonSRXConfiguration().apply(configure))
+    ChargerTalonSRX(deviceNumber,encoderTicksPerRotation).apply{
+        if (factoryDefault) {
+            configFactoryDefault()
+            println("TalonSRX has been factory defaulted.")
+        }
+        val config = TalonSRXConfiguration().apply(configure)
+        configure(config)
     }
 
 public class TalonSRXEncoderAdapter(

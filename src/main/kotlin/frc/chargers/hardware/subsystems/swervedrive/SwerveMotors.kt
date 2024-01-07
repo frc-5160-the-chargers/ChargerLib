@@ -1,15 +1,29 @@
 package frc.chargers.hardware.subsystems.swervedrive
 
-import com.revrobotics.CANSparkMaxLowLevel
+import com.revrobotics.CANSparkLowLevel
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.falcon
-import frc.chargers.hardware.motorcontrol.rev.ChargerCANSparkMax
-import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
-import frc.chargers.hardware.motorcontrol.rev.brushedSparkMax
-import frc.chargers.hardware.motorcontrol.rev.neoSparkMax
+import frc.chargers.hardware.motorcontrol.rev.*
 import frc.chargers.hardware.sensors.encoders.Encoder
+
+/**
+ * Constructs an instance of [SwerveMotors] with Spark Flex motor controllers.
+ */
+public inline fun sparkFlexSwerveMotors(
+    topLeftId: Int,
+    topRightId: Int,
+    bottomLeftId: Int,
+    bottomRightId: Int,
+    configure: SparkFlexConfiguration.() -> Unit
+): SwerveMotors<ChargerSparkFlex> = sparkFlexSwerveMotors(
+    neoSparkFlex(topLeftId),
+    neoSparkFlex(topRightId),
+    neoSparkFlex(bottomLeftId),
+    neoSparkFlex(bottomRightId),
+    configure
+)
 
 
 /**
@@ -20,17 +34,17 @@ public inline fun sparkMaxSwerveMotors(
     topRightId: Int,
     bottomLeftId: Int,
     bottomRightId: Int,
-    type: CANSparkMaxLowLevel.MotorType = CANSparkMaxLowLevel.MotorType.kBrushless,
+    type: CANSparkLowLevel.MotorType = CANSparkLowLevel.MotorType.kBrushless,
     configure: SparkMaxConfiguration.() -> Unit = {}
-): SwerveMotors<ChargerCANSparkMax> = when (type){
-    CANSparkMaxLowLevel.MotorType.kBrushless -> sparkMaxSwerveMotors(
+): SwerveMotors<ChargerSparkMax> = when (type){
+    CANSparkLowLevel.MotorType.kBrushless -> sparkMaxSwerveMotors(
         neoSparkMax(topLeftId),
         neoSparkMax(topRightId),
         neoSparkMax(bottomLeftId),
         neoSparkMax(bottomRightId),
         configure
     )
-    CANSparkMaxLowLevel.MotorType.kBrushed -> sparkMaxSwerveMotors(
+    CANSparkLowLevel.MotorType.kBrushed -> sparkMaxSwerveMotors(
         brushedSparkMax(topLeftId),
         brushedSparkMax(topRightId),
         brushedSparkMax(bottomLeftId),
@@ -61,12 +75,12 @@ public inline fun talonFXSwerveMotors(
  * Constructs an instance of [SwerveMotors] with Spark Max motor controllers.
  */
 public inline fun sparkMaxSwerveMotors(
-    topLeft: ChargerCANSparkMax,
-    topRight: ChargerCANSparkMax,
-    bottomLeft: ChargerCANSparkMax,
-    bottomRight: ChargerCANSparkMax,
+    topLeft: ChargerSparkMax,
+    topRight: ChargerSparkMax,
+    bottomLeft: ChargerSparkMax,
+    bottomRight: ChargerSparkMax,
     configure: SparkMaxConfiguration.() -> Unit = {}
-): SwerveMotors<ChargerCANSparkMax> {
+): SwerveMotors<ChargerSparkMax> {
     val config = SparkMaxConfiguration().apply(configure)
 
     topLeft.configure(config)
@@ -78,6 +92,27 @@ public inline fun sparkMaxSwerveMotors(
         topLeft, topRight, bottomLeft, bottomRight,
     )
 }
+
+
+public inline fun sparkFlexSwerveMotors(
+    topLeft: ChargerSparkFlex,
+    topRight: ChargerSparkFlex,
+    bottomLeft: ChargerSparkFlex,
+    bottomRight: ChargerSparkFlex,
+    configure: SparkFlexConfiguration.() -> Unit = {}
+): SwerveMotors<ChargerSparkFlex>{
+    val config = SparkFlexConfiguration().apply(configure)
+
+    topLeft.configure(config)
+    topRight.configure(config)
+    bottomLeft.configure(config)
+    bottomRight.configure(config)
+
+    return SwerveMotors(
+        topLeft, topRight, bottomLeft, bottomRight,
+    )
+}
+
 
 
 /**

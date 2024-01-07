@@ -102,8 +102,9 @@ public class OnboardPIDSwerveModule private constructor( // Do not use this cons
         turnMotor.setAngularPosition(
             turnSetpoint.value,
             turnPIDConstants,
-            turnEncoder,
-            turnSetpoint.feedforwardOutput
+            continuousWrap = true,
+            extraVoltage = turnSetpoint.feedforwardOutput,
+            turnEncoder = turnEncoder
         )
     }
 

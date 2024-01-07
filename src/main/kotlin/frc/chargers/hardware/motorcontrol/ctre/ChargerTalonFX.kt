@@ -3,6 +3,7 @@ package frc.chargers.hardware.motorcontrol.ctre
 import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.*
 import com.ctre.phoenix6.StatusCode
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs
 import com.ctre.phoenix6.configs.Slot0Configs
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityVoltage
@@ -15,26 +16,28 @@ import frc.chargers.hardware.configuration.HardwareConfigurable
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.motorcontrol.*
-import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.hardware.sensors.encoders.ResettableEncoder
+import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.delay
 import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
 
 /**
  * Creates an instance of a falcon motor, controlled by a TalonFX motor controller.
- * This function supports inline configuration using the configure lambda function,
+ *
+ * This function supports inline configuration using the "[configure]" lambda function,
  * which has the context of a [TalonFXConfiguration].
  *
  * You do not need to manually factory default this motor, as it is factory defaulted on startup,
  * before configuration. This setting can be changed by setting factoryDefault = false.
+ *
+ * ```
+ * // example
+ * val motor = falcon(canId = 6){ feedbackRemoteSensorId = 5 }
  */
 public fun falcon(
     canId: Int,
     canBus: String = "rio",
     factoryDefault: Boolean = true,
-    // This function block has the context of a TalonFXConfiguration,
-    // which means that it is basically treated as if it was called with the class itself.
-    // Example Usage: falcon(6){ beepOnBoot = true; neutralMode = NeutralModeValue.Brake }
     configure: TalonFXConfiguration.() -> Unit = {}
 ): ChargerTalonFX = ChargerTalonFX(canId, canBus).apply {
     // factory defaults configs on startup when factoryDefault = true
@@ -108,6 +111,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
     private val currentSlotConfigs = Slot0Configs()
     private val velocityRequest = VelocityVoltage(0.0).also{ it.Slot = 0 }
     private val positionRequest = PositionVoltage(0.0).also{it.Slot = 0 }
+    private var isWrapping = false
 
     private fun currentPIDConstants() = PIDConstants(currentSlotConfigs.kP, currentSlotConfigs.kI, currentSlotConfigs.kD)
 
@@ -144,18 +148,30 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
     override fun setAngularPosition(
         target: Angle,
         pidConstants: PIDConstants,
-        absoluteEncoder: PositionEncoder?,
+        continuousWrap: Boolean,
         extraVoltage: Voltage
     ) {
+
         if (currentPIDConstants() != pidConstants){
             setPIDConstants(pidConstants)
             configurator.apply(currentSlotConfigs)
-            println("PID status has been updated.")
+            println("PID status for Talon FX has been updated.")
         }
-        if (absoluteEncoder == null){
-            positionRequest.Position = target.inUnit(rotations)
+
+        if (isWrapping != continuousWrap){
+            configurator.apply(
+                ClosedLoopGeneralConfigs().apply{ContinuousWrap = continuousWrap}
+            )
+            isWrapping = continuousWrap
+            println("Closed Loop status for TalonFX has been updated.")
+        }
+
+        if (isWrapping){
+            positionRequest.Position = target
+                .inputModulus((-0.5).rotations..0.5.rotations)
+                .inUnit(rotations)
         }else{
-            positionRequest.Position = (encoder.angularPosition - absoluteEncoder.angularPosition + target).inUnit(rotations)
+            positionRequest.Position = target.inUnit(rotations)
         }
         positionRequest.FeedForward = extraVoltage.inUnit(volts)
         setControl(positionRequest)
@@ -242,9 +258,6 @@ public data class TalonFXConfiguration(
     // audio configs
     var beepOnBoot: Boolean? = null,
 
-    // closed loop general configs
-    var closedLoopContinuousWrap: Boolean? = null,
-
     // Closed Loop Ramps Configs
     var dutyCycleClosedLoopRampPeriod: Time? = null,
     var torqueClosedLoopRampPeriod: Time? = null,
@@ -322,10 +335,6 @@ internal fun applyChanges(ctreConfig: CTRETalonFXConfiguration, chargerConfig: T
     ctreConfig.apply{
         chargerConfig.beepOnBoot?.let{
             Audio.BeepOnBoot = it
-        }
-
-        chargerConfig.closedLoopContinuousWrap?.let{
-            ClosedLoopGeneral.ContinuousWrap = it
         }
 
         CurrentLimits.apply{

@@ -4,7 +4,9 @@ package frc.chargers.hardware.motorcontrol
 import com.batterystaple.kmeasure.quantities.Angle
 import com.batterystaple.kmeasure.quantities.AngularVelocity
 import com.batterystaple.kmeasure.quantities.Voltage
+import com.batterystaple.kmeasure.quantities.times
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
+import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
 import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.hardware.sensors.encoders.Encoder
@@ -38,15 +40,37 @@ public interface SmartEncoderMotorController: EncoderMotorController, Temperatur
     )
 
     /**
-     * Sets the position of the motor using closed loop control,
-     * utilizing the output of an optional absolute encoder.
+     * Sets the position of the motor using closed loop control.
      */
     public fun setAngularPosition(
         target: Angle,
         pidConstants: PIDConstants,
-        absoluteEncoder: PositionEncoder? = null,
+        continuousWrap: Boolean = false,
         extraVoltage: Voltage = Voltage(0.0)
     )
+
+
+    /**
+     * Sets the position of the motor using closed loop control;
+     * utilizing the readings of an absolute encoder.
+     */
+    public fun setAngularPosition(
+        target: Angle,
+        pidConstants: PIDConstants,
+        continuousWrap: Boolean = false,
+        extraVoltage: Voltage = Voltage(0.0),
+        turnEncoder: PositionEncoder,
+        motorToEncoderRatio: Double = DEFAULT_GEAR_RATIO,
+    ){
+        val positionError = motorToEncoderRatio * (target - turnEncoder.angularPosition)
+
+        setAngularPosition(
+            encoder.angularPosition + positionError,
+            pidConstants,
+            continuousWrap,
+            extraVoltage
+        )
+    }
 
 
 }

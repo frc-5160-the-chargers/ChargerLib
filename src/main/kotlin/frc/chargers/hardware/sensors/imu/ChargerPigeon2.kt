@@ -4,6 +4,7 @@ import com.batterystaple.kmeasure.quantities.*
 import com.batterystaple.kmeasure.units.degrees
 import com.batterystaple.kmeasure.units.milli
 import com.batterystaple.kmeasure.units.seconds
+import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.StatusCode
 import com.ctre.phoenix6.hardware.Pigeon2
 import edu.wpi.first.wpilibj.RobotBase.isReal
@@ -63,6 +64,28 @@ public class ChargerPigeon2(
      */
     override fun zeroHeading() { reset() }
 
+    private var _isConnected = true
+
+    /**
+     * Determines if the gyro is connected or not.
+     */
+    public var isConnected: Boolean by ImuLog.boolean(
+        getValue = { isReal() &&  _isConnected  },
+        setValue = { value -> _isConnected = value }
+    )
+
+
+
+
+    init{
+        ChargerRobot.runPeriodically (addToFront = true) {
+            val currentStatus = BaseStatusSignal.refreshAll(
+                *gyroscope.getSignals(),
+                *accelerometer.getSignals()
+            )
+            isConnected = currentStatus == StatusCode.OK
+        }
+    }
 
     /*
     Internal constructor makes it so that the inner class can be accepted as a type argument,
@@ -71,6 +94,7 @@ public class ChargerPigeon2(
 
 
     public inner class Gyroscope internal constructor(): ThreeAxisGyroscope {
+
         private val yawSignal = getYaw()
         private val rollSignal = getRoll()
         private val pitchSignal = getPitch()
@@ -79,23 +103,26 @@ public class ChargerPigeon2(
         private val pitchRateSignal = angularVelocityY
         private val rollRateSignal = angularVelocityX
 
+        internal fun getSignals(): Array<BaseStatusSignal> =
+            arrayOf(yawSignal, rollSignal, pitchSignal, yawRateSignal, pitchRateSignal, rollRateSignal)
+
         private var simPreviousYaw = Angle(0.0)
 
         override val yaw: Angle by GyroLog.quantity{
-            if (isReal()) yawSignal.refresh(true).value.ofUnit(degrees) else getSimHeading()
+            if (isReal()) yawSignal.value.ofUnit(degrees) else getSimHeading()
         }
 
         override val pitch: Angle by GyroLog.quantity{
-            if (isReal()) pitchSignal.refresh(true).value.ofUnit(degrees) else Angle(0.0)
+            if (isReal()) pitchSignal.value.ofUnit(degrees) else Angle(0.0)
         }
 
         override val roll: Angle by GyroLog.quantity{
-            if (isReal()) rollSignal.refresh(true).value.ofUnit(degrees) else Angle(0.0)
+            if (isReal()) rollSignal.value.ofUnit(degrees) else Angle(0.0)
         }
 
         public val yawRate: AngularVelocity by GyroLog.quantity{
             if (isReal()){
-                yawRateSignal.refresh(true).value.ofUnit(degrees/seconds)
+                yawRateSignal.value.ofUnit(degrees/seconds)
             }else{
                 val currH = getSimHeading()
                 ((currH - simPreviousYaw) / ChargerRobot.LOOP_PERIOD).also{
@@ -105,11 +132,11 @@ public class ChargerPigeon2(
         }
 
         public val pitchRate: AngularVelocity by GyroLog.quantity{
-            if (isReal()) pitchRateSignal.refresh(true).value.ofUnit(degrees/seconds) else AngularVelocity(0.0)
+            if (isReal()) pitchRateSignal.value.ofUnit(degrees/seconds) else AngularVelocity(0.0)
         }
 
         public val rollRate: AngularVelocity by GyroLog.quantity{
-            if (isReal()) rollRateSignal.refresh(true).value.ofUnit(degrees/seconds) else AngularVelocity(0.0)
+            if (isReal()) rollRateSignal.value.ofUnit(degrees/seconds) else AngularVelocity(0.0)
         }
 
     }
@@ -121,16 +148,19 @@ public class ChargerPigeon2(
         private val yAccelSignal = accelerationY
         private val zAccelSignal = accelerationZ
 
+        internal fun getSignals(): Array<BaseStatusSignal> =
+            arrayOf(xAccelSignal, yAccelSignal, zAccelSignal)
+
         override val xAcceleration: Acceleration by AccelerometerLog.quantity{
-            if (isReal()) xAccelSignal.refresh(true).value.ofUnit(g) else Acceleration(0.0)
+            if (isReal()) xAccelSignal.value.ofUnit(g) else Acceleration(0.0)
         }
 
         override val yAcceleration: Acceleration by AccelerometerLog.quantity{
-            if (isReal()) yAccelSignal.refresh(true).value.ofUnit(g) else Acceleration(0.0)
+            if (isReal()) yAccelSignal.value.ofUnit(g) else Acceleration(0.0)
         }
 
         override val zAcceleration: Acceleration by AccelerometerLog.quantity{
-            if (isReal()) zAccelSignal.refresh(true).value.ofUnit(g) else Acceleration(0.0)
+            if (isReal()) zAccelSignal.value.ofUnit(g) else Acceleration(0.0)
         }
     }
 

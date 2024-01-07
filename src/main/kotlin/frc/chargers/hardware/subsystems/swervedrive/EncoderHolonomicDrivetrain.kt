@@ -8,9 +8,9 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.chargerlibexternal.frc4481.HeadingCorrector
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.*
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
@@ -253,7 +253,6 @@ public class EncoderHolonomicDrivetrain(
 
     private val distanceOffset: Distance = averageEncoderPosition() * wheelRadius
 
-    private val headingCorrector = HeadingCorrector()
     /*
     OPEN_LOOP indicates percent-out(power) based drive,
     while CLOSED_LOOP uses PID and feedforward for velocity-based driving.
@@ -466,7 +465,7 @@ public class EncoderHolonomicDrivetrain(
         powers: ChassisPowers,
         fieldRelative: Boolean = RobotBase.isSimulation() || gyro != null
     ){
-        if (powers.xPower == 0.0 && powers.yPower == 0.0 && powers.rotationPower == 0.0){
+        if (DriverStation.isDisabled() || (powers.xPower == 0.0 && powers.yPower == 0.0 && powers.rotationPower == 0.0)){
             topLeft.halt()
             topRight.halt()
             bottomLeft.halt()
@@ -478,8 +477,6 @@ public class EncoderHolonomicDrivetrain(
         if (fieldRelative) speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, heading.asRotation2d())
         // extension function defined in chargerlib
         speeds = speeds.discretize(driftRate = controlData.openLoopDiscretizationRate)
-        // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
-        speeds = headingCorrector.correctHeading(speeds,heading.asRotation2d())
         val stateArray = kinematics.toSwerveModuleStates(speeds)
 
         currentModuleStates = ModuleStateGroup(
@@ -521,13 +518,18 @@ public class EncoderHolonomicDrivetrain(
         speeds: ChassisSpeeds,
         fieldRelative: Boolean = RobotBase.isSimulation() || gyro != null
     ){
+        if (DriverStation.isDisabled()){
+            topLeft.halt()
+            topRight.halt()
+            bottomLeft.halt()
+            bottomRight.halt()
+            return
+        }
         currentControlMode = ControlMode.CLOSED_LOOP
         var newSpeeds: ChassisSpeeds =
             if (fieldRelative) ChassisSpeeds.fromFieldRelativeSpeeds(speeds,heading.asRotation2d()) else speeds
         // extension function defined in chargerlib
         newSpeeds = newSpeeds.discretize(driftRate = controlData.closedLoopDiscretizationRate)
-        // corrects heading when robot is moving at high velocities; not sure if heading should be negative or positive here
-        newSpeeds = headingCorrector.correctHeading(newSpeeds,heading.asRotation2d())
         val stateArray = kinematics.toSwerveModuleStates(newSpeeds)
         currentModuleStates = ModuleStateGroup(
             topLeftState = stateArray[0],

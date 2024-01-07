@@ -20,7 +20,6 @@ import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
-import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIO
 import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOReal
@@ -28,6 +27,7 @@ import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOSi
 import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.framework.ChargerRobot
+import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
 import frc.chargers.hardware.sensors.RobotPoseMonitor
 import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.utils.a

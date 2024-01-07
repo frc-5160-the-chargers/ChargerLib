@@ -47,7 +47,7 @@ public class ChargerNavX(
 
     public val firmwareVersion: String get() = ahrs.firmwareVersion
 
-    public val isConnected: Boolean get() = ahrs.isConnected
+    public val isConnected: Boolean by ImuLog.boolean{ ahrs.isConnected && isReal() }
 
     override val heading: Angle by ImuLog.quantity{
         if (isReal()) {
