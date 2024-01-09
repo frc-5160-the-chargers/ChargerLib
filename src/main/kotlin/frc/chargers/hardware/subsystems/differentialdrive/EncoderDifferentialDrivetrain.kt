@@ -112,6 +112,7 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
 
 
 
+@Suppress("MemberVisibilityCanBePrivate", "CanBeParameter")
 public class EncoderDifferentialDrivetrain(
     lowLevel: DiffDriveIO,
     public val hardwareData: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
@@ -193,20 +194,13 @@ public class EncoderDifferentialDrivetrain(
         hardwareData.width.inUnit(meters)
     )
 
+    private val distanceOffset = a[leftWheelTravel,rightWheelTravel].average()
+
     /**
-     * The total linear distance traveled from the zero point of the encoders.
-     *
-     * This value by itself is not particularly meaningful as it may be fairly large,
-     * positive or negative, based on previous rotations of the motors, including
-     * from previous times the robot has been enabled.
-     *
-     * Thus, it's more common to use this property to determine *change* in position.
-     * If the initial value of this property is stored, the distance traveled since
-     * that initial point can easily be determined by subtracting the initial position
-     * from the current position.
+     * The total linear distance traveled since the start of the match.
      */
     public val distanceTraveled: Distance
-        get() = a[leftWheelTravel,rightWheelTravel].average() * wheelTravelPerMotorRadian
+        get() = (arrayOf(leftWheelTravel,rightWheelTravel).average() - distanceOffset) * wheelTravelPerMotorRadian
 
     /**
      * The current linear velocity of the robot.

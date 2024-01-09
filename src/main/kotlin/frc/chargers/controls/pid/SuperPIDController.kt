@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.PIDController
 import frc.chargers.controls.FeedbackController
 import frc.chargers.controls.SetpointSupplier
 import frc.chargers.framework.ChargerRobot
+import frc.chargers.utils.Precision
 import frc.chargers.utils.math.inputModulus
 
 /**
@@ -52,6 +53,10 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
      */
     private val outputRange: ClosedRange<Quantity<O>> = Quantity<O>(Double.NEGATIVE_INFINITY)..Quantity(Double.POSITIVE_INFINITY),
     /**
+     * Controls the error tolerance of the controller.
+     */
+    errorTolerance: Precision<I> = Precision.AllowOvershoot,
+    /**
      * Determines if the [SuperPIDController] should call calculateOutput()
      * during every loop of the command scheduler. Normal PID controllers require the user to do this.
      */
@@ -72,6 +77,12 @@ public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
             pidController.enableContinuousInput(
                 continuousInputRange.start.siValue,
                 continuousInputRange.endInclusive.siValue
+            )
+        }
+
+        if (errorTolerance is Precision.Within){
+            pidController.setTolerance(
+                (errorTolerance.allowableError.endInclusive - errorTolerance.allowableError.start).siValue
             )
         }
     }

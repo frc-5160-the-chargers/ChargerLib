@@ -1,10 +1,7 @@
 package frc.chargers.hardware.motorcontrol
 
 
-import com.batterystaple.kmeasure.quantities.Angle
-import com.batterystaple.kmeasure.quantities.AngularVelocity
-import com.batterystaple.kmeasure.quantities.Voltage
-import com.batterystaple.kmeasure.quantities.times
+import com.batterystaple.kmeasure.quantities.*
 import edu.wpi.first.wpilibj.motorcontrol.MotorController
 import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
 import frc.chargers.controls.feedforward.AngularMotorFFConstants
@@ -28,7 +25,21 @@ public interface EncoderMotorController : MotorController {
  * that can measure it's recorded temperature, applied current, and applied voltage,
  * as well as run closed loop control on the motor itself.
  */
-public interface SmartEncoderMotorController: EncoderMotorController, TemperatureProvider, CurrentProvider, VoltageProvider{
+public interface SmartEncoderMotorController: EncoderMotorController{
+    /**
+     * The applied current of the motor.
+     */
+    public val appliedCurrent: Current
+
+    /**
+     * The applied voltage of the motor.
+     */
+    public val appliedVoltage: Voltage
+
+    /**
+     * The temperature of the motor.
+     */
+    public val tempCelsius: Double
 
     /**
      * Sets the angular velocity of the motor.
@@ -71,7 +82,5 @@ public interface SmartEncoderMotorController: EncoderMotorController, Temperatur
             extraVoltage
         )
     }
-
-
 }
 

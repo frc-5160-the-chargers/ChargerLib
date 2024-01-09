@@ -7,6 +7,12 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 
+public typealias AprilTagVisionPipeline = VisionPipeline<VisionTarget.AprilTag>
+
+public typealias MLVisionPipeline = VisionPipeline<VisionTarget.ML>
+
+public typealias GenericVisionPipeline = VisionPipeline<VisionTarget.Generic>
+
 /**
  * Represents a generic vision system that can detect one type of target and compile data about it.
  *

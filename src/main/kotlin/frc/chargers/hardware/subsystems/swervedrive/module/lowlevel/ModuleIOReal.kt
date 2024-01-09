@@ -6,13 +6,10 @@ import com.batterystaple.kmeasure.units.volts
 import edu.wpi.first.wpilibj.RobotController
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.DEFAULT_GEAR_RATIO
-import frc.chargers.hardware.motorcontrol.CurrentProvider
-import frc.chargers.hardware.motorcontrol.EncoderMotorController
-import frc.chargers.hardware.motorcontrol.TemperatureProvider
+import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.PositionEncoder
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.Alert
-import frc.chargers.hardware.motorcontrol.setVoltage
 
 /**
  * Represents the low level hardware of a SwerveModule on the real robot.
@@ -75,7 +72,7 @@ public class ModuleIOReal(
     }
 
     override val driveCurrent: Current by logInputs.quantity{
-        if (driveMotor is CurrentProvider){
+        if (driveMotor is SmartEncoderMotorController){
             driveMotor.appliedCurrent
         }else{
             Current(0.0)
@@ -83,7 +80,7 @@ public class ModuleIOReal(
     }
 
     override val turnCurrent: Current by logInputs.quantity{
-        if (turnMotor is CurrentProvider){
+        if (turnMotor is SmartEncoderMotorController){
             turnMotor.appliedCurrent
         }else{
             Current(0.0)
@@ -91,7 +88,7 @@ public class ModuleIOReal(
     }
 
     override val driveTempCelsius: Double by logInputs.double{
-        if (driveMotor is TemperatureProvider){
+        if (driveMotor is SmartEncoderMotorController){
             driveMotor.tempCelsius
         }else{
             0.0
@@ -99,7 +96,7 @@ public class ModuleIOReal(
     }
 
     override val turnTempCelsius: Double by logInputs.double{
-        if (turnMotor is TemperatureProvider){
+        if (turnMotor is SmartEncoderMotorController){
             turnMotor.tempCelsius
         }else{
             0.0

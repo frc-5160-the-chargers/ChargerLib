@@ -8,7 +8,6 @@ import frc.chargers.framework.ChargerRobot
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.inputs.LoggableInputs
-import java.util.concurrent.locks.ReentrantLock
 import java.util.function.*
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
@@ -27,9 +26,7 @@ public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, Read
 
 /**
  * A wrapper around AdvantageKit which manages logging and replaying loggable inputs
- * in a clean and descriptive way.
- *
- * Usage example:
+ * with kotlin's property delegates.
  *
  * ```
  * // have 1 LoggableInputsProvider per subsystem/log category
@@ -70,200 +67,98 @@ public typealias ReadWriteLoggableInput<T> = PropertyDelegateProvider<Any?, Read
  *      override val otherProperty by ArmLog.double{...}
  *
  *      // native support for kotlin nullables;
- *      // value logged under "Arm/nullableProperty",
- *      // and "Arm/nullablePropertyIsValid" logs whether the value is null or not.
+ *      // value logged under "Arm/nullableProperty/value",
+ *      // and "Arm/nullableProperty/isValid" logs whether the value is null or not.
  *      override val nullableProperty: Double? by ArmLog.nullableDouble{...}
  *      ...
  * }
  */
 public class LoggableInputsProvider(
     public val namespace: String,
-    public val updateInputs: Boolean = true
+    /**
+     * Determines whether inputs should be updated every loop.
+     * This can be set to false if your IO class only interacts with real hardware(with no sim equivalent),
+     * and does not want to fetch data from real hardware that does not exist.
+     */
+    private val updateInputs: Boolean = true,
+    /**
+     * A function block that runs before inputs are updated.
+     */
+    private val runBeforeInputUpdate: ( () -> Unit )? = null,
+    /**
+     * A function block that runs after inputs are updated.
+     */
+    private val runAfterInputUpdate: ( () -> Unit )? = null
 ){
+    /**
+     * Creates a subtab of a [LoggableInputsProvider].
+     */
     public fun subgroup(group: String): LoggableInputsProvider =
         LoggableInputsProvider("$namespace/$group")
 
-    /**
-     * A [ReentrantLock] that automatically locks when the loggable inputs are updated.
-     *
-     */
-    public val updateInputsLock: ReentrantLock = ReentrantLock()
-
-
-
-
-    public fun int(getValue: () -> Int): ReadOnlyLoggableInput<Int> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedInt(variable.name, getValue) }
-    public fun double(getValue: () -> Double): ReadOnlyLoggableInput<Double> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedDouble(variable.name, getValue) }
-    public fun <D: AnyDimension> quantity(getValue: () -> Quantity<D>): ReadOnlyLoggableInput<Quantity<D>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantity(variable.name + "(SI value)", getValue) }
-    public fun boolean(getValue: () -> Boolean): ReadOnlyLoggableInput<Boolean> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedBoolean(variable.name, getValue) }
-    public fun string(getValue: () -> String): ReadOnlyLoggableInput<String> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedString(variable.name, getValue) }
-
-
-
-    public fun nullableInt(getValue: () -> Int?): ReadOnlyLoggableInput<Int?> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableInt(variable.name, getValue) }
-    public fun nullableDouble(getValue: () -> Double?): ReadOnlyLoggableInput<Double?> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableDouble(variable.name, getValue) }
-    public fun <D: AnyDimension> nullableQuantity(getValue: () -> Quantity<D>?): ReadOnlyLoggableInput<Quantity<D>?> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantity(variable.name + "(SI value)", getValue) }
-
-
-
-    public fun intList(getValue: () -> List<Int>): ReadOnlyLoggableInput<List<Int>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedIntList(variable.name, getValue) }
-    public fun <D: AnyDimension> quantityList(getValue: () -> List<Quantity<D>>): ReadOnlyLoggableInput<List<Quantity<D>>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityList(variable.name + "(SI Value)", getValue) }
-    public fun doubleList(getValue: () -> List<Double>): ReadOnlyLoggableInput<List<Double>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedDoubleList(variable.name, getValue) }
-    public fun booleanList(getValue: () -> List<Boolean>): ReadOnlyLoggableInput<List<Boolean>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedBooleanList(variable.name, getValue) }
-    public fun stringList(getValue: () -> List<String>): ReadOnlyLoggableInput<List<String>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedStringList(variable.name, getValue) }
-
-
-    public fun <T: AdvantageKitLoggable<T>> value(default: T, getValue: () -> T): ReadOnlyLoggableInput<T> =
-        PropertyDelegateProvider{_, variable -> AutoLoggedGenericValue(variable.name,default, getValue)}
-    public fun <T: AdvantageKitLoggable<T>> nullableValue(default: T, getValue: () -> T?): ReadOnlyLoggableInput<T?> =
-        PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,default, getValue)}
-    public fun <T: AdvantageKitLoggable<T>> valueList(
-        default: T,
-        getValue: () -> List<T>
-    ): ReadOnlyLoggableInput<List<T>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValueList(variable.name, default, getValue) }
-
-
-
-
-
-    public fun int(getValue: () -> Int, setValue: (Int) -> Unit): ReadWriteLoggableInput<Int> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedInt(variable.name, getValue,setValue) }
-    public fun double(getValue: () -> Double, setValue: (Double) -> Unit): ReadWriteLoggableInput<Double> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedDouble(variable.name, getValue,setValue) }
-    public fun <D: AnyDimension> quantity(getValue: () -> Quantity<D>, setValue: (Quantity<D>) -> Unit): ReadWriteLoggableInput<Quantity<D>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantity(variable.name + "(SI value)", getValue,setValue) }
-    public fun boolean(getValue: () -> Boolean, setValue: (Boolean) -> Unit): ReadWriteLoggableInput<Boolean> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedBoolean(variable.name, getValue,setValue) }
-
-
-    public fun string(getValue: () -> String, setValue: (String) -> Unit): ReadWriteLoggableInput<String> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedString(variable.name, getValue,setValue) }
-
-
-
-
-    public fun nullableInt(getValue: () -> Int?, setValue: (Int?) -> Unit): ReadWriteLoggableInput<Int?> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableInt(variable.name, getValue,setValue) }
-    public fun nullableDouble(getValue: () -> Double?, setValue: (Double?) -> Unit): ReadWriteLoggableInput<Double?> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableDouble(variable.name, getValue,setValue) }
-    public fun <D: AnyDimension> nullableQuantity(getValue: () -> Quantity<D>?, setValue: (Quantity<D>?) -> Unit): ReadWriteLoggableInput<Quantity<D>?> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantity(variable.name + "(SI value)", getValue,setValue) }
-
-
-
-    public fun intList(getValue: () -> List<Int>, setValue: (List<Int>) -> Unit): ReadWriteLoggableInput<List<Int>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedIntList(variable.name, getValue,setValue) }
-    public fun <D: AnyDimension> quantityList(
-        getValue: () -> List<Quantity<D>>,
-        setValue: (List<Quantity<D>>) -> Unit
-    ): ReadWriteLoggableInput<List<Quantity<D>>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityList(variable.name + "(SI Value)", getValue,setValue) }
-    public fun doubleList(
-        getValue: () -> List<Double>,
-        setValue: (List<Double>) -> Unit
-    ): ReadWriteLoggableInput<List<Double>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedDoubleList(variable.name, getValue, setValue) }
-    public fun booleanList(
-        getValue: () -> List<Boolean>,
-        setValue: (List<Boolean>) -> Unit
-    ): ReadWriteLoggableInput<List<Boolean>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedBooleanList(variable.name, getValue, setValue) }
-    public fun stringList(
-        getValue: () -> List<String>,
-        setValue: (List<String>) -> Unit
-    ): ReadWriteLoggableInput<List<String>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedStringList(variable.name, getValue, setValue) }
-
-
-    public fun <T: AdvantageKitLoggable<T>> value(
-        default: T,
-        getValue: () -> T,
-        setValue: (T) -> Unit
-    ): ReadWriteLoggableInput<T> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValue(variable.name, default, getValue, setValue)}
-    public fun <T: AdvantageKitLoggable<T>> nullableValue(
-        default: T,
-        getValue: () -> T?,
-        setValue: (T?) -> Unit
-    ): ReadWriteLoggableInput<T?> =
-        PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name, default, getValue, setValue)}
-
-    public fun <T: AdvantageKitLoggable<T>> valueList(
-        default: T,
-        getValue: () -> List<T>,
-        setValue: (List<T>) -> Unit
-    ): ReadWriteLoggableInput<List<T>> =
-        PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValueList(variable.name, default, getValue, setValue) }
-
-
-
-    /*
-    These are no boxing overhead suppliers for Kmeasure Quantities.
-
-    Note: For primitive type values, there is less overhead
-    to using functional interfaces over function types; this is because when
-    a type is passed in as a generic, it is automatically boxed, while functional interfaces
-    are not boxed at all. Thus, for primitive types/value class types, we use
-    functional interfaces to reduce the latency of this class.
-     */
-
-    private fun interface QuantitySupplier<D: AnyDimension>{
-        fun asQuantity(): Quantity<D>
-    }
-
-    private fun interface QuantityConsumer<D: AnyDimension>{
-        fun accept(value: Quantity<D>)
-    }
 
 
 
     // Stores all auto logged items, in order to update them individually.
-    private val allItems = mutableListOf<AutoLoggedItem>()
+    private val allLoggedProperties = mutableListOf<AutoLoggedItem>()
+
 
     /*
     Represents a Generic auto logged item.
      */
     private abstract inner class AutoLoggedItem {
         init{
-            @Suppress("LeakingThis") // safe; works similarly to the java VirtualSubsystem
-            allItems.add(this)
+            //@Suppress("LeakingThis") // safe; works similarly to the java VirtualSubsystem
+            allLoggedProperties.add(this)
         }
 
         abstract val inputsProcessor: LoggableInputs
 
         abstract fun updateInputs()
-
     }
 
     init{
+        /*
+        This block of code is responsible for periodically updating and pr
+         */
         ChargerRobot.runPeriodically{
             if (updateInputs){
-                updateInputsLock.lock()
-                allItems.forEach{ item ->
+                runBeforeInputUpdate?.invoke()
+                // updates inputs periodically in the background
+                allLoggedProperties.forEach{ item ->
                     item.updateInputs()
                 }
-                updateInputsLock.unlock()
+                runAfterInputUpdate?.invoke()
             }
-            allItems.forEach{ item ->
-                Logger.processInputs(namespace, item.inputsProcessor)
+            // processes all the loggable inputs to the log
+            allLoggedProperties.forEach{ item ->
+                try{
+                    Logger.processInputs(namespace, item.inputsProcessor)
+                }catch(_: Exception){
+                    println("Logging has failed for a logged input; this potentially is a problem with initialization.")
+                }
             }
         }
     }
 
+
+
+
+
+
+
+    /*
+    Creates property delegates that provide auto-logged Integers.
+     */
+
+    public fun int(getValue: () -> Int): ReadOnlyLoggableInput<Int> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedInt(variable.name, getValue) }
+
+    public fun int(
+        getValue: () -> Int,
+        setValue: (Int) -> Unit
+    ): ReadWriteLoggableInput<Int> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedInt(variable.name, getValue, setValue) }
 
     private inner class AutoLoggedInt(
         val name: String,
@@ -290,6 +185,20 @@ public class LoggableInputsProvider(
     }
 
 
+
+    /*
+    Creates property delegates that provide auto-logged doubles.
+     */
+
+    public fun double(getValue: () -> Double): ReadOnlyLoggableInput<Double> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedDouble(variable.name, getValue) }
+
+    public fun double(
+        getValue: () -> Double,
+        setValue: (Double) -> Unit
+    ): ReadWriteLoggableInput<Double> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedDouble(variable.name, getValue,setValue) }
+
     private inner class AutoLoggedDouble(
         val name: String,
         val get: DoubleSupplier,
@@ -314,6 +223,37 @@ public class LoggableInputsProvider(
     }
 
 
+
+    /*
+    Creates property delegates that provide auto-logged Kmeasure Quantities.
+     */
+    public fun <D: AnyDimension> quantity(getValue: () -> Quantity<D>): ReadOnlyLoggableInput<Quantity<D>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantity(variable.name + "(SI value)", getValue) }
+
+    public fun <D: AnyDimension> quantity(
+        getValue: () -> Quantity<D>,
+        setValue: (Quantity<D>) -> Unit
+    ): ReadWriteLoggableInput<Quantity<D>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantity(variable.name + "(SI value)", getValue, setValue) }
+
+    /*
+    These are no boxing overhead suppliers for Kmeasure Quantities.
+
+    Note: For primitive type values, there is less overhead
+    to using functional interfaces over function types; this is because when
+    a type is passed in as a generic, it is automatically boxed, while functional interfaces
+    are not boxed at all. Thus, for primitive types/value class types, we use
+    functional interfaces to reduce the latency of this class.
+     */
+
+    private fun interface QuantitySupplier<D: AnyDimension>{
+        fun asQuantity(): Quantity<D>
+    }
+
+    private fun interface QuantityConsumer<D: AnyDimension>{
+        fun accept(value: Quantity<D>)
+    }
+
     private inner class AutoLoggedQuantity<D: AnyDimension>(
         val name: String,
         val get: QuantitySupplier<D>,
@@ -336,6 +276,21 @@ public class LoggableInputsProvider(
             set.accept(value)
         }
     }
+
+
+
+
+    /*
+    Creates property delegates that provide auto-logged Booleans.
+     */
+    public fun boolean(getValue: () -> Boolean): ReadOnlyLoggableInput<Boolean> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedBoolean(variable.name, getValue) }
+
+    public fun boolean(
+        getValue: () -> Boolean,
+        setValue: (Boolean) -> Unit
+    ): ReadWriteLoggableInput<Boolean> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedBoolean(variable.name, getValue,setValue) }
 
     private inner class AutoLoggedBoolean(
         val name: String,
@@ -361,6 +316,20 @@ public class LoggableInputsProvider(
     }
 
 
+
+
+    /*
+    Creates property delegates that provide auto-logged Strings.
+     */
+    public fun string(getValue: () -> String): ReadOnlyLoggableInput<String> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedString(variable.name, getValue) }
+
+    public fun string(
+        getValue: () -> String,
+        setValue: (String) -> Unit
+    ): ReadWriteLoggableInput<String> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedString(variable.name, getValue,setValue) }
+
     private inner class AutoLoggedString(
         val name: String,
         val get: () -> String,
@@ -382,6 +351,21 @@ public class LoggableInputsProvider(
             set(value)
         }
     }
+
+
+
+
+    /*
+    Creates property delegates that provide auto-logged Nullable Integers.
+     */
+    public fun nullableInt(getValue: () -> Int?): ReadOnlyLoggableInput<Int?> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableInt(variable.name, getValue) }
+
+    public fun nullableInt(
+        getValue: () -> Int?,
+        setValue: (Int?) -> Unit
+    ): ReadWriteLoggableInput<Int?> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableInt(variable.name, getValue,setValue) }
 
     private inner class AutoLoggedNullableInt(
         val name: String,
@@ -424,6 +408,19 @@ public class LoggableInputsProvider(
 
 
 
+
+    /*
+    Creates property delegates that provide auto-logged Nullable doubles.
+     */
+    public fun nullableDouble(getValue: () -> Double?): ReadOnlyLoggableInput<Double?> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableDouble(variable.name, getValue) }
+
+    public fun nullableDouble(
+        getValue: () -> Double?,
+        setValue: (Double?) -> Unit
+    ): ReadWriteLoggableInput<Double?> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableDouble(variable.name, getValue, setValue) }
+
     private inner class AutoLoggedNullableDouble(
         val name: String,
         val get: () -> Double?,
@@ -465,6 +462,19 @@ public class LoggableInputsProvider(
 
 
 
+
+    /*
+    Creates property delegates that provide auto-logged nullable Quantities.
+     */
+    public fun <D: AnyDimension> nullableQuantity(getValue: () -> Quantity<D>?): ReadOnlyLoggableInput<Quantity<D>?> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantity(variable.name + "(SI value)", getValue) }
+
+    public fun <D: AnyDimension> nullableQuantity(
+        getValue: () -> Quantity<D>?,
+        setValue: (Quantity<D>?) -> Unit
+    ): ReadWriteLoggableInput<Quantity<D>?> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantity(variable.name + "(SI value)", getValue,setValue) }
+
     private inner class AutoLoggedNullableQuantity<D: AnyDimension>(
         val name: String,
         val get: () -> Quantity<D>?,
@@ -505,6 +515,20 @@ public class LoggableInputsProvider(
 
 
 
+
+
+    /*
+    Creates property delegates that provide auto-logged Integer lists.
+     */
+    public fun intList(getValue: () -> List<Int>): ReadOnlyLoggableInput<List<Int>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedIntList(variable.name, getValue) }
+
+    public fun intList(
+        getValue: () -> List<Int>,
+        setValue: (List<Int>) -> Unit
+    ): ReadWriteLoggableInput<List<Int>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedIntList(variable.name, getValue,setValue) }
+
     private inner class AutoLoggedIntList(
         val name: String,
         val get: () -> List<Int>,
@@ -529,29 +553,19 @@ public class LoggableInputsProvider(
     }
 
 
-    private inner class AutoLoggedQuantityList<D: AnyDimension>(
-        val name: String,
-        val get: () -> List<Quantity<D>>,
-        val set: (List<Quantity<D>>) -> Unit = {}
-    ): ReadWriteProperty<Any?,List<Quantity<D>>>, AutoLoggedItem(){
-        private var field = listOf<Quantity<D>>()
 
-        override val inputsProcessor = object: LoggableInputs{
-            override fun toLog(table: LogTable) = table.put(name,field.map{it.siValue}.toDoubleArray())
-            override fun fromLog(table: LogTable) { field = table.get(name,doubleArrayOf()).map{Quantity(it)}}
-        }
 
-        override fun getValue(thisRef: Any?, property: KProperty<*>): List<Quantity<D>> = field
+    /*
+    Creates property delegates that provide auto-logged Double lists.
+     */
+    public fun doubleList(getValue: () -> List<Double>): ReadOnlyLoggableInput<List<Double>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedDoubleList(variable.name, getValue) }
 
-        override fun updateInputs() {
-            field = get()
-        }
-
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<Quantity<D>>) {
-            set(value)
-        }
-    }
-
+    public fun doubleList(
+        getValue: () -> List<Double>,
+        setValue: (List<Double>) -> Unit
+    ): ReadWriteLoggableInput<List<Double>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedDoubleList(variable.name, getValue, setValue) }
 
     private inner class AutoLoggedDoubleList(
         val name: String,
@@ -577,51 +591,61 @@ public class LoggableInputsProvider(
     }
 
 
-    private inner class AutoLoggedBooleanList(
+
+
+
+    /*
+    Creates property delegates that provide auto-logged Quantity Lists.
+     */
+    public fun <D: AnyDimension> quantityList(getValue: () -> List<Quantity<D>>): ReadOnlyLoggableInput<List<Quantity<D>>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityList(variable.name + "(SI Value)", getValue) }
+
+    public fun <D: AnyDimension> quantityList(
+        getValue: () -> List<Quantity<D>>,
+        setValue: (List<Quantity<D>>) -> Unit
+    ): ReadWriteLoggableInput<List<Quantity<D>>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityList(variable.name + "(SI Value)", getValue,setValue) }
+
+    private inner class AutoLoggedQuantityList<D: AnyDimension>(
         val name: String,
-        val get: () -> List<Boolean>,
-        val set: (List<Boolean>) -> Unit = {}
-    ): ReadWriteProperty<Any?,List<Boolean>>, AutoLoggedItem(){
-        private var field = listOf<Boolean>()
+        val get: () -> List<Quantity<D>>,
+        val set: (List<Quantity<D>>) -> Unit = {}
+    ): ReadWriteProperty<Any?,List<Quantity<D>>>, AutoLoggedItem(){
+        private var field = listOf<Quantity<D>>()
 
         override val inputsProcessor = object: LoggableInputs{
-            override fun toLog(table: LogTable) = table.put(name,field.toBooleanArray())
-            override fun fromLog(table: LogTable) { field = table.get(name, booleanArrayOf()).toList() }
+            override fun toLog(table: LogTable) = table.put(name,field.map{it.siValue}.toDoubleArray())
+            override fun fromLog(table: LogTable) { field = table.get(name,doubleArrayOf()).map{Quantity(it)}}
         }
 
-        override fun getValue(thisRef: Any?, property: KProperty<*>): List<Boolean> = field
+        override fun getValue(thisRef: Any?, property: KProperty<*>): List<Quantity<D>> = field
 
         override fun updateInputs() {
             field = get()
         }
 
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<Boolean>) {
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<Quantity<D>>) {
             set(value)
         }
     }
 
-    private inner class AutoLoggedStringList(
-        val name: String,
-        val get: () -> List<String>,
-        val set: (List<String>) -> Unit = {}
-    ): ReadWriteProperty<Any?,List<String>>, AutoLoggedItem(){
-        private var field = listOf<String>()
 
-        override val inputsProcessor = object: LoggableInputs{
-            override fun toLog(table: LogTable) = table.put(name,field.toTypedArray())
-            override fun fromLog(table: LogTable) { field = table.get(name,arrayOf()).toList() }
-        }
 
-        override fun getValue(thisRef: Any?, property: KProperty<*>): List<String> = field
 
-        override fun updateInputs() {
-            field = get()
-        }
 
-        override fun setValue(thisRef: Any?, property: KProperty<*>, value: List<String>) {
-            set(value)
-        }
-    }
+
+    public fun <T: AdvantageKitLoggable<T>> value(
+        default: T,
+        getValue: () -> T
+    ): ReadOnlyLoggableInput<T> =
+        PropertyDelegateProvider{_, variable -> AutoLoggedGenericValue(variable.name,default, getValue)}
+
+    public fun <T: AdvantageKitLoggable<T>> value(
+        default: T,
+        getValue: () -> T,
+        setValue: (T) -> Unit
+    ): ReadWriteLoggableInput<T> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValue(variable.name, default, getValue, setValue)}
 
     private inner class AutoLoggedGenericValue<T: AdvantageKitLoggable<T>>(
         val name: String,
@@ -649,6 +673,21 @@ public class LoggableInputsProvider(
     }
 
 
+
+
+
+    public fun <T: AdvantageKitLoggable<T>> nullableValue(
+        default: T,
+        getValue: () -> T?
+    ): ReadOnlyLoggableInput<T?> =
+        PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name,default, getValue)}
+
+    public fun <T: AdvantageKitLoggable<T>> nullableValue(
+        default: T,
+        getValue: () -> T?,
+        setValue: (T?) -> Unit
+    ): ReadWriteLoggableInput<T?> =
+        PropertyDelegateProvider{_, variable -> AutoLoggedGenericNullableValue(variable.name, default, getValue, setValue)}
 
     private inner class AutoLoggedGenericNullableValue<T: AdvantageKitLoggable<T>>(
         val name: String,
@@ -683,6 +722,22 @@ public class LoggableInputsProvider(
         }
     }
 
+
+
+
+
+    public fun <T: AdvantageKitLoggable<T>> valueList(
+        default: T,
+        getValue: () -> List<T>
+    ): ReadOnlyLoggableInput<List<T>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValueList(variable.name, default, getValue) }
+
+    public fun <T: AdvantageKitLoggable<T>> valueList(
+        default: T,
+        getValue: () -> List<T>,
+        setValue: (List<T>) -> Unit
+    ): ReadWriteLoggableInput<List<T>> =
+        PropertyDelegateProvider{ _, variable -> AutoLoggedGenericValueList(variable.name, default, getValue, setValue) }
 
     private inner class AutoLoggedGenericValueList<T: AdvantageKitLoggable<T>>(
         val name: String,
@@ -724,5 +779,4 @@ public class LoggableInputsProvider(
             set(value)
         }
     }
-
 }

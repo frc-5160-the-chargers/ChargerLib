@@ -4,10 +4,30 @@ import com.batterystaple.kmeasure.dimensions.AnyDimension
 import com.batterystaple.kmeasure.quantities.Quantity
 
 /**
- * A class that holds data about the Precision of a certain mechanism or class.
+ * A sealed class enum that holds data about the Precision of a certain mechanism or class.
+ *
+ * Example usage:
+ * ```
+ * val precision: Precision<AngleDimension> = Precision.Within(5.0.degrees)
+ *
+ * when(precision){
+ *      Precision.AllowOvershoot -> println("Precision is allow overshoot")
+ *
+ *      // no need for an else branch; sealed classes know all of their inheritors
+ *      // at runtime; similar to rust enums
+ *      // allowableError is only a property of Precision.Within; this enforces compile time safety
+ *      is Precision.Within -> println("Allowable Error: " + precision.allowableError)
+ * }
  */
 public sealed class Precision<out D : AnyDimension> {
+    /**
+     * Represents a [Precision] that allows overshoot.
+     */
     public data object AllowOvershoot : Precision<Nothing>()
+
+    /**
+     * Represents a [Precision] that allows for a certain margin of error.
+     */
     public class Within<D : AnyDimension>(public val allowableError: ClosedRange<Quantity<D>>) : Precision<D>() {
         public constructor(margin: Quantity<D>) : this(-margin..margin)
     }

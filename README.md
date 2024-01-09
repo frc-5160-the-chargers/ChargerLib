@@ -12,4 +12,4 @@ Some features include:
 - Idiomatic Kotlin Commands DSL for creating commands and autonomous routines
 - And a custom AdvantageKit wrapper that takes advantage of kotlin property delegates to create auto-logged inputs!
 
-In order to see installation, documentation, and more, visit the wiki and the [Github pages site]()
+In order to see installation, documentation, and more, visit the wiki and the [Github pages site](https://frc-5160-the-chargers.github.io/ChargerLib/)
