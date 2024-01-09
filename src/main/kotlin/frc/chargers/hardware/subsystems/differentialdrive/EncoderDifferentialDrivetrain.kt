@@ -132,7 +132,8 @@ public class EncoderDifferentialDrivetrain(
         getInput = {leftVelocity},
         target = AngularVelocity(0.0),
         setpointSupplier = SetpointSupplier.Default(
-            feedforward = Feedforward(controlData.leftFF)
+            // leftFF stores the left feedforward constants.
+            Feedforward(controlData.leftFF)
         ),
         selfSustain = true,
     )
@@ -142,7 +143,8 @@ public class EncoderDifferentialDrivetrain(
         getInput = {rightVelocity},
         target = AngularVelocity(0.0),
         setpointSupplier = SetpointSupplier.Default(
-            feedforward = Feedforward(controlData.rightFF)
+            // rightff stores the right feedforward constants.
+            Feedforward(controlData.rightFF)
         ),
         selfSustain = true,
     )

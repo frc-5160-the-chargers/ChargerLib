@@ -24,8 +24,6 @@ import frc.chargers.hardware.subsystems.swervedrive.module.*
 import frc.chargers.hardware.subsystems.swervedrive.module.lowlevel.*
 import frc.chargers.pathplannerextensions.asPathPlannerConstants
 import frc.chargers.utils.math.inputModulus
-import frc.chargers.utils.math.units.pow
-import frc.chargers.utils.math.units.sqrt
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
@@ -338,7 +336,7 @@ public class EncoderHolonomicDrivetrain(
      */
     public val velocity: Velocity get(){
         val speeds = currentSpeeds
-        return sqrt(speeds.xVelocity.pow(2.0) + speeds.yVelocity.pow(2.0))
+        return hypot(speeds.xVelocity, speeds.yVelocity)
     }
 
 
