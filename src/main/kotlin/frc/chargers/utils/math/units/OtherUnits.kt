@@ -6,13 +6,13 @@ import com.batterystaple.kmeasure.quantities.*
 
 public typealias VoltageRateDimension = Dimension<Mass1,Length2,TimeN4,CurrentN1>
 
-public typealias VoltageRate = Quantity<VoltageRateDimension>
+public typealias VoltageRate = KmeasureUnit<VoltageRateDimension>
 
 
 
 public typealias VoltagePerAngleDimension = ElectricalPotentialDimension
 
-public typealias VoltagePerAngle = Quantity<VoltagePerAngleDimension>
+public typealias VoltagePerAngle = KmeasureUnit<VoltagePerAngleDimension>
 
 
 
