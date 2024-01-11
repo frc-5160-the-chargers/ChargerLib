@@ -16,35 +16,6 @@ import frc.chargers.hardware.motorcontrol.rev.util.*
 import frc.chargers.utils.revertIfInvalid
 import frc.chargers.wpilibextensions.delay
 
-/**
- * A convenience function to create a [ChargerSparkFlex].
- *
- * This function supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [ChargerSparkMaxConfiguration] object.
- *
- * You do not need to manually factory default this motor, as it is factory defaulted on startup,
- * before configuration. This setting can be changed by setting factoryDefault = false.
- *
- * Example:
- * ```
- * val neo = neoSparkFlex(deviceId = 5){ inverted = false }
- */
-public inline fun neoSparkFlex(
-    deviceId: Int,
-    factoryDefault: Boolean = true,
-    configure: ChargerSparkFlexConfiguration.() -> Unit = {}
-): ChargerSparkFlex = ChargerSparkFlex(deviceId)
-    .apply {
-        if (factoryDefault) {
-            restoreFactoryDefaults()
-            delay(200.milli.seconds)
-            println("SparkFlex has been factory defaulted.")
-        }
-        val config = ChargerSparkFlexConfiguration().apply(configure)
-        configure(config)
-    }
-
-
 
 /**
  * Represents a type of spark flex encoder.
@@ -111,17 +82,60 @@ public class ChargerSparkFlexConfiguration(
 
 
 /**
+ * A convenience function to create a [ChargerSparkFlex],
+ * which uses a function with the context of a [ChargerSparkFlexConfiguration]
+ * to configure the motor.
+ *
+ * Like the constructor, this function factory defaults the motor by default;
+ * set factoryDefault = false to turn this off.
+ *
+ * ```
+ * // example
+ * val neo = ChargerSparkFlex(5){ inverted = false }
+ */
+public inline fun ChargerSparkFlex(
+    deviceId: Int,
+    factoryDefault: Boolean = true,
+    configure: ChargerSparkFlexConfiguration.() -> Unit
+): ChargerSparkFlex = ChargerSparkFlex(
+    deviceId, factoryDefault,
+    ChargerSparkFlexConfiguration().apply(configure)
+)
+
+
+
+
+/**
  * A wrapper around REV's [CANSparkFlex], with support for Kmeasure units
  * and integration with the rest of the library.
+ *
+ * Creating an instance of this class factory will factory default the motor;
+ * set factoryDefault = false to turn this off.
+ *
+ * @see ChargerSparkFlexConfiguration
+ * @see com.revrobotics.CANSparkFlex
  */
-public class ChargerSparkFlex(deviceId: Int) :
-    CANSparkFlex(deviceId, MotorType.kBrushless), SmartEncoderMotorController, HardwareConfigurable<ChargerSparkFlexConfiguration> {
+public class ChargerSparkFlex(
+    deviceId: Int,
+    factoryDefault: Boolean = true,
+    configuration: ChargerSparkFlexConfiguration? = null
+) : CANSparkFlex(deviceId, MotorType.kBrushless), SmartEncoderMotorController, HardwareConfigurable<ChargerSparkFlexConfiguration> {
+
+    init{
+        if (factoryDefault) {
+            restoreFactoryDefaults()
+            delay(200.milli.seconds)
+            println("SparkMax has been factory defaulted.")
+        }
+        if (configuration != null){
+            configure(configuration)
+        }
+    }
 
     private var encoderType: SparkFlexEncoderType = SparkFlexEncoderType.Regular()
 
     override var encoder: SparkEncoderAdaptor = getEncoder(encoderType)
         private set
-
 
     private fun getEncoder(encoderType: SparkFlexEncoderType): SparkEncoderAdaptor{
         this.encoderType = encoderType
@@ -190,7 +204,6 @@ public class ChargerSparkFlex(deviceId: Int) :
         get() = busVoltage.ofUnit(volts)
             .revertIfInvalid(previousVoltage)
             .also{ previousVoltage = it }
-
 
 
     /**

@@ -4,7 +4,6 @@ import com.revrobotics.CANSparkLowLevel
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFXConfiguration
-import frc.chargers.hardware.motorcontrol.ctre.falcon
 import frc.chargers.hardware.motorcontrol.rev.*
 import frc.chargers.hardware.sensors.encoders.Encoder
 
@@ -18,10 +17,10 @@ public inline fun sparkFlexSwerveMotors(
     bottomRightId: Int,
     configure: ChargerSparkFlexConfiguration.() -> Unit
 ): SwerveMotors<ChargerSparkFlex> = sparkFlexSwerveMotors(
-    neoSparkFlex(topLeftId),
-    neoSparkFlex(topRightId),
-    neoSparkFlex(bottomLeftId),
-    neoSparkFlex(bottomRightId),
+    ChargerSparkFlex(topLeftId),
+    ChargerSparkFlex(topRightId),
+    ChargerSparkFlex(bottomLeftId),
+    ChargerSparkFlex(bottomRightId),
     configure
 )
 
@@ -36,22 +35,14 @@ public inline fun sparkMaxSwerveMotors(
     bottomRightId: Int,
     type: CANSparkLowLevel.MotorType = CANSparkLowLevel.MotorType.kBrushless,
     configure: ChargerSparkMaxConfiguration.() -> Unit = {}
-): SwerveMotors<ChargerSparkMax> = when (type){
-    CANSparkLowLevel.MotorType.kBrushless -> sparkMaxSwerveMotors(
-        neoSparkMax(topLeftId),
-        neoSparkMax(topRightId),
-        neoSparkMax(bottomLeftId),
-        neoSparkMax(bottomRightId),
+): SwerveMotors<ChargerSparkMax> = sparkMaxSwerveMotors(
+        ChargerSparkMax(topLeftId, type),
+        ChargerSparkMax(topRightId, type),
+        ChargerSparkMax(bottomLeftId, type),
+        ChargerSparkMax(bottomRightId, type),
         configure
     )
-    CANSparkLowLevel.MotorType.kBrushed -> sparkMaxSwerveMotors(
-        brushedSparkMax(topLeftId),
-        brushedSparkMax(topRightId),
-        brushedSparkMax(bottomLeftId),
-        brushedSparkMax(bottomRightId),
-        configure
-    )
-}
+
 
 
 /**
@@ -64,10 +55,10 @@ public inline fun talonFXSwerveMotors(
     bottomRightId: Int,
     configure: ChargerTalonFXConfiguration.() -> Unit = {}
 ): SwerveMotors<ChargerTalonFX> = talonFXSwerveMotors(
-    falcon(topLeftId),
-    falcon(topRightId),
-    falcon(bottomLeftId),
-    falcon(bottomRightId),
+    ChargerTalonFX(topLeftId),
+    ChargerTalonFX(topRightId),
+    ChargerTalonFX(bottomLeftId),
+    ChargerTalonFX(bottomRightId),
     configure
 )
 

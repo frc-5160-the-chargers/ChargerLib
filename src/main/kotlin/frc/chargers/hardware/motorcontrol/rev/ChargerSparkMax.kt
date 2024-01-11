@@ -15,83 +15,17 @@ import frc.chargers.utils.revertIfInvalid
 import frc.chargers.wpilibextensions.delay
 
 /**
- * A convenience function to create a [ChargerSparkMax]
- * specifically to drive a Neo motor.
- *
- * This function supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [ChargerSparkMaxConfiguration] object.
- *
- * You do not need to manually factory default this motor, as it is factory defaulted on startup,
- * before configuration. This setting can be changed by setting factoryDefault = false.
- *
- * ```
- * // example
- * val neo = neoSparkMax(deviceId = 5){ inverted = false }
- */
-public inline fun neoSparkMax(
-    canBusId: Int,
-    factoryDefault: Boolean = true,
-    configure: ChargerSparkMaxConfiguration.() -> Unit = {}
-): ChargerSparkMax =
-    ChargerSparkMax(canBusId, MotorType.kBrushless)
-        .apply {
-            if (factoryDefault) {
-                restoreFactoryDefaults()
-                delay(200.milli.seconds)
-                println("SparkMax has been factory defaulted.")
-            }
-            val config = ChargerSparkMaxConfiguration().apply(configure)
-            configure(config)
-        }
-
-
-/**
- * A convenience function to create a [ChargerSparkMax]
- * specifically to drive a brushed motor, such as a CIM.
- *
- * This motor supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [ChargerSparkMaxConfiguration] object.
- *
- * You do not need to manually factory default this motor, as it is factory defaulted on startup,
- * before configuration. This setting can be changed by setting factoryDefault = false.
- *
- * ```
- * // example
- * val neo = neoSparkMax(deviceId = 5){ inverted = false }
- */
-public inline fun brushedSparkMax(
-    canBusId: Int,
-    factoryDefault: Boolean = true,
-    configure: ChargerSparkMaxConfiguration.() -> Unit = {}
-): ChargerSparkMax =
-    ChargerSparkMax(canBusId, MotorType.kBrushed)
-        .apply {
-            if (factoryDefault) {
-                restoreFactoryDefaults()
-                delay(200.milli.seconds)
-                println("SparkMax has been factory defaulted.")
-            }
-            val config = ChargerSparkMaxConfiguration().apply(configure)
-            configure(config)
-        }
-
-/**
  * Represents a type of spark max encoder.
  *
  * Options include [Regular], [Alternate] or [Absolute].
  */
 public sealed class SparkMaxEncoderType{
-    /**
-     * Represents a regular spark max encoder.
-     */
+
     public data class Regular(
         val averageDepth: Int? = null,
         val inverted: Boolean? = null
     ): SparkMaxEncoderType()
 
-    /**
-     * Represents a Spark Max Alternate encoder.
-     */
     public data class Alternate(
         val category: SparkMaxAlternateEncoder.Type,
         val countsPerRev: Int,
@@ -100,15 +34,14 @@ public sealed class SparkMaxEncoderType{
         val inverted: Boolean? = null
     ): SparkMaxEncoderType()
 
-    /**
-     * Represents an absolute encoder connected to a spark max.
-     */
     public data class Absolute(
         val category: SparkAbsoluteEncoder.Type,
         val averageDepth: Int? = null,
         val inverted: Boolean? = null
     ): SparkMaxEncoderType()
 }
+
+
 
 
 /**
@@ -137,6 +70,28 @@ public class ChargerSparkMaxConfiguration(
 
 
 
+/**
+ * A convenience function to create a [ChargerSparkMax],
+ * which uses a function with the context of a [ChargerSparkMaxConfiguration]
+ * to configure the motor.
+ *
+ * Like the constructor, this function factory defaults the motor by default;
+ * set factoryDefault = false to turn this off.
+ *
+ * ```
+ * // example
+ * val neo = ChargerSparkMax(5){ inverted = false }
+ */
+public inline fun ChargerSparkMax(
+    deviceId: Int,
+    type: MotorType = MotorType.kBrushless,
+    factoryDefault: Boolean = true,
+    configure: ChargerSparkMaxConfiguration.() -> Unit
+): ChargerSparkMax = ChargerSparkMax(
+    deviceId, type, factoryDefault, ChargerSparkMaxConfiguration().apply(configure)
+)
+
+
 
 
 /**
@@ -145,14 +100,33 @@ public class ChargerSparkMaxConfiguration(
  * but has additional features to mesh better with the rest
  * of this library.
  *
+ * Creating an instance of this class factory will factory default the motor;
+ * set factoryDefault = false to turn this off.
+ *
  * @see com.revrobotics.CANSparkMax
  * @see ChargerSparkMaxConfiguration
  */
 public class ChargerSparkMax(
     deviceId: Int,
-    type: MotorType
+    type: MotorType = MotorType.kBrushless,
+    factoryDefault: Boolean = true,
+    configuration: ChargerSparkMaxConfiguration? = null
 ) : CANSparkMax(deviceId, type), SmartEncoderMotorController, HardwareConfigurable<ChargerSparkMaxConfiguration>{
+
     private var encoderType: SparkMaxEncoderType = SparkMaxEncoderType.Regular()
+
+    init{
+        if (factoryDefault) {
+            restoreFactoryDefaults()
+            delay(200.milli.seconds)
+            println("SparkMax has been factory defaulted.")
+        }
+
+        if (configuration != null){
+            configure(configuration)
+        }
+    }
+
 
     /**
      * The encoder of the spark max.

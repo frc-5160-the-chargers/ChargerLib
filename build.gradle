@@ -104,13 +104,6 @@ allprojects {
     }
 }
 
-/*
-task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
-    mainClass = "org.littletonrobotics.junction.CheckInstall"
-    classpath = sourceSets.main.runtimeClasspath
-}
-compileJava.finalizedBy checkAkitInstall
- */
 
 wpi.java.configureExecutableTasks(jar)
 wpi.java.configureTestTasks(test)

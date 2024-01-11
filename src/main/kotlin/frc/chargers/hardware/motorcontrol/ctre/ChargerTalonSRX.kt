@@ -79,22 +79,65 @@ public class TalonSRXEncoderAdapter(
     }
 }
 
+
+
+
+/**
+ * Creates an instance of a [ChargerTalonSRX] through a "[configure]" lambda function,
+ * which has the context of a [ChargerTalonSRXConfiguration].
+ *
+ * ```
+ * // example
+ * val motor = ChargerTalonSRX(canId = 6){ feedbackRemoteSensorId = 5 }
+ */
+public inline fun ChargerTalonSRX(
+    deviceNumber: Int,
+    encoderTicksPerRotation: Int,
+    factoryDefault: Boolean = true,
+    configure: ChargerTalonSRXConfiguration.() -> Unit
+): ChargerTalonSRX = ChargerTalonSRX(
+    deviceNumber, encoderTicksPerRotation, factoryDefault,
+    ChargerTalonSRXConfiguration().apply(configure)
+)
+
+
+
+
 /**
  * Represents a TalonSRX motor controller.
  * Includes everything in the CTRE TalonSRX class,
  * but has additional features to mesh better with the rest
  * of this library.
- * Note: The ChargerTalonSRX still uses phoenix v5, as phoenix v6 scraps support for the TalonSRX.
+ *
+ *
+ * Creating an instance of this class factory will factory default the motor;
+ * set factoryDefault = false to turn this off.
+ *
+ * In addition, the ChargerTalonSRX still uses phoenix v5,
+ * as phoenix v6 scraps support for the TalonSRX.
  *
  * @see com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
  * @see ChargerTalonSRXConfiguration
  */
-public open class ChargerTalonSRX(
+public class ChargerTalonSRX(
     deviceNumber: Int,
-    private val encoderTicksPerRotation: Int
+    private val encoderTicksPerRotation: Int,
+    factoryDefault: Boolean = true,
+    configuration: ChargerTalonSRXConfiguration? = null
 ) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<ChargerTalonSRXConfiguration>{
 
-    final override val encoder: Encoder
+    init{
+        if (factoryDefault){
+            configFactoryDefault()
+        }
+
+        if (configuration != null){
+            configure(configuration)
+        }
+    }
+
+
+    override val encoder: Encoder
         get() = TalonSRXEncoderAdapter(
             ctreMotorController = this,
             pidIndex = 0,
@@ -140,7 +183,7 @@ public open class ChargerTalonSRX(
     }
 
 
-    final override fun configure(configuration: ChargerTalonSRXConfiguration) {
+    override fun configure(configuration: ChargerTalonSRXConfiguration) {
         configuration.inverted?.let(::setInverted)
         configuration.expiration?.let { expiration = it.inUnit(seconds) }
         configuration.safetyEnabled?.let(::setSafetyEnabled)

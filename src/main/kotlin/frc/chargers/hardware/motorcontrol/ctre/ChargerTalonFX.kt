@@ -19,40 +19,11 @@ import frc.chargers.hardware.configuration.safeConfigure
 import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.ResettableEncoder
 import frc.chargers.utils.math.inputModulus
-import frc.chargers.wpilibextensions.delay
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 
 /**
- * Creates an instance of a falcon motor, controlled by a TalonFX motor controller.
- *
- * This function supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [ChargerTalonFXConfiguration].
- *
- * You do not need to manually factory default this motor, as it is factory defaulted on startup,
- * before configuration. This setting can be changed by setting factoryDefault = false.
- *
- * ```
- * // example
- * val motor = falcon(canId = 6){ feedbackRemoteSensorId = 5 }
+ * An adaptor to the encoder of a [TalonFX].
  */
-public fun falcon(
-    canId: Int,
-    canBus: String = "rio",
-    factoryDefault: Boolean = true,
-    configure: ChargerTalonFXConfiguration.() -> Unit = {}
-): ChargerTalonFX = ChargerTalonFX(canId, canBus).apply {
-    // factory defaults configs on startup when factoryDefault = true
-    if (factoryDefault) {
-        configurator.apply(TalonFXConfiguration(), 0.02)
-    }
-    val config = ChargerTalonFXConfiguration().apply(configure)
-    if (config != ChargerTalonFXConfiguration()){
-        configure(config)
-    }
-}
-
-
-
 public class TalonFXEncoderAdapter(
     private val motorController: TalonFX
 ): ResettableEncoder {
@@ -77,16 +48,64 @@ public class TalonFXEncoderAdapter(
 
 
 /**
+ * Creates an instance of a [ChargerTalonFX] through a "[configure]" lambda function,
+ * which has the context of a [ChargerTalonFXConfiguration].
+ *
+ * ```
+ * // example
+ * val motor = ChargerTalonFX(canId = 6){ feedbackRemoteSensorId = 5 }
+ */
+public inline fun ChargerTalonFX(
+    deviceId: Int,
+    canBus: String = "rio",
+    factoryDefault: Boolean = true,
+    configure: ChargerTalonFXConfiguration.() -> Unit
+): ChargerTalonFX = ChargerTalonFX(
+    deviceId, canBus, factoryDefault,
+    ChargerTalonFXConfiguration().apply(configure)
+)
+
+
+
+
+/**
  * Represents a TalonFX motor controller.
  * Includes everything in the CTRE TalonFX class,
  * but has additional features to mesh better with the rest
  * of this library.
  *
+ * Creating an instance of this class factory will factory default the motor;
+ * set factoryDefault = false to turn this off.
+ *
  * @see com.ctre.phoenix6.hardware.TalonFX
  * @see ChargerTalonFXConfiguration
  */
-public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
-    TalonFX(deviceNumber, canBus), SmartEncoderMotorController, HardwareConfigurable<ChargerTalonFXConfiguration> {
+public open class ChargerTalonFX(
+    deviceId: Int,
+    canBus: String = "rio",
+    factoryDefault: Boolean = true,
+    configuration: ChargerTalonFXConfiguration? = null
+): TalonFX(deviceId, canBus), SmartEncoderMotorController, HardwareConfigurable<ChargerTalonFXConfiguration> {
+
+    init{
+        val baseConfig = TalonFXConfiguration()
+        var baseConfigHasChanged = false
+
+        if (!factoryDefault){
+            configurator.refresh(baseConfig)
+            baseConfigHasChanged = true
+        }
+
+        if (configuration != null){
+            applyChanges(baseConfig, configuration)
+            baseConfigHasChanged = true
+        }
+
+        if (baseConfigHasChanged){
+            configurator.apply(baseConfig)
+        }
+    }
+
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
     // and does not pass around the reference to this class.
@@ -265,7 +284,6 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
             if (RobotBase.isSimulation()){
                 println("A Phoenix Device did not configure properly; however, this was ignored because the code is running in simulation.")
             }else{
-                delay(200.milli.seconds)
                 allConfigErrors.add(this)
                 configAppliedProperly = false
             }
