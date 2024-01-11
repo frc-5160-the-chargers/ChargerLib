@@ -9,7 +9,6 @@ import frc.chargers.controls.SetpointSupplier
 import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.pid.PIDConstants
 import frc.chargers.utils.Precision
-import frc.chargers.utils.math.units.Inertia
 
 /**
  * A class that holds Control data for a [frc.chargers.hardware.subsystems.swervedrive.EncoderHolonomicDrivetrain].
@@ -36,8 +35,8 @@ public data class SwerveHardwareData(
     val invertTurnMotors: Boolean = false,
     val turnGearRatio: Double = DEFAULT_GEAR_RATIO,
     val driveGearRatio: Double = DEFAULT_GEAR_RATIO,
-    val turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
-    val driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
+    val turnInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_TURN_INERTIA,
+    val driveInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_DRIVE_INERTIA,
     val maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
     val wheelDiameter: Length,
     val trackWidth: Distance,
@@ -52,8 +51,8 @@ public data class SwerveHardwareData(
             maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
             trackWidth: Distance,
             wheelBase: Distance,
-            turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
-            driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
+            turnInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_TURN_INERTIA,
+            driveInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_DRIVE_INERTIA,
         ): SwerveHardwareData = SwerveHardwareData(
             invertTurnMotors = true,
             150.0 / 7.0,
@@ -74,8 +73,8 @@ public data class SwerveHardwareData(
             maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
             trackWidth: Distance,
             wheelBase: Distance,
-            turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
-            driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
+            turnInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_TURN_INERTIA,
+            driveInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_DRIVE_INERTIA,
         ): SwerveHardwareData = SwerveHardwareData(
             invertTurnMotors = true,
             150.0 / 7.0,
@@ -94,8 +93,8 @@ public data class SwerveHardwareData(
          */
         public fun mk4iL1(
             maxModuleSpeed: Velocity = DEFAULT_MAX_MODULE_SPEED,
-            turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
-            driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA,
+            turnInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_TURN_INERTIA,
+            driveInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_DRIVE_INERTIA,
             trackWidth: Distance,
             wheelBase: Distance
         ): SwerveHardwareData = SwerveHardwareData(

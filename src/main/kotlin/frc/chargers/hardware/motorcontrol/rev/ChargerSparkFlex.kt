@@ -20,7 +20,7 @@ import frc.chargers.wpilibextensions.delay
  * A convenience function to create a [ChargerSparkFlex].
  *
  * This function supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [SparkMaxConfiguration] object.
+ * which has the context of a [ChargerSparkMaxConfiguration] object.
  *
  * You do not need to manually factory default this motor, as it is factory defaulted on startup,
  * before configuration. This setting can be changed by setting factoryDefault = false.
@@ -32,7 +32,7 @@ import frc.chargers.wpilibextensions.delay
 public inline fun neoSparkFlex(
     deviceId: Int,
     factoryDefault: Boolean = true,
-    configure: SparkFlexConfiguration.() -> Unit = {}
+    configure: ChargerSparkFlexConfiguration.() -> Unit = {}
 ): ChargerSparkFlex = ChargerSparkFlex(deviceId)
     .apply {
         if (factoryDefault) {
@@ -40,7 +40,7 @@ public inline fun neoSparkFlex(
             delay(200.milli.seconds)
             println("SparkFlex has been factory defaulted.")
         }
-        val config = SparkFlexConfiguration().apply(configure)
+        val config = ChargerSparkFlexConfiguration().apply(configure)
         configure(config)
     }
 
@@ -56,6 +56,7 @@ public sealed class SparkFlexEncoderType{
      * Represents a regular Spark Flex encoder.
      */
     public data class Regular(
+        val optimizeStatusFrames: Boolean = true,
         val category: SparkRelativeEncoder.Type = SparkRelativeEncoder.Type.kHallSensor,
         val averageDepth: Int? = null,
         val inverted: Boolean? = null
@@ -88,7 +89,7 @@ public sealed class SparkFlexEncoderType{
  *
  * @see ChargerSparkMax
  */
-public class SparkFlexConfiguration(
+public class ChargerSparkFlexConfiguration(
     public var encoderType: SparkFlexEncoderType? = null,
     idleMode: CANSparkBase.IdleMode? = null,
     inverted: Boolean? = null,
@@ -97,13 +98,13 @@ public class SparkFlexConfiguration(
     closedLoopRampRate: Double? = null,
     openLoopRampRate: Double? = null,
     controlFramePeriod: Time? = null,
-    periodicFramePeriods: MutableMap<CANSparkLowLevel.PeriodicFrame, Time> = mutableMapOf(),
+    periodicFrameConfig: PeriodicFrameConfig? = null,
     smartCurrentLimit: SmartCurrentLimit? = null,
     secondaryCurrentLimit: SecondaryCurrentLimit? = null,
     softLimits: MutableMap<CANSparkBase.SoftLimitDirection, Angle> = mutableMapOf(),
 ): SparkConfigurationBase(
     idleMode, inverted, voltageCompensationNominalVoltage, canTimeout, closedLoopRampRate, openLoopRampRate,
-    controlFramePeriod, periodicFramePeriods, smartCurrentLimit, secondaryCurrentLimit, softLimits
+    controlFramePeriod, periodicFrameConfig, smartCurrentLimit, secondaryCurrentLimit, softLimits
 )
 
 
@@ -114,56 +115,61 @@ public class SparkFlexConfiguration(
  * and integration with the rest of the library.
  */
 public class ChargerSparkFlex(deviceId: Int) :
-    CANSparkFlex(deviceId, MotorType.kBrushless), SmartEncoderMotorController, HardwareConfigurable<SparkFlexConfiguration> {
+    CANSparkFlex(deviceId, MotorType.kBrushless), SmartEncoderMotorController, HardwareConfigurable<ChargerSparkFlexConfiguration> {
 
-    override var encoder: SparkEncoderAdaptor = getEncoder(SparkFlexEncoderType.Regular())
+    private var encoderType: SparkFlexEncoderType = SparkFlexEncoderType.Regular()
+
+    override var encoder: SparkEncoderAdaptor = getEncoder(encoderType)
         private set
 
-    private fun getEncoder(encoderType: SparkFlexEncoderType) = when (encoderType){
-        is SparkFlexEncoderType.Regular -> SparkEncoderAdaptor(
-            super.getEncoder().apply{
-                // property access syntax setters
-                if (encoderType.averageDepth != null){
-                    averageDepth = encoderType.averageDepth
-                }
-                if (encoderType.inverted != null){
-                    inverted = encoderType.inverted
-                }
-            }
-        )
 
-        is SparkFlexEncoderType.External -> SparkEncoderAdaptor(
-            super.getExternalEncoder(
-                encoderType.category,
-                encoderType.countsPerRev
-            ).apply{
-                // property access syntax setters
-                if (encoderType.encoderMeasurementPeriod != null){
-                    measurementPeriod = encoderType.encoderMeasurementPeriod.inUnit(milli.seconds).toInt()
-                }
-                if (encoderType.averageDepth != null){
-                    averageDepth = encoderType.averageDepth
-                }
-                if (encoderType.inverted != null){
-                    inverted = encoderType.inverted
-                }
-            }
-        )
+    private fun getEncoder(encoderType: SparkFlexEncoderType): SparkEncoderAdaptor{
+        this.encoderType = encoderType
 
-        is SparkFlexEncoderType.Absolute -> SparkEncoderAdaptor(
-            super.getAbsoluteEncoder(encoderType.category).apply{
-                // property access syntax setters
-                if (encoderType.averageDepth != null){
-                    averageDepth = encoderType.averageDepth
+        return when (encoderType){
+            is SparkFlexEncoderType.Regular -> SparkEncoderAdaptor(
+                super.getEncoder().apply{
+                    // property access syntax setters
+                    if (encoderType.averageDepth != null){
+                        averageDepth = encoderType.averageDepth
+                    }
+                    if (encoderType.inverted != null){
+                        inverted = encoderType.inverted
+                    }
                 }
-                if (encoderType.inverted != null){
-                    inverted = encoderType.inverted
+            )
+
+            is SparkFlexEncoderType.External -> SparkEncoderAdaptor(
+                super.getExternalEncoder(
+                    encoderType.category,
+                    encoderType.countsPerRev
+                ).apply{
+                    // property access syntax setters
+                    if (encoderType.encoderMeasurementPeriod != null){
+                        measurementPeriod = encoderType.encoderMeasurementPeriod.inUnit(milli.seconds).toInt()
+                    }
+                    if (encoderType.averageDepth != null){
+                        averageDepth = encoderType.averageDepth
+                    }
+                    if (encoderType.inverted != null){
+                        inverted = encoderType.inverted
+                    }
                 }
-            }
-        )
+            )
+
+            is SparkFlexEncoderType.Absolute -> SparkEncoderAdaptor(
+                super.getAbsoluteEncoder(encoderType.category).apply{
+                    // property access syntax setters
+                    if (encoderType.averageDepth != null){
+                        averageDepth = encoderType.averageDepth
+                    }
+                    if (encoderType.inverted != null){
+                        inverted = encoderType.inverted
+                    }
+                }
+            )
+        }
     }
-
-
 
 
     private var previousCurrent = Current(0.0)
@@ -187,8 +193,52 @@ public class ChargerSparkFlex(deviceId: Int) :
 
 
 
+    /**
+     * Adds a generic amount of followers to the Spark Max.
+     *
+     * For each follower that is a Spark Max or Spark Flex, we will call the vendor implementation;
+     * otherwise, the other motors are added to a list of motors within this class
+     * to be run.
+     */
+    public fun withFollowers(vararg followers: SmartEncoderMotorController): ChargerSparkFlex{
+        // chargerlib defined util function
+        addFollowers(
+            this,
+            nonRevFollowerSet = nonRevFollowers,
+            *followers
+        )
+        return this
+    }
 
-    private val pidHandler = SparkPIDHandler(this)
+    private val nonRevFollowers: MutableSet<SmartEncoderMotorController> = mutableSetOf()
+
+    override fun set(speed: Double){
+        super.set(speed)
+        nonRevFollowers.forEach{ it.set(speed) }
+    }
+
+    override fun stopMotor() {
+        super.stopMotor()
+        nonRevFollowers.forEach{ it.stopMotor() }
+    }
+
+    override fun setInverted(isInverted: Boolean){
+        super.setInverted(isInverted)
+        nonRevFollowers.forEach{
+            // property access syntax
+            it.inverted = isInverted
+        }
+    }
+
+    override fun disable(){
+        super.disable()
+        nonRevFollowers.forEach{
+            it.disable()
+        }
+    }
+
+
+    private val pidHandler = SparkPIDHandler(this, encoderAdaptor = encoder)
 
     override fun setAngularPosition(
         target: Angle,
@@ -204,9 +254,9 @@ public class ChargerSparkFlex(deviceId: Int) :
     ): Unit = pidHandler.setAngularVelocity(target, pidConstants, feedforwardConstants)
 
 
-    private var allConfigErrors: List<REVLibError> = listOf()
+    private var allConfigErrors: MutableList<REVLibError> = mutableListOf()
 
-    override fun configure(configuration: SparkFlexConfiguration) {
+    override fun configure(configuration: ChargerSparkFlexConfiguration) {
         configuration.encoderType?.let{ encoderType ->
             encoder = getEncoder(encoderType)
         }
@@ -216,11 +266,74 @@ public class ChargerSparkFlex(deviceId: Int) :
             getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
         ){
             // configures the motor and records errors
-            allConfigErrors = configuration.applyTo(this)
+            allConfigErrors = configuration.applyTo(this).toMutableList()
+
+            fun REVLibError.addError(){
+                allConfigErrors.add(this)
+            }
+
+            when (val frameConfig = configuration.periodicFrameConfig){
+                is PeriodicFrameConfig.Custom -> {
+                    frameConfig.frames.forEach{ (frame, period) ->
+                        setPeriodicFramePeriod(frame, period).addError()
+                    }
+                }
+
+                is PeriodicFrameConfig.Optimized -> {
+                    // status 0 is ignored due to it only being applicable to follower motors
+                    var status1 = SLOW_PERIODIC_FRAME_STRATEGY
+                    var status2 = SLOW_PERIODIC_FRAME_STRATEGY
+                    // status 3 is skipped due to chargerlib not interfacing w/ analog encoders
+                    var status4 = DISABLED_PERIODIC_FRAME_STRATEGY
+                    var status5 = DISABLED_PERIODIC_FRAME_STRATEGY
+                    var status6 = DISABLED_PERIODIC_FRAME_STRATEGY
+
+                    if (MotorData.TEMPERATURE in frameConfig.utilizedData ||
+                        MotorData.VELOCITY in frameConfig.utilizedData ||
+                        MotorData.VOLTAGE in frameConfig.utilizedData
+                    ) {
+                        status1 = FAST_PERIODIC_FRAME_STRATEGY
+                    }
+
+                    if (MotorData.POSITION in frameConfig.utilizedData) {
+                        status2 = FAST_PERIODIC_FRAME_STRATEGY
+                    }
+
+                    if (frameConfig.optimizeEncoderFrames){
+                        when (this.encoderType){
+                            is SparkFlexEncoderType.Absolute -> {
+                                status4 = FAST_PERIODIC_FRAME_STRATEGY
+                            }
+
+                            is SparkFlexEncoderType.External -> {
+                                if (MotorData.POSITION in frameConfig.utilizedData){
+                                    status5 = FAST_PERIODIC_FRAME_STRATEGY
+                                }
+                                if (MotorData.VELOCITY in frameConfig.utilizedData){
+                                    status6 = FAST_PERIODIC_FRAME_STRATEGY
+                                }
+                            }
+
+                            is SparkFlexEncoderType.Regular -> {}
+                        }
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus1, status1).addError()
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus2, status2).addError()
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus4, status4).addError()
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus5, status5).addError()
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus6, status6).addError()
+                    }
+                }
+
+                null -> {}
+            }
+
             return@safeConfigure allConfigErrors.isEmpty()
         }
-        if (RobotBase.isReal()) delay(200.milli.seconds)
-        burnFlash()
+
+        if (RobotBase.isReal()) {
+            delay(200.milli.seconds)
+            burnFlash()
+        }
     }
 
 

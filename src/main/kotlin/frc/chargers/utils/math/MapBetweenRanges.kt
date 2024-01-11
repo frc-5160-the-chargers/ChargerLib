@@ -1,6 +1,6 @@
 package frc.chargers.utils.math
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 
 public fun Double.mapBetweenRanges(from: ClosedRange<Double>, to: ClosedRange<Double>): Double {
@@ -12,7 +12,7 @@ public fun Double.mapBetweenRanges(from: ClosedRange<Double>, to: ClosedRange<Do
 }
 
 
-public fun <D: AnyDimension> Quantity<D>.mapBetweenRanges(
+public fun <D: Dimension<*,*,*,*>> Quantity<D>.mapBetweenRanges(
     from: ClosedRange<Quantity<D>>,
     to: ClosedRange<Quantity<D>>
 ): Quantity<D> = Quantity(

@@ -58,10 +58,10 @@ public data class UnitTranslation2d(
     override fun interpolate(other: UnitTranslation2d, t: Double): UnitTranslation2d = siValue.interpolate(other.inUnit(meters),t).ofUnit(meters)
     public fun rotateBy(other: Angle): UnitTranslation2d = siValue.rotateBy(other.asRotation2d()).ofUnit(meters)
     override fun pushToLog(table: LogTable, category: String) {
-        table.put(category,siValue)
+        table.put(category, Translation2d.struct, siValue)
     }
     override fun getFromLog(table: LogTable, category: String): UnitTranslation2d =
-        UnitTranslation2d(table.get(category,Translation2d()))
+        UnitTranslation2d(table.get(category, Translation2d.struct, Translation2d()))
 
 }
 

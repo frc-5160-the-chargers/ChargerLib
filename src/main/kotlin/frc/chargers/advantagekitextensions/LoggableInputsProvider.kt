@@ -1,7 +1,7 @@
 package frc.chargers.advantagekitextensions
 
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.util.function.BooleanConsumer
 import frc.chargers.framework.ChargerRobot
@@ -227,10 +227,10 @@ public class LoggableInputsProvider(
     /*
     Creates property delegates that provide auto-logged Kmeasure Quantities.
      */
-    public fun <D: AnyDimension> quantity(getValue: () -> Quantity<D>): ReadOnlyLoggableInput<Quantity<D>> =
+    public fun <D: Dimension<*,*,*,*>> quantity(getValue: () -> Quantity<D>): ReadOnlyLoggableInput<Quantity<D>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantity(variable.name + "(SI value)", getValue) }
 
-    public fun <D: AnyDimension> quantity(
+    public fun <D: Dimension<*,*,*,*>> quantity(
         getValue: () -> Quantity<D>,
         setValue: (Quantity<D>) -> Unit
     ): ReadWriteLoggableInput<Quantity<D>> =
@@ -246,15 +246,15 @@ public class LoggableInputsProvider(
     functional interfaces to reduce the latency of this class.
      */
 
-    private fun interface QuantitySupplier<D: AnyDimension>{
+    private fun interface QuantitySupplier<D: Dimension<*,*,*,*>>{
         fun asQuantity(): Quantity<D>
     }
 
-    private fun interface QuantityConsumer<D: AnyDimension>{
+    private fun interface QuantityConsumer<D: Dimension<*,*,*,*>>{
         fun accept(value: Quantity<D>)
     }
 
-    private inner class AutoLoggedQuantity<D: AnyDimension>(
+    private inner class AutoLoggedQuantity<D: Dimension<*,*,*,*>>(
         val name: String,
         val get: QuantitySupplier<D>,
         val set: QuantityConsumer<D> = QuantityConsumer{}
@@ -466,16 +466,16 @@ public class LoggableInputsProvider(
     /*
     Creates property delegates that provide auto-logged nullable Quantities.
      */
-    public fun <D: AnyDimension> nullableQuantity(getValue: () -> Quantity<D>?): ReadOnlyLoggableInput<Quantity<D>?> =
+    public fun <D: Dimension<*,*,*,*>> nullableQuantity(getValue: () -> Quantity<D>?): ReadOnlyLoggableInput<Quantity<D>?> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantity(variable.name + "(SI value)", getValue) }
 
-    public fun <D: AnyDimension> nullableQuantity(
+    public fun <D: Dimension<*,*,*,*>> nullableQuantity(
         getValue: () -> Quantity<D>?,
         setValue: (Quantity<D>?) -> Unit
     ): ReadWriteLoggableInput<Quantity<D>?> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedNullableQuantity(variable.name + "(SI value)", getValue,setValue) }
 
-    private inner class AutoLoggedNullableQuantity<D: AnyDimension>(
+    private inner class AutoLoggedNullableQuantity<D: Dimension<*,*,*,*>>(
         val name: String,
         val get: () -> Quantity<D>?,
         val set: (Quantity<D>?) -> Unit = {}
@@ -597,16 +597,16 @@ public class LoggableInputsProvider(
     /*
     Creates property delegates that provide auto-logged Quantity Lists.
      */
-    public fun <D: AnyDimension> quantityList(getValue: () -> List<Quantity<D>>): ReadOnlyLoggableInput<List<Quantity<D>>> =
+    public fun <D: Dimension<*,*,*,*>> quantityList(getValue: () -> List<Quantity<D>>): ReadOnlyLoggableInput<List<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityList(variable.name + "(SI Value)", getValue) }
 
-    public fun <D: AnyDimension> quantityList(
+    public fun <D: Dimension<*,*,*,*>> quantityList(
         getValue: () -> List<Quantity<D>>,
         setValue: (List<Quantity<D>>) -> Unit
     ): ReadWriteLoggableInput<List<Quantity<D>>> =
         PropertyDelegateProvider{ _, variable -> AutoLoggedQuantityList(variable.name + "(SI Value)", getValue,setValue) }
 
-    private inner class AutoLoggedQuantityList<D: AnyDimension>(
+    private inner class AutoLoggedQuantityList<D: Dimension<*,*,*,*>>(
         val name: String,
         val get: () -> List<Quantity<D>>,
         val set: (List<Quantity<D>>) -> Unit = {}

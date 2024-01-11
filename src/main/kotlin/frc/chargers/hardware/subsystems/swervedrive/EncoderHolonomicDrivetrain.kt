@@ -7,6 +7,7 @@ import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
@@ -360,7 +361,7 @@ public class EncoderHolonomicDrivetrain(
             bottomLeftState = bottomLeft.getModuleState(wheelRadius),
             bottomRightState = bottomRight.getModuleState(wheelRadius)
         ).also{
-            recordOutput("Drivetrain(Swerve)/CurrentModuleStates", it.topLeftState, it.topRightState, it.bottomLeftState, it.bottomRightState)
+            recordOutput("Drivetrain(Swerve)/CurrentModuleStates", SwerveModuleState.struct, it.topLeftState, it.topRightState, it.bottomLeftState, it.bottomRightState)
         }
         set(ms){
             ms.desaturate(hardwareData.maxModuleSpeed)
@@ -375,7 +376,7 @@ public class EncoderHolonomicDrivetrain(
                 bottomLeft.setDirectionalPower((ms.bottomLeftSpeed/hardwareData.maxModuleSpeed).siValue, ms.bottomLeftAngle)
                 bottomRight.setDirectionalPower((ms.bottomRightSpeed/hardwareData.maxModuleSpeed).siValue, ms.bottomRightAngle)
             }
-            recordOutput("Drivetrain(Swerve)/DesiredModuleStates", ms.topLeftState,ms.topRightState,ms.bottomLeftState,ms.bottomRightState)
+            recordOutput("Drivetrain(Swerve)/DesiredModuleStates", SwerveModuleState.struct, ms.topLeftState,ms.topRightState,ms.bottomLeftState,ms.bottomRightState)
         }
 
 
@@ -596,7 +597,7 @@ public class EncoderHolonomicDrivetrain(
      * Called periodically in the subsystem.
      */
     override fun periodic() {
-        recordOutput("Drivetrain(Swerve)/CurrentModuleStates", *currentModuleStates.toArray())
+        recordOutput("Drivetrain(Swerve)/CurrentModuleStates", SwerveModuleState.struct, *currentModuleStates.toArray())
         recordOutput("Drivetrain(Swerve)/DistanceTraveledMeters", distanceTraveled.inUnit(meters))
         recordOutput("Drivetrain(Swerve)/OverallVelocityMetersPerSec",velocity.inUnit(meters/seconds))
     }

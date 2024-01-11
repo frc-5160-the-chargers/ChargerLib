@@ -11,13 +11,16 @@ import com.batterystaple.kmeasure.units.volts
 import frc.chargers.controls.feedforward.AngularMotorFFConstants
 import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.controls.pid.PIDConstants
+import frc.chargers.hardware.motorcontrol.SmartEncoderMotorController
+import frc.chargers.hardware.sensors.encoders.Encoder
 
 /**
  * A utility class that manages closed loop control
  * for a CAN spark device.
  */
-public class SparkPIDHandler(
-    motor: com.revrobotics.CANSparkBase
+internal class SparkPIDHandler(
+    motor: com.revrobotics.CANSparkBase,
+    private val encoderAdaptor: Encoder
 ) {
 
     private val innerController = motor.pidController
@@ -25,6 +28,7 @@ public class SparkPIDHandler(
     private var currentFFConstants = AngularMotorFFConstants.None
     private var currentFF = Feedforward<AngularVelocityDimension, VoltageDimension>{ Voltage(0.0) }
     private var isCurrentlyWrapping = false
+
 
     private fun updateControllerConstants(newConstants: PIDConstants){
         if (currentPIDConstants != newConstants){
@@ -35,10 +39,11 @@ public class SparkPIDHandler(
         }
     }
 
-    public fun setAngularVelocity(
+    fun setAngularVelocity(
         target: AngularVelocity,
         pidConstants: PIDConstants,
-        feedforwardConstants: AngularMotorFFConstants
+        feedforwardConstants: AngularMotorFFConstants,
+        vararg followers: SmartEncoderMotorController
     ) {
         updateControllerConstants(pidConstants)
         if (currentFFConstants != feedforwardConstants){
@@ -51,13 +56,17 @@ public class SparkPIDHandler(
             0,
             currentFF.calculate(target).inUnit(volts)
         )
+        followers.forEach{
+            it.setAngularVelocity(target, pidConstants, feedforwardConstants)
+        }
     }
 
-    public fun setAngularPosition(
+    fun setAngularPosition(
         target: Angle,
         pidConstants: PIDConstants,
         continuousWrap: Boolean,
-        extraVoltage: Voltage
+        extraVoltage: Voltage,
+        vararg followers: SmartEncoderMotorController
     ) {
         if (continuousWrap != isCurrentlyWrapping){
             if (continuousWrap){
@@ -76,6 +85,11 @@ public class SparkPIDHandler(
             0,
             extraVoltage.siValue
         )
+        followers.forEach{
+            it.setAngularPosition(
+                target, pidConstants, continuousWrap, extraVoltage, encoderAdaptor
+            )
+        }
     }
 
 }

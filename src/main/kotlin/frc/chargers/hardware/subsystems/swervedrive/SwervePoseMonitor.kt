@@ -5,6 +5,7 @@ import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -153,7 +154,7 @@ public class SwervePoseMonitor(
             Records the robot's pose on the field and in AdvantageScope.
              */
             field.robotPose = poseEstimator.latestPose
-            recordOutput("Drivetrain(Swerve)/Pose2d",poseEstimator.latestPose)
+            recordOutput("Drivetrain(Swerve)/Pose2d", Pose2d.struct, poseEstimator.latestPose)
             recordOutput("Drivetrain(Swerve)/realGyroUsedInPoseEstimation", drivetrain.gyro != null)
             recordOutput("Drivetrain(Swerve)/realGyroHeadingRad", drivetrain.gyro?.heading?.inUnit(radians) ?: 0.0)
         }

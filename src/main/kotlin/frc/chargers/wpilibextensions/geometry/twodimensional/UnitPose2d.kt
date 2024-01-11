@@ -69,10 +69,10 @@ public data class UnitPose2d(
     public operator fun times(scalar: Double): UnitPose2d = UnitPose2d(siValue * scalar)
     public operator fun div(scalar: Double): UnitPose2d = UnitPose2d(siValue / scalar)
     override fun pushToLog(table: LogTable, category: String) {
-        table.put(category,siValue)
+        table.put(category, Pose2d.struct, siValue)
     }
 
     override fun getFromLog(table: LogTable, category: String): UnitPose2d =
-        UnitPose2d(table.get(category,Pose2d()))
+        UnitPose2d(table.get(category, Pose2d.struct, Pose2d()))
 
 }

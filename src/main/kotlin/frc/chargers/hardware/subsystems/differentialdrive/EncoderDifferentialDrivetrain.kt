@@ -17,9 +17,8 @@ import frc.chargers.advantagekitextensions.LoggableInputsProvider
 import frc.chargers.constants.drivetrain.DiffDriveHardwareData
 import frc.chargers.controls.SetpointSupplier
 import frc.chargers.controls.pid.SuperPIDController
-import frc.chargers.hardware.motorcontrol.EncoderMotorControllerGroup
 import frc.chargers.hardware.configuration.HardwareConfiguration
-import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
+import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFXConfiguration
 import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
 import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIO
 import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOReal
@@ -27,7 +26,11 @@ import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOSi
 import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.controls.feedforward.Feedforward
 import frc.chargers.framework.ChargerRobot
-import frc.chargers.hardware.motorcontrol.rev.SparkMaxConfiguration
+import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.motorcontrol.EncoderMotorController
+import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
+import frc.chargers.hardware.motorcontrol.rev.ChargerSparkMax
+import frc.chargers.hardware.motorcontrol.rev.ChargerSparkMaxConfiguration
 import frc.chargers.hardware.sensors.RobotPoseMonitor
 import frc.chargers.hardware.sensors.VisionPoseSupplier
 import frc.chargers.utils.a
@@ -44,20 +47,22 @@ private val standardLogInputs = LoggableInputsProvider(namespace = "Drivetrain(D
  * using SparkMax motor controllers.
  */
 public inline fun sparkMaxDrivetrain(
-    leftMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
-    rightMotors: EncoderMotorControllerGroup<SparkMaxConfiguration>,
+    topLeft: ChargerSparkMax,
+    topRight: ChargerSparkMax,
+    bottomLeft: ChargerSparkMax,
+    bottomRight: ChargerSparkMax,
     hardwareData: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
     controlData: DiffDriveControlData = DiffDriveControlData.None,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
-    configure: SparkMaxConfiguration.() -> Unit = {}
+    configure: ChargerSparkMaxConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
-        leftMotors, rightMotors, hardwareData, controlData,
+        topLeft, topRight, bottomLeft, bottomRight, hardwareData, controlData,
         DifferentialDrivetrainSim.KitbotMotor.kDoubleNEOPerSide,
         gyro, startingPose, *poseSuppliers,
-        configuration = SparkMaxConfiguration().apply(configure)
+        configuration = ChargerSparkMaxConfiguration().apply(configure)
     )
 
 
@@ -66,29 +71,35 @@ public inline fun sparkMaxDrivetrain(
  * using Talon FX motor controllers.
  */
 public inline fun talonFXDrivetrain(
-    leftMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
-    rightMotors: EncoderMotorControllerGroup<TalonFXConfiguration>,
+    topLeft: ChargerTalonFX,
+    topRight: ChargerTalonFX,
+    bottomLeft: ChargerTalonFX,
+    bottomRight: ChargerTalonFX,
     hardwareData: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
     controlData: DiffDriveControlData = DiffDriveControlData.None,
     gyro: HeadingProvider? = null,
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
-    configure: TalonFXConfiguration.() -> Unit = {}
+    configure: ChargerTalonFXConfiguration.() -> Unit = {}
 ): EncoderDifferentialDrivetrain =
     EncoderDifferentialDrivetrain(
-        leftMotors, rightMotors, hardwareData, controlData,
+        topLeft, topRight, bottomLeft, bottomRight, hardwareData, controlData,
         DifferentialDrivetrainSim.KitbotMotor.kDoubleFalcon500PerSide,
         gyro, startingPose, *poseSuppliers,
-        configuration = TalonFXConfiguration().apply(configure)
+        configuration = ChargerTalonFXConfiguration().apply(configure)
     )
 
 /**
  * A convenience function to create an [EncoderDifferentialDrivetrain]
  * allowing its motors to all be configured.
+ *
+ * Here, C represents the configuration of the motor, while M represents the motor controllers themselves.
  */
-public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
-    leftMotors: EncoderMotorControllerGroup<C>,
-    rightMotors: EncoderMotorControllerGroup<C>,
+public fun <M, C : HardwareConfiguration> EncoderDifferentialDrivetrain(
+    topLeft: M,
+    topRight: M,
+    bottomLeft: M,
+    bottomRight: M,
     hardwareData: DiffDriveHardwareData = DiffDriveHardwareData.andyMark(),
     controlData: DiffDriveControlData = DiffDriveControlData.None,
     simMotors: DifferentialDrivetrainSim.KitbotMotor = DifferentialDrivetrainSim.KitbotMotor.kDualCIMPerSide,
@@ -96,12 +107,15 @@ public fun <C : HardwareConfiguration> EncoderDifferentialDrivetrain(
     startingPose: UnitPose2d = UnitPose2d(),
     vararg poseSuppliers: VisionPoseSupplier,
     configuration: C
-): EncoderDifferentialDrivetrain{
+): EncoderDifferentialDrivetrain
+    where M: EncoderMotorController, M: HardwareConfigurable<C> {
     val lowLevel = if (RobotBase.isReal()){
         DiffDriveIOReal(
             standardLogInputs,
-            leftMotors.apply { configure(configuration) },
-            rightMotors.apply { configure(configuration) }
+            topLeft.apply{ configure(configuration) },
+            topRight.apply{ configure(configuration) },
+            bottomLeft.apply{ configure(configuration) },
+            bottomRight.apply{ configure(configuration) }
         )
     }else{
         DiffDriveIOSim(standardLogInputs, simMotors)

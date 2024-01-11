@@ -1,7 +1,7 @@
 package frc.chargers.controls.feedforward
 
 import com.batterystaple.kmeasure.dimensions.AngularVelocityDimension
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.dimensions.VelocityDimension
 import com.batterystaple.kmeasure.dimensions.VoltageDimension
 import com.batterystaple.kmeasure.quantities.*
@@ -31,7 +31,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
  * // Alternatively, the fromSI factory function can be used if all units are SI units.
  * val armFF = Feedforward(ArmFFConstants.fromSI(ksDouble, kGDouble, kVDouble, kADouble))
  */
-public fun interface Feedforward<I: AnyDimension, O: AnyDimension> {
+public fun interface Feedforward<I: Dimension<*,*,*,*>, O: Dimension<*,*,*,*>> {
     public fun calculate(value: Quantity<I>): Quantity<O>
 }
 

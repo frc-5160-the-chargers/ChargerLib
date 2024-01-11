@@ -1,6 +1,6 @@
 package frc.chargers.utils
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import kotlin.math.abs
 
@@ -19,7 +19,7 @@ public fun Double.revertIfInvalid(
  * Reverts a [Quantity] to a certain value if it is NaN or infinite,
  * with the ability to specify extra invalid conditions.
  */
-public fun <D: AnyDimension> Quantity<D>.revertIfInvalid(
+public fun <D: Dimension<*,*,*,*>> Quantity<D>.revertIfInvalid(
     previousValue: Quantity<D>,
     additionalInvalidCond: Boolean = false
 ): Quantity<D> =

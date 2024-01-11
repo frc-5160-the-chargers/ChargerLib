@@ -1,6 +1,6 @@
 package frc.chargers.constants.tuning
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import com.batterystaple.kmeasure.quantities.inUnit
 import com.batterystaple.kmeasure.quantities.ofUnit
@@ -145,7 +145,7 @@ public open class DashboardTuner(
      * @see Quantity
      * @see LoggedDashboardNumber
      */
-    public fun <D: AnyDimension> quantity(
+    public fun <D: Dimension<*,*,*,*>> quantity(
         default: Quantity<D>, key: String? = null, logUnit: KmeasureUnit<D> = siUnit()
     ): TunableDelegate<Quantity<D>> =
         PropertyDelegateProvider{ _, variable ->
@@ -153,7 +153,7 @@ public open class DashboardTuner(
             TunableQuantity(default, name, logUnit)
         }
 
-    private inner class TunableQuantity<D: AnyDimension>(
+    private inner class TunableQuantity<D: Dimension<*,*,*,*>>(
         default: Quantity<D>, key: String, logUnit: KmeasureUnit<D>
     ): ReadOnlyProperty<Any?, Quantity<D>> {
 

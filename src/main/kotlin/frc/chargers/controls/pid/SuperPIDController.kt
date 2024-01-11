@@ -1,6 +1,6 @@
 package frc.chargers.controls.pid
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.math.controller.PIDController
 import frc.chargers.controls.FeedbackController
@@ -20,7 +20,7 @@ import frc.chargers.utils.math.inputModulus
  *
  * See [here](https://www.ni.com/en-us/innovations/white-papers/06/pid-theory-explained.html) for an explanation of PID.
  */
-public class SuperPIDController<I: AnyDimension, O: AnyDimension>(
+public class SuperPIDController<I: Dimension<*,*,*,*>, O: Dimension<*,*,*,*>>(
     /**
      * The PID constants of the controller.
      */

@@ -1,6 +1,6 @@
 package frc.chargers.utils
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 
 /**
@@ -19,7 +19,7 @@ import com.batterystaple.kmeasure.quantities.Quantity
  *      is Precision.Within -> println("Allowable Error: " + precision.allowableError)
  * }
  */
-public sealed class Precision<out D : AnyDimension> {
+public sealed class Precision<out D : Dimension<*,*,*,*>> {
     /**
      * Represents a [Precision] that allows overshoot.
      */
@@ -28,7 +28,7 @@ public sealed class Precision<out D : AnyDimension> {
     /**
      * Represents a [Precision] that allows for a certain margin of error.
      */
-    public class Within<D : AnyDimension>(public val allowableError: ClosedRange<Quantity<D>>) : Precision<D>() {
+    public class Within<D : Dimension<*,*,*,*>>(public val allowableError: ClosedRange<Quantity<D>>) : Precision<D>() {
         public constructor(margin: Quantity<D>) : this(-margin..margin)
     }
 }
@@ -39,7 +39,7 @@ public sealed class Precision<out D : AnyDimension> {
  * If the precision is a [Precision.Within], it will return true if the value is between the allowable error or not.
  * Otherwise, it will return false.
  */
-public fun <D: AnyDimension> Quantity<D>.within(precision: Precision<D>): Boolean =
+public fun <D: Dimension<*,*,*,*>> Quantity<D>.within(precision: Precision<D>): Boolean =
     if (precision is Precision.Within){
         this in precision.allowableError
     }else{

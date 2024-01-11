@@ -5,6 +5,7 @@ import com.batterystaple.kmeasure.units.meters
 import com.batterystaple.kmeasure.units.radians
 import com.batterystaple.kmeasure.units.seconds
 import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -113,7 +114,7 @@ public class DifferentialPoseMonitor(
 
 
         field.robotPose = poseEstimator.latestPose
-        recordOutput("Drivetrain(Differential)/Pose2d",poseEstimator.latestPose)
+        recordOutput("Drivetrain(Differential)/Pose2d", Pose2d.struct, poseEstimator.latestPose)
         recordOutput("Drivetrain(Differential)/realGyroUsedInPoseEstimation", drivetrain.gyro != null)
         recordOutput("Drivetrain(Differential)/realGyroHeadingRad", drivetrain.gyro?.heading?.inUnit(radians) ?: 0.0)
     }

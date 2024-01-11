@@ -74,11 +74,11 @@ public data class UnitTransform2d(
 
     public operator fun unaryMinus(): UnitTransform2d = UnitTransform2d(siValue.inverse())
     override fun pushToLog(table: LogTable, category: String) {
-        table.put(category,siValue)
+        table.put(category, Transform2d.struct, siValue)
     }
 
     override fun getFromLog(table: LogTable, category: String): UnitTransform2d =
-        UnitTransform2d(table.get(category,Transform2d()))
+        UnitTransform2d(table.get(category, Transform2d.struct, Transform2d()))
 
 
 }

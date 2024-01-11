@@ -1,6 +1,6 @@
 package frc.chargers.utils.math.units
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 
 /**
@@ -18,4 +18,4 @@ public typealias KmeasureUnit<D> = Quantity<D>
 /**
  * Gets an SI unit representation of a specific quantity and/or dimension.
  */
-public fun <D: AnyDimension> siUnit(): KmeasureUnit<D> = KmeasureUnit(1.0)
+public fun <D: Dimension<*,*,*,*>> siUnit(): KmeasureUnit<D> = KmeasureUnit(1.0)

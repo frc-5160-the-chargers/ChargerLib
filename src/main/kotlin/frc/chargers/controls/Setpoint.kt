@@ -8,7 +8,7 @@ import frc.chargers.controls.feedforward.Feedforward
  * Stores a produced Setpoint; with the appropriate setpoint value,
  * and additional feedforward control output.
  */
-public data class Setpoint<S: AnyDimension, O: AnyDimension>(
+public data class Setpoint<S: Dimension<*,*,*,*>, O: Dimension<*,*,*,*>>(
     /**
      * The value of the setpoint.
      */
@@ -23,7 +23,7 @@ public data class Setpoint<S: AnyDimension, O: AnyDimension>(
 /**
  * A class that can supply a certain setpoint to a [FeedbackController] or [Controller].
  */
-public fun interface SetpointSupplier<S: AnyDimension, O: AnyDimension>{
+public fun interface SetpointSupplier<S: Dimension<*,*,*,*>, O: Dimension<*,*,*,*>>{
 
     /**
      * Fetches a calculated [Setpoint]
@@ -50,7 +50,7 @@ public fun interface SetpointSupplier<S: AnyDimension, O: AnyDimension>{
      * For instance, in a velocity controller,
      * you would use this class and pass in the appropriate feedforward.
      */
-    public class Default<I: AnyDimension, O: AnyDimension>(
+    public class Default<I: Dimension<*,*,*,*>, O: Dimension<*,*,*,*>>(
         private val feedforward: Feedforward<I, O> = Feedforward{ Quantity(0.0) }
     ): SetpointSupplier<I,O>{
         override fun calculateSetpoint(target: Quantity<I>): Setpoint<I,O> =

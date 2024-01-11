@@ -25,7 +25,7 @@ public typealias CustomParameterValue = Int
  * Represents a TalonSRX powering a redline/ CIM motor.
  *
  * This function supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [TalonSRXConfiguration].
+ * which has the context of a [ChargerTalonSRXConfiguration].
  *
  * You do not need to manually factory default this motor, as it is factory defaulted on startup,
  * before configuration. This setting can be changed by setting factoryDefault = false.
@@ -38,14 +38,14 @@ public inline fun redlineSRX(
     deviceNumber: Int,
     encoderTicksPerRotation: Int = 1024,
     factoryDefault: Boolean = true,
-    configure: TalonSRXConfiguration.() -> Unit = {}
+    configure: ChargerTalonSRXConfiguration.() -> Unit = {}
 ): ChargerTalonSRX =
     ChargerTalonSRX(deviceNumber,encoderTicksPerRotation).apply{
         if (factoryDefault) {
             configFactoryDefault()
             println("TalonSRX has been factory defaulted.")
         }
-        val config = TalonSRXConfiguration().apply(configure)
+        val config = ChargerTalonSRXConfiguration().apply(configure)
         configure(config)
     }
 
@@ -87,12 +87,12 @@ public class TalonSRXEncoderAdapter(
  * Note: The ChargerTalonSRX still uses phoenix v5, as phoenix v6 scraps support for the TalonSRX.
  *
  * @see com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX
- * @see TalonSRXConfiguration
+ * @see ChargerTalonSRXConfiguration
  */
 public open class ChargerTalonSRX(
     deviceNumber: Int,
     private val encoderTicksPerRotation: Int
-) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<TalonSRXConfiguration>{
+) : WPI_TalonSRX(deviceNumber), EncoderMotorController, HardwareConfigurable<ChargerTalonSRXConfiguration>{
 
     final override val encoder: Encoder
         get() = TalonSRXEncoderAdapter(
@@ -101,7 +101,46 @@ public open class ChargerTalonSRX(
             pulsesPerRotation = encoderTicksPerRotation
         )
 
-    final override fun configure(configuration: TalonSRXConfiguration) {
+    private val nonSRXFollowers: MutableSet<EncoderMotorController> = mutableSetOf()
+
+    public fun withFollowers(vararg followers: EncoderMotorController): ChargerTalonSRX{
+        followers.forEach{
+            if (it is WPI_TalonSRX){
+                it.follow(this)
+            }else{
+                nonSRXFollowers.add(it)
+            }
+        }
+        return this
+    }
+
+    override fun set(speed: Double){
+        super.set(speed)
+        nonSRXFollowers.forEach{ it.set(speed) }
+    }
+
+    override fun stopMotor() {
+        super.stopMotor()
+        nonSRXFollowers.forEach{ it.stopMotor() }
+    }
+
+    override fun setInverted(isInverted: Boolean){
+        super.setInverted(isInverted)
+        nonSRXFollowers.forEach{
+            // property access syntax
+            it.inverted = isInverted
+        }
+    }
+
+    override fun disable(){
+        super.disable()
+        nonSRXFollowers.forEach{
+            it.disable()
+        }
+    }
+
+
+    final override fun configure(configuration: ChargerTalonSRXConfiguration) {
         configuration.inverted?.let(::setInverted)
         configuration.expiration?.let { expiration = it.inUnit(seconds) }
         configuration.safetyEnabled?.let(::setSafetyEnabled)
@@ -168,7 +207,7 @@ public open class ChargerTalonSRX(
  *
  * @see ChargerTalonSRX
  */
-public data class TalonSRXConfiguration(
+public data class ChargerTalonSRXConfiguration(
     var inverted: Boolean? = null,
     var invertSensorPhase: Boolean? = null,
     var expiration: Time? = null,

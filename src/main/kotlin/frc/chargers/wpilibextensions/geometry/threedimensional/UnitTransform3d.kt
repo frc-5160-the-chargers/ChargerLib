@@ -36,10 +36,10 @@ public data class UnitTransform3d(
     public operator fun plus(other: UnitTransform3d): UnitTransform3d = UnitTransform3d(siValue + other.siValue)
 
     override fun pushToLog(table: LogTable, category: String) {
-        table.put(category,siValue)
+        table.put(category, Transform3d.struct, siValue)
     }
 
     override fun getFromLog(table: LogTable, category: String): UnitTransform3d =
-        UnitTransform3d(table.get(category,Transform3d()))
+        UnitTransform3d(table.get(category,Transform3d.struct, Transform3d()))
 
 }

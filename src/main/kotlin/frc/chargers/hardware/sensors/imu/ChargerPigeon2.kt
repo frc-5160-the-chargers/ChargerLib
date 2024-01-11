@@ -99,9 +99,9 @@ public class ChargerPigeon2(
         private val rollSignal = getRoll()
         private val pitchSignal = getPitch()
 
-        private val yawRateSignal = angularVelocityZ
-        private val pitchRateSignal = angularVelocityY
-        private val rollRateSignal = angularVelocityX
+        private val yawRateSignal = angularVelocityXWorld
+        private val pitchRateSignal = angularVelocityYWorld
+        private val rollRateSignal = angularVelocityXWorld
 
         internal fun getSignals(): Array<BaseStatusSignal> =
             arrayOf(yawSignal, rollSignal, pitchSignal, yawRateSignal, pitchRateSignal, rollRateSignal)

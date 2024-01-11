@@ -46,11 +46,11 @@ public data class UnitTranslation3d(
         UnitTranslation3d(siValue.interpolate(endValue.siValue,t))
 
     override fun pushToLog(table: LogTable, category: String) {
-        table.put(category,siValue)
+        table.put(category, Translation3d.struct, siValue)
     }
 
     override fun getFromLog(table: LogTable, category: String): UnitTranslation3d =
-        UnitTranslation3d(table.get(category,Translation3d()))
+        UnitTranslation3d(table.get(category, Translation3d.struct, Translation3d()))
 
 }
 

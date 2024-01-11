@@ -1,6 +1,6 @@
 package frc.chargers.utils.math
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import edu.wpi.first.math.MathUtil
 
@@ -25,7 +25,7 @@ public fun Double.inputModulus(range: ClosedRange<Double>): Double =
  *
  * @see MathUtil.inputModulus
  */
-public fun <D: AnyDimension> Quantity<D>.inputModulus(min: Quantity<D>, max: Quantity<D>): Quantity<D> =
+public fun <D: Dimension<*, *, *, *>> Quantity<D>.inputModulus(min: Quantity<D>, max: Quantity<D>): Quantity<D> =
     Quantity(siValue.inputModulus(min.siValue,max.siValue))
 
 /**
@@ -33,5 +33,5 @@ public fun <D: AnyDimension> Quantity<D>.inputModulus(min: Quantity<D>, max: Qua
  *
  * @see MathUtil.inputModulus
  */
-public fun <D: AnyDimension> Quantity<D>.inputModulus(range: ClosedRange<Quantity<D>>): Quantity<D> =
+public fun <D: Dimension<*, *, *, *>> Quantity<D>.inputModulus(range: ClosedRange<Quantity<D>>): Quantity<D> =
     inputModulus(range.start,range.endInclusive)

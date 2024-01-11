@@ -15,6 +15,7 @@ import frc.chargerlibexternal.builddata.ChargerLibBuildConstants
 import frc.chargerlibexternal.pathplanner.LocalADStarAK
 import frc.chargers.constants.tuning.DashboardTuner
 import frc.chargers.wpilibextensions.Alert
+import org.littletonrobotics.junction.AutoLogOutputManager
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.LoggedRobot
 import org.littletonrobotics.junction.Logger.*
@@ -115,6 +116,7 @@ public open class ChargerRobot(
             // inits robotContainer
             robotContainer = getRobotContainer()
             robotContainer.robotInit()
+            AutoLogOutputManager.addPackage("frc.chargers")
 
             Pathfinding.setPathfinder(LocalADStarAK())
 

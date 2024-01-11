@@ -1,29 +1,41 @@
 package frc.chargers.hardware.subsystems.differentialdrive.lowlevel
 
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
-import frc.chargers.hardware.motorcontrol.NonConfigurableEncoderMotorControllerGroup
 import com.batterystaple.kmeasure.quantities.*
+import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.setVoltage
 
 public class DiffDriveIOReal(
     logInputs: LoggableInputsProvider,
-    private val leftMotors: NonConfigurableEncoderMotorControllerGroup,
-    private val rightMotors: NonConfigurableEncoderMotorControllerGroup
+    private val topLeft: EncoderMotorController,
+    private val topRight: EncoderMotorController,
+    private val bottomLeft: EncoderMotorController,
+    private val bottomRight: EncoderMotorController,
 ): DiffDriveIO {
 
     init {
-        leftMotors.inverted = false
-        rightMotors.inverted = true
+        topLeft.inverted = false
+        bottomLeft.inverted = false
+        topRight.inverted = true
+        bottomRight.inverted = true
     }
 
     private var leftAppliedVoltage = Voltage(0.0)
     private var rightAppliedVoltage = Voltage(0.0)
 
-    override val leftWheelTravel: Angle by logInputs.quantity{leftMotors.encoder.angularPosition}
-    override val rightWheelTravel: Angle by logInputs.quantity{rightMotors.encoder.angularPosition}
+    override val leftWheelTravel: Angle by logInputs.quantity{
+        (topLeft.encoder.angularPosition + bottomLeft.encoder.angularPosition) / 2.0
+    }
+    override val rightWheelTravel: Angle by logInputs.quantity{
+        (topRight.encoder.angularPosition + bottomRight.encoder.angularPosition) / 2.0
+    }
 
-    override val leftVelocity: AngularVelocity by logInputs.quantity{leftMotors.encoder.angularVelocity}
-    override val rightVelocity: AngularVelocity by logInputs.quantity{rightMotors.encoder.angularVelocity}
+    override val leftVelocity: AngularVelocity by logInputs.quantity{
+        (topLeft.encoder.angularVelocity + bottomLeft.encoder.angularVelocity) / 2.0
+    }
+    override val rightVelocity: AngularVelocity by logInputs.quantity{
+        (topRight.encoder.angularVelocity + bottomRight.encoder.angularVelocity) / 2.0
+    }
 
     override val leftVoltage: Voltage by logInputs.quantity{leftAppliedVoltage}
     override val rightVoltage: Voltage by logInputs.quantity {rightAppliedVoltage}
@@ -32,19 +44,25 @@ public class DiffDriveIOReal(
         leftAppliedVoltage = left
         rightAppliedVoltage = right
         // uses custom extension functions; see wpilibextensions
-        leftMotors.setVoltage(left)
-        rightMotors.setVoltage(right)
+        topLeft.setVoltage(left)
+        bottomLeft.setVoltage(left)
+        topRight.setVoltage(right)
+        bottomRight.setVoltage(right)
     }
 
 
     override var inverted: Boolean = false
         set(invertMotors){
             if (invertMotors) {
-                leftMotors.inverted = true
-                rightMotors.inverted = false
+                topLeft.inverted = true
+                bottomLeft.inverted = true
+                topRight.inverted = false
+                bottomRight.inverted = false
             }else{
-                leftMotors.inverted = false
-                rightMotors.inverted = true
+                topLeft.inverted = false
+                bottomLeft.inverted = false
+                topRight.inverted = true
+                bottomRight.inverted = true
             }
             field = invertMotors
         }

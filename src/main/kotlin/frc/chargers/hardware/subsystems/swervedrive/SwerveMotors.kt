@@ -3,7 +3,7 @@ package frc.chargers.hardware.subsystems.swervedrive
 import com.revrobotics.CANSparkLowLevel
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
-import frc.chargers.hardware.motorcontrol.ctre.TalonFXConfiguration
+import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.ctre.falcon
 import frc.chargers.hardware.motorcontrol.rev.*
 import frc.chargers.hardware.sensors.encoders.Encoder
@@ -16,7 +16,7 @@ public inline fun sparkFlexSwerveMotors(
     topRightId: Int,
     bottomLeftId: Int,
     bottomRightId: Int,
-    configure: SparkFlexConfiguration.() -> Unit
+    configure: ChargerSparkFlexConfiguration.() -> Unit
 ): SwerveMotors<ChargerSparkFlex> = sparkFlexSwerveMotors(
     neoSparkFlex(topLeftId),
     neoSparkFlex(topRightId),
@@ -35,7 +35,7 @@ public inline fun sparkMaxSwerveMotors(
     bottomLeftId: Int,
     bottomRightId: Int,
     type: CANSparkLowLevel.MotorType = CANSparkLowLevel.MotorType.kBrushless,
-    configure: SparkMaxConfiguration.() -> Unit = {}
+    configure: ChargerSparkMaxConfiguration.() -> Unit = {}
 ): SwerveMotors<ChargerSparkMax> = when (type){
     CANSparkLowLevel.MotorType.kBrushless -> sparkMaxSwerveMotors(
         neoSparkMax(topLeftId),
@@ -62,7 +62,7 @@ public inline fun talonFXSwerveMotors(
     topRightId: Int,
     bottomLeftId: Int,
     bottomRightId: Int,
-    configure: TalonFXConfiguration.() -> Unit = {}
+    configure: ChargerTalonFXConfiguration.() -> Unit = {}
 ): SwerveMotors<ChargerTalonFX> = talonFXSwerveMotors(
     falcon(topLeftId),
     falcon(topRightId),
@@ -79,9 +79,9 @@ public inline fun sparkMaxSwerveMotors(
     topRight: ChargerSparkMax,
     bottomLeft: ChargerSparkMax,
     bottomRight: ChargerSparkMax,
-    configure: SparkMaxConfiguration.() -> Unit = {}
+    configure: ChargerSparkMaxConfiguration.() -> Unit = {}
 ): SwerveMotors<ChargerSparkMax> {
-    val config = SparkMaxConfiguration().apply(configure)
+    val config = ChargerSparkMaxConfiguration().apply(configure)
 
     topLeft.configure(config)
     topRight.configure(config)
@@ -99,9 +99,9 @@ public inline fun sparkFlexSwerveMotors(
     topRight: ChargerSparkFlex,
     bottomLeft: ChargerSparkFlex,
     bottomRight: ChargerSparkFlex,
-    configure: SparkFlexConfiguration.() -> Unit = {}
+    configure: ChargerSparkFlexConfiguration.() -> Unit = {}
 ): SwerveMotors<ChargerSparkFlex>{
-    val config = SparkFlexConfiguration().apply(configure)
+    val config = ChargerSparkFlexConfiguration().apply(configure)
 
     topLeft.configure(config)
     topRight.configure(config)
@@ -123,9 +123,9 @@ public inline fun talonFXSwerveMotors(
     topRight: ChargerTalonFX,
     bottomLeft: ChargerTalonFX,
     bottomRight: ChargerTalonFX,
-    configure: TalonFXConfiguration.() -> Unit = {}
+    configure: ChargerTalonFXConfiguration.() -> Unit = {}
 ): SwerveMotors<ChargerTalonFX>{
-    val config = TalonFXConfiguration().apply(configure)
+    val config = ChargerTalonFXConfiguration().apply(configure)
 
     topLeft.configure(config)
     topRight.configure(config)

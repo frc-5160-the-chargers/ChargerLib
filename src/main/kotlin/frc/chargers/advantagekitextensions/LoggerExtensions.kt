@@ -1,6 +1,6 @@
 package frc.chargers.advantagekitextensions
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.quantities.inUnit
@@ -18,7 +18,7 @@ private const val warningMsg =
 /**
  * Records the output of a generic [Quantity].
  */
-public fun <D: AnyDimension> recordOutput(key: String, value: Quantity<D>){
+public fun <D: Dimension<*,*,*,*>> recordOutput(key: String, value: Quantity<D>){
     recordOutput("$key(SI Value)", value.siValue)
 }
 

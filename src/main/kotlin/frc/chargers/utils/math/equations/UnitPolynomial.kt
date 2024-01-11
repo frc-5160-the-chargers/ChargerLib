@@ -1,6 +1,6 @@
 package frc.chargers.utils.math.equations
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.*
 import frc.chargers.utils.math.units.KmeasureUnit
 import frc.chargers.utils.math.units.siUnit
@@ -18,7 +18,7 @@ import kotlin.math.pow
  * ```
  * @see Polynomial
  */
-public data class UnitPolynomial<I: AnyDimension, O: AnyDimension>(
+public data class UnitPolynomial<I: Dimension<*,*,*,*>, O: Dimension<*,*,*,*>>(
     val units: Pair<KmeasureUnit<I>, KmeasureUnit<O>> = siUnit<I>() to siUnit<O>(),
     val coefficients: List<Double>
 ) : (Quantity<I>) -> Quantity<O> {

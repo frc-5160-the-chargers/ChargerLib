@@ -5,6 +5,7 @@ import com.batterystaple.kmeasure.units.*
 import com.ctre.phoenix6.StatusCode
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs
 import com.ctre.phoenix6.configs.Slot0Configs
+import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
@@ -19,13 +20,13 @@ import frc.chargers.hardware.motorcontrol.*
 import frc.chargers.hardware.sensors.encoders.ResettableEncoder
 import frc.chargers.utils.math.inputModulus
 import frc.chargers.wpilibextensions.delay
-import com.ctre.phoenix6.configs.TalonFXConfiguration as CTRETalonFXConfiguration
+import com.ctre.phoenix6.configs.TalonFXConfiguration
 
 /**
  * Creates an instance of a falcon motor, controlled by a TalonFX motor controller.
  *
  * This function supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [TalonFXConfiguration].
+ * which has the context of a [ChargerTalonFXConfiguration].
  *
  * You do not need to manually factory default this motor, as it is factory defaulted on startup,
  * before configuration. This setting can be changed by setting factoryDefault = false.
@@ -38,14 +39,14 @@ public fun falcon(
     canId: Int,
     canBus: String = "rio",
     factoryDefault: Boolean = true,
-    configure: TalonFXConfiguration.() -> Unit = {}
+    configure: ChargerTalonFXConfiguration.() -> Unit = {}
 ): ChargerTalonFX = ChargerTalonFX(canId, canBus).apply {
     // factory defaults configs on startup when factoryDefault = true
     if (factoryDefault) {
-        configurator.apply(CTRETalonFXConfiguration(), 0.02)
+        configurator.apply(TalonFXConfiguration(), 0.02)
     }
-    val config = TalonFXConfiguration().apply(configure)
-    if (config != TalonFXConfiguration()){
+    val config = ChargerTalonFXConfiguration().apply(configure)
+    if (config != ChargerTalonFXConfiguration()){
         configure(config)
     }
 }
@@ -73,6 +74,8 @@ public class TalonFXEncoderAdapter(
 }
 
 
+
+
 /**
  * Represents a TalonFX motor controller.
  * Includes everything in the CTRE TalonFX class,
@@ -80,10 +83,10 @@ public class TalonFXEncoderAdapter(
  * of this library.
  *
  * @see com.ctre.phoenix6.hardware.TalonFX
- * @see TalonFXConfiguration
+ * @see ChargerTalonFXConfiguration
  */
 public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
-    TalonFX(deviceNumber, canBus), SmartEncoderMotorController, HardwareConfigurable<TalonFXConfiguration> {
+    TalonFX(deviceNumber, canBus), SmartEncoderMotorController, HardwareConfigurable<ChargerTalonFXConfiguration> {
 
     @Suppress("LeakingThis") // Known to be safe; CTREMotorControllerEncoderAdapter ONLY uses final functions
     // and does not pass around the reference to this class.
@@ -108,6 +111,75 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         get() = tempSignal.refresh(true).value
 
 
+
+    private val talonFXFollowers: MutableSet<TalonFX> = mutableSetOf()
+    private val otherFollowers: MutableSet<SmartEncoderMotorController> = mutableSetOf()
+    private val defaultFollowRequest = Follower(deviceID, false)
+    private val invertFollowRequest = Follower(deviceID, true)
+
+    /**
+     * Adds follower motors to this TalonFX.
+     *
+     * If they are also TalonFX's, ctre-based optimizations will occur;
+     * other motors added as followers simply mirror the requests of this motor.
+     */
+    public fun withFollowers(vararg followers: SmartEncoderMotorController){
+        followers.forEach{
+            if (it is TalonFX){
+                talonFXFollowers.add(it)
+            }else{
+                otherFollowers.add(it)
+            }
+        }
+    }
+
+
+    private fun runFollowing(){
+        talonFXFollowers.forEach{
+            if (it.inverted == this.inverted){
+                it.setControl(defaultFollowRequest)
+            }else{
+                it.setControl(invertFollowRequest)
+            }
+        }
+    }
+
+    override fun set(speed: Double){
+        super.set(speed)
+        runFollowing()
+        otherFollowers.forEach{
+            it.set(speed)
+        }
+    }
+
+    override fun stopMotor() {
+        super.stopMotor()
+        runFollowing()
+        otherFollowers.forEach{
+            it.stopMotor()
+        }
+    }
+
+    override fun setInverted(isInverted: Boolean){
+        super.setInverted(isInverted)
+        runFollowing()
+        otherFollowers.forEach{
+            it.inverted = isInverted
+        }
+    }
+
+    override fun disable(){
+        super.disable()
+        runFollowing()
+        otherFollowers.forEach{
+            it.disable()
+        }
+    }
+
+
+
+
+
     private val currentSlotConfigs = Slot0Configs()
     private val velocityRequest = VelocityVoltage(0.0).also{ it.Slot = 0 }
     private val positionRequest = PositionVoltage(0.0).also{it.Slot = 0 }
@@ -120,7 +192,6 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         currentSlotConfigs.kI = newConstants.kI
         currentSlotConfigs.kD = newConstants.kD
     }
-
 
     override fun setAngularVelocity(
         target: AngularVelocity,
@@ -143,6 +214,10 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         }
         velocityRequest.Velocity = target.inUnit(rotations/seconds)
         setControl(velocityRequest)
+        runFollowing()
+        otherFollowers.forEach{
+            it.setAngularVelocity(target, pidConstants, feedforwardConstants)
+        }
     }
 
     override fun setAngularPosition(
@@ -175,6 +250,10 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
         }
         positionRequest.FeedForward = extraVoltage.inUnit(volts)
         setControl(positionRequest)
+        runFollowing()
+        otherFollowers.forEach{
+            it.setAngularPosition(target, pidConstants, continuousWrap, extraVoltage, this.encoder)
+        }
     }
 
 
@@ -195,14 +274,14 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
     }
 
 
-    final override fun configure(configuration: TalonFXConfiguration){
+    final override fun configure(configuration: ChargerTalonFXConfiguration){
         configAppliedProperly = true
         safeConfigure(
             deviceName = "ChargerTalonFX(id = $deviceID)",
             getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
         ){
             allConfigErrors.clear()
-            val baseTalonFXConfig = CTRETalonFXConfiguration()
+            val baseTalonFXConfig = TalonFXConfiguration()
             configurator.refresh(baseTalonFXConfig)
             applyChanges(baseTalonFXConfig, configuration)
             configurator.apply(baseTalonFXConfig,0.02).updateConfigStatus()
@@ -254,7 +333,7 @@ public open class ChargerTalonFX(deviceNumber: Int, canBus: String = "rio"):
  *
  * @see ChargerTalonFX
  */
-public data class TalonFXConfiguration(
+public data class ChargerTalonFXConfiguration(
     // audio configs
     var beepOnBoot: Boolean? = null,
 
@@ -331,7 +410,7 @@ public data class TalonFXConfiguration(
 
 ): HardwareConfiguration
 
-internal fun applyChanges(ctreConfig: CTRETalonFXConfiguration, chargerConfig: TalonFXConfiguration): CTRETalonFXConfiguration{
+internal fun applyChanges(ctreConfig: TalonFXConfiguration, chargerConfig: ChargerTalonFXConfiguration): TalonFXConfiguration{
     ctreConfig.apply{
         chargerConfig.beepOnBoot?.let{
             Audio.BeepOnBoot = it

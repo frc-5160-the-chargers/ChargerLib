@@ -1,6 +1,6 @@
 package frc.chargers.utils
 
-import com.batterystaple.kmeasure.dimensions.AnyDimension
+import com.batterystaple.kmeasure.dimensions.Dimension
 import com.batterystaple.kmeasure.quantities.Quantity
 import com.batterystaple.kmeasure.quantities.Time
 import com.batterystaple.kmeasure.quantities.inUnit
@@ -40,7 +40,7 @@ public data class DoubleMeasurement(
  * @see Measurement
  * @see DoubleMeasurement
  */
-public data class QuantityMeasurement<D: AnyDimension>(
+public data class QuantityMeasurement<D: Dimension<*,*,*,*>>(
     val value: Quantity<D>,
     val timestamp: Time,
 ): AdvantageKitLoggable<QuantityMeasurement<D>>{

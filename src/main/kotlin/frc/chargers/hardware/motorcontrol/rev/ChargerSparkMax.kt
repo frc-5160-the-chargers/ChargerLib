@@ -14,13 +14,12 @@ import frc.chargers.hardware.motorcontrol.rev.util.*
 import frc.chargers.utils.revertIfInvalid
 import frc.chargers.wpilibextensions.delay
 
-
 /**
  * A convenience function to create a [ChargerSparkMax]
  * specifically to drive a Neo motor.
  *
  * This function supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [SparkMaxConfiguration] object.
+ * which has the context of a [ChargerSparkMaxConfiguration] object.
  *
  * You do not need to manually factory default this motor, as it is factory defaulted on startup,
  * before configuration. This setting can be changed by setting factoryDefault = false.
@@ -32,7 +31,7 @@ import frc.chargers.wpilibextensions.delay
 public inline fun neoSparkMax(
     canBusId: Int,
     factoryDefault: Boolean = true,
-    configure: SparkMaxConfiguration.() -> Unit = {}
+    configure: ChargerSparkMaxConfiguration.() -> Unit = {}
 ): ChargerSparkMax =
     ChargerSparkMax(canBusId, MotorType.kBrushless)
         .apply {
@@ -41,7 +40,7 @@ public inline fun neoSparkMax(
                 delay(200.milli.seconds)
                 println("SparkMax has been factory defaulted.")
             }
-            val config = SparkMaxConfiguration().apply(configure)
+            val config = ChargerSparkMaxConfiguration().apply(configure)
             configure(config)
         }
 
@@ -51,7 +50,7 @@ public inline fun neoSparkMax(
  * specifically to drive a brushed motor, such as a CIM.
  *
  * This motor supports inline configuration using the "[configure]" lambda function,
- * which has the context of a [SparkMaxConfiguration] object.
+ * which has the context of a [ChargerSparkMaxConfiguration] object.
  *
  * You do not need to manually factory default this motor, as it is factory defaulted on startup,
  * before configuration. This setting can be changed by setting factoryDefault = false.
@@ -63,7 +62,7 @@ public inline fun neoSparkMax(
 public inline fun brushedSparkMax(
     canBusId: Int,
     factoryDefault: Boolean = true,
-    configure: SparkMaxConfiguration.() -> Unit = {}
+    configure: ChargerSparkMaxConfiguration.() -> Unit = {}
 ): ChargerSparkMax =
     ChargerSparkMax(canBusId, MotorType.kBrushed)
         .apply {
@@ -72,7 +71,7 @@ public inline fun brushedSparkMax(
                 delay(200.milli.seconds)
                 println("SparkMax has been factory defaulted.")
             }
-            val config = SparkMaxConfiguration().apply(configure)
+            val config = ChargerSparkMaxConfiguration().apply(configure)
             configure(config)
         }
 
@@ -94,7 +93,7 @@ public sealed class SparkMaxEncoderType{
      * Represents a Spark Max Alternate encoder.
      */
     public data class Alternate(
-        val type: SparkMaxAlternateEncoder.Type,
+        val category: SparkMaxAlternateEncoder.Type,
         val countsPerRev: Int,
         val encoderMeasurementPeriod: Time? = null,
         val averageDepth: Int? = null,
@@ -105,7 +104,7 @@ public sealed class SparkMaxEncoderType{
      * Represents an absolute encoder connected to a spark max.
      */
     public data class Absolute(
-        val type: SparkAbsoluteEncoder.Type,
+        val category: SparkAbsoluteEncoder.Type,
         val averageDepth: Int? = null,
         val inverted: Boolean? = null
     ): SparkMaxEncoderType()
@@ -117,7 +116,7 @@ public sealed class SparkMaxEncoderType{
  *
  * @see ChargerSparkMax
  */
-public class SparkMaxConfiguration(
+public class ChargerSparkMaxConfiguration(
     public var encoderType: SparkMaxEncoderType? = null,
     idleMode: CANSparkBase.IdleMode? = null,
     inverted: Boolean? = null,
@@ -126,13 +125,13 @@ public class SparkMaxConfiguration(
     closedLoopRampRate: Double? = null,
     openLoopRampRate: Double? = null,
     controlFramePeriod: Time? = null,
-    periodicFramePeriods: MutableMap<PeriodicFrame, Time> = mutableMapOf(),
+    periodicFrameConfig: PeriodicFrameConfig? = null,
     smartCurrentLimit: SmartCurrentLimit? = null,
     secondaryCurrentLimit: SecondaryCurrentLimit? = null,
     softLimits: MutableMap<CANSparkBase.SoftLimitDirection, Angle> = mutableMapOf(),
 ): SparkConfigurationBase(
     idleMode, inverted, voltageCompensationNominalVoltage, canTimeout, closedLoopRampRate, openLoopRampRate,
-    controlFramePeriod, periodicFramePeriods, smartCurrentLimit, secondaryCurrentLimit, softLimits
+    controlFramePeriod, periodicFrameConfig, smartCurrentLimit, secondaryCurrentLimit, softLimits
 )
 
 
@@ -147,18 +146,24 @@ public class SparkMaxConfiguration(
  * of this library.
  *
  * @see com.revrobotics.CANSparkMax
- * @see SparkMaxConfiguration
+ * @see ChargerSparkMaxConfiguration
  */
 public class ChargerSparkMax(
     deviceId: Int,
     type: MotorType
-) : CANSparkMax(deviceId, type), SmartEncoderMotorController, HardwareConfigurable<SparkMaxConfiguration>{
+) : CANSparkMax(deviceId, type), SmartEncoderMotorController, HardwareConfigurable<ChargerSparkMaxConfiguration>{
+    private var encoderType: SparkMaxEncoderType = SparkMaxEncoderType.Regular()
 
-    override var encoder: SparkEncoderAdaptor = getEncoder(SparkMaxEncoderType.Regular())
+    /**
+     * The encoder of the spark max.
+     */
+    override var encoder: SparkEncoderAdaptor = getEncoder(encoderType)
         private set
 
-    private fun getEncoder(encoderType: SparkMaxEncoderType): SparkEncoderAdaptor =
-        when (encoderType){
+    private fun getEncoder(encoderType: SparkMaxEncoderType): SparkEncoderAdaptor{
+        this.encoderType = encoderType
+
+        return when (encoderType){
             is SparkMaxEncoderType.Regular -> SparkEncoderAdaptor(
                 super.getEncoder().apply{
                     // property access syntax setters
@@ -190,7 +195,7 @@ public class ChargerSparkMax(
             )
 
             is SparkMaxEncoderType.Absolute -> SparkEncoderAdaptor(
-                super.getAbsoluteEncoder(encoderType.type).apply{
+                super.getAbsoluteEncoder(encoderType.category).apply{
                     // property access syntax setters
                     if (encoderType.averageDepth != null){
                         averageDepth = encoderType.averageDepth
@@ -201,6 +206,51 @@ public class ChargerSparkMax(
                 }
             )
         }
+    }
+
+    /**
+     * Adds a generic amount of followers to the Spark Max.
+     *
+     * For each follower that is a Spark Max or Spark Flex, we will call the vendor implementation;
+     * otherwise, the other motors are added to a list of motors within this class
+     * to be run.
+     */
+    public fun withFollowers(vararg followers: SmartEncoderMotorController): ChargerSparkMax{
+        // chargerlib follower adding util function
+        addFollowers(
+            this,
+            nonRevFollowerSet = nonRevFollowers,
+            *followers
+        )
+        return this
+    }
+
+    private val nonRevFollowers: MutableSet<SmartEncoderMotorController> = mutableSetOf()
+
+    override fun set(speed: Double){
+        super.set(speed)
+        nonRevFollowers.forEach{ it.set(speed) }
+    }
+
+    override fun stopMotor() {
+        super.stopMotor()
+        nonRevFollowers.forEach{ it.stopMotor() }
+    }
+
+    override fun setInverted(isInverted: Boolean){
+        super.setInverted(isInverted)
+        nonRevFollowers.forEach{
+            // property access syntax
+            it.inverted = isInverted
+        }
+    }
+
+    override fun disable(){
+        super.disable()
+        nonRevFollowers.forEach{
+            it.disable()
+        }
+    }
 
 
     private var previousCurrent = Current(0.0)
@@ -224,14 +274,14 @@ public class ChargerSparkMax(
 
 
 
-    private val pidHandler = SparkPIDHandler(motor = this)
+    private val pidHandler = SparkPIDHandler(motor = this, encoderAdaptor = encoder)
 
     override fun setAngularPosition(
         target: Angle,
         pidConstants: PIDConstants,
         continuousWrap: Boolean,
         extraVoltage: Voltage
-    ): Unit = pidHandler.setAngularPosition(target, pidConstants, continuousWrap, extraVoltage)
+    ): Unit = pidHandler.setAngularPosition(target, pidConstants, continuousWrap, extraVoltage, *nonRevFollowers.toTypedArray())
 
     override fun setAngularVelocity(
         target: AngularVelocity,
@@ -242,9 +292,9 @@ public class ChargerSparkMax(
 
 
 
-    private var allConfigErrors: List<REVLibError> = listOf()
+    private var allConfigErrors: MutableList<REVLibError> = mutableListOf()
 
-    override fun configure(configuration: SparkMaxConfiguration) {
+    override fun configure(configuration: ChargerSparkMaxConfiguration) {
         configuration.encoderType?.let{ encoderType ->
             encoder = getEncoder(encoderType)
         }
@@ -254,11 +304,74 @@ public class ChargerSparkMax(
             getErrorInfo = {"All Recorded Errors: $allConfigErrors"}
         ){
             // configures the motor and records errors
-            allConfigErrors = configuration.applyTo(this)
+            allConfigErrors = configuration.applyTo(this).toMutableList()
+
+            fun REVLibError.addError(){
+                allConfigErrors.add(this)
+            }
+
+            when (val frameConfig = configuration.periodicFrameConfig){
+                is PeriodicFrameConfig.Custom -> {
+                    frameConfig.frames.forEach{ (frame, period) ->
+                        setPeriodicFramePeriod(frame, period).addError()
+                    }
+                }
+
+                is PeriodicFrameConfig.Optimized -> {
+                    // status 0 is ignored due to it only being applicable to follower motors
+                    var status1 = SLOW_PERIODIC_FRAME_STRATEGY
+                    var status2 = SLOW_PERIODIC_FRAME_STRATEGY
+                    // status 3 is skipped due to chargerlib not interfacing w/ analog encoders
+                    var status4 = DISABLED_PERIODIC_FRAME_STRATEGY
+                    var status5 = DISABLED_PERIODIC_FRAME_STRATEGY
+                    var status6 = DISABLED_PERIODIC_FRAME_STRATEGY
+
+                    if (MotorData.TEMPERATURE in frameConfig.utilizedData ||
+                        MotorData.VELOCITY in frameConfig.utilizedData ||
+                        MotorData.VOLTAGE in frameConfig.utilizedData
+                    ) {
+                        status1 = FAST_PERIODIC_FRAME_STRATEGY
+                    }
+
+                    if (MotorData.POSITION in frameConfig.utilizedData) {
+                        status2 = FAST_PERIODIC_FRAME_STRATEGY
+                    }
+
+                    if (frameConfig.optimizeEncoderFrames){
+                        when (this.encoderType){
+                            is SparkMaxEncoderType.Alternate -> {
+                                status4 = FAST_PERIODIC_FRAME_STRATEGY
+                            }
+
+                            is SparkMaxEncoderType.Absolute -> {
+                                if (MotorData.POSITION in frameConfig.utilizedData){
+                                    status5 = FAST_PERIODIC_FRAME_STRATEGY
+                                }
+                                if (MotorData.VELOCITY in frameConfig.utilizedData){
+                                    status6 = FAST_PERIODIC_FRAME_STRATEGY
+                                }
+                            }
+
+                            is SparkMaxEncoderType.Regular -> {}
+                        }
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus1, status1).addError()
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus2, status2).addError()
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus4, status4).addError()
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus5, status5).addError()
+                        setPeriodicFramePeriod(PeriodicFrame.kStatus6, status6).addError()
+                    }
+                }
+
+                null -> {}
+            }
+
             return@safeConfigure allConfigErrors.isEmpty()
         }
-        if (RobotBase.isReal()) delay(200.milli.seconds)
-        burnFlash()
+
+        if (RobotBase.isReal()) {
+            delay(200.milli.seconds)
+            burnFlash()
+        }
     }
 
 }

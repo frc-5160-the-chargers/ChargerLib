@@ -10,8 +10,6 @@ import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_DRIVE_INERTIA
 import frc.chargers.constants.drivetrain.DEFAULT_SWERVE_TURN_INERTIA
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.utils.math.inputModulus
-import frc.chargers.utils.math.units.Inertia
-import frc.chargers.utils.math.units.times
 
 /**
  * Represents the low level hardware of a SwerveModule during simulation.
@@ -22,19 +20,19 @@ public class ModuleIOSim(
     driveGearbox: DCMotor,
     turnGearRatio: Double = DEFAULT_GEAR_RATIO,
     driveGearRatio: Double = DEFAULT_GEAR_RATIO,
-    turnInertiaMoment: Inertia = DEFAULT_SWERVE_TURN_INERTIA,
-    driveInertiaMoment: Inertia = DEFAULT_SWERVE_DRIVE_INERTIA
+    turnInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_TURN_INERTIA,
+    driveInertiaMoment: MomentOfInertia = DEFAULT_SWERVE_DRIVE_INERTIA
 ): ModuleIO {
     private val turnMotorSim = DCMotorSim(
         turnGearbox,
         turnGearRatio,
-        turnInertiaMoment.inUnit(kilo.grams * meters * meters)
+        turnInertiaMoment.inUnit(kilo.grams * (meters * meters) )
     )
 
     private val driveMotorSim = DCMotorSim(
         driveGearbox,
         driveGearRatio,
-        driveInertiaMoment.inUnit(kilo.grams * meters * meters)
+        driveInertiaMoment.inUnit(kilo.grams * (meters * meters) )
     )
 
     private var turnAppliedVoltage = Voltage(0.0)
