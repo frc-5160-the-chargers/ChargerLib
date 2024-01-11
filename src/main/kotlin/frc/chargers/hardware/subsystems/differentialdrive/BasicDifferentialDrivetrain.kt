@@ -1,7 +1,7 @@
 package frc.chargers.hardware.subsystems.differentialdrive
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup
+import edu.wpi.first.wpilibj.motorcontrol.MotorController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 
 
@@ -11,8 +11,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
  * @see DifferentialDrivetrain
  */
 public open class BasicDifferentialDrivetrain(
-    leftMotors: MotorControllerGroup,
-    rightMotors: MotorControllerGroup,
+    leftMotors: MotorController,
+    rightMotors: MotorController,
     invertMotors: Boolean = false,
     protected val powerScale: Double = 1.0,
     protected val rotationScale: Double = 1.0,

@@ -10,34 +10,36 @@ import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.chargers.advantagekitextensions.LoggableInputsProvider
+import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.constants.drivetrain.DiffDriveHardwareData
 import frc.chargers.controls.SetpointSupplier
-import frc.chargers.controls.pid.SuperPIDController
-import frc.chargers.hardware.configuration.HardwareConfiguration
-import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFXConfiguration
-import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
-import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIO
-import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOReal
-import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOSim
-import frc.chargers.constants.drivetrain.DiffDriveControlData
 import frc.chargers.controls.feedforward.Feedforward
+import frc.chargers.controls.pid.SuperPIDController
 import frc.chargers.framework.ChargerRobot
 import frc.chargers.hardware.configuration.HardwareConfigurable
+import frc.chargers.hardware.configuration.HardwareConfiguration
 import frc.chargers.hardware.motorcontrol.EncoderMotorController
 import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFX
+import frc.chargers.hardware.motorcontrol.ctre.ChargerTalonFXConfiguration
 import frc.chargers.hardware.motorcontrol.rev.ChargerSparkMax
 import frc.chargers.hardware.motorcontrol.rev.ChargerSparkMaxConfiguration
 import frc.chargers.hardware.sensors.RobotPoseMonitor
 import frc.chargers.hardware.sensors.VisionPoseSupplier
+import frc.chargers.hardware.sensors.imu.gyroscopes.HeadingProvider
+import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIO
+import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOReal
+import frc.chargers.hardware.subsystems.differentialdrive.lowlevel.DiffDriveIOSim
 import frc.chargers.utils.a
 import frc.chargers.wpilibextensions.geometry.ofUnit
 import frc.chargers.wpilibextensions.geometry.twodimensional.UnitPose2d
 import frc.chargers.wpilibextensions.kinematics.ChassisSpeeds
 import org.littletonrobotics.junction.Logger.recordOutput
+
 
 private val standardLogInputs = LoggableInputsProvider(namespace = "Drivetrain(Differential)")
 
@@ -163,6 +165,16 @@ public class EncoderDifferentialDrivetrain(
         selfSustain = true,
     )
 
+    private fun shouldFlipAlliance(): Boolean{
+        // Boolean supplier that controls when the path will be mirrored for the red alliance
+        // This will flip the path being followed to the red side of the field.
+        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+        val alliance = DriverStation.getAlliance()
+        return if (alliance.isPresent) {
+            alliance.get() == DriverStation.Alliance.Red
+        } else false
+    }
+
 
     /* Public API */
 
@@ -177,6 +189,7 @@ public class EncoderDifferentialDrivetrain(
                     { speeds: ChassisSpeeds -> velocityDrive(speeds) },
                     ChargerRobot.LOOP_PERIOD.inUnit(seconds),
                     controlData.pathReplanConfig,
+                    ::shouldFlipAlliance,
                     this
                 )
             }
@@ -188,6 +201,7 @@ public class EncoderDifferentialDrivetrain(
                     { currentSpeeds },
                     { speeds: ChassisSpeeds -> velocityDrive(speeds) },
                     controlData.pathReplanConfig,
+                    ::shouldFlipAlliance,
                     this
                 )
             }

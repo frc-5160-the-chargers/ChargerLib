@@ -31,6 +31,7 @@ import frc.chargers.wpilibextensions.geometry.twodimensional.UnitTranslation2d
 import frc.chargers.wpilibextensions.geometry.twodimensional.asRotation2d
 import frc.chargers.wpilibextensions.kinematics.*
 import org.littletonrobotics.junction.Logger.*
+import java.util.Optional
 import kotlin.math.pow
 
 
@@ -274,6 +275,13 @@ public class EncoderHolonomicDrivetrain(
                 kotlin.math.sqrt(hardwareData.trackWidth.inUnit(meters).pow(2) + hardwareData.wheelBase.inUnit(meters).pow(2)),
                 controlData.pathReplanConfig
             ),
+            {
+                when (val alliance = DriverStation.getAlliance()){
+                    Optional.empty<DriverStation.Alliance>() -> false
+
+                    else -> alliance.get() == DriverStation.Alliance.Red
+                }
+            },
             this
         )
     }
@@ -285,7 +293,7 @@ public class EncoderHolonomicDrivetrain(
     /**
      * The pose estimator of the [EncoderHolonomicDrivetrain].
      *
-     * This can be changed to a different pose monitor if nessecary.
+     * This can be changed to a different pose monitor if necessary.
      */
     public var poseEstimator: RobotPoseMonitor = SwervePoseMonitor(
         drivetrain = this,
