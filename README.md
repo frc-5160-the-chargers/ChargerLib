@@ -1,6 +1,9 @@
 # ChargerLib
 
-ChargerLib is 5160's custom kotlin-oriented library, intended for use in 2024 and beyond.
+Notice: ChargerLib itself has officially been converted to a "lib" folder within yearly repos; see FRC2024 for the latest version.
+In the future, the command DSL and advantagekit integration within chargerlib will be moved to maven central repositories.
+
+
 
 Some features include:
 - Classes for some common subsystems (e.g. drivetrains)
